@@ -1,6 +1,5 @@
 using System.Numerics;
 using Synesthesia.Engine.Configuration;
-using Synesthesia.Engine.Rendering.Veldrid;
 using Veldrid;
 
 namespace Synesthesia.Engine.Host;
