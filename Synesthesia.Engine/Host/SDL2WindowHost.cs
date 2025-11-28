@@ -15,7 +15,7 @@ public class SDL2WindowHost : IHost
     private GraphicsDevice _graphicsDevice = null!;
     private CommandList _commandList = null!;
 
-    public bool WindowExists { get; private set; }
+    public bool WindowExists { get; set; }
 
     public void Initialize(Game game, RendererType rendererType)
     {
@@ -46,6 +46,7 @@ public class SDL2WindowHost : IHost
         Logger.Debug($"SDL2 Driver: {PlatformUtils.GetPlatformName()}", Logger.RENDER);
 
         _commandList = _graphicsDevice.ResourceFactory.CreateCommandList();
+        WindowExists = true;
     }
 
     public void Shutdown()
@@ -72,7 +73,13 @@ public class SDL2WindowHost : IHost
 
     public CommandList GetCommandList() => _commandList;
 
-    public void SwapBuffers() => _graphicsDevice.SwapBuffers();
+    public void SwapBuffers()
+    {
+        if (WindowExists)
+        {
+            _graphicsDevice.SwapBuffers();
+        }
+    }
 
     public void SetVsync(bool enabled) => _graphicsDevice.SyncToVerticalBlank = enabled;
 

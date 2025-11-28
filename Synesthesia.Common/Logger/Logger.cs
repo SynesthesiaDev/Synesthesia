@@ -56,4 +56,13 @@ public static class Logger
     public static void Verbose(string message, LogType type) => log(message, VERBOSE, type, true);
     public static void Warning(string message, LogType type) => log(message, WARNING, type, true);
     public static void Error(string message, LogType type) => log(message, ERROR, type, true);
+
+    public static void Exception(Exception exception, LogType type)
+    {
+        log(exception.ToString(), ERROR, type, true);
+        if (exception.InnerException != null)
+        {
+            Exception(exception.InnerException, type);
+        }
+    }
 }
