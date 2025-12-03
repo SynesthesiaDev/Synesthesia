@@ -16,6 +16,7 @@ public static class Logger
 
     public static LogType RUNTIME { get; } = new LogType("Runtime");
     public static LogType INPUT { get; } = new LogType("Input");
+    public static LogType AUDIO { get; } = new LogType("Audio");
     public static LogType NETWORK { get; } = new LogType("Network");
     public static LogType RENDER { get; } = new LogType("Render");
     public static LogType DATABASE { get; } = new LogType("Database");
