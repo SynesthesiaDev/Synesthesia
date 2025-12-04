@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using Common.Event;
 using Common.Logger;
 
 namespace Synesthesia.Engine.Threading.Runners;
@@ -13,6 +14,8 @@ public abstract class IThreadRunner : IDisposable
 
     private bool _isRunning;
 
+    public readonly EventDispatcher<IThreadRunner> ThreadLoadedDispatcher = new();
+
     protected TimeSpan targetUpdateTime = TimeSpan.FromSeconds(1.0 / 60);
 
     public void SetTargetUpdateTime(long newInputRate)
@@ -20,14 +23,15 @@ public abstract class IThreadRunner : IDisposable
         targetUpdateTime = TimeSpan.FromSeconds(1.0 / newInputRate);
     }
 
+    protected void MarkLoaded() => ThreadLoadedDispatcher.Dispatch(this);
+
     protected abstract void OnLoop();
 
-    protected abstract void OnInit(Game game);
+    protected abstract void OnThreadInit(Game game);
 
-    public void Schedule(Action func)
-    {
-        _workQueue.Enqueue(func);
-    }
+    public abstract void OnLoadComplete(Game game);
+
+    public void Schedule(Action func) => _workQueue.Enqueue(func);
 
     private void ExecuteScheduledActions()
     {
@@ -47,7 +51,7 @@ public abstract class IThreadRunner : IDisposable
 
     public void InternalLoop()
     {
-        OnInit(_game);
+        OnThreadInit(_game);
 
         while (_isRunning)
         {
@@ -59,7 +63,7 @@ public abstract class IThreadRunner : IDisposable
             }
             catch (Exception ex)
             {
-                Logger.Exception(ex, Logger.RUNTIME);
+                Logger.Exception(ex, Logger.RENDER);
             }
 
             var elapsed = DateTime.UtcNow - now;
@@ -75,5 +79,6 @@ public abstract class IThreadRunner : IDisposable
     {
         _isRunning = false;
         _workQueue.Clear();
+        ThreadLoadedDispatcher.Dispose();
     }
 }

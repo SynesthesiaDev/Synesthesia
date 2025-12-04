@@ -20,6 +20,7 @@ public static class Logger
     public static LogType NETWORK { get; } = new LogType("Network");
     public static LogType RENDER { get; } = new LogType("Render");
     public static LogType DATABASE { get; } = new LogType("Database");
+    public static LogType IO { get; } = new LogType("IO");
 
     private record LogSeverity(string name, ConsoleColor? consoleColor = null);
 

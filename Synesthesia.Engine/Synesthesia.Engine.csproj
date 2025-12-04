@@ -10,16 +10,13 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Synesthesia.Common\Synesthesia.Common.csproj"/>
+        <ProjectReference Include="..\Synesthesia.Resources\Synesthesia.Resources.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Veldrid" Version="4.9.0" />
       <PackageReference Include="Veldrid.SDL2" Version="4.9.0" />
       <PackageReference Include="Veldrid.StartupUtilities" Version="4.9.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Rendering\" />
     </ItemGroup>
 
 </Project>

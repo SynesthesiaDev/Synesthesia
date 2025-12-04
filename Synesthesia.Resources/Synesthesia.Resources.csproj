@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <LangVersion>9</LangVersion>
+        <Nullable>enable</Nullable>
+        <RootNamespace>SynesthesiaResources</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <None Remove="main.vsh" />
+      <EmbeddedResource Include="main.vsh" />
+      <None Remove="main.fsh" />
+      <EmbeddedResource Include="main.fsh" />
+    </ItemGroup>
+
+</Project>

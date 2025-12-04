@@ -1,3 +1,4 @@
+using Common.Event;
 using Common.Logger;
 using Synesthesia.Engine.Host;
 
@@ -7,7 +8,7 @@ public class InputThreadRunner : IThreadRunner
 {
     private IHost _host = null!;
 
-    protected override void OnInit(Game game)
+    protected override void OnThreadInit(Game game)
     {
         _host = game.Host;
         Logger.Debug($"Using {game.Host.GetHostName()} ({game.Host.GetPlatformName()}) host..", Logger.RENDER);
@@ -15,6 +16,12 @@ public class InputThreadRunner : IThreadRunner
         Logger.Debug($"Renderer initialized", Logger.RENDER);
 
         Logger.Verbose($"Input polling at {1.0 / targetUpdateTime.TotalSeconds}hz", Logger.INPUT);
+
+        MarkLoaded();
+    }
+
+    public override void OnLoadComplete(Game game)
+    {
     }
 
     protected override void OnLoop()
