@@ -14,4 +14,8 @@
       <EmbeddedResource Include="main.fsh" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Veldrid.SPIRV" Version="1.0.15" />
+    </ItemGroup>
+
 </Project>

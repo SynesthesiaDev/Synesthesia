@@ -11,6 +11,7 @@
     <ItemGroup>
       <PackageReference Include="Pastel" Version="7.0.1" />
       <PackageReference Include="SynesthesiaUtils" Version="1.0.0" />
+      <PackageReference Include="Veldrid.SPIRV" Version="1.0.15" />
     </ItemGroup>
 
 </Project>

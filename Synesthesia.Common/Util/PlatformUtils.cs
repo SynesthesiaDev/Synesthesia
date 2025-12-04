@@ -7,6 +7,7 @@ public static class PlatformUtils
         if (OperatingSystem.IsWindows()) return "Windows";
         if (OperatingSystem.IsLinux()) return "Linux";
         if (OperatingSystem.IsMacOS()) return "macOS";
+        if (OperatingSystem.IsIOS()) return "IOS";
         return OperatingSystem.IsAndroid() ? "Android" : "Unknown";
     }
 }

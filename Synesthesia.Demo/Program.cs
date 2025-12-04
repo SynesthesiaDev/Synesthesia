@@ -1,6 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using Common.Util;
+﻿using Common.Util;
 using Synesthesia.Engine;
 using Synesthesia.Engine.Configuration;
 using Synesthesia.Engine.Host;
@@ -11,12 +9,13 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        EnvUtils.Set("GRAPHICS_RENDERER", RendererType.Vulkan);
+        EnvUtils.Set("GRAPHICS_RENDERER", RendererType.OpenGL);
 
         var game = new Game
         {
             Host = new SDL2WindowHost()
         };
+
 
         game.Run();
     }

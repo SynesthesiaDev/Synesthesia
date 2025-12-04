@@ -28,13 +28,11 @@ public class Game : IDisposable
         AudioThread = ThreadSafety.CreateThread(new AudioThreadRunner(), ThreadSafety.THREAD_AUDIO, Defaults.AudioRate, this);
 
         // Input Thread creates the window, so we need it initialized before doing anything else rendering-wise
-        InputThread.ThreadLoadedDispatcher.Subscribe(_ =>
-        {
-            InputThread.OnLoadComplete(this);
-            RenderThread.OnLoadComplete(this);
-            UpdateThread.OnLoadComplete(this);
-            AudioThread.OnLoadComplete(this);
-        });
+        InputThread.ThreadLoadedDispatcher.Subscribe(_ => RenderThread.OnLoadComplete(this));
+
+        InputThread.OnLoadComplete(this);
+        UpdateThread.OnLoadComplete(this);
+        AudioThread.OnLoadComplete(this);
 
         Logger.Debug("Initializing Resource Loaders..", Logger.IO);
         ResourceManager.RegisterLoader("vsh", ResourceLoaders.LoadText); // Vertex Shader
