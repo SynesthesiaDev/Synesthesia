@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
+using Common.Bindable;
 using Common.Event;
 using Common.Logger;
 
@@ -8,22 +10,33 @@ public abstract class IThreadRunner : IDisposable
 {
     public Thread Thread { get; private set; } = null!;
 
-    private ConcurrentQueue<Action> _workQueue = new();
+    protected readonly BindablePool _bindablePool = new BindablePool();
+
+    public Bindable<TimeSpan> TargetUpdateRate = null!;
+
+    private readonly ConcurrentQueue<Action> _workQueue = new();
 
     private Game _game = null!;
 
     private bool _isRunning;
 
-    public readonly EventDispatcher<IThreadRunner> ThreadLoadedDispatcher = new();
+    public readonly SingleOffEventDispatcher<IThreadRunner> ThreadLoadedDispatcher = new();
 
-    protected TimeSpan targetUpdateTime = TimeSpan.FromSeconds(1.0 / 60);
+    private long _fpsBits;
+    private long _frameTimeTicks;
 
-    public void SetTargetUpdateTime(long newInputRate)
+    public double Fps => BitConverter.Int64BitsToDouble(Interlocked.Read(ref _fpsBits));
+    public TimeSpan FrameTime => new(Interlocked.Read(ref _frameTimeTicks));
+
+    public int FpsTarget = 0;
+
+    protected void MarkLoaded()
     {
-        targetUpdateTime = TimeSpan.FromSeconds(1.0 / newInputRate);
+        FpsTarget = (int)Math.Floor(1.0 / TargetUpdateRate.Value.TotalSeconds);
+        Logger.Debug($"{Thread.Name} thread running at {FpsTarget}hz", Logger.IO);
+        ThreadLoadedDispatcher.Dispatch(this);
+        OnLoadComplete(_game);
     }
-
-    protected void MarkLoaded() => ThreadLoadedDispatcher.Dispatch(this);
 
     protected abstract void OnLoop();
 
@@ -45,17 +58,22 @@ public abstract class IThreadRunner : IDisposable
     {
         _game = game;
         Thread = thread;
-        Thread.Start();
+
+        TargetUpdateRate = _bindablePool.Borrow(TimeSpan.FromSeconds(1.0 / 60));
+
         _isRunning = true;
+        Thread.Start();
     }
 
     public void InternalLoop()
     {
         OnThreadInit(_game);
+        MarkLoaded();
 
         while (_isRunning)
         {
-            var now = DateTime.UtcNow;
+            var frameStart = Stopwatch.GetTimestamp();
+
             try
             {
                 OnLoop();
@@ -64,14 +82,38 @@ public abstract class IThreadRunner : IDisposable
             catch (Exception ex)
             {
                 Logger.Exception(ex, Logger.RENDER);
+                Environment.Exit(-1);
             }
 
-            var elapsed = DateTime.UtcNow - now;
-            var sleepTime = targetUpdateTime - elapsed;
-            if (sleepTime > TimeSpan.Zero)
+            var frameTime = Stopwatch.GetElapsedTime(frameStart);
+            Interlocked.Exchange(ref _frameTimeTicks, frameTime.Ticks);
+
+
+            var target = TargetUpdateRate.Value;
+            if (target > TimeSpan.Zero)
             {
-                Thread.Sleep(sleepTime);
+                while (true)
+                {
+                    var elapsed = Stopwatch.GetElapsedTime(frameStart);
+                    var remaining = target - elapsed;
+
+                    if (remaining <= TimeSpan.Zero)
+                        break;
+
+                    if (remaining > TimeSpan.FromMilliseconds(2))
+                    {
+                        Thread.Sleep(remaining - TimeSpan.FromMilliseconds(1));
+                    }
+                    else
+                    {
+                        Thread.SpinWait(50);
+                    }
+                }
             }
+
+            var current = Stopwatch.GetElapsedTime(frameStart);
+            var fps = current.TotalSeconds > 0 ? 1.0 / current.TotalSeconds : 0.0;
+            Interlocked.Exchange(ref _fpsBits, BitConverter.DoubleToInt64Bits(fps));
         }
     }
 
@@ -80,5 +122,6 @@ public abstract class IThreadRunner : IDisposable
         _isRunning = false;
         _workQueue.Clear();
         ThreadLoadedDispatcher.Dispose();
+        Thread.Interrupt();
     }
 }

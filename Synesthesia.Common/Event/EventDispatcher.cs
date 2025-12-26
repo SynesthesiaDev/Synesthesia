@@ -1,8 +1,15 @@
+using Common.Statistics;
+
 namespace Common.Event;
 
 public class EventDispatcher<T> : IDisposable
 {
     private List<EventSubscriber<T>> _eventSubscribers = [];
+
+    public EventDispatcher()
+    {
+        EngineStatistics.Dispatchers.Increment();
+    }
 
     public EventSubscriber<T> Subscribe(Action<T> action)
     {
@@ -28,6 +35,7 @@ public class EventDispatcher<T> : IDisposable
 
     public void Dispose()
     {
+        EngineStatistics.Dispatchers.Decrement();
         UnsubscribeAll();
     }
 }

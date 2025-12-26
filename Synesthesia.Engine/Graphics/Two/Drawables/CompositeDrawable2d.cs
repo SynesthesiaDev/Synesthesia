@@ -1,0 +1,92 @@
+using System.Numerics;
+using Common.Util;
+using SynesthesiaUtil.Extensions;
+
+namespace Synesthesia.Engine.Graphics.Two.Drawables;
+
+public class CompositeDrawable2d : Drawable2d
+{
+    protected List<Drawable2d> _children = [];
+
+    public Vector4 AutoSizePadding { get; set; } = new(0);
+
+    public IEnumerable<Drawable2d> Children
+    {
+        get => _children;
+        set
+        {
+            _children = value.ToList();
+            foreach (var child in value)
+            {
+                child.Load();
+            }
+        }
+    }
+
+    public void AddChild(Drawable2d child)
+    {
+        _children.Add(child);
+        child.Load();
+    }
+
+    public void RemoveChild(Drawable2d child)
+    {
+        _children.Remove(child);
+        child.Dispose();
+    }
+
+    protected internal override void OnUpdate()
+    {
+        foreach (var child in Children)
+        {
+            child.Parent = this;
+            child.OnUpdate();
+        }
+
+        if (AutoSizeAxes != Axes.None) UpdateAutoSize();
+
+        base.OnUpdate();
+    }
+
+    protected override void OnDraw2d()
+    {
+        _children.Filter(c => c.Visible).ForEach(child => child.OnDraw());
+    }
+
+    protected override void Dispose(bool isDisposing)
+    {
+        _children.ForEach(c => c.Dispose());
+        base.Dispose(isDisposing);
+    }
+
+    protected virtual void UpdateAutoSize()
+    {
+        var childrenSize = GetChildrenSize();
+
+        var newWidth = Size.X;
+        var newHeight = Size.Y;
+
+        if (AutoSizeAxes.HasFlag(Axes.X)) newWidth = childrenSize.X + AutoSizePadding.X + AutoSizePadding.Z;
+        if (AutoSizeAxes.HasFlag(Axes.Y)) newHeight = childrenSize.Y + AutoSizePadding.Y + AutoSizePadding.W;
+
+        Size = new Vector2(newWidth, newHeight);
+    }
+
+    public Vector2 GetChildrenSize()
+    {
+        if (_children.Count == 0) return Vector2.Zero;
+
+        float minX = float.MaxValue, minY = float.MaxValue;
+        float maxX = float.MinValue, maxY = float.MinValue;
+
+        foreach (var child in _children)
+        {
+            minX = Math.Min(minX, child.Position.X);
+            minY = Math.Min(minY, child.Position.Y);
+            maxX = Math.Max(maxX, child.Position.X + child.Size.X);
+            maxY = Math.Max(maxY, child.Position.Y + child.Size.Y);
+        }
+
+        return new Vector2(maxX - minX, maxY - minY);
+    }
+}

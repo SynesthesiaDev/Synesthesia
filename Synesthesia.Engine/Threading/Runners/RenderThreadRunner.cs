@@ -1,109 +1,87 @@
 using System.Numerics;
-using System.Text;
 using Common.Logger;
-using Synesthesia.Engine.Graphics;
-using Synesthesia.Engine.Host;
-using SynesthesiaUtil;
-using Veldrid;
-using Veldrid.SPIRV;
-using ResourceManager = Synesthesia.Engine.Resources.ResourceManager;
+using Raylib_cs;
+using Synesthesia.Engine.Graphics.Three.Shapes;
+using Synesthesia.Engine.Input;
+using Synesthesia.Engine.Resources;
 
 namespace Synesthesia.Engine.Threading.Runners;
 
 public class RenderThreadRunner : IThreadRunner
 {
-    private IHost _host = null!;
     private Game _game = null!;
-    private GraphicsDevice _graphicsDevice = null!;
-    private ResourceFactory _resourceFactory = null!;
-
-    public static DeviceBuffer VertexBuffer = null!;
-    public static DeviceBuffer IndexBuffer = null!;
-    public static List<Shader> Shaders = null!;
-    public static Pipeline? Pipeline;
-
-    VertexPositionColor[] quadVertices =
-    [
-        new VertexPositionColor(new Vector2(-0.75f, 0.75f), RgbaFloat.Red),
-        new VertexPositionColor(new Vector2(0.75f, 0.75f), RgbaFloat.Green),
-        new VertexPositionColor(new Vector2(-0.75f, -0.75f), RgbaFloat.Blue),
-        new VertexPositionColor(new Vector2(0.75f, -0.75f), RgbaFloat.Yellow)
-    ];
-
-    ushort[] quadIndices = [0, 1, 2, 3];
+    private Camera3D _camera;
 
     protected override void OnThreadInit(Game game)
     {
-        _host = game.Host;
         _game = game;
-        MarkLoaded();
+        Logger.Debug("Loading window host..");
+        _game.WindowHost.Initialize(_game);
+
+        ResourceManager.ResolveAll("ttf");
+
+        _camera = new Camera3D
+        {
+            Position = new Vector3(6f, 6f, 6f),
+            Target = Vector3.Zero,
+            Up = Vector3.UnitY,
+            FovY = 60f,
+            Projection = CameraProjection.Perspective
+        };
+
+        _game.RootComposite3d.Children =
+        [
+            new Cube
+            {
+                Position = new Vector3(0f, 0f, 0f),
+                Size = new Vector3(1f, 1f, 1f),
+                Color = Color.Red
+            },
+            new Cube
+            {
+                Color = Color.Blue,
+                Position = new Vector3(2f, 0f, 0f),
+                Rotation = new Vector3(45, 0, 0)
+            }
+        ];
     }
 
     public override void OnLoadComplete(Game game)
     {
-        _graphicsDevice = _host.GetGraphicsDevice();
-        _resourceFactory = _graphicsDevice.ResourceFactory;
-
-        VertexBuffer = _resourceFactory.CreateBuffer(new BufferDescription(4 * VertexPositionColor.SizeInBytes, BufferUsage.VertexBuffer));
-        IndexBuffer = _resourceFactory.CreateBuffer(new BufferDescription(4 * sizeof(ushort), BufferUsage.IndexBuffer));
-
-        _graphicsDevice.UpdateBuffer(VertexBuffer, 0, quadVertices);
-        _graphicsDevice.UpdateBuffer(IndexBuffer, 0, quadIndices);
-
-        var vertexLayout = new VertexLayoutDescription(
-            new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
-            new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4)
-        );
-
-        Logger.Verbose("Loading built-in shaders..", Logger.RENDER);
-        var vertexShader = ResourceManager.Get<string>("SynesthesiaResources.main.vsh");
-        var fragmentShader = ResourceManager.Get<string>("SynesthesiaResources.main.fsh");
-
-        var vertexShaderDesc = new ShaderDescription(ShaderStages.Vertex, Encoding.UTF8.GetBytes(vertexShader), "main");
-        var fragmentShaderDesc = new ShaderDescription(ShaderStages.Fragment, Encoding.UTF8.GetBytes(fragmentShader), "main");
-
-        _resourceFactory.CreateFromSpirv(vertexShaderDesc, fragmentShaderDesc);
-        Shaders = Lists.Of(_resourceFactory.CreateShader(vertexShaderDesc), _resourceFactory.CreateShader(fragmentShaderDesc));
-
-        var pipelineDescription = new GraphicsPipelineDescription
-        {
-            BlendState = BlendStateDescription.SingleOverrideBlend,
-            DepthStencilState = new DepthStencilStateDescription(depthTestEnabled: true, depthWriteEnabled: true, comparisonKind: ComparisonKind.LessEqual),
-            RasterizerState = new RasterizerStateDescription(
-                cullMode: FaceCullMode.Back,
-                fillMode: PolygonFillMode.Solid,
-                frontFace: FrontFace.Clockwise,
-                depthClipEnabled: true,
-                scissorTestEnabled: true
-            ),
-            PrimitiveTopology = PrimitiveTopology.TriangleStrip,
-            ResourceLayouts = [],
-            ShaderSet = new ShaderSetDescription(vertexLayouts: [vertexLayout], shaders: Shaders.ToArray()),
-            Outputs = _graphicsDevice.SwapchainFramebuffer.OutputDescription
-        };
-
-        Pipeline = _resourceFactory.CreateGraphicsPipeline(pipelineDescription);
-
-        Logger.Verbose($"Rendering at {Math.Round(1 / targetUpdateTime.TotalSeconds)}fps", Logger.RENDER);
     }
 
     protected override void OnLoop()
     {
-        if (!_host.WindowExists) return;
-        if(Pipeline == null) return;
+        _game.WindowHost.PollEvents();
 
-        var commandList = _host.GetCommandList();
-        commandList.Begin();
-        commandList.SetVertexBuffer(0, VertexBuffer);
-        commandList.SetFramebuffer(_host.GetGraphicsDevice().SwapchainFramebuffer);
-        commandList.SetIndexBuffer(IndexBuffer, IndexFormat.UInt16);
-        // commandList.ClearColorTarget(0, RgbaFloat.Black);
-        commandList.SetPipeline(Pipeline);
-        commandList.DrawIndexed(4, 1, 0, 0, 0);
+        int key;
+        while ((key = Raylib.GetKeyPressed()) != 0)
+        {
+            InputManager.EnqueueKeyEvent((KeyboardKey)key, true);
+        }
 
-        commandList.End();
-        _host.GetGraphicsDevice().SubmitCommands(commandList);
+        if (Raylib.IsWindowReady() && _game.WindowHost.ShouldWindowClose)
+        {
+            _game.Dispose();
+        }
 
-        _host.SwapBuffers();
+        _game.RootComposite2d.Size = _game.WindowHost.WindowSize;
+        _game.EngineDebugOverlay.Size = _game.WindowHost.WindowSize;
+
+        Raylib.UpdateCamera(ref _camera, CameraMode.Orbital);
+
+        Raylib.BeginDrawing();
+
+        Raylib.ClearBackground(Color.Black);
+        Raylib.BeginMode3D(_camera);
+        Raylib.DrawGrid(20, 1.0f);
+        _game.RootComposite3d.OnDraw();
+        Raylib.EndMode3D();
+
+        _game.RootComposite2d.OnDraw();
+        _game.EngineDebugOverlay.OnDraw();
+
+        // Raylib.DrawTextEx(font, "Hello from Memory!", new System.Numerics.Vector2(100, 100), 32, 2, Color.White);
+        Raylib.EndDrawing();
     }
 }

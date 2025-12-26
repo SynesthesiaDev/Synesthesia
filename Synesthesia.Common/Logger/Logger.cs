@@ -1,3 +1,4 @@
+using Common.Event;
 using Common.Util;
 using Pastel;
 
@@ -9,10 +10,12 @@ public static class Logger
 
     public static AtomicInt LogCount { get; } = new(0);
 
-    private static LogSeverity ERROR { get; } = new LogSeverity("Error", ConsoleColor.Red);
-    private static LogSeverity WARNING { get; } = new LogSeverity("Warning", ConsoleColor.Yellow);
+    public static readonly EventDispatcher<LogEvent> MessageLogged = new();
+
+    private static LogSeverity ERROR { get; } = new LogSeverity("Error", ConsoleColor.Red, "#960000");
+    private static LogSeverity WARNING { get; } = new LogSeverity("Warning", ConsoleColor.Yellow, "#a39800");
     private static LogSeverity DEBUG { get; } = new LogSeverity("Debug");
-    private static LogSeverity VERBOSE { get; } = new LogSeverity("Verbose");
+    private static LogSeverity VERBOSE { get; } = new LogSeverity("Verbose", ConsoleColor.Gray, "#004c75");
 
     public static LogType RUNTIME { get; } = new LogType("Runtime");
     public static LogType INPUT { get; } = new LogType("Input");
@@ -22,9 +25,11 @@ public static class Logger
     public static LogType DATABASE { get; } = new LogType("Database");
     public static LogType IO { get; } = new LogType("IO");
 
-    private record LogSeverity(string name, ConsoleColor? consoleColor = null);
+    public record LogSeverity(string name, ConsoleColor? consoleColor = null, string debugOverlayColor = "#4f4f4f");
 
     public record LogType(string name);
+
+    public record LogEvent(string message, LogSeverity severity, LogType type, bool displayTimestamp, Guid uuid);
 
     private static void log(string message, LogSeverity severity, LogType type, bool displayTimestamp)
     {
@@ -46,6 +51,7 @@ public static class Logger
         }
 
         Console.WriteLine(logString);
+        MessageLogged.Dispatch(new LogEvent(message, severity, type, displayTimestamp, Guid.NewGuid()));
         LogCount.Increment();
     }
 

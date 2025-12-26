@@ -1,17 +1,14 @@
 using Common.Logger;
-using Synesthesia.Engine.Host;
 
 namespace Synesthesia.Engine.Threading.Runners;
 
 public class UpdateThreadRunner : IThreadRunner
 {
-    private IHost _host = null!;
+    private Game _game = null!;
 
     protected override void OnThreadInit(Game game)
     {
-        _host = game.Host;
-        Logger.Verbose($"Update thread running at {Math.Round(1 / targetUpdateTime.TotalSeconds)}hz", Logger.RUNTIME);
-        MarkLoaded();
+        _game = game;
     }
 
     public override void OnLoadComplete(Game game)
@@ -20,5 +17,8 @@ public class UpdateThreadRunner : IThreadRunner
 
     protected override void OnLoop()
     {
+        _game.RootComposite3d.OnUpdate();
+        _game.RootComposite2d.OnUpdate();
+        _game.EngineDebugOverlay.OnUpdate();
     }
 }

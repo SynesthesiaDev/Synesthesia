@@ -8,14 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Remove="main.vsh" />
-      <EmbeddedResource Include="main.vsh" />
-      <None Remove="main.fsh" />
-      <EmbeddedResource Include="main.fsh" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Veldrid.SPIRV" Version="1.0.15" />
+        <None Remove="main.vsh"/>
+        <EmbeddedResource Include="main.vsh"/>
+        <None Remove="main.fsh"/>
+        <EmbeddedResource Include="main.fsh"/>
+        <None Remove="Quicksand-Regular.ttf"/>
+        <EmbeddedResource Include="Quicksand-Regular.ttf"/>
     </ItemGroup>
 
 </Project>
