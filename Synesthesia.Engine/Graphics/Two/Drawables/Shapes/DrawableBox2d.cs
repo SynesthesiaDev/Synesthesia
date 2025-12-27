@@ -23,7 +23,7 @@ public class DrawableBox2d : ColoredDrawable2d
 
             var rect = new Rectangle(0, 0, Size.X, Size.Y);
 
-            Raylib.DrawRectangleRounded(rect, roundness, 48, applyAlpha(Color));
+            Raylib.DrawRectangleRounded(rect, roundness, 8, applyAlpha(Color));
         }
     }
 }

@@ -1,6 +1,8 @@
 using System.Numerics;
+using Common.Logger;
 using Common.Util;
 using Raylib_cs;
+using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Input;
@@ -21,7 +23,7 @@ public class EngineDebugOverlay : CompositeDrawable2d
 
     protected internal override void OnUpdate()
     {
-        if(!Visible) return;
+        if (!Visible) return;
         base.OnUpdate();
     }
 
@@ -32,12 +34,19 @@ public class EngineDebugOverlay : CompositeDrawable2d
             new FillFlowContainer2d
             {
                 Position = new Vector2(10, 10),
+                AutoSizeAxes = Axes.Both,
                 Direction = Direction.Vertical,
                 Spacing = 10f,
                 Children =
                 [
-                    _frameCounter = new FrameCounter(),
-                    _engineStatisticsPanel = new EngineStatisticsPanel(),
+                    _frameCounter = new FrameCounter
+                    {
+                        Visible = true,
+                    },
+                    _engineStatisticsPanel = new EngineStatisticsPanel
+                    {
+                        Visible = false,
+                    },
                 ]
             },
 
@@ -56,16 +65,23 @@ public class EngineDebugOverlay : CompositeDrawable2d
 
         InputManager.Press.Subscribe(e =>
         {
-            if (e.HotKey == EngineDebugOverlayToggle) Visible = !Visible;
+            if (e.HotKey == EngineDebugOverlayToggle) toggle(this);
 
             if (!Visible) return;
 
-            if (e.HotKey == FrameCounterToggle) _frameCounter.Visible = !_frameCounter.Visible;
+            if (e.HotKey == FrameCounterToggle) toggle(_frameCounter);
 
-            if (e.HotKey == EngineStatisticsToggle) _engineStatisticsPanel.Visible = !_engineStatisticsPanel.Visible;
+            if (e.HotKey == EngineStatisticsToggle) toggle(_engineStatisticsPanel);
 
-            if (e.HotKey == LoggerOverlayToggle) _debugLoggerOverlay.Visible = !_debugLoggerOverlay.Visible;
+            if (e.HotKey == LoggerOverlayToggle) toggle(_debugLoggerOverlay);
         });
         base.OnLoading();
+    }
+
+    private void toggle(Drawable2d drawable)
+    {
+        drawable.Visible = !drawable.Visible;
+        var name = drawable.GetType().Name;
+        Logger.Verbose($"Toggled visibility of {name} to {drawable.Visible}");
     }
 }

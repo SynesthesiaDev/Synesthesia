@@ -1,7 +1,8 @@
 using System.Numerics;
-using Common.Logger;
 using Common.Util;
 using Raylib_cs;
+using Synesthesia.Engine.Animation;
+using Transform = Synesthesia.Engine.Animation.Transform;
 
 namespace Synesthesia.Engine.Graphics.Two;
 
@@ -25,7 +26,82 @@ public abstract class Drawable2d : Drawable
 
     public Drawable2d? Parent { get; set; }
 
+    public bool IsHovered { get; set; } = false;
+
+    public bool IsMouseDown { get; set; } = false;
+
     public long Depth = 0;
+
+    public AnimationManager AnimationManager = null!;
+
+    public Vector2 ScreenSpacePosition
+    {
+        get
+        {
+            var anchorPos = Vector2.Zero;
+            if (Parent != null)
+            {
+                anchorPos = Parent.ScreenSpacePosition + GetAnchorOffset(Parent.Size, Anchor);
+            }
+
+            var originOffset = GetAnchorOffset(Size, Origin) * Scale;
+            return anchorPos + Position - originOffset;
+        }
+    }
+
+    protected Drawable2d()
+    {
+        OnLoadComplete.Subscribe(_ =>
+        {
+            AnimationManager = new AnimationManager();
+        });
+    }
+
+    public bool Contains(Vector2 screenSpacePoint)
+    {
+        if (!Visible) return false;
+
+        var pos = ScreenSpacePosition;
+        var scaledSize = Size * Scale;
+
+        return screenSpacePoint.X >= pos.X && screenSpacePoint.X <= pos.X + scaledSize.X &&
+               screenSpacePoint.Y >= pos.Y && screenSpacePoint.Y <= pos.Y + scaledSize.Y;
+    }
+
+    public Vector2 ToLocalSpace(Vector2 screenSpacePoint)
+    {
+        if (Parent == null) return screenSpacePoint - Position;
+
+        var pointInParentSpace = Parent.ToLocalSpace(screenSpacePoint);
+
+        // offset applied in matrix4
+        var anchorOffset = GetAnchorOffset(Parent.Size, Anchor);
+        var originOffset = GetAnchorOffset(Size, Origin);
+
+        // local = (parentPoint - translation) + origin
+        // translation = anchor + pos + margin
+        var localPoint = (pointInParentSpace - (anchorOffset + Position + new Vector2(Margin.X, Margin.Y))) + originOffset;
+
+        return localPoint / Scale;
+    }
+
+    protected internal virtual bool OnHover(HoverEvent e)
+    {
+        return false;
+    }
+
+    protected internal virtual void OnHoverLost(HoverEvent e)
+    {
+    }
+
+    protected internal virtual bool OnMouseDown(MouseEvent e)
+    {
+        return false;
+    }
+
+    protected internal virtual void OnMouseUp(MouseEvent e)
+    {
+    }
 
     protected internal override void OnUpdate()
     {
@@ -64,7 +140,6 @@ public abstract class Drawable2d : Drawable
 
     private void updateLayout()
     {
-
     }
 
     protected abstract void OnDraw2d();
@@ -85,9 +160,9 @@ public abstract class Drawable2d : Drawable
 
         if (Rotation.Z != 0) Rlgl.Rotatef(Rotation.Z, 0, 0, 1);
 
-        Rlgl.Translatef(-originOffset.X, -originOffset.Y, 0);
-
         Rlgl.Scalef(Scale.X, Scale.Y, 1);
+
+        Rlgl.Translatef(-originOffset.X, -originOffset.Y, 0);
     }
 
     private void EndLocalSpace()
@@ -114,4 +189,60 @@ public abstract class Drawable2d : Drawable
             _ => Vector2.Zero
         };
     }
+
+    public Animation<T> TransformTo<T>
+    (
+        T startValue,
+        T endValue,
+        long duration,
+        Easing easing,
+        Transform<T> transform,
+        Action<T> onUpdate,
+        Action<T>? onComplete = null,
+        long delay = 0L
+    )
+    {
+        var animation = new Animation<T>
+        {
+            StartValue = startValue,
+            EndValue = endValue,
+            Duration = duration,
+            Transform = transform,
+            Easing = easing,
+            OnUpdate = onUpdate,
+            OnComplete = onComplete,
+            Delay = delay
+        };
+        AnimationManager.AddAnimation(animation);
+        return animation;
+    }
+
+    public Animation<Vector2> ScaleTo(float newScale, long duration, Easing easing)
+    {
+        return ScaleTo(new Vector2(newScale), duration, easing);
+    }
+
+    public Animation<Vector2> ScaleTo(Vector2 newScale, long duration, Easing easing)
+    {
+        return TransformTo
+        (
+            Scale,
+            newScale,
+            duration,
+            easing,
+            Transform.Vector2,
+            (vec) => { Scale = vec; }
+        );
+    }
+
+    protected override void Dispose(bool isDisposing)
+    {
+        AnimationManager.Dispose();
+        Parent = null;
+        base.Dispose(isDisposing);
+    }
+
+    public record HoverEvent(bool Hovered, Vector2 MousePosition);
+
+    public record MouseEvent(MouseButton Button, Vector2 MousePosition);
 }

@@ -8,6 +8,7 @@ public class BindablePool : IDisposable
 {
     private List<Bindable<object>> _bindables = [];
     private List<EventDispatcher<object>> _dispatchers = [];
+    private List<SingleOffEventDispatcher<object>> _singleOffDispatchers = [];
 
     public BindablePool()
     {
@@ -26,6 +27,14 @@ public class BindablePool : IDisposable
     {
         var dispatcher = new EventDispatcher<T>();
         _dispatchers.Add((dispatcher as EventDispatcher<object>)!);
+        EngineStatistics.DispatchersBorrowed.Increment();
+        return dispatcher;
+    }
+
+    public SingleOffEventDispatcher<T> BorrowSingleOffDispatcher<T>()
+    {
+        var dispatcher = new SingleOffEventDispatcher<T>();
+        _singleOffDispatchers.Add((dispatcher as SingleOffEventDispatcher<object>)!);
         EngineStatistics.DispatchersBorrowed.Increment();
         return dispatcher;
     }
@@ -57,6 +66,7 @@ public class BindablePool : IDisposable
         // ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         _bindables.Filter(p => p != null).ForEach(b => b.Dispose());
         _dispatchers.Filter(p => p != null).ForEach(b => b.Dispose());
+        _singleOffDispatchers.Filter(p => p != null).ForEach(b => b.Dispose());
         _bindables.Clear();
         _dispatchers.Clear();
     }

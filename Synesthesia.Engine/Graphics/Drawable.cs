@@ -5,7 +5,6 @@ using Common.Event;
 using Common.Logger;
 using Common.Statistics;
 using Raylib_cs;
-using Synesthesia.Engine.Graphics.Three;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Timing;
 
@@ -15,7 +14,7 @@ public abstract partial class Drawable : IDrawable, IDisposable
 {
     protected internal bool IsDisposed { get; private set; }
 
-    internal readonly object LoadLock = new object();
+    internal readonly object LoadLock = new();
 
     public DrawableLoadState LoadState { get; protected set; }
 
@@ -23,15 +22,15 @@ public abstract partial class Drawable : IDrawable, IDisposable
 
     internal readonly BindablePool BindablePool = new();
 
-    public readonly EventDispatcher<Drawable> OnLoadComplete;
+    public readonly SingleOffEventDispatcher<Drawable> OnLoadComplete;
 
     public readonly EventDispatcher<Drawable> OnInvalidated;
 
     public readonly EventDispatcher<Drawable> OnDisposed;
 
-    public Vector3 Rotation { get; set; } = new();
+    public Vector3 Rotation { get; set; } = Vector3.Zero;
 
-    public Vector3 Shear { get; set; } = new();
+    public Vector3 Shear { get; set; } = Vector3.Zero;
 
     public bool Visible { get; set; } = true;
 
@@ -47,7 +46,7 @@ public abstract partial class Drawable : IDrawable, IDisposable
     {
         EngineStatistics.Drawables.Increment();
 
-        OnLoadComplete = BindablePool.BorrowDispatcher<Drawable>();
+        OnLoadComplete = BindablePool.BorrowSingleOffDispatcher<Drawable>();
         OnDisposed = BindablePool.BorrowDispatcher<Drawable>();
         OnInvalidated = BindablePool.BorrowDispatcher<Drawable>();
     }
@@ -81,8 +80,6 @@ public abstract partial class Drawable : IDrawable, IDisposable
     private void load()
     {
         LoadThread = Thread.CurrentThread;
-        //Perfm loading
-        // inject deps
         var timeBefore = performance_watch.CurrentTime;
 
         OnLoading();
@@ -91,7 +88,7 @@ public abstract partial class Drawable : IDrawable, IDisposable
         if (!(timeBefore > 1000)) return;
 
         var loadDuration = performance_watch.CurrentTime - timeBefore;
-        var blocking = ThreadSafety.IsInputThread;
+        var blocking = ThreadSafety.IsUpdateThread;
         var allowedDuration = blocking ? 16.0 : 100.0;
 
         if (!(loadDuration > allowedDuration)) return;
@@ -119,7 +116,6 @@ public abstract partial class Drawable : IDrawable, IDisposable
         LoadComplete();
 
         OnLoadComplete.Dispatch(this);
-        // BindablePool.UnregisterDispatcher(OnLoadComplete);
         return true;
     }
 

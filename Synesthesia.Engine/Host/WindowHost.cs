@@ -26,6 +26,7 @@ public class WindowHost : IDisposable
     {
         Raylib.SetTraceLogCallback(&RaylibLoggerProxy.HandleRaylibLog);
         Raylib.SetConfigFlags(ConfigFlags.ResizableWindow);
+        Raylib.SetConfigFlags(ConfigFlags.Msaa4xHint);
         Raylib.InitWindow(400, 800, game.WindowTitle.Value);
 
         WindowState = _bindablePool.Borrow(Host.WindowState.Normal);

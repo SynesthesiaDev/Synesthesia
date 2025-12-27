@@ -16,4 +16,11 @@ public static class Extensions
     {
         return dictionary.GetValueOrDefault(key);
     }
+
+    public static IEnumerable<T> Reversed<T>(this IEnumerable<T> enumerable)
+    {
+        var newList = enumerable.ToList();
+        newList.Reverse();
+        return newList;
+    }
 }

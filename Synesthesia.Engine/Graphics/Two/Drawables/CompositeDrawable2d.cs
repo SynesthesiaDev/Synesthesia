@@ -1,4 +1,5 @@
 using System.Numerics;
+using Common.Logger;
 using Common.Util;
 using SynesthesiaUtil.Extensions;
 
@@ -18,14 +19,62 @@ public class CompositeDrawable2d : Drawable2d
             _children = value.ToList();
             foreach (var child in value)
             {
+                child.Parent = this;
                 child.Load();
             }
         }
     }
 
+    protected internal void UpdateHoverState(HoverEvent e)
+    {
+        foreach (var child in _children.Reversed())
+        {
+            if (child.IsHovered && !child.Contains(e.MousePosition))
+            {
+                child.IsHovered = false;
+                child.OnHoverLost(e);
+            }
+
+            if (!child.IsHovered && child.Contains(e.MousePosition) && child.OnHover(e))
+            {
+                child.IsHovered = true;
+            }
+
+            if (child is CompositeDrawable2d drawable2d)
+            {
+                drawable2d.UpdateHoverState(e);
+            }
+        }
+    }
+
+    protected internal override bool OnMouseDown(MouseEvent e)
+    {
+        foreach (var child in _children.Reversed())
+        {
+            if (child.IsMouseDown || !child.IsHovered || !child.OnMouseDown(e)) continue;
+
+            child.IsMouseDown = true;
+            return true;
+        }
+
+        return base.OnMouseDown(e);
+    }
+
+    protected internal override void OnMouseUp(MouseEvent e)
+    {
+        foreach (var child in _children.Where(child => child.IsMouseDown))
+        {
+            child.IsMouseDown = false;
+            child.OnMouseUp(e);
+        }
+
+        base.OnMouseUp(e);
+    }
+
     public void AddChild(Drawable2d child)
     {
         _children.Add(child);
+        child.Parent = this;
         child.Load();
     }
 
@@ -39,7 +88,6 @@ public class CompositeDrawable2d : Drawable2d
     {
         foreach (var child in Children)
         {
-            child.Parent = this;
             child.OnUpdate();
         }
 
@@ -56,6 +104,7 @@ public class CompositeDrawable2d : Drawable2d
     protected override void Dispose(bool isDisposing)
     {
         _children.ForEach(c => c.Dispose());
+        _children.Clear();
         base.Dispose(isDisposing);
     }
 
@@ -88,5 +137,24 @@ public class CompositeDrawable2d : Drawable2d
         }
 
         return new Vector2(maxX - minX, maxY - minY);
+    }
+
+    public List<Drawable2d> GetFlattenedChildrenList()
+    {
+        var list = new List<Drawable2d>();
+        getChildrenRecursive(this, list);
+        return list;
+    }
+
+    private static void getChildrenRecursive(CompositeDrawable2d compositeDrawable2d, List<Drawable2d> outList)
+    {
+        foreach (var child in compositeDrawable2d._children)
+        {
+            outList.Add(child);
+            if (child is CompositeDrawable2d compositeChild)
+            {
+                getChildrenRecursive(compositeDrawable2d, outList);
+            }
+        }
     }
 }

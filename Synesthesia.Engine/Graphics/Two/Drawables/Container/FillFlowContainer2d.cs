@@ -12,8 +12,6 @@ public class FillFlowContainer2d : BackgroundContainer2d
 
     protected internal override void OnUpdate()
     {
-        base.OnUpdate();
-
         float currentY = 0;
         float currentX = 0;
         float maxWidth = 0;
@@ -39,18 +37,15 @@ public class FillFlowContainer2d : BackgroundContainer2d
 
         if (AutoSizeAxes.HasFlag(Axes.X))
         {
-            float contentWidth = Direction == Direction.Vertical ? maxWidth : (currentX - Spacing);
+            var contentWidth = Direction == Direction.Vertical ? maxWidth : (currentX - Spacing);
             Size = Size with { X = contentWidth + AutoSizePadding.X + AutoSizePadding.Z };
         }
 
         if (AutoSizeAxes.HasFlag(Axes.Y))
         {
-            float contentHeight = Direction == Direction.Vertical ? (currentY - Spacing) : maxHeight;
+            var contentHeight = Direction == Direction.Vertical ? (currentY - Spacing) : maxHeight;
             Size = Size with { Y = contentHeight + AutoSizePadding.Y + AutoSizePadding.W };
         }
-
-        // if (AutoSizeAxes.HasFlag(Axes.X)) Size = Size with { X = Direction == Direction.Vertical ? maxWidth : currentX };
-        // if (AutoSizeAxes.HasFlag(Axes.Y)) Size = Size with { Y = Direction == Direction.Vertical ? currentY : maxHeight };
     }
 
     protected override void OnDraw2d()

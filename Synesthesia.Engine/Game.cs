@@ -1,5 +1,6 @@
 using Common.Bindable;
 using Common.Logger;
+using Common.Util;
 using Synesthesia.Engine.Components.Two;
 using Synesthesia.Engine.Configuration;
 using Synesthesia.Engine.Dependency;
@@ -77,6 +78,17 @@ public class Game : IDisposable
         RootComposite2d.Load();
         RootComposite3d.Load();
         Logger.Debug($"Load Complete, took {GameRuntimeClock.Elapsed.Milliseconds}ms.", Logger.RUNTIME);
+
+
+        RootComposite2d.Children =
+        [
+            new Button
+            {
+                Text = "Testing",
+                Anchor = Anchor.Centre,
+                Origin = Anchor.Centre,
+            }
+        ];
 
         InputThread.Thread.Join();
         RenderThread.Thread.Join();

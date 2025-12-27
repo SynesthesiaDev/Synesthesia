@@ -18,5 +18,6 @@ public class InputThreadRunner : IThreadRunner
     protected override void OnLoop()
     {
         InputManager.PollInputs();
+        InputManager.PollMouse(_game);
     }
 }
