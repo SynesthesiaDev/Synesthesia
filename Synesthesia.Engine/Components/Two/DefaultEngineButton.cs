@@ -1,14 +1,13 @@
 using System.Numerics;
 using Common.Util;
-using Synesthesia.Engine.Animation;
+using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Configuration;
-using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
 
 namespace Synesthesia.Engine.Components.Two;
 
-public class Button : CompositeDrawable2d
+public class DefaultEngineButton : DisableableContainer
 {
     public string Text
     {
@@ -16,10 +15,12 @@ public class Button : CompositeDrawable2d
         set => _textDrawable.Text = value;
     }
 
+    public Action? OnClick { get; set; } = null;
+
     private BackgroundContainer2d _backgroundContainer;
     private TextDrawable _textDrawable;
 
-    public Button()
+    public DefaultEngineButton()
     {
         Size = new Vector2(120, 40);
         Children =
@@ -29,8 +30,6 @@ public class Button : CompositeDrawable2d
                 RelativeSizeAxes = Axes.Both,
                 BackgroundColor = Defaults.Background2,
                 BackgroundCornerRadius = 5,
-                Anchor = Anchor.Centre,
-                Origin = Anchor.Centre,
                 Children =
                 [
                     _textDrawable = new TextDrawable
@@ -53,16 +52,17 @@ public class Button : CompositeDrawable2d
     protected internal override void OnMouseUp(MouseEvent e)
     {
         ScaleTo(1f, 1000, Easing.OutElastic);
+        if (!Disabled) OnClick?.Invoke();
     }
 
     protected internal override bool OnHover(HoverEvent e)
     {
-        _backgroundContainer.BackgroundColor = Defaults.Background3;
+        _backgroundContainer.FadeBackgroundTo(Defaults.Background3, 100, Easing.InCubic);
         return true;
     }
 
     protected internal override void OnHoverLost(HoverEvent e)
     {
-        _backgroundContainer.BackgroundColor = Defaults.Background2;
+        _backgroundContainer.FadeBackgroundTo(Defaults.Background2, 100, Easing.OutCubic);
     }
 }

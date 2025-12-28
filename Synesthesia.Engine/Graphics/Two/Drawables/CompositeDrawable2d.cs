@@ -47,28 +47,26 @@ public class CompositeDrawable2d : Drawable2d
         }
     }
 
-    protected internal override bool OnMouseDown(MouseEvent e)
+    protected internal void UpdateMouseClickState(MouseEvent e, bool down)
     {
         foreach (var child in _children.Reversed())
         {
-            if (child.IsMouseDown || !child.IsHovered || !child.OnMouseDown(e)) continue;
+            if (down && !child.IsMouseDown && child.IsHovered && child.OnMouseDown(e))
+            {
+                child.IsMouseDown = true;
+            }
 
-            child.IsMouseDown = true;
-            return true;
+            if (!down && child.IsMouseDown)
+            {
+                child.IsMouseDown = false;
+                child.OnMouseUp(e);
+            }
+
+            if (child is CompositeDrawable2d drawable2d)
+            {
+                drawable2d.UpdateMouseClickState(e, down);
+            }
         }
-
-        return base.OnMouseDown(e);
-    }
-
-    protected internal override void OnMouseUp(MouseEvent e)
-    {
-        foreach (var child in _children.Where(child => child.IsMouseDown))
-        {
-            child.IsMouseDown = false;
-            child.OnMouseUp(e);
-        }
-
-        base.OnMouseUp(e);
     }
 
     public void AddChild(Drawable2d child)

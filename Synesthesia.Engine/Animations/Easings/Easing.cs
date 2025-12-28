@@ -1,4 +1,4 @@
-namespace Synesthesia.Engine.Animation;
+namespace Synesthesia.Engine.Animations.Easings;
 
 public enum Easing
 {

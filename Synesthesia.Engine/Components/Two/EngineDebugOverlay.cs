@@ -55,6 +55,13 @@ public class EngineDebugOverlay : CompositeDrawable2d
                 Anchor = Anchor.BottomLeft,
                 Origin = Anchor.BottomLeft,
                 Position = new Vector2(10, -10),
+            },
+
+            new EngineDebugSettings
+            {
+                Anchor = Anchor.TopRight,
+                Origin = Anchor.TopRight,
+                Position = new Vector2(-10, 10),
             }
         ];
 
@@ -78,7 +85,7 @@ public class EngineDebugOverlay : CompositeDrawable2d
         base.OnLoading();
     }
 
-    private void toggle(Drawable2d drawable)
+    private static void toggle(Drawable2d drawable)
     {
         drawable.Visible = !drawable.Visible;
         var name = drawable.GetType().Name;

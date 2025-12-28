@@ -5,6 +5,7 @@ using Common.Event;
 using Common.Logger;
 using Common.Statistics;
 using Raylib_cs;
+using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Timing;
 
@@ -41,6 +42,8 @@ public abstract partial class Drawable : IDrawable, IDisposable
     public bool IsLoaded => LoadState >= DrawableLoadState.Loaded;
 
     private static readonly StopwatchClock performance_watch = new(true);
+
+    public AnimationManager AnimationManager = null!;
 
     protected Drawable()
     {
@@ -111,6 +114,7 @@ public abstract partial class Drawable : IDrawable, IDisposable
     {
         if (LoadState < DrawableLoadState.Ready) return false;
 
+        AnimationManager = new AnimationManager();
         LoadState = DrawableLoadState.Loaded;
 
         LoadComplete();

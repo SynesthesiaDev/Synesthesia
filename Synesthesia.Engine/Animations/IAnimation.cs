@@ -1,6 +1,6 @@
-namespace Synesthesia.Engine.Animation;
+namespace Synesthesia.Engine.Animations;
 
-public interface IAnimation
+public interface IAnimation : IDisposable
 {
     public bool IsCompleted { get; set; }
 

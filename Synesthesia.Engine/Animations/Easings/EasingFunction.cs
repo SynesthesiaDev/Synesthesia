@@ -1,6 +1,6 @@
-namespace Synesthesia.Engine.Animation.Easings;
+namespace Synesthesia.Engine.Animations.Easings;
 
-public readonly struct DefaultEasingFunction(Easing easing) : IEasingFunction
+public readonly struct EasingFunction(Easing easing) : IEasingFunction
 {
     private const double elastic_const = 2 * Math.PI / .3;
     private const double elastic_const2 = .3 / 4;
@@ -156,9 +156,9 @@ public readonly struct DefaultEasingFunction(Easing easing) : IEasingFunction
                 return 7.5625 * (time -= 2.625 * bounce_const) * time + .984375;
 
             case Easing.InOutBounce:
-                if (time < .5) return .5 - .5 * new DefaultEasingFunction(Easing.OutBounce).ApplyEasing(1 - time * 2);
+                if (time < .5) return .5 - .5 * new EasingFunction(Easing.OutBounce).ApplyEasing(1 - time * 2);
 
-                return new DefaultEasingFunction(Easing.OutBounce).ApplyEasing((time - .5) * 2) * .5 + .5;
+                return new EasingFunction(Easing.OutBounce).ApplyEasing((time - .5) * 2) * .5 + .5;
 
             case Easing.OutPow10:
                 return --time * Math.Pow(time, 10) + 1;

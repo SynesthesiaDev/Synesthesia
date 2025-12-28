@@ -1,8 +1,9 @@
 using System.Numerics;
+using Common.Logger;
 using Common.Util;
 using Raylib_cs;
-using Synesthesia.Engine.Animation;
-using Transform = Synesthesia.Engine.Animation.Transform;
+using Synesthesia.Engine.Animations;
+using Synesthesia.Engine.Animations.Easings;
 
 namespace Synesthesia.Engine.Graphics.Two;
 
@@ -32,8 +33,6 @@ public abstract class Drawable2d : Drawable
 
     public long Depth = 0;
 
-    public AnimationManager AnimationManager = null!;
-
     public Vector2 ScreenSpacePosition
     {
         get
@@ -47,14 +46,6 @@ public abstract class Drawable2d : Drawable
             var originOffset = GetAnchorOffset(Size, Origin) * Scale;
             return anchorPos + Position - originOffset;
         }
-    }
-
-    protected Drawable2d()
-    {
-        OnLoadComplete.Subscribe(_ =>
-        {
-            AnimationManager = new AnimationManager();
-        });
     }
 
     public bool Contains(Vector2 screenSpacePoint)
@@ -192,6 +183,7 @@ public abstract class Drawable2d : Drawable
 
     public Animation<T> TransformTo<T>
     (
+        string field,
         T startValue,
         T endValue,
         long duration,
@@ -213,7 +205,7 @@ public abstract class Drawable2d : Drawable
             OnComplete = onComplete,
             Delay = delay
         };
-        AnimationManager.AddAnimation(animation);
+        AnimationManager.AddAnimation(field, animation);
         return animation;
     }
 
@@ -226,18 +218,28 @@ public abstract class Drawable2d : Drawable
     {
         return TransformTo
         (
+            nameof(Scale),
             Scale,
             newScale,
             duration,
             easing,
-            Transform.Vector2,
+            Transforms.Vector2,
             (vec) => { Scale = vec; }
         );
     }
 
+
     protected override void Dispose(bool isDisposing)
     {
-        AnimationManager.Dispose();
+        if (AnimationManager == null)
+        {
+            Logger.Warning($"AnimationManager was null when disposing {GetType().Name}");
+        }
+        else
+        {
+            AnimationManager.Dispose();
+        }
+
         Parent = null;
         base.Dispose(isDisposing);
     }

@@ -1,4 +1,4 @@
-namespace Synesthesia.Engine.Animation.Easings;
+namespace Synesthesia.Engine.Animations.Easings;
 
 public interface IEasingFunction
 {

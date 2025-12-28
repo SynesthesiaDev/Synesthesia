@@ -1,7 +1,7 @@
-using Synesthesia.Engine.Animation.Easings;
+using Synesthesia.Engine.Animations.Easings;
 using SynesthesiaUtil.Extensions;
 
-namespace Synesthesia.Engine.Animation;
+namespace Synesthesia.Engine.Animations;
 
 public partial class Animation<T> : IAnimation
 {
@@ -20,7 +20,7 @@ public partial class Animation<T> : IAnimation
     public long PausedTime { get; private set; } = 0L;
     public bool IsCompleted { get; set; } = false;
 
-    private DefaultEasingFunction easingFunction => new(Easing);
+    private EasingFunction easingFunction => new(Easing);
 
     public bool IsRunning => StartTime != -1 && !IsCompleted && !IsPaused;
 
@@ -81,4 +81,9 @@ public partial class Animation<T> : IAnimation
         return false;
     }
 
+
+    public void Dispose()
+    {
+        Stop();
+    }
 }

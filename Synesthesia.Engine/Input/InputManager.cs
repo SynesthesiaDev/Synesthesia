@@ -94,16 +94,8 @@ public static class InputManager
             if (isDown == wasDown) continue;
 
             var mouseEvent = new Drawable2d.MouseEvent(mouseButton, mousePos);
-            if (isDown)
-            {
-                if (!game.EngineDebugOverlay.OnMouseDown(mouseEvent))
-                    game.RootComposite2d.OnMouseDown(mouseEvent);
-            }
-            else
-            {
-                game.EngineDebugOverlay.OnMouseUp(mouseEvent);
-                game.RootComposite2d.OnMouseUp(mouseEvent);
-            }
+            game.EngineDebugOverlay.UpdateMouseClickState(mouseEvent, isDown);
+            game.RootComposite2d.UpdateMouseClickState(mouseEvent, isDown);
 
             _lastMouseState[i] = isDown;
         }
