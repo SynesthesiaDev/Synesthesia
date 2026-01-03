@@ -31,7 +31,6 @@ public static class ResourceManager
         var extension = Path.GetExtension(resourceName).ToLowerInvariant().RemovePrefix(".");
         if (!_loaderRegistry.TryGetValue(extension, out var loaderFunction)) throw new NotSupportedException($"No resource loader registered for type '{extension}'");
 
-
         using var stream = assembly.GetManifestResourceStream(resourceName);
         if (stream == null) throw new FileNotFoundException($"Embedded resource '{resourceName}' does not exist!");
 

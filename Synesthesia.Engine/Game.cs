@@ -1,12 +1,10 @@
 using Common.Bindable;
 using Common.Logger;
-using Common.Util;
 using Synesthesia.Engine.Components.Two;
 using Synesthesia.Engine.Configuration;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Three;
 using Synesthesia.Engine.Graphics.Two.Drawables;
-using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Host;
 using Synesthesia.Engine.Resources;
 using Synesthesia.Engine.Threading;
@@ -45,10 +43,12 @@ public class Game : IDisposable
 
     public void Run()
     {
+        EngineConfiguration.Load();
+
         DependencyContainer.Add(this);
 
-        ResourceManager.RegisterLoader("vsh", ResourceLoaders.LoadText); // Vertex Shader
-        ResourceManager.RegisterLoader("fsh", ResourceLoaders.LoadText); // Fragment Shader
+        ResourceManager.RegisterLoader("vsh", ResourceLoaders.LoadVertexShader, true); // Vertex Shader
+        ResourceManager.RegisterLoader("fsh", ResourceLoaders.LoadFragmentShader, true); // Fragment Shader
         ResourceManager.RegisterLoader("ttf", ResourceLoaders.LoadFont, true); // Default Font (unresolved until gl initialized)
 
         ResourceManager.CacheAll(SynesthesiaResources.AssemblyInfo.ResourceAssembly);

@@ -9,7 +9,7 @@ public class DisableableContainer : BackgroundContainer2d
 {
     private readonly DrawableBox2d _disabledOverlay = new();
 
-    private bool _disabled = false;
+    private bool _disabled;
 
     public bool Disabled
     {

@@ -8,12 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Remove="main.vsh"/>
-        <EmbeddedResource Include="main.vsh"/>
-        <None Remove="main.fsh"/>
-        <EmbeddedResource Include="main.fsh"/>
-        <None Remove="Quicksand-Regular.ttf"/>
-        <EmbeddedResource Include="Quicksand-Regular.ttf"/>
+        <EmbeddedResource Include="**\*" />
+        <EmbeddedResource Remove="bin\**;obj\**;*.csproj;*.cs" />
     </ItemGroup>
 
 </Project>

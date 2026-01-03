@@ -15,7 +15,7 @@ public class DefaultEngineButton : DisableableContainer
         set => _textDrawable.Text = value;
     }
 
-    public Action? OnClick { get; set; } = null;
+    public Action? OnClick { get; set; }
 
     private BackgroundContainer2d _backgroundContainer;
     private TextDrawable _textDrawable;

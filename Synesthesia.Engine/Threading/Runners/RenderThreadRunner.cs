@@ -11,6 +11,7 @@ public class RenderThreadRunner : IThreadRunner
 {
     private Game _game = null!;
     private Camera3D _camera;
+    public static Shader SignedDistanceFieldShader;
 
     protected override void OnThreadInit(Game game)
     {
@@ -18,7 +19,12 @@ public class RenderThreadRunner : IThreadRunner
         Logger.Debug("Loading window host..");
         _game.WindowHost.Initialize(_game);
 
+        // Load resources dependent on gl
         ResourceManager.ResolveAll("ttf");
+        ResourceManager.ResolveAll("vsh");
+        ResourceManager.ResolveAll("fsh");
+
+        SignedDistanceFieldShader = ResourceManager.Get<Shader>("SynesthesiaResources.Shaders.sdf_font.fsh");
 
         _camera = new Camera3D
         {
@@ -68,11 +74,11 @@ public class RenderThreadRunner : IThreadRunner
         _game.RootComposite2d.Size = _game.WindowHost.WindowSize;
         _game.EngineDebugOverlay.Size = _game.WindowHost.WindowSize;
 
-        Raylib.UpdateCamera(ref _camera, CameraMode.Orbital);
+        Raylib.UpdateCamera(ref _camera, CameraMode.Free);
 
         Raylib.BeginDrawing();
-
         Raylib.ClearBackground(Color.Black);
+
         Raylib.BeginMode3D(_camera);
         Raylib.DrawGrid(20, 1.0f);
         _game.RootComposite3d.OnDraw();
@@ -81,7 +87,6 @@ public class RenderThreadRunner : IThreadRunner
         _game.RootComposite2d.OnDraw();
         _game.EngineDebugOverlay.OnDraw();
 
-        // Raylib.DrawTextEx(font, "Hello from Memory!", new System.Numerics.Vector2(100, 100), 32, 2, Color.White);
         Raylib.EndDrawing();
     }
 }

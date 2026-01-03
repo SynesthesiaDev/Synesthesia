@@ -4,22 +4,26 @@ namespace Synesthesia.Engine.Animations;
 
 public class AnimationManager : IDisposable
 {
-    private Scheduler scheduler = new Scheduler();
+    private readonly object _lock = new();
+    private Scheduler scheduler = new();
     private long currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
     private Dictionary<string, IAnimation> Animations = [];
 
     public AnimationManager()
     {
-        scheduler.Repeating(1, task =>
+        scheduler.Repeating(1, _ =>
         {
             currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
-            foreach (var (field, animation) in Animations.ToList())
+            lock (_lock)
             {
-                animation.Update(currentTime);
-                if (animation.IsCompleted)
+                foreach (var (field, animation) in Animations.ToList())
                 {
-                    Animations.Remove(field);
+                    animation.Update(currentTime);
+                    if (animation.IsCompleted)
+                    {
+                        Animations.Remove(field);
+                    }
                 }
             }
         });
@@ -27,24 +31,31 @@ public class AnimationManager : IDisposable
 
     public void AddAnimation<T>(string field, Animation<T> animation)
     {
-        if (Animations.TryGetValue(field, out var existingAnimation))
+        lock (_lock)
         {
-            existingAnimation.Stop();
-            existingAnimation.Dispose();
-            Animations.Remove(field);
-        }
+            if (Animations.TryGetValue(field, out var existingAnimation))
+            {
+                existingAnimation.Stop();
+                existingAnimation.Dispose();
+                Animations.Remove(field);
+            }
 
-        Animations.Add(field, animation);
-        animation.Start(currentTime);
+            Animations.Add(field, animation);
+            animation.Start(currentTime);
+        }
     }
 
     public void Clear()
     {
-        foreach (var (_, animation) in Animations)
+        lock (_lock)
         {
-            animation.Stop();
+            foreach (var (_, animation) in Animations.ToList())
+            {
+                animation.Stop();
+            }
+
+            Animations.Clear();
         }
-        Animations.Clear();
     }
 
 
