@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace Synesthesia.Engine.Timing;
 
-public class StopwatchClock : Stopwatch, IAdjustableClock
+public sealed class StopwatchClock : Stopwatch, IAdjustableClock
 {
     private double seekOffset = 0;
 
@@ -14,7 +14,7 @@ public class StopwatchClock : Stopwatch, IAdjustableClock
 
     private double stopwatchCurrentTime => (stopwatchMilliseconds - rateChangeUsed) * rate + rateChangeAccumulated;
 
-    public virtual double CurrentTime => stopwatchCurrentTime + seekOffset;
+    public double CurrentTime => stopwatchCurrentTime + seekOffset;
 
     private double rate = 1;
 

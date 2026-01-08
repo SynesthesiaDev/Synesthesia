@@ -12,7 +12,7 @@ public partial class Animation<T> : IAnimation
     public required Transform<T> Transform { get; init; }
     public required Easing Easing { get; init; }
     public required Action<T> OnUpdate { get; init; }
-    public required Action<T>? OnComplete { get; init; }
+    public required Action<T>? OnComplete { get; set; }
     public required long Delay { get; init; }
 
     public long StartTime { get; private set; } = -1;
@@ -85,5 +85,10 @@ public partial class Animation<T> : IAnimation
     public void Dispose()
     {
         Stop();
+    }
+
+    public void Then(Action<T> then)
+    {
+        OnComplete = then;
     }
 }

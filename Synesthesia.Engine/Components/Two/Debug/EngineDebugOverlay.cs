@@ -1,6 +1,5 @@
 using System.Numerics;
 using Common.Logger;
-using Common.Statistics;
 using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Configuration;
@@ -9,7 +8,7 @@ using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Input;
 
-namespace Synesthesia.Engine.Components.Two;
+namespace Synesthesia.Engine.Components.Two.Debug;
 
 public class EngineDebugOverlay : CompositeDrawable2d
 {
@@ -44,10 +43,12 @@ public class EngineDebugOverlay : CompositeDrawable2d
                     _frameCounter = new FrameCounter
                     {
                         Visible = EngineConfiguration.ShowFps,
+                        Scale = new Vector2(0.8f)
                     },
                     _engineStatisticsPanel = new EngineStatisticsPanel
                     {
                         Visible = EngineConfiguration.ShowEngineStatistics,
+                        Scale = new Vector2(0.8f)
                     },
                 ]
             },
@@ -58,6 +59,7 @@ public class EngineDebugOverlay : CompositeDrawable2d
                 Origin = Anchor.BottomLeft,
                 Position = new Vector2(10, -10),
                 Visible = EngineConfiguration.ShowLogOverlay,
+                Scale = new Vector2(0.8f)
             },
 
             new EngineDebugSettings

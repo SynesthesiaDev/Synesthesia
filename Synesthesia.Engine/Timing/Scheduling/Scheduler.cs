@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using Common.Statistics;
-using Common.Util;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Threading.Runners;
 using SynesthesiaUtil.Extensions;
+using SynesthesiaUtil.Types;
 
 namespace Synesthesia.Engine.Timing.Scheduling;
 

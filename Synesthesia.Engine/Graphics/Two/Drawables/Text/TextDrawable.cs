@@ -56,10 +56,14 @@ public class TextDrawable : ColoredDrawable2d
 
     protected override void OnDraw2d()
     {
-        var renderSizeLoc = Raylib.GetShaderLocation(RenderThreadRunner.SignedDistanceFieldShader, "renderSize");
-        Raylib.SetShaderValue(RenderThreadRunner.SignedDistanceFieldShader, renderSizeLoc, FontSize > 0 ? FontSize : 1.0f, ShaderUniformDataType.Float);
-
-        Raylib.BeginShaderMode(RenderThreadRunner.SignedDistanceFieldShader);
+        var shader = RenderThreadRunner.SignedDistanceFieldShader;
+        var sizeLoc = Raylib.GetShaderLocation(shader, "renderSize");
+        var alphaLoc = Raylib.GetShaderLocation(shader, "alpha");
+        
+        Raylib.SetShaderValue(shader, sizeLoc, FontSize, ShaderUniformDataType.Float);
+        Raylib.SetShaderValue(shader, alphaLoc, InheritedAlpha, ShaderUniformDataType.Float);
+        
+        Raylib.BeginShaderMode(shader);
         Raylib.DrawTextEx(Font, Text, Vector2.Zero, FontSize, Spacing, applyAlpha(Color));
         Raylib.EndShaderMode();
     }

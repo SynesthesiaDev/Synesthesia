@@ -38,7 +38,7 @@ public abstract partial class Drawable : IDrawable, IDisposable
     public BlendMode BlendMode { get; set; } = BlendMode.Alpha;
 
     public float Alpha { get; set; } = 1f;
-
+    
     public bool IsLoaded => LoadState >= DrawableLoadState.Loaded;
 
     private static readonly StopwatchClock performance_watch = new(true);

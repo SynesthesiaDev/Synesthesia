@@ -4,6 +4,8 @@ using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Animations.Easings;
+using Synesthesia.Engine.Resources;
+using Synesthesia.Engine.Threading.Runners;
 
 namespace Synesthesia.Engine.Graphics.Two;
 
@@ -69,12 +71,14 @@ public abstract class Drawable2d : Drawable
         var anchorOffset = GetAnchorOffset(Parent.Size, Anchor);
         var originOffset = GetAnchorOffset(Size, Origin);
 
-        // local = (parentPoint - translation) + origin
-        // translation = anchor + pos + margin
-        var localPoint = (pointInParentSpace - (anchorOffset + Position + new Vector2(Margin.X, Margin.Y))) + originOffset;
+        var localPoint = (pointInParentSpace - (anchorOffset + Position + new Vector2(Margin.X, Margin.Y))) +
+                         originOffset;
 
         return localPoint / Scale;
     }
+
+    // for properly applying alpha to all children, multiply local alpha by parent's inherited alpha recursively
+    protected float InheritedAlpha => Alpha * Parent?.InheritedAlpha ?? Alpha;
 
     protected internal virtual bool OnHover(HoverEvent e)
     {
@@ -107,15 +111,28 @@ public abstract class Drawable2d : Drawable
             {
                 Axes.X => Size with { X = Parent.Size.X - Margin.X - Margin.Z },
                 Axes.Y => Size with { Y = Parent.Size.Y - Margin.Y - Margin.W },
-                Axes.Both => Size with { X = Parent.Size.X - Margin.X - Margin.Z } with { Y = Parent.Size.Y - Margin.Y - Margin.W },
+                Axes.Both => Size with { X = Parent.Size.X - Margin.X - Margin.Z } with
+                {
+                    Y = Parent.Size.Y - Margin.Y - Margin.W
+                },
                 _ => Size
             };
         }
     }
 
+    //TODO proper shader caching
+    private static int _alphaUniformLoc = -1;
+
     protected internal sealed override void OnDraw()
     {
-        if (!Visible) return;
+        if (!Visible || InheritedAlpha <= 0.001f) return; // Skip if effectively invisible
+        if (_alphaUniformLoc == -1)
+            _alphaUniformLoc = Raylib.GetShaderLocation(RenderThreadRunner.AlphaShader, "alpha");
+
+        Raylib.SetShaderValue(RenderThreadRunner.AlphaShader, _alphaUniformLoc, InheritedAlpha,
+            ShaderUniformDataType.Float);
+        Raylib.BeginShaderMode(RenderThreadRunner.AlphaShader);
+        Raylib.BeginBlendMode(BlendMode.Alpha);
 
         BeginLocalSpace();
 
@@ -126,9 +143,12 @@ public abstract class Drawable2d : Drawable
         finally
         {
             EndLocalSpace();
+            Raylib.EndBlendMode();
+            Raylib.EndShaderMode();
         }
     }
 
+    //TODO layout invalidation and update only when needed
     private void updateLayout()
     {
     }
@@ -224,10 +244,38 @@ public abstract class Drawable2d : Drawable
             duration,
             easing,
             Transforms.Vector2,
-            (vec) => { Scale = vec; }
+            vec => { Scale = vec; }
         );
     }
 
+    public Animation<Vector3> RotateTo(Vector3 newRotation, long duration, Easing easing)
+    {
+        return TransformTo
+        (
+            nameof(Rotation),
+            Rotation,
+            newRotation,
+            duration,
+            easing,
+            Transforms.Vector3,
+            vec => { Rotation = vec; }
+        );
+    }
+
+
+    public Animation<float> FadeTo(float newAlpha, long duration, Easing easing)
+    {
+        return TransformTo
+        (
+            nameof(Alpha),
+            Alpha,
+            newAlpha,
+            duration,
+            easing,
+            Transforms.Float,
+            a => Alpha = a
+        );
+    }
 
     protected override void Dispose(bool isDisposing)
     {

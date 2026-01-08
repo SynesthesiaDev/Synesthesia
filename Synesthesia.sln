@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.Demo", "Synesth
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.Resources", "Synesthesia.Resources\Synesthesia.Resources.csproj", "{A6641A68-A720-41F5-B8C4-67C051E24A49}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.Editor", "Synesthesia.Editor\Synesthesia.Editor.csproj", "{3DE2DEB7-7081-4B2E-B7BE-B21A6C88AB41}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{A6641A68-A720-41F5-B8C4-67C051E24A49}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A6641A68-A720-41F5-B8C4-67C051E24A49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A6641A68-A720-41F5-B8C4-67C051E24A49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DE2DEB7-7081-4B2E-B7BE-B21A6C88AB41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DE2DEB7-7081-4B2E-B7BE-B21A6C88AB41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DE2DEB7-7081-4B2E-B7BE-B21A6C88AB41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DE2DEB7-7081-4B2E-B7BE-B21A6C88AB41}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

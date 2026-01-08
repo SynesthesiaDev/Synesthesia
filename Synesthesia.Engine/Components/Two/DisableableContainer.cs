@@ -5,7 +5,7 @@ using Synesthesia.Engine.Graphics.Two.Drawables.Shapes;
 
 namespace Synesthesia.Engine.Components.Two;
 
-public class DisableableContainer : BackgroundContainer2d
+public class DisableableContainer : BackgroundContainer2d, IDisablable
 {
     private readonly DrawableBox2d _disabledOverlay = new();
 

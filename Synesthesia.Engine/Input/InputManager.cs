@@ -19,7 +19,6 @@ public static class InputManager
     private static Vector2 _lastMousePos = new Vector2(0, 0);
     private static readonly bool[] _lastMouseState = new bool[6];
 
-
     private record InputEventData(KeyboardKey Key, bool IsDown);
 
     public static void Register(HotKey hotKey)
@@ -101,8 +100,8 @@ public static class InputManager
         }
     }
 
-    public class InputState
+    private class InputState
     {
-        public readonly HashSet<KeyboardKey> PressedKeys = new();
+        public readonly HashSet<KeyboardKey> PressedKeys = [];
     }
 }

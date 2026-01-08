@@ -25,12 +25,12 @@ public class FillFlowContainer2d : BackgroundContainer2d
 
             if (Direction == Direction.Vertical)
             {
-                currentY += child.Size.Y + Spacing;
+                currentY += (child.Size.Y + Spacing) * child.Scale.Y;
                 maxWidth = Math.Max(maxWidth, child.Size.X);
             }
             else
             {
-                currentX += child.Size.X + Spacing;
+                currentX += (child.Size.X + Spacing) * child.Scale.X;
                 maxHeight = Math.Max(maxHeight, child.Size.Y);
             }
         }

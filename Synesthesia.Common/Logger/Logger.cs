@@ -1,6 +1,7 @@
 using Common.Event;
 using Common.Util;
 using Pastel;
+using SynesthesiaUtil.Types;
 
 namespace Common.Logger;
 

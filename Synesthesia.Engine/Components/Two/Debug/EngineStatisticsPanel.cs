@@ -7,8 +7,9 @@ using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
 using SynesthesiaUtil;
+using SynesthesiaUtil.Types;
 
-namespace Synesthesia.Engine.Components.Two;
+namespace Synesthesia.Engine.Components.Two.Debug;
 
 public class EngineStatisticsPanel : CompositeDrawable2d
 {

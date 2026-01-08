@@ -3,6 +3,7 @@ using Common.Event;
 using Common.Logger;
 using Common.Util;
 using Raylib_cs;
+using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Configuration;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Two.Drawables;
@@ -11,8 +12,9 @@ using Synesthesia.Engine.Graphics.Two.Drawables.Text;
 using Synesthesia.Engine.Threading.Runners;
 using Synesthesia.Engine.Timing.Scheduling;
 using Synesthesia.Engine.Utility;
+using SynesthesiaUtil.Extensions;
 
-namespace Synesthesia.Engine.Components.Two;
+namespace Synesthesia.Engine.Components.Two.Debug;
 
 public class DebugLoggerOverlay : CompositeDrawable2d
 {
@@ -64,7 +66,7 @@ public class DebugLoggerOverlay : CompositeDrawable2d
     {
         if (Messages.Remove(logEvent, out var value))
         {
-            _fillFlowContainer.RemoveChild(value);
+            value.FadeTo(0f, 500, Easing.Out).Then(_ => _fillFlowContainer.RemoveChild(value));
         }
     }
 
@@ -113,7 +115,7 @@ public class DebugLoggerOverlay : CompositeDrawable2d
                                     AutoSizeAxes = Axes.Both,
                                     Anchor = Anchor.CentreLeft,
                                     Origin = Anchor.CentreLeft,
-                                    Text = $"{logEvent.message.CutIfTooLong(MAX_MESSAGE_LENGHT)} "
+                                    Text = $"{logEvent.message.CutIfTooLong(MAX_MESSAGE_LENGHT, true)} "
                                 }
                             ]
                         }

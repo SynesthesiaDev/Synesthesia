@@ -10,13 +10,23 @@ public abstract class Transform<T>
 
 public static class Transforms
 {
-    public static readonly Transform<float> Float = new FloatTranform((start, end, progress) => start + (end - start) * progress);
+    public static readonly Transform<float> Float =
+        new FloatTranform((start, end, progress) => start + (end - start) * progress);
 
-    public static readonly Transform<int> Int = new IntTransform((start, end, progress) => (int)(start + (end - start) * progress));
+    public static readonly Transform<int> Int =
+        new IntTransform((start, end, progress) => (int)(start + (end - start) * progress));
 
-    public static readonly Transform<long> Long = new LongTransform((start, end, progress) => (long)(start + (end - start) * progress));
+    public static readonly Transform<long> Long =
+        new LongTransform((start, end, progress) => (long)(start + (end - start) * progress));
 
-    public static readonly Transform<Vector2> Vector2 = new Vector2Transform((start, end, progress) => new Vector2(start.X + (end.X - start.X) * progress, start.Y + (end.Y - start.Y) * progress));
+    public static readonly Transform<Vector2> Vector2 = new Vector2Transform((start, end, progress) =>
+        new Vector2(start.X + (end.X - start.X) * progress, start.Y + (end.Y - start.Y) * progress));
+
+    public static readonly Transform<Vector3> Vector3 = new Vector3Transform((start, end, progress) => new Vector3(
+        start.X + (end.X - start.X) * progress,
+        start.Y + (end.Y - start.Y) * progress,
+        start.Z + (end.Z - start.Z) * progress
+    ));
 
     public static readonly Transform<Color> Color = new ColorTransform((start, end, progress) => new Color(
         start.R / 255f + (end.R / 255f - start.R / 255f) * progress,
@@ -27,12 +37,14 @@ public static class Transforms
 
     public class ColorTransform(Func<Color, Color, float, Color> transform) : Transform<Color>
     {
-        public override Color Apply(Color startValue, Color endValue, float progress) => transform(startValue, endValue, progress);
+        public override Color Apply(Color startValue, Color endValue, float progress) =>
+            transform(startValue, endValue, progress);
     }
 
     public class FloatTranform(Func<float, float, float, float> transform) : Transform<float>
     {
-        public override float Apply(float startValue, float endValue, float progress) => transform(startValue, endValue, progress);
+        public override float Apply(float startValue, float endValue, float progress) =>
+            transform(startValue, endValue, progress);
     }
 
     public class IntTransform(Func<int, int, float, int> transform) : Transform<int>
@@ -46,6 +58,14 @@ public static class Transforms
     public class Vector2Transform(Func<Vector2, Vector2, float, Vector2> transform) : Transform<Vector2>
     {
         public override Vector2 Apply(Vector2 startValue, Vector2 endValue, float progress)
+        {
+            return transform(startValue, endValue, progress);
+        }
+    }
+
+    public class Vector3Transform(Func<Vector3, Vector3, float, Vector3> transform) : Transform<Vector3>
+    {
+        public override Vector3 Apply(Vector3 startValue, Vector3 endValue, float progress)
         {
             return transform(startValue, endValue, progress);
         }

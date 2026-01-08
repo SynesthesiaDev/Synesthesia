@@ -1,5 +1,4 @@
 using System.Numerics;
-using Common.Logger;
 using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Configuration;
@@ -8,7 +7,7 @@ using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
 
-namespace Synesthesia.Engine.Components.Two;
+namespace Synesthesia.Engine.Components.Two.Debug;
 
 public class FrameCounter : CompositeDrawable2d
 {
@@ -70,17 +69,6 @@ public class FrameCounter : CompositeDrawable2d
                 ]
             }
         ];
-    }
-
-    protected internal override bool OnHover(HoverEvent e)
-    {
-        Logger.Verbose("HOVER ON FRAME COUNTER!!!");
-        return true;
-    }
-
-    protected internal override void OnHoverLost(HoverEvent e)
-    {
-        Logger.Verbose("hover off frame counter :c");
     }
 
     private class PerformanceMonitorElement : CompositeDrawable2d

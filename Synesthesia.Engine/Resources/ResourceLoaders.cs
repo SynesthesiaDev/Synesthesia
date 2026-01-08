@@ -1,4 +1,5 @@
 using System.Text;
+using Common.Logger;
 using Raylib_cs;
 using Synesthesia.Engine.Utility;
 
@@ -22,7 +23,14 @@ public static class ResourceLoaders
     public static object LoadFragmentShader(Stream stream)
     {
         var text = LoadText(stream) as string;
-        return Raylib.LoadShaderFromMemory(null, text);
+        var shader = Raylib.LoadShaderFromMemory(null, text);
+
+        if (shader.Id > 0) return shader;
+        
+        var ex = new Exception("Fragment shader failed to load");
+        Logger.Exception(ex, Logger.RENDER);
+        throw ex;
+
     }
 
     public static object LoadFont(Stream stream)

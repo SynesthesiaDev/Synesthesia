@@ -1,4 +1,5 @@
 using Common.Util;
+using SynesthesiaUtil.Types;
 
 namespace Common.Statistics;
 

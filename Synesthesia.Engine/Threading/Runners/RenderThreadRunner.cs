@@ -12,6 +12,7 @@ public class RenderThreadRunner : IThreadRunner
     private Game _game = null!;
     private Camera3D _camera;
     public static Shader SignedDistanceFieldShader;
+    public static Shader AlphaShader;
 
     protected override void OnThreadInit(Game game)
     {
@@ -25,6 +26,7 @@ public class RenderThreadRunner : IThreadRunner
         ResourceManager.ResolveAll("fsh");
 
         SignedDistanceFieldShader = ResourceManager.Get<Shader>("SynesthesiaResources.Shaders.sdf_font.fsh");
+        AlphaShader = ResourceManager.Get<Shader>("SynesthesiaResources.Shaders.alpha.fsh");
 
         _camera = new Camera3D
         {
@@ -32,24 +34,24 @@ public class RenderThreadRunner : IThreadRunner
             Target = Vector3.Zero,
             Up = Vector3.UnitY,
             FovY = 60f,
-            Projection = CameraProjection.Perspective
+            Projection = CameraProjection.Perspective,
         };
 
-        _game.RootComposite3d.Children =
-        [
-            new Cube
-            {
-                Position = new Vector3(0f, 0f, 0f),
-                Size = new Vector3(1f, 1f, 1f),
-                Color = Color.Red
-            },
-            new Cube
-            {
-                Color = Color.Blue,
-                Position = new Vector3(2f, 0f, 0f),
-                Rotation = new Vector3(45, 0, 0)
-            }
-        ];
+        // _game.RootComposite3d.Children =
+        // [
+        //     new Cube
+        //     {
+        //         Position = new Vector3(0f, 0f, 0f),
+        //         Size = new Vector3(1f, 1f, 1f),
+        //         Color = Color.Red
+        //     },
+        //     new Cube
+        //     {
+        //         Color = Color.Blue,
+        //         Position = new Vector3(2f, 0f, 0f),
+        //         Rotation = new Vector3(45, 0, 0)
+        //     }
+        // ];
     }
 
     public override void OnLoadComplete(Game game)
@@ -74,13 +76,13 @@ public class RenderThreadRunner : IThreadRunner
         _game.RootComposite2d.Size = _game.WindowHost.WindowSize;
         _game.EngineDebugOverlay.Size = _game.WindowHost.WindowSize;
 
-        Raylib.UpdateCamera(ref _camera, CameraMode.Free);
+        Raylib.UpdateCamera(ref _camera, CameraMode.Custom);
 
         Raylib.BeginDrawing();
         Raylib.ClearBackground(Color.Black);
 
         Raylib.BeginMode3D(_camera);
-        Raylib.DrawGrid(20, 1.0f);
+        // Raylib.DrawGrid(20, 1.0f);
         _game.RootComposite3d.OnDraw();
         Raylib.EndMode3D();
 
@@ -88,5 +90,6 @@ public class RenderThreadRunner : IThreadRunner
         _game.EngineDebugOverlay.OnDraw();
 
         Raylib.EndDrawing();
+        Raylib.EndBlendMode();
     }
 }

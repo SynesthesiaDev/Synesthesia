@@ -1,11 +1,10 @@
-using System.Numerics;
 using Common.Util;
+using Raylib_cs;
 using Synesthesia.Engine.Animations.Easings;
-using Synesthesia.Engine.Configuration;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
 
-namespace Synesthesia.Engine.Components.Two;
+namespace Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 
 public class DefaultEngineButton : DisableableContainer
 {
@@ -15,21 +14,54 @@ public class DefaultEngineButton : DisableableContainer
         set => _textDrawable.Text = value;
     }
 
+    public float FontSize
+    {
+        get => _textDrawable.FontSize;
+        set => _textDrawable.FontSize = value;
+    }
+
+    public Color TextColor
+    {
+        get => _textDrawable.Color;
+        set => _textDrawable.Color = value;
+    }
+
+    public DefaultEngineColorCombination ColorCombination { get; init; } = DefaultEngineColorCombination.Surface2;
+
     public Action? OnClick { get; set; }
 
     private BackgroundContainer2d _backgroundContainer;
     private TextDrawable _textDrawable;
 
+    protected override void OnLoading()
+    {
+        updateVisualState();
+        base.OnLoading();
+    }
+
+    private void updateVisualState()
+    {
+        if (IsHovered)
+        {
+            _backgroundContainer.FadeBackgroundTo(ColorCombination.Hovered, 100, Easing.InCubic);
+        }
+        else
+        {
+            _backgroundContainer.FadeBackgroundTo(ColorCombination.Normal, 100, Easing.OutCubic);
+        }
+    }
+
     public DefaultEngineButton()
     {
-        Size = new Vector2(120, 40);
         Children =
         [
             _backgroundContainer = new BackgroundContainer2d
             {
                 RelativeSizeAxes = Axes.Both,
-                BackgroundColor = Defaults.Background2,
+                BackgroundColor = ColorCombination.Normal,
                 BackgroundCornerRadius = 5,
+                Anchor = Anchor.Centre,
+                Origin = Anchor.Centre,
                 Children =
                 [
                     _textDrawable = new TextDrawable
@@ -45,24 +77,29 @@ public class DefaultEngineButton : DisableableContainer
 
     protected internal override bool OnMouseDown(MouseEvent e)
     {
-        ScaleTo(0.9f, 2000, Easing.OutQuint);
+        if (Disabled) return false;
+        _backgroundContainer.ScaleTo(0.9f, 2000, Easing.OutQuint);
         return true;
     }
 
     protected internal override void OnMouseUp(MouseEvent e)
     {
-        ScaleTo(1f, 1000, Easing.OutElastic);
+        if (Disabled) return;
+        _backgroundContainer.ScaleTo(1f, 1000, Easing.OutElastic);
         if (!Disabled) OnClick?.Invoke();
     }
 
     protected internal override bool OnHover(HoverEvent e)
     {
-        _backgroundContainer.FadeBackgroundTo(Defaults.Background3, 100, Easing.InCubic);
-        return true;
+        IsHovered = true;
+        updateVisualState();
+        return base.OnHover(e);
     }
 
     protected internal override void OnHoverLost(HoverEvent e)
     {
-        _backgroundContainer.FadeBackgroundTo(Defaults.Background2, 100, Easing.OutCubic);
+        IsHovered = false;
+        updateVisualState();
+        base.OnHoverLost(e);
     }
 }

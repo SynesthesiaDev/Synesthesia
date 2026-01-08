@@ -8,6 +8,36 @@ public static class ColorUtil
 {
     private static Dictionary<string, Color> _cachedColors = new();
 
+    public static Color ChangeBrightness(this Color color, float correctionFactor)
+    {
+        var factor = Math.Clamp(correctionFactor, -1f, 1f);
+
+        var red = (float)color.R;
+        var green = (float)color.G;
+        var blue = (float)color.B;
+
+        if (factor < 0)
+        {
+            factor = 1 + factor;
+            red *= factor;
+            green *= factor;
+            blue *= factor;
+        }
+        else
+        {
+            red = (255 - red) * factor + red;
+            green = (255 - green) * factor + green;
+            blue = (255 - blue) * factor + blue;
+        }
+
+        return new Color(
+            (byte)Math.Clamp(red, 0, 255), 
+            (byte)Math.Clamp(green, 0, 255), 
+            (byte)Math.Clamp(blue, 0, 255), 
+            color.A
+        );
+    }
+
     public static Color GetOrCacheColor(string hex)
     {
         hex = hex.RemovePrefix("#");
@@ -39,9 +69,6 @@ public static class ColorUtil
                 break;
             //#RGB
             case 3:
-                red = int.Parse(hexColor[0] + hexColor[0].ToString(), NumberStyles.AllowHexSpecifier);
-                green = int.Parse(hexColor[1] + hexColor[1].ToString(), NumberStyles.AllowHexSpecifier);
-                blue = int.Parse(hexColor[2] + hexColor[2].ToString(), NumberStyles.AllowHexSpecifier);
                 break;
         }
 
