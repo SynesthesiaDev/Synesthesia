@@ -65,7 +65,7 @@ public class RenderThreadRunner : IThreadRunner
         int key;
         while ((key = Raylib.GetKeyPressed()) != 0)
         {
-            InputManager.EnqueueKeyEvent((KeyboardKey)key, true);
+            // InputManager.EnqueueEvent((KeyboardKey)key, true);
         }
 
         if (Raylib.IsWindowReady() && _game.WindowHost.ShouldWindowClose)

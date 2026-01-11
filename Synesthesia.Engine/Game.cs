@@ -36,7 +36,6 @@ public class Game : IDisposable
         WindowTitle = _bindablePool.Borrow("Synesthesia Engine");
     }
 
-
     public IThreadRunner InputThread { get; private set; } = null!;
     public IThreadRunner RenderThread { get; private set; } = null!;
     public IThreadRunner UpdateThread { get; private set; } = null!;
@@ -53,28 +52,22 @@ public class Game : IDisposable
         EngineConfiguration.Load();
 
         DependencyContainer.Add(this);
+        // AudioManager.Initialize();
 
         ResourceManager.RegisterLoader("vsh", ResourceLoaders.LoadVertexShader, true); // Vertex Shader
         ResourceManager.RegisterLoader("fsh", ResourceLoaders.LoadFragmentShader, true); // Fragment Shader
-        ResourceManager.RegisterLoader("ttf", ResourceLoaders.LoadFont,
-            true); // Default Font (unresolved until gl initialized)
+        ResourceManager.RegisterLoader("ttf", ResourceLoaders.LoadFont, true); // Default Font (unresolved until gl initialized)
 
         ResourceManager.CacheAll(SynesthesiaResources.AssemblyInfo.ResourceAssembly);
-        Logger.Debug(
-            $"Cached {ResourceManager.CachedSize} built-in engine resources, {ResourceManager.UnresolvedSize} waiting to be resolved, {ResourceManager.Size} total",
-            Logger.IO);
+        Logger.Debug($"Cached {ResourceManager.CachedSize} built-in engine resources, {ResourceManager.UnresolvedSize} waiting to be resolved, {ResourceManager.Size} total", Logger.IO);
 
         var loadSignal = new CountdownEvent(4);
         Action<IThreadRunner> onThreadLoaded = _ => loadSignal.Signal();
 
-        UpdateThread = ThreadSafety.CreateThread(new UpdateThreadRunner(), ThreadSafety.THREAD_UPDATE,
-            Defaults.UpdateRate, this);
-        RenderThread = ThreadSafety.CreateThread(new RenderThreadRunner(), ThreadSafety.THREAD_RENDER,
-            Defaults.RendererRate, this);
-        InputThread =
-            ThreadSafety.CreateThread(new InputThreadRunner(), ThreadSafety.THREAD_INPUT, Defaults.InputRate, this);
-        AudioThread =
-            ThreadSafety.CreateThread(new AudioThreadRunner(), ThreadSafety.THREAD_AUDIO, Defaults.AudioRate, this);
+        UpdateThread = ThreadSafety.CreateThread(new UpdateThreadRunner(), ThreadSafety.THREAD_UPDATE, Defaults.UpdateRate, this);
+        RenderThread = ThreadSafety.CreateThread(new RenderThreadRunner(), ThreadSafety.THREAD_RENDER, Defaults.RendererRate, this);
+        InputThread = ThreadSafety.CreateThread(new InputThreadRunner(), ThreadSafety.THREAD_INPUT, Defaults.InputRate, this);
+        AudioThread = ThreadSafety.CreateThread(new AudioThreadRunner(), ThreadSafety.THREAD_AUDIO, Defaults.AudioRate, this);
 
         UpdateThread.ThreadLoadedDispatcher.Subscribe(onThreadLoaded);
         RenderThread.ThreadLoadedDispatcher.Subscribe(onThreadLoaded);
@@ -103,15 +96,13 @@ public class Game : IDisposable
                 Direction = Direction.Vertical,
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
-                Spacing = 5,
+                Spacing = 10,
                 Children =
                 [
                     new FillFlowContainer2d
                     {
                         AutoSizeAxes = Axes.Both,
                         Direction = Direction.Horizontal,
-                        Anchor = Anchor.TopLeft,
-                        Origin = Anchor.TopLeft,
                         Spacing = 5,
                         Children =
                         [
@@ -142,17 +133,17 @@ public class Game : IDisposable
                     {
                         Text = "Do Stuff",
                         Size = new Vector2(200, 30),
-                        Anchor = Anchor.Centre,
-                        Origin = Anchor.Centre,
                     },
                     
                     new DefaultEngineCheckbox
                     {
                         Text = "Also disabled :c",
                         Size = new Vector2(200, 30),
-                        Anchor = Anchor.Centre,
-                        Origin = Anchor.Centre,
                         Disabled = true,
+                    },
+                    new DefaultEngineTextbox
+                    {
+                        Size = new Vector2(300, 40),
                     }
                 ],
             },

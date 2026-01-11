@@ -5,7 +5,6 @@ namespace Synesthesia.Engine.Animations;
 
 public partial class Animation<T> : IAnimation
 {
-
     public required T StartValue { get; init; }
     public required T EndValue { get; init; }
     public required long Duration { get; init; }
@@ -20,7 +19,7 @@ public partial class Animation<T> : IAnimation
     public long PausedTime { get; private set; } = 0L;
     public bool IsCompleted { get; set; } = false;
 
-    private EasingFunction easingFunction => new(Easing);
+    private EasingFunction EasingFunction => new(Easing);
 
     public bool IsRunning => StartTime != -1 && !IsCompleted && !IsPaused;
 
@@ -73,7 +72,7 @@ public partial class Animation<T> : IAnimation
         }
 
         var progress = (float)elapsed / Duration;
-        var easedProgress = easingFunction.ApplyEasing(progress).ToFloat();
+        var easedProgress = EasingFunction.ApplyEasing(progress).ToFloat();
         var currentValue = Transform.Apply(StartValue, EndValue, easedProgress);
 
         OnUpdate.Invoke(currentValue);

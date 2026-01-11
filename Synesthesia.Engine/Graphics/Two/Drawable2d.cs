@@ -4,6 +4,7 @@ using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Animations.Easings;
+using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Resources;
 using Synesthesia.Engine.Threading.Runners;
 
@@ -46,7 +47,7 @@ public abstract class Drawable2d : Drawable
             }
 
             var originOffset = GetAnchorOffset(Size, Origin) * Scale;
-            return anchorPos + Position - originOffset;
+            return anchorPos + Position + GetMarginOffset() - originOffset;
         }
     }
 
@@ -57,8 +58,7 @@ public abstract class Drawable2d : Drawable
         var pos = ScreenSpacePosition;
         var scaledSize = Size * Scale;
 
-        return screenSpacePoint.X >= pos.X && screenSpacePoint.X <= pos.X + scaledSize.X &&
-               screenSpacePoint.Y >= pos.Y && screenSpacePoint.Y <= pos.Y + scaledSize.Y;
+        return screenSpacePoint.X >= pos.X && screenSpacePoint.X <= pos.X + scaledSize.X && screenSpacePoint.Y >= pos.Y && screenSpacePoint.Y <= pos.Y + scaledSize.Y;
     }
 
     public Vector2 ToLocalSpace(Vector2 screenSpacePoint)
@@ -71,10 +71,22 @@ public abstract class Drawable2d : Drawable
         var anchorOffset = GetAnchorOffset(Parent.Size, Anchor);
         var originOffset = GetAnchorOffset(Size, Origin);
 
-        var localPoint = (pointInParentSpace - (anchorOffset + Position + new Vector2(Margin.X, Margin.Y))) +
-                         originOffset;
+        var localPoint = (pointInParentSpace - (anchorOffset + Position + new Vector2(Margin.X, Margin.Y))) + originOffset;
 
         return localPoint / Scale;
+    }
+
+    private Vector2 GetMarginOffset()
+    {
+        var x = Anchor.HasFlag(Anchor.Left) ? Margin.X : (Anchor.HasFlag(Anchor.Right) ? -Margin.Z : 0);
+        var y = Anchor.HasFlag(Anchor.Top) ? Margin.Y : (Anchor.HasFlag(Anchor.Bottom) ? -Margin.W : 0);
+
+        if (Anchor is Anchor.Centre or Anchor.TopCentre or Anchor.BottomCentre)
+            x = (Margin.X - Margin.Z) / 2f;
+        if (Anchor is Anchor.Centre or Anchor.CentreLeft or Anchor.CentreRight)
+            y = (Margin.Y - Margin.W) / 2f;
+
+        return new Vector2(x, y);
     }
 
     // for properly applying alpha to all children, multiply local alpha by parent's inherited alpha recursively
@@ -89,14 +101,24 @@ public abstract class Drawable2d : Drawable
     {
     }
 
-    protected internal virtual bool OnMouseDown(MouseEvent e)
+    protected internal virtual bool OnMouseDown(PointInput e)
     {
         return false;
     }
 
-    protected internal virtual void OnMouseUp(MouseEvent e)
+    protected internal virtual void OnMouseUp(PointInput e)
     {
     }
+
+    protected internal virtual bool OnActionBindingDown(ActionBinding e)
+    {
+        return false;
+    }
+
+    protected internal virtual void OnActionBindingUp(ActionBinding e)
+    {
+    }
+
 
     protected internal override void OnUpdate()
     {
@@ -111,10 +133,7 @@ public abstract class Drawable2d : Drawable
             {
                 Axes.X => Size with { X = Parent.Size.X - Margin.X - Margin.Z },
                 Axes.Y => Size with { Y = Parent.Size.Y - Margin.Y - Margin.W },
-                Axes.Both => Size with { X = Parent.Size.X - Margin.X - Margin.Z } with
-                {
-                    Y = Parent.Size.Y - Margin.Y - Margin.W
-                },
+                Axes.Both => Size with { X = Parent.Size.X - Margin.X - Margin.Z } with { Y = Parent.Size.Y - Margin.Y - Margin.W },
                 _ => Size
             };
         }
@@ -129,8 +148,7 @@ public abstract class Drawable2d : Drawable
         if (_alphaUniformLoc == -1)
             _alphaUniformLoc = Raylib.GetShaderLocation(RenderThreadRunner.AlphaShader, "alpha");
 
-        Raylib.SetShaderValue(RenderThreadRunner.AlphaShader, _alphaUniformLoc, InheritedAlpha,
-            ShaderUniformDataType.Float);
+        Raylib.SetShaderValue(RenderThreadRunner.AlphaShader, _alphaUniformLoc, InheritedAlpha, ShaderUniformDataType.Float);
         Raylib.BeginShaderMode(RenderThreadRunner.AlphaShader);
         Raylib.BeginBlendMode(BlendMode.Alpha);
 
@@ -160,6 +178,7 @@ public abstract class Drawable2d : Drawable
         Rlgl.PushMatrix();
 
         var anchorPos = Vector2.Zero;
+        var marginOffset = GetMarginOffset();
         if (Parent != null)
         {
             anchorPos = GetAnchorOffset(Parent.Size, Anchor);
@@ -174,6 +193,8 @@ public abstract class Drawable2d : Drawable
         Rlgl.Scalef(Scale.X, Scale.Y, 1);
 
         Rlgl.Translatef(-originOffset.X, -originOffset.Y, 0);
+        Rlgl.Translatef(-Margin.X, -Margin.Y, 0);
+        // Rlgl.Translatef(anchorPos.X + Position.X + marginOffset.X, anchorPos.Y + Position.Y + marginOffset.Y, 0);
     }
 
     private void EndLocalSpace()
@@ -201,18 +222,7 @@ public abstract class Drawable2d : Drawable
         };
     }
 
-    public Animation<T> TransformTo<T>
-    (
-        string field,
-        T startValue,
-        T endValue,
-        long duration,
-        Easing easing,
-        Transform<T> transform,
-        Action<T> onUpdate,
-        Action<T>? onComplete = null,
-        long delay = 0L
-    )
+    public Animation<T> TransformTo<T>(string field, T startValue, T endValue, long duration, Easing easing, Transform<T> transform, Action<T> onUpdate, Action<T>? onComplete = null, long delay = 0L)
     {
         var animation = new Animation<T>
         {
@@ -236,45 +246,18 @@ public abstract class Drawable2d : Drawable
 
     public Animation<Vector2> ScaleTo(Vector2 newScale, long duration, Easing easing)
     {
-        return TransformTo
-        (
-            nameof(Scale),
-            Scale,
-            newScale,
-            duration,
-            easing,
-            Transforms.Vector2,
-            vec => { Scale = vec; }
-        );
+        return TransformTo(nameof(Scale), Scale, newScale, duration, easing, Transforms.Vector2, vec => { Scale = vec; });
     }
 
     public Animation<Vector3> RotateTo(Vector3 newRotation, long duration, Easing easing)
     {
-        return TransformTo
-        (
-            nameof(Rotation),
-            Rotation,
-            newRotation,
-            duration,
-            easing,
-            Transforms.Vector3,
-            vec => { Rotation = vec; }
-        );
+        return TransformTo(nameof(Rotation), Rotation, newRotation, duration, easing, Transforms.Vector3, vec => { Rotation = vec; });
     }
 
 
     public Animation<float> FadeTo(float newAlpha, long duration, Easing easing)
     {
-        return TransformTo
-        (
-            nameof(Alpha),
-            Alpha,
-            newAlpha,
-            duration,
-            easing,
-            Transforms.Float,
-            a => Alpha = a
-        );
+        return TransformTo(nameof(Alpha), Alpha, newAlpha, duration, easing, Transforms.Float, a => Alpha = a);
     }
 
     protected override void Dispose(bool isDisposing)
@@ -294,5 +277,5 @@ public abstract class Drawable2d : Drawable
 
     public record HoverEvent(bool Hovered, Vector2 MousePosition);
 
-    public record MouseEvent(MouseButton Button, Vector2 MousePosition);
+    public record PointInput(IInputEvent Event, Vector2 MousePosition, bool IsDown);
 }

@@ -30,9 +30,8 @@ public class FrameCounter : CompositeDrawable2d
                     new FillFlowContainer2d
                     {
                         AutoSizeAxes = Axes.Both,
-                        Anchor = Anchor.CentreLeft,
-                        Origin = Anchor.CentreLeft,
-                        Margin = new Vector4(10, 0, 0, 0),
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
                         Children =
                         [
                             new PerformanceMonitorElement

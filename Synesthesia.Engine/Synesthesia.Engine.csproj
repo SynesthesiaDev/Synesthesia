@@ -18,7 +18,9 @@
       <PackageReference Include="ManagedBass.Fx" Version="4.0.2" />
       <PackageReference Include="ManagedBass.Mix" Version="4.0.2" />
       <PackageReference Include="ManagedBass.Wasapi" Version="4.0.2" />
-      <PackageReference Include="Raylib-cs" Version="7.0.2" />
+      <PackageReference Include="ppy.osuTK.NS20" Version="1.0.211" />
+      <PackageReference Include="ppy.SDL2-CS" Version="1.0.741-alpha" />
+      <PackageReference Include="Raylib-cs-SDL2" Version="7.0.3" />
       <PackageReference Include="SPIRVCross.NET" Version="1.1.3" />
       <PackageReference Include="SynesthesiaDev.Codon.IniTranscoder" Version="1.0.1" />
     </ItemGroup>

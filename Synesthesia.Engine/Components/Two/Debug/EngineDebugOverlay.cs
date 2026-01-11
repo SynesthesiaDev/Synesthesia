@@ -1,6 +1,7 @@
 using System.Numerics;
 using Common.Logger;
 using Common.Util;
+using osuTK.Input;
 using Raylib_cs;
 using Synesthesia.Engine.Configuration;
 using Synesthesia.Engine.Graphics.Two;
@@ -12,11 +13,17 @@ namespace Synesthesia.Engine.Components.Two.Debug;
 
 public class EngineDebugOverlay : CompositeDrawable2d
 {
-    public static readonly HotKey EngineDebugOverlayToggle = new(KeyboardKey.F1, KeyboardKey.LeftControl);
+    public static readonly ActionBinding EngineDebugOverlayToggle = new()
+    {
+        Key = new KeyboardBinding(KeyboardKey.F1, KeyboardKey.LeftControl), 
+        ActionName = "Toggle Engine Debug Overlay",
+    };
 
-    public static readonly HotKey FrameCounterToggle = new(KeyboardKey.F2, KeyboardKey.LeftControl);
-    public static readonly HotKey EngineStatisticsToggle = new(KeyboardKey.F3, KeyboardKey.LeftControl);
-    public static readonly HotKey LoggerOverlayToggle = new(KeyboardKey.F4, KeyboardKey.LeftControl);
+    // public static readonly HotKey EngineDebugOverlayToggle = new(KeyboardKey.F1, KeyboardKey.LeftControl);
+    //
+    // public static readonly HotKey FrameCounterToggle = new(KeyboardKey.F2, KeyboardKey.LeftControl);
+    // public static readonly HotKey EngineStatisticsToggle = new(KeyboardKey.F3, KeyboardKey.LeftControl);
+    // public static readonly HotKey LoggerOverlayToggle = new(KeyboardKey.F4, KeyboardKey.LeftControl);
 
     private FrameCounter _frameCounter = null!;
     private EngineStatisticsPanel _engineStatisticsPanel = null!;
@@ -40,16 +47,8 @@ public class EngineDebugOverlay : CompositeDrawable2d
                 Spacing = 10f,
                 Children =
                 [
-                    _frameCounter = new FrameCounter
-                    {
-                        Visible = EngineConfiguration.ShowFps,
-                        Scale = new Vector2(0.8f)
-                    },
-                    _engineStatisticsPanel = new EngineStatisticsPanel
-                    {
-                        Visible = EngineConfiguration.ShowEngineStatistics,
-                        Scale = new Vector2(0.8f)
-                    },
+                    _frameCounter = new FrameCounter { Visible = EngineConfiguration.ShowFps, Scale = new Vector2(0.8f) },
+                    _engineStatisticsPanel = new EngineStatisticsPanel { Visible = EngineConfiguration.ShowEngineStatistics, Scale = new Vector2(0.8f) },
                 ]
             },
 
@@ -62,32 +61,20 @@ public class EngineDebugOverlay : CompositeDrawable2d
                 Scale = new Vector2(0.8f)
             },
 
-            new EngineDebugSettings
-            {
-                Anchor = Anchor.TopRight,
-                Origin = Anchor.TopRight,
-                Position = new Vector2(-10, 10),
-            }
+            new EngineDebugSettings { Anchor = Anchor.TopRight, Origin = Anchor.TopRight, Position = new Vector2(-10, 10), }
         ];
 
-        InputManager.Register(FrameCounterToggle);
-        InputManager.Register(EngineStatisticsToggle);
-        InputManager.Register(EngineDebugOverlayToggle);
-        InputManager.Register(LoggerOverlayToggle);
+        InputManager.RegisterActionInput(EngineDebugOverlayToggle);
 
-        InputManager.Press.Subscribe(e =>
-        {
-            if (e.HotKey == EngineDebugOverlayToggle) toggle(this);
-
-            if (!Visible) return;
-
-            if (e.HotKey == FrameCounterToggle) toggle(_frameCounter);
-
-            if (e.HotKey == EngineStatisticsToggle) toggle(_engineStatisticsPanel);
-
-            if (e.HotKey == LoggerOverlayToggle) toggle(_debugLoggerOverlay);
-        });
         base.OnLoading();
+    }
+
+    protected internal override bool OnActionBindingDown(ActionBinding e)
+    {
+        if (e != EngineDebugOverlayToggle) return base.OnActionBindingDown(e);
+        
+        Visible = !Visible;
+        return true;
     }
 
     private static void toggle(Drawable2d drawable)

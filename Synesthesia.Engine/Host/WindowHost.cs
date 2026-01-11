@@ -2,6 +2,7 @@ using System.Numerics;
 using Common.Bindable;
 using Common.Logger;
 using Raylib_cs;
+using SDL2;
 using Synesthesia.Engine.Utility;
 
 namespace Synesthesia.Engine.Host;
@@ -24,10 +25,12 @@ public class WindowHost : IDisposable
 
     public unsafe void Initialize(Game game)
     {
+        
         Raylib.SetTraceLogCallback(&RaylibLoggerProxy.HandleRaylibLog);
         Raylib.SetConfigFlags(ConfigFlags.ResizableWindow);
         Raylib.SetConfigFlags(ConfigFlags.Msaa4xHint);
         Raylib.InitWindow(400, 800, game.WindowTitle.Value);
+
 
         WindowState = _bindablePool.Borrow(Host.WindowState.Normal);
         IsFullscreen = _bindablePool.Borrow(EngineEnvironment.StartFullscreen);

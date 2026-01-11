@@ -2,19 +2,19 @@ namespace Synesthesia.Engine.Animations.Easings;
 
 public readonly struct EasingFunction(Easing easing) : IEasingFunction
 {
-    private const double elastic_const = 2 * Math.PI / .3;
-    private const double elastic_const2 = .3 / 4;
+    private const double ElasticConst = 2 * Math.PI / .3;
+    private const double ElasticConst2 = .3 / 4;
 
-    private const double back_const = 1.70158;
-    private const double back_const2 = back_const * 1.525;
+    private const double BackConst = 1.70158;
+    private const double BackConst2 = BackConst * 1.525;
 
-    private const double bounce_const = 1 / 2.75;
+    private const double BounceConst = 1 / 2.75;
 
-    private static readonly double expo_offset = Math.Pow(2, -10);
-    private static readonly double elastic_offset_full = Math.Pow(2, -11);
-    private static readonly double elastic_offset_half = Math.Pow(2, -10) * Math.Sin((.5 - elastic_const2) * elastic_const);
-    private static readonly double elastic_offset_quarter = Math.Pow(2, -10) * Math.Sin((.25 - elastic_const2) * elastic_const);
-    private static readonly double in_out_elastic_offset = Math.Pow(2, -10) * Math.Sin((1 - elastic_const2 * 1.5) * elastic_const / 1.5);
+    private static readonly double ExpoOffset = Math.Pow(2, -10);
+    private static readonly double ElasticOffsetFull = Math.Pow(2, -11);
+    private static readonly double ElasticOffsetHalf = Math.Pow(2, -10) * Math.Sin((.5 - ElasticConst2) * ElasticConst);
+    private static readonly double ElasticOffsetQuarter = Math.Pow(2, -10) * Math.Sin((.25 - ElasticConst2) * ElasticConst);
+    private static readonly double InOutElasticOffset = Math.Pow(2, -10) * Math.Sin((1 - ElasticConst2 * 1.5) * ElasticConst / 1.5);
 
     public double ApplyEasing(double time)
     {
@@ -80,15 +80,15 @@ public readonly struct EasingFunction(Easing easing) : IEasingFunction
                 return .5 - .5 * Math.Cos(Math.PI * time);
 
             case Easing.InExpo:
-                return Math.Pow(2, 10 * (time - 1) + expo_offset * (time - 1));
+                return Math.Pow(2, 10 * (time - 1) + ExpoOffset * (time - 1));
 
             case Easing.OutExpo:
-                return -Math.Pow(2, -10 * time) + 1 + expo_offset * time;
+                return -Math.Pow(2, -10 * time) + 1 + ExpoOffset * time;
 
             case Easing.InOutExpo:
-                if (time < .5) return .5 * (Math.Pow(2, 20 * time - 10) + expo_offset * (2 * time - 1));
+                if (time < .5) return .5 * (Math.Pow(2, 20 * time - 10) + ExpoOffset * (2 * time - 1));
 
-                return 1 - .5 * (Math.Pow(2, -20 * time + 10) + expo_offset * (-2 * time + 1));
+                return 1 - .5 * (Math.Pow(2, -20 * time + 10) + ExpoOffset * (-2 * time + 1));
 
             case Easing.InCirc:
                 return 1 - Math.Sqrt(1 - time * time);
@@ -102,58 +102,58 @@ public readonly struct EasingFunction(Easing easing) : IEasingFunction
                 return .5 * Math.Sqrt(1 - (time -= 2) * time) + .5;
 
             case Easing.InElastic:
-                return -Math.Pow(2, -10 + 10 * time) * Math.Sin((1 - elastic_const2 - time) * elastic_const) + elastic_offset_full * (1 - time);
+                return -Math.Pow(2, -10 + 10 * time) * Math.Sin((1 - ElasticConst2 - time) * ElasticConst) + ElasticOffsetFull * (1 - time);
 
             case Easing.OutElastic:
-                return Math.Pow(2, -10 * time) * Math.Sin((time - elastic_const2) * elastic_const) + 1 - elastic_offset_full * time;
+                return Math.Pow(2, -10 * time) * Math.Sin((time - ElasticConst2) * ElasticConst) + 1 - ElasticOffsetFull * time;
 
             case Easing.OutElasticHalf:
-                return Math.Pow(2, -10 * time) * Math.Sin((.5 * time - elastic_const2) * elastic_const) + 1 - elastic_offset_half * time;
+                return Math.Pow(2, -10 * time) * Math.Sin((.5 * time - ElasticConst2) * ElasticConst) + 1 - ElasticOffsetHalf * time;
 
             case Easing.OutElasticQuarter:
-                return Math.Pow(2, -10 * time) * Math.Sin((.25 * time - elastic_const2) * elastic_const) + 1 - elastic_offset_quarter * time;
+                return Math.Pow(2, -10 * time) * Math.Sin((.25 * time - ElasticConst2) * ElasticConst) + 1 - ElasticOffsetQuarter * time;
 
             case Easing.InOutElastic:
                 if ((time *= 2) < 1)
                 {
-                    return -.5 * (Math.Pow(2, -10 + 10 * time) * Math.Sin((1 - elastic_const2 * 1.5 - time) * elastic_const / 1.5)
-                                  - in_out_elastic_offset * (1 - time));
+                    return -.5 * (Math.Pow(2, -10 + 10 * time) * Math.Sin((1 - ElasticConst2 * 1.5 - time) * ElasticConst / 1.5)
+                                  - InOutElasticOffset * (1 - time));
                 }
 
-                return .5 * (Math.Pow(2, -10 * --time) * Math.Sin((time - elastic_const2 * 1.5) * elastic_const / 1.5)
-                             - in_out_elastic_offset * time) + 1;
+                return .5 * (Math.Pow(2, -10 * --time) * Math.Sin((time - ElasticConst2 * 1.5) * ElasticConst / 1.5)
+                             - InOutElasticOffset * time) + 1;
 
             case Easing.InBack:
-                return time * time * ((back_const + 1) * time - back_const);
+                return time * time * ((BackConst + 1) * time - BackConst);
 
             case Easing.OutBack:
-                return --time * time * ((back_const + 1) * time + back_const) + 1;
+                return --time * time * ((BackConst + 1) * time + BackConst) + 1;
 
             case Easing.InOutBack:
-                if ((time *= 2) < 1) return .5 * time * time * ((back_const2 + 1) * time - back_const2);
+                if ((time *= 2) < 1) return .5 * time * time * ((BackConst2 + 1) * time - BackConst2);
 
-                return .5 * ((time -= 2) * time * ((back_const2 + 1) * time + back_const2) + 2);
+                return .5 * ((time -= 2) * time * ((BackConst2 + 1) * time + BackConst2) + 2);
 
             case Easing.InBounce:
                 time = 1 - time;
-                if (time < bounce_const)
+                if (time < BounceConst)
                     return 1 - 7.5625 * time * time;
-                if (time < 2 * bounce_const)
-                    return 1 - (7.5625 * (time -= 1.5 * bounce_const) * time + .75);
-                if (time < 2.5 * bounce_const)
-                    return 1 - (7.5625 * (time -= 2.25 * bounce_const) * time + .9375);
+                if (time < 2 * BounceConst)
+                    return 1 - (7.5625 * (time -= 1.5 * BounceConst) * time + .75);
+                if (time < 2.5 * BounceConst)
+                    return 1 - (7.5625 * (time -= 2.25 * BounceConst) * time + .9375);
 
-                return 1 - (7.5625 * (time -= 2.625 * bounce_const) * time + .984375);
+                return 1 - (7.5625 * (time -= 2.625 * BounceConst) * time + .984375);
 
             case Easing.OutBounce:
-                if (time < bounce_const)
+                if (time < BounceConst)
                     return 7.5625 * time * time;
-                if (time < 2 * bounce_const)
-                    return 7.5625 * (time -= 1.5 * bounce_const) * time + .75;
-                if (time < 2.5 * bounce_const)
-                    return 7.5625 * (time -= 2.25 * bounce_const) * time + .9375;
+                if (time < 2 * BounceConst)
+                    return 7.5625 * (time -= 1.5 * BounceConst) * time + .75;
+                if (time < 2.5 * BounceConst)
+                    return 7.5625 * (time -= 2.25 * BounceConst) * time + .9375;
 
-                return 7.5625 * (time -= 2.625 * bounce_const) * time + .984375;
+                return 7.5625 * (time -= 2.625 * BounceConst) * time + .984375;
 
             case Easing.InOutBounce:
                 if (time < .5) return .5 - .5 * new EasingFunction(Easing.OutBounce).ApplyEasing(1 - time * 2);

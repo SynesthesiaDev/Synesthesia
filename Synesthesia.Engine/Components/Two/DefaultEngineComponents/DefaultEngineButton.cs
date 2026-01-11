@@ -75,14 +75,14 @@ public class DefaultEngineButton : DisableableContainer
         ];
     }
 
-    protected internal override bool OnMouseDown(MouseEvent e)
+    protected internal override bool OnMouseDown(PointInput e)
     {
         if (Disabled) return false;
         _backgroundContainer.ScaleTo(0.9f, 2000, Easing.OutQuint);
         return true;
     }
 
-    protected internal override void OnMouseUp(MouseEvent e)
+    protected internal override void OnMouseUp(PointInput e)
     {
         if (Disabled) return;
         _backgroundContainer.ScaleTo(1f, 1000, Easing.OutElastic);

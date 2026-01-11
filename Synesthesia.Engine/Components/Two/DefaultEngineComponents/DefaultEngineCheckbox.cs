@@ -96,7 +96,7 @@ public class DefaultEngineCheckbox : CompositeDrawable2d, IDisablable
         base.OnHoverLost(e);
     }
 
-    protected internal override void OnMouseUp(MouseEvent e)
+    protected internal override void OnMouseUp(PointInput e)
     {
         if (Disabled) return;
         Checked.Value = !Checked.Value;
@@ -104,7 +104,7 @@ public class DefaultEngineCheckbox : CompositeDrawable2d, IDisablable
         base.OnMouseUp(e);
     }
 
-    protected internal override bool OnMouseDown(MouseEvent e)
+    protected internal override bool OnMouseDown(PointInput e)
     {
         return !Disabled;
     }

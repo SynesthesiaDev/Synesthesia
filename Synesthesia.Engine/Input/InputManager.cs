@@ -1,5 +1,5 @@
+using System.Collections.Immutable;
 using System.Numerics;
-using Common.Event;
 using Common.Logger;
 using Raylib_cs;
 using Synesthesia.Engine.Graphics.Two;
@@ -8,96 +8,161 @@ namespace Synesthesia.Engine.Input;
 
 public static class InputManager
 {
-    private static List<HotKey> _registeredHotKeys = [];
-    private static readonly Queue<InputEventData> _pendingEvents = new();
+    private static readonly Queue<IInputEvent> EventQueue = new();
+    private static Vector2 _lastMousePos = new(x: 0, 0);
+    private static readonly Dictionary<(InputSource source, int id), bool> LastStates = new();
 
-    public static EventDispatcher<InputEvent> KeyDown = new();
-    public static EventDispatcher<InputEvent> KeyUp = new();
-    public static EventDispatcher<InputEvent> Press = new();
-    private static readonly InputState _currentState = new();
+    private static readonly List<ActionBinding> _actionBindings = [];
 
-    private static Vector2 _lastMousePos = new Vector2(0, 0);
-    private static readonly bool[] _lastMouseState = new bool[6];
+    public static ImmutableList<ActionBinding> ActionBindings => _actionBindings.ToImmutableList();
 
-    private record InputEventData(KeyboardKey Key, bool IsDown);
-
-    public static void Register(HotKey hotKey)
+    public static void RegisterActionInput(ActionBinding actionBinding)
     {
-        _registeredHotKeys.Add(hotKey);
-    }
-
-    public record InputEvent(HotKey HotKey)
-    {
-    }
-
-    public static void EnqueueKeyEvent(KeyboardKey key, bool isDown)
-    {
-        lock (_pendingEvents)
+        if (_actionBindings.Contains(actionBinding) || _actionBindings.Any(b => b.ActionName == actionBinding.ActionName))
         {
-            _pendingEvents.Enqueue(new InputEventData(key, isDown));
+            var message = $"Action {actionBinding.ActionName} is already registered!";
+            Logger.Error(message);
+            throw new InvalidOperationException(message);
+        }
+        _actionBindings.Add(actionBinding);
+    }
+    
+    private static IAcceptsFocus? _focusedDrawable;
+
+    public static IAcceptsFocus? FocusedDrawable
+    {
+        get => _focusedDrawable;
+        set
+        {
+            if (_focusedDrawable == value) return;
+            _focusedDrawable?.OnFocusLost();
+            value?.OnFocusGained();
+            _focusedDrawable = value;
         }
     }
 
-    public static void PollInputs()
+    private record InputEventData(KeyboardKey Key, bool IsDown);
+
+    public static void EnqueueEvent(IInputEvent inputEvent)
+    {
+        lock (EventQueue) EventQueue.Enqueue(inputEvent);
+    }
+
+    public static void PollInputs(Game game)
     {
         while (true)
         {
-            InputEventData? data;
-            lock (_pendingEvents)
+            IInputEvent? inputEvent;
+            lock (EventQueue)
             {
-                if (!_pendingEvents.TryDequeue(out data)) break;
+                if (!EventQueue.TryDequeue(out inputEvent)) break;
             }
-
-            if (data.IsDown) _currentState.PressedKeys.Add(data.Key);
-            else _currentState.PressedKeys.Remove(data.Key);
-
-            foreach (var ev
-                     in from hotKey in _registeredHotKeys
-                     where data.Key == hotKey.Key
-                     where hotKey.Modifiers.All(m => _currentState.PressedKeys.Contains(m))
-                     select new InputEvent(hotKey))
+            
+            foreach (var binding in _actionBindings)
             {
-                if (data.IsDown)
+                if (MatchesBinding(binding, inputEvent))
                 {
-                    Press.Dispatch(ev);
-                    KeyDown.Dispatch(ev);
+                    game.RootComposite2d.UpdateActionBindingState(binding, true);
+                    HandleActionBinding(binding);
                 }
-                else
+                else if (IsReleaseEvent(binding, inputEvent))
                 {
-                    KeyUp.Dispatch(ev);
+                    game.RootComposite2d.UpdateActionBindingState(binding, false);
                 }
             }
+        }
+    }
+    
+    private static bool MatchesBinding(ActionBinding binding, IInputEvent inputEvent)
+    {
+        return inputEvent switch
+        {
+            KeyInputEvent keyEvent when binding.Key != null => 
+                keyEvent.Key == binding.Key.Key && 
+                keyEvent.IsDown && 
+                binding.Key.Modifiers.All(p => Raylib.IsKeyDown(p)),
+
+            MouseInputEvent mouseEvent when binding.MouseButton != null => 
+                mouseEvent.Button == binding.MouseButton.Key && 
+                mouseEvent.IsDown && 
+                binding.MouseButton.Modifiers.All(p => Raylib.IsMouseButtonDown(p)),
+
+            TouchInputEvent touchEvent when binding.TouchGesture != null => 
+                touchEvent.Gesture == binding.TouchGesture.Key && 
+                touchEvent.IsDown, // Gestures typically don't have "held" modifiers in the same way
+
+            _ => false
+        };
+    }
+    
+    private static bool IsReleaseEvent(ActionBinding binding, IInputEvent inputEvent)
+    {
+        return inputEvent switch
+        {
+            KeyInputEvent keyEvent => binding.Key?.Key == keyEvent.Key && !keyEvent.IsDown,
+            MouseInputEvent mouseEvent => binding.MouseButton?.Key == mouseEvent.Button && !mouseEvent.IsDown,
+            _ => false
+        };
+    }
+
+    public static void HandleActionBinding(ActionBinding actionBinding)
+    {
+        
+        //will do this myself later
+    }
+
+    private static void HandlePointInput(Game game, Vector2 position, InputSource source)
+    {
+        var moved = position != _lastMousePos;
+        _lastMousePos = position;
+
+        if (moved)
+        {
+            var hoverEvent = new Drawable2d.HoverEvent(true, position);
+            game.EngineDebugOverlay.UpdateHoverState(hoverEvent);
+            game.RootComposite2d.UpdateHoverState(hoverEvent);
+        }
+
+        var buttonCount = (source == InputSource.Mouse) ? 6 : 1;
+        for (var i = 0; i < buttonCount; i++)
+        {
+            bool isDown = source switch
+            {
+                InputSource.Keyboard => Raylib.IsKeyDown((KeyboardKey)i),
+                InputSource.Mouse => Raylib.IsMouseButtonDown((MouseButton)i),
+                InputSource.Touch => Raylib.IsGestureDetected((Gesture)i),
+                _ => false
+            };
+
+            var key = (source, i);
+            LastStates.TryGetValue(key, out var wasDown);
+
+            if (isDown == wasDown) continue;
+            LastStates[key] = isDown;
+
+            if (!isDown && FocusedDrawable != null && !FocusedDrawable.GetOwningDrawable().Contains(position))
+            {
+                FocusedDrawable = null;
+            }
+
+            IInputEvent inputEvent = source switch
+            {
+                InputSource.Keyboard => new KeyInputEvent((KeyboardKey)i, isDown),
+                InputSource.Mouse => new MouseInputEvent((MouseButton)i, position, isDown),
+                InputSource.Touch => new TouchInputEvent((Gesture)i, position, isDown),
+                _ => throw new ArgumentOutOfRangeException(nameof(source), source, null)
+            };
+
+            var mouseEvent = new Drawable2d.PointInput(inputEvent, position, isDown);
+            game.EngineDebugOverlay.UpdatePointInputState(mouseEvent, isDown);
+            game.RootComposite2d.UpdatePointInputState(mouseEvent, isDown);
         }
     }
 
     public static void PollMouse(Game game)
     {
         var mousePos = Raylib.GetMousePosition();
-        var moved = mousePos != _lastMousePos;
-        _lastMousePos = mousePos;
-
-        var hoverEvent = new Drawable2d.HoverEvent(true, mousePos);
-
-        if (moved)
-        {
-            game.EngineDebugOverlay.UpdateHoverState(hoverEvent);
-            game.RootComposite2d.UpdateHoverState(hoverEvent);
-        }
-
-        for (var i = 0; i < 6; i++)
-        {
-            var mouseButton = (MouseButton)i;
-            var isDown = Raylib.IsMouseButtonDown(mouseButton);
-            var wasDown = _lastMouseState[i];
-
-            if (isDown == wasDown) continue;
-
-            var mouseEvent = new Drawable2d.MouseEvent(mouseButton, mousePos);
-            game.EngineDebugOverlay.UpdateMouseClickState(mouseEvent, isDown);
-            game.RootComposite2d.UpdateMouseClickState(mouseEvent, isDown);
-
-            _lastMouseState[i] = isDown;
-        }
+        HandlePointInput(game, mousePos, InputSource.Mouse);
     }
 
     private class InputState

@@ -1,6 +1,7 @@
 using System.Numerics;
 using Common.Logger;
 using Common.Util;
+using Synesthesia.Engine.Input;
 using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two.Drawables;
@@ -47,7 +48,7 @@ public class CompositeDrawable2d : Drawable2d
         }
     }
 
-    protected internal void UpdateMouseClickState(MouseEvent e, bool down)
+    protected internal void UpdatePointInputState(PointInput e, bool down)
     {
         foreach (var child in _children.Reversed())
         {
@@ -64,7 +65,24 @@ public class CompositeDrawable2d : Drawable2d
 
             if (child is CompositeDrawable2d drawable2d)
             {
-                drawable2d.UpdateMouseClickState(e, down);
+                drawable2d.UpdatePointInputState(e, down);
+            }
+        }
+    }
+
+    protected internal void UpdateActionBindingState(ActionBinding e, bool down)
+    {
+        foreach (var child in _children.Reversed())
+        {
+            var handled = down && child.OnActionBindingDown(e);
+
+            if (!down) child.OnActionBindingUp(e);
+
+            if (handled) continue;
+            
+            if (child is CompositeDrawable2d drawable2d)
+            {
+                drawable2d.UpdateActionBindingState(e, down);
             }
         }
     }
@@ -118,6 +136,7 @@ public class CompositeDrawable2d : Drawable2d
 
         Size = new Vector2(newWidth, newHeight);
     }
+
 
     public Vector2 GetChildrenSize()
     {
