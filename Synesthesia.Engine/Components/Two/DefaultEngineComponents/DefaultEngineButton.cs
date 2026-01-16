@@ -86,7 +86,7 @@ public class DefaultEngineButton : DisableableContainer
     {
         if (Disabled) return;
         _backgroundContainer.ScaleTo(1f, 1000, Easing.OutElastic);
-        if (!Disabled) OnClick?.Invoke();
+        if (Contains(e.MousePosition)) OnClick?.Invoke();
     }
 
     protected internal override bool OnHover(HoverEvent e)

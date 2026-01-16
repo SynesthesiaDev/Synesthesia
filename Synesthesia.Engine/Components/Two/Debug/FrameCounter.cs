@@ -1,6 +1,7 @@
 using System.Numerics;
 using Common.Util;
 using Raylib_cs;
+using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Configuration;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Two.Drawables;
@@ -15,14 +16,14 @@ public class FrameCounter : CompositeDrawable2d
     {
         var game = DependencyContainer.Get<Game>();
         AutoSizeAxes = Axes.Both;
-
+        Alpha = 0.5f;
         Children =
         [
             new BackgroundContainer2d
             {
                 AutoSizeAxes = Axes.Both,
                 BackgroundColor = Defaults.Background2,
-                BackgroundAlpha = 0.9f,
+                BackgroundAlpha = 1f,
                 BackgroundCornerRadius = 10f,
                 AutoSizePadding = new Vector4(10),
                 Children =
@@ -68,6 +69,17 @@ public class FrameCounter : CompositeDrawable2d
                 ]
             }
         ];
+    }
+
+    protected internal override bool OnHover(HoverEvent e)
+    {
+        FadeTo(1f, 100, Easing.In);
+        return true;
+    }
+
+    protected internal override void OnHoverLost(HoverEvent e)
+    {
+        FadeTo(0.5f, 100, Easing.Out);
     }
 
     private class PerformanceMonitorElement : CompositeDrawable2d

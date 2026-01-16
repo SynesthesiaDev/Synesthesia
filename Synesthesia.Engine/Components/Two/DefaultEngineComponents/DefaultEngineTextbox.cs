@@ -60,6 +60,7 @@ public class DefaultEngineTextbox : DisableableContainer, IAcceptsFocus
 
     protected internal override void OnMouseUp(PointInput e)
     {
+        if(!Contains(e.MousePosition)) return;
         InputManager.FocusedDrawable = this;
     }
 

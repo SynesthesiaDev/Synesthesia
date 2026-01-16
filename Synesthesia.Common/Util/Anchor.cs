@@ -3,7 +3,6 @@ namespace Common.Util;
 [Flags]
 public enum Anchor
 {
-    // Basic components
     None = 0,
     Top = 1 << 0,
     CentreVertical = 1 << 1,

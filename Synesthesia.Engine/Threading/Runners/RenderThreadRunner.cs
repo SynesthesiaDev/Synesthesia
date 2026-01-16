@@ -1,9 +1,9 @@
 using System.Numerics;
 using Common.Logger;
 using Raylib_cs;
-using Synesthesia.Engine.Graphics.Three.Shapes;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Resources;
+using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Threading.Runners;
 
@@ -62,11 +62,7 @@ public class RenderThreadRunner : IThreadRunner
     {
         _game.WindowHost.PollEvents();
 
-        int key;
-        while ((key = Raylib.GetKeyPressed()) != 0)
-        {
-            // InputManager.EnqueueEvent((KeyboardKey)key, true);
-        }
+        pollKeyboardEvents();
 
         if (Raylib.IsWindowReady() && _game.WindowHost.ShouldWindowClose)
         {
@@ -91,5 +87,46 @@ public class RenderThreadRunner : IThreadRunner
 
         Raylib.EndDrawing();
         Raylib.EndBlendMode();
+
+        pollKeyboardEvents();
+    }
+
+    private readonly HashSet<KeyboardKey> _activeKeys = [];
+    private readonly bool[] _activeMouseButtons = new bool[6];
+    private Vector2 _lastMousePos = Vector2.Zero;
+
+    private void pollKeyboardEvents()
+    {
+        int key;
+        while ((key = Raylib.GetKeyPressed()) != 0)
+        {
+            var keyboardKey = (KeyboardKey)key;
+            InputManager.EnqueueEvent(new KeyInputEvent(keyboardKey, true));
+            _activeKeys.Add(keyboardKey);
+        }
+
+        _activeKeys.ToList().Filter(k => Raylib.IsKeyReleased(k)).ForEach(keyboardKey =>
+        {
+            _activeKeys.Remove(keyboardKey);
+            InputManager.EnqueueEvent(new KeyInputEvent(keyboardKey, false));
+        });
+
+        for (var i = 0; i < 6; i++)
+        {
+            var mouseButton = (MouseButton)i;
+            var previousState = _activeMouseButtons[i];
+            var currentState = Raylib.IsMouseButtonDown(mouseButton);
+            if (previousState == currentState) continue;
+            
+            InputManager.EnqueueEvent(new MouseButtonInputEvent(mouseButton, currentState));
+            _activeMouseButtons[i] = currentState;
+        }
+        
+        var mousePosition = Raylib.GetMousePosition();
+        if (mousePosition != _lastMousePos)
+        {
+            _lastMousePos = mousePosition;
+            InputManager.EnqueueEvent(new MouseMoveInputEvent(mousePosition));
+        }
     }
 }

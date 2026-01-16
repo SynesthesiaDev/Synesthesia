@@ -22,8 +22,7 @@ public class InputThreadRunner : IThreadRunner
     {
         try
         {
-            InputManager.PollInputs(_game);
-            InputManager.PollMouse(_game);
+            InputManager.ProcessQueue(_game);
         }
         catch (Exception ex)
         {
