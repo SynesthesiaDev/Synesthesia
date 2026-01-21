@@ -3,6 +3,7 @@ using System.Numerics;
 using Common.Logger;
 using Common.Util;
 using Raylib_cs;
+using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Two;
 using SynesthesiaUtil.Extensions;
 
@@ -11,16 +12,22 @@ namespace Synesthesia.Engine.Input;
 public static class InputManager
 {
     private static readonly Queue<IInputEvent> EventQueue = new();
-    private static Vector2 _lastMousePos = new(x: 0, 0);
+    
+    public static Vector2 LastMousePosition = new(x: 0, 0);
 
     private static readonly List<ActionBinding> _actionBindings = [];
 
     private static readonly List<ActionBinding> _heldActionBindings = [];
-    
+
     private static readonly List<KeyboardKey> _heldKeys = [];
 
     private static readonly List<MouseButton> _heldMouseButtons = [];
 
+    public static void InvalidMousePosition()
+    {
+        LastMousePosition = Vector2.Zero;
+    }
+    
     public static Vector2 MousePosition { get; private set; } = Vector2.Zero;
 
     public static ImmutableList<KeyboardKey> HeldKeys => _heldKeys.ToImmutableList();
@@ -86,16 +93,21 @@ public static class InputManager
 
             switch (inputEvent)
             {
-                case KeyInputEvent keyInputEvent when inputEvent.IsDown:
+                case KeyInputEvent keyInputEvent:
                 {
-                    _heldKeys.Add(keyInputEvent.Key);
+                    if (keyInputEvent.IsDown)
+                    {
+                        _heldKeys.Add(keyInputEvent.Key);
+                    }
+                    else
+                    {
+                        _heldKeys.Remove(keyInputEvent.Key);
+                    }
                     
+                    game.EngineDebugOverlay.UpdateKeyState(keyInputEvent.Key, keyInputEvent.IsDown);
+                    game.RootComposite2d.UpdateKeyState(keyInputEvent.Key, keyInputEvent.IsDown);
                     break;
                 }
-
-                case KeyInputEvent keyInputEvent:
-                    _heldKeys.Remove(keyInputEvent.Key);
-                    break;
 
                 case MouseButtonInputEvent mouseButtonInputEvent:
                 {
@@ -106,8 +118,10 @@ public static class InputManager
                     else
                     {
                         _heldMouseButtons.Remove(mouseButtonInputEvent.Button);
-                        
-                        if (FocusedDrawable != null && !FocusedDrawable.GetOwningDrawable().Contains(MousePosition))
+
+                        if (FocusedDrawable != null && !FocusedDrawable
+                                .GetOwningDrawable()
+                                .Contains(MousePosition))
                         {
                             FocusedDrawable = null;
                         }
@@ -127,8 +141,14 @@ public static class InputManager
                     game.RootComposite2d.UpdateHoverState(hoverEvent);
                     break;
                 }
+
+                case TextInputEvent textInputEvent:
+                {
+                    FocusedDrawable?.OnCharacterTyped(textInputEvent.Character);
+                    break;
+                }
             }
-            
+
             _actionBindings.ForEach(binding =>
             {
                 var lastState = _heldActionBindings.Contains(binding);

@@ -66,7 +66,7 @@ public class DebugLoggerOverlay : CompositeDrawable2d
     {
         if (Messages.Remove(logEvent, out var value))
         {
-            value.FadeTo(0f, 500, Easing.Out).Then(_ => _fillFlowContainer.RemoveChild(value));
+            value.FadeTo(0f, 500, Easing.Out).Then(() => _fillFlowContainer.RemoveChild(value));
         }
     }
 

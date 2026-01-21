@@ -69,5 +69,7 @@ public class BindablePool : IDisposable
         _singleOffDispatchers.Filter(p => p != null).ForEach(b => b.Dispose());
         _bindables.Clear();
         _dispatchers.Clear();
+        _singleOffDispatchers.Clear();
+        EngineStatistics.BindablePools.Decrement();
     }
 }

@@ -9,14 +9,14 @@ namespace Synesthesia.Engine.Input;
 public class ActionBinding
 {
     public string ActionName { get; set; } = string.Empty;
-    public KeyboardBinding? Key { get; set; }
-    public GamepadBinding? PadButton { get; set; }
+    public KeyboardBinding? Keyboard { get; set; }
+    public GamepadBinding? Gamepad { get; set; }
     public TouchBinding? TouchGesture { get; set; }
     public MouseBinding? MouseButton { get; set; }
 
     private List<IBinding?> AsBindingList()
     {
-        return Lists.Of<IBinding?>(Key, PadButton, TouchGesture, MouseButton);
+        return Lists.Of<IBinding?>(Keyboard, Gamepad, TouchGesture, MouseButton);
     }
 
     public bool IsDown => AsBindingList().FilterNonNull().Any(b => b!.IsDown());

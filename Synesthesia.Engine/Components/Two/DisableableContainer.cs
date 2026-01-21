@@ -20,7 +20,7 @@ public class DisableableContainer : BackgroundContainer2d, IDisablable
             var newAlpha = value ? 0.5f : 0f;
             if (IsLoaded)
             {
-                _disabledOverlay.FadeAlphaTo(newAlpha, 200, Easing.InExpo);
+                _disabledOverlay.FadeTo(newAlpha, 200, Easing.InExpo);
             }
             else
             {

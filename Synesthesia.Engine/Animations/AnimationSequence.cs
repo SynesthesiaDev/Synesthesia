@@ -1,0 +1,132 @@
+using Common.Logger;
+using Common.Util;
+using SynesthesiaUtil.Extensions;
+
+namespace Synesthesia.Engine.Animations;
+
+public class AnimationSequence : IAnimation
+{
+    public List<IAnimation> Animations = [];
+    
+    public bool IsCompleted { get; set; }
+
+    public Action? OnComplete { get; set; } = null;
+    
+    public bool IsPaused { get; set; } = false;
+    
+    public long PausedTime { get; set; } = 0L;
+
+    public bool Loop { get; set; } = false;
+    
+    private int _currentIndex = 0;
+
+    public IAnimation CurrentAnimation => Animations[_currentIndex];
+
+    public AnimationSequence(params IAnimation[] values)
+    {
+        foreach (var animation in values)
+        {
+            Animations.Add(animation);
+        }
+    }
+
+    public AnimationSequence(List<IAnimation> values)
+    {
+        Animations.AddAll(values);
+    }
+    
+    public void Start(long currentTime)
+    {
+        if (Animations.IsEmpty())
+        {
+            IsCompleted = true;
+            return;
+        }
+
+        IsCompleted = false;
+        CurrentAnimation.Start(currentTime);
+    }
+    
+    public bool Update(long currentTime)
+    {
+        if (IsCompleted || Animations.IsEmpty()) return IsCompleted;
+        
+        var current = CurrentAnimation;
+        current.Update(currentTime);
+
+        if (current.IsCompleted)
+        {
+            _currentIndex++;
+            if (_currentIndex < Animations.Count)
+            {
+                Animations[_currentIndex].Start(currentTime);
+            }
+            else
+            {
+                IsCompleted = true;
+            }
+        }
+
+        return IsCompleted;
+    }
+
+    public void Stop()
+    {
+        if (_currentIndex < Animations.Count)
+        {
+            Animations[_currentIndex].Stop();
+        }
+    }
+
+    public void Reset()
+    {
+        IsCompleted = false;
+        _currentIndex = 0;
+        Animations.ForEach(anim =>
+        {
+            anim.Reset();
+        });
+    }
+    
+    public void Dispose()
+    {
+        Stop();
+        Animations.ForEach(anim =>
+        {
+            anim.Dispose();
+        });
+        Animations.Clear();
+    }
+
+    public class Builder
+    {
+        private readonly List<IAnimation> _animations = [];
+        private bool _isLooping = false;
+        
+        public Builder Add(IAnimation animation)
+        {
+            _animations.Add(animation);
+            return this;
+        }
+
+        public Builder Delay(long time)
+        {
+            _animations.Add(new AnimationDelay(time));
+            return this;
+        }
+
+        public Builder IsLooping(bool isLooping)
+        {
+            _isLooping = isLooping;
+            return this;
+        }
+
+        public AnimationSequence Build()
+        {
+            return new AnimationSequence(_animations)
+            {
+                Loop = _isLooping
+            };
+        }
+    }
+}

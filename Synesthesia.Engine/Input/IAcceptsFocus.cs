@@ -9,4 +9,9 @@ public interface IAcceptsFocus
     public void OnFocusGained();
 
     public void OnFocusLost();
+
+    public virtual void OnCharacterTyped(char character)
+    {
+        
+    }
 }

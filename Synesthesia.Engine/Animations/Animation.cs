@@ -11,13 +11,17 @@ public partial class Animation<T> : IAnimation
     public required Transform<T> Transform { get; init; }
     public required Easing Easing { get; init; }
     public required Action<T> OnUpdate { get; init; }
-    public required Action<T>? OnComplete { get; set; }
+    public required Action? OnComplete { get; set; }
     public required long Delay { get; init; }
 
     public long StartTime { get; private set; } = -1;
-    public bool IsPaused { get; private set; } = false;
-    public long PausedTime { get; private set; } = 0L;
+    public bool IsPaused { get; set; } = false;
+    
+    public long PausedTime { get; set; } = 0L;
+    
     public bool IsCompleted { get; set; } = false;
+
+    public bool Loop { get; set; } = false;
 
     private EasingFunction EasingFunction => new(Easing);
 
@@ -67,7 +71,7 @@ public partial class Animation<T> : IAnimation
         {
             OnUpdate.Invoke(EndValue);
             IsCompleted = true;
-            OnComplete?.Invoke(EndValue);
+            OnComplete?.Invoke();
             return true;
         }
 
@@ -81,13 +85,21 @@ public partial class Animation<T> : IAnimation
     }
 
 
+
     public void Dispose()
     {
         Stop();
     }
 
-    public void Then(Action<T> then)
+    public Animation<T> Then(Action then)
     {
         OnComplete = then;
+        return this;
+    }
+
+    public Animation<T> MakeLooping()
+    {
+        Loop = true;
+        return this;
     }
 }

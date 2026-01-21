@@ -37,5 +37,6 @@ public class SingleOffEventDispatcher<T> : IDisposable
     public void Dispose()
     {
         _eventSubscribers.Clear();
+        EngineStatistics.Dispatchers.Decrement();
     }
 }

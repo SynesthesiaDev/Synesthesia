@@ -119,6 +119,7 @@ public abstract class IThreadRunner : IDisposable
 
     public void Dispose()
     {
+        _bindablePool.Dispose();
         _isRunning = false;
         _workQueue.Clear();
         ThreadLoadedDispatcher.Dispose();

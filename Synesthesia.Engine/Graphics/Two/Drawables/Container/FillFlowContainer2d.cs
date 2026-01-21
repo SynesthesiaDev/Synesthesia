@@ -12,6 +12,8 @@ public class FillFlowContainer2d : BackgroundContainer2d
 
     protected internal override void OnUpdate()
     {
+        base.OnUpdate();
+        
         float currentY = 0;
         float currentX = 0;
         float maxWidth = 0;

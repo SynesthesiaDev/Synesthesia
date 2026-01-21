@@ -2,7 +2,6 @@ using System.Numerics;
 using Common.Bindable;
 using Common.Logger;
 using Raylib_cs;
-using SDL2;
 using Synesthesia.Engine.Utility;
 
 namespace Synesthesia.Engine.Host;

@@ -1,6 +1,7 @@
 using System.Numerics;
 using Common.Logger;
 using Common.Util;
+using Raylib_cs;
 using Synesthesia.Engine.Input;
 using SynesthesiaUtil.Extensions;
 
@@ -28,7 +29,7 @@ public class CompositeDrawable2d : Drawable2d
 
     protected internal void UpdateHoverState(HoverEvent e)
     {
-        foreach (var child in _children.Reversed())
+        foreach (var child in _children.Filter(c => c.AcceptsInputs()).Reversed())
         {
             if (child.IsHovered && !child.Contains(e.MousePosition))
             {
@@ -50,7 +51,7 @@ public class CompositeDrawable2d : Drawable2d
 
     protected internal void UpdatePointInputState(PointInput e, bool down)
     {
-        foreach (var child in _children.Reversed())
+        foreach (var child in _children.Filter(c => c.AcceptsInputs()).Reversed())
         {
             if (down && !child.IsMouseDown && child.IsHovered && child.OnMouseDown(e))
             {
@@ -72,7 +73,7 @@ public class CompositeDrawable2d : Drawable2d
 
     protected internal void UpdateActionBindingState(ActionBinding e, bool down)
     {
-        foreach (var child in _children.Reversed())
+        foreach (var child in _children.Filter(c => c.AcceptsInputs()).Reversed())
         {
             var handled = down && child.OnActionBindingDown(e);
 
@@ -83,6 +84,23 @@ public class CompositeDrawable2d : Drawable2d
             if (child is CompositeDrawable2d drawable2d)
             {
                 drawable2d.UpdateActionBindingState(e, down);
+            }
+        }
+    }
+    
+    protected internal void UpdateKeyState(KeyboardKey e, bool down)
+    {
+        foreach (var child in _children.Filter(c => c.AcceptsInputs()).Reversed())
+        {
+            var handled = down && child.OnKeyDown(e);
+
+            if (!down) child.OnKeyUp(e);
+
+            if (handled) continue;
+            
+            if (child is CompositeDrawable2d drawable2d)
+            {
+                drawable2d.UpdateKeyState(e, down);
             }
         }
     }

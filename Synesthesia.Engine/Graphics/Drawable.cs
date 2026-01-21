@@ -6,8 +6,10 @@ using Common.Logger;
 using Common.Statistics;
 using Raylib_cs;
 using Synesthesia.Engine.Animations;
+using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Timing;
+using Synesthesia.Engine.Timing.Scheduling;
 
 namespace Synesthesia.Engine.Graphics;
 
@@ -28,7 +30,7 @@ public abstract partial class Drawable : IDrawable, IDisposable
     public readonly EventDispatcher<Drawable> OnInvalidated;
 
     public readonly EventDispatcher<Drawable> OnDisposed;
-
+    
     public Vector3 Rotation { get; set; } = Vector3.Zero;
 
     public Vector3 Shear { get; set; } = Vector3.Zero;
@@ -43,6 +45,8 @@ public abstract partial class Drawable : IDrawable, IDisposable
 
     private static readonly StopwatchClock performance_watch = new(true);
 
+    public Scheduler Scheduler = null!;
+    
     public AnimationManager AnimationManager = null!;
 
     protected Drawable()
@@ -114,7 +118,8 @@ public abstract partial class Drawable : IDrawable, IDisposable
     {
         if (LoadState < DrawableLoadState.Ready) return false;
 
-        AnimationManager = new AnimationManager();
+        Scheduler = new Scheduler();
+        AnimationManager = new AnimationManager(Scheduler);
         LoadState = DrawableLoadState.Loaded;
 
         LoadComplete();

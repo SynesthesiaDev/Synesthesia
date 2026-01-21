@@ -22,7 +22,11 @@ public interface IInputEvent
     }
 }
 
-
+public record TextInputEvent(char Character, InputSource Source = InputSource.Keyboard) : IInputEvent
+{
+    public float Timestamp { get; } = (float)Raylib.GetTime();
+    public bool IsDown => true;
+}
 
 public record KeyInputEvent(KeyboardKey Key, bool IsDown, InputSource Source = InputSource.Keyboard) : IInputEvent
 {
@@ -52,6 +56,7 @@ public enum InputSource
 {
     Keyboard,
     Mouse,
+
     // Controller,
     Touch
 }

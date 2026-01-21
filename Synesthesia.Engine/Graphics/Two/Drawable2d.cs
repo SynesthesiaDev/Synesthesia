@@ -36,6 +36,8 @@ public abstract class Drawable2d : Drawable
 
     public long Depth = 0;
 
+    protected internal virtual bool AcceptsInputs() => true;
+    
     public Vector2 ScreenSpacePosition
     {
         get
@@ -107,6 +109,19 @@ public abstract class Drawable2d : Drawable
     }
 
     protected internal virtual void OnMouseUp(PointInput e)
+    {
+    }
+    
+    protected internal virtual bool OnKeyDown(KeyboardKey e)
+    {
+        return false;
+    }
+    
+    protected internal virtual void OnKeyUp(KeyboardKey e)
+    {
+    }
+
+    protected internal virtual void OnMouseUp(KeyboardKey e)
     {
     }
 
@@ -222,7 +237,7 @@ public abstract class Drawable2d : Drawable
         };
     }
 
-    public Animation<T> TransformTo<T>(string field, T startValue, T endValue, long duration, Easing easing, Transform<T> transform, Action<T> onUpdate, Action<T>? onComplete = null, long delay = 0L)
+    public Animation<T> TransformTo<T>(string field, T startValue, T endValue, long duration, Easing easing, Transform<T> transform, Action<T> onUpdate, Action? onComplete = null, long delay = 0L)
     {
         var animation = new Animation<T>
         {
@@ -253,13 +268,17 @@ public abstract class Drawable2d : Drawable
     {
         return TransformTo(nameof(Rotation), Rotation, newRotation, duration, easing, Transforms.Vector3, vec => { Rotation = vec; });
     }
-
-
+    
     public Animation<float> FadeTo(float newAlpha, long duration, Easing easing)
     {
         return TransformTo(nameof(Alpha), Alpha, newAlpha, duration, easing, Transforms.Float, a => Alpha = a);
     }
 
+    public Animation<float> FadeFromTo(float startAlpha, float endAlpha, long duration, Easing easing)
+    {
+        return TransformTo(nameof(Alpha), startAlpha, endAlpha, duration, easing, Transforms.Float, a => Alpha = a);
+    }
+    
     protected override void Dispose(bool isDisposing)
     {
         if (AnimationManager == null)

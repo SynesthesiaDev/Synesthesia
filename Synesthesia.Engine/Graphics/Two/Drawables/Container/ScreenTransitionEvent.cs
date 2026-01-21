@@ -1,5 +1,3 @@
 namespace Synesthesia.Engine.Graphics.Two.Drawables.Container;
 
-public class Container2d : CompositeDrawable2d
-{
-}
+public record ScreenTransitionEvent(Screen? Old, Screen? New);

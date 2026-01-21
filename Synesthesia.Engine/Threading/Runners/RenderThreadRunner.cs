@@ -36,22 +36,6 @@ public class RenderThreadRunner : IThreadRunner
             FovY = 60f,
             Projection = CameraProjection.Perspective,
         };
-
-        // _game.RootComposite3d.Children =
-        // [
-        //     new Cube
-        //     {
-        //         Position = new Vector3(0f, 0f, 0f),
-        //         Size = new Vector3(1f, 1f, 1f),
-        //         Color = Color.Red
-        //     },
-        //     new Cube
-        //     {
-        //         Color = Color.Blue,
-        //         Position = new Vector3(2f, 0f, 0f),
-        //         Rotation = new Vector3(45, 0, 0)
-        //     }
-        // ];
     }
 
     public override void OnLoadComplete(Game game)
@@ -62,7 +46,7 @@ public class RenderThreadRunner : IThreadRunner
     {
         _game.WindowHost.PollEvents();
 
-        pollKeyboardEvents();
+        PollKeyboardEvents();
 
         if (Raylib.IsWindowReady() && _game.WindowHost.ShouldWindowClose)
         {
@@ -88,14 +72,13 @@ public class RenderThreadRunner : IThreadRunner
         Raylib.EndDrawing();
         Raylib.EndBlendMode();
 
-        pollKeyboardEvents();
+        PollKeyboardEvents();
     }
 
     private readonly HashSet<KeyboardKey> _activeKeys = [];
     private readonly bool[] _activeMouseButtons = new bool[6];
-    private Vector2 _lastMousePos = Vector2.Zero;
 
-    private void pollKeyboardEvents()
+    private void PollKeyboardEvents()
     {
         int key;
         while ((key = Raylib.GetKeyPressed()) != 0)
@@ -123,10 +106,17 @@ public class RenderThreadRunner : IThreadRunner
         }
         
         var mousePosition = Raylib.GetMousePosition();
-        if (mousePosition != _lastMousePos)
+        if (mousePosition != InputManager.LastMousePosition)
         {
-            _lastMousePos = mousePosition;
+            InputManager.LastMousePosition = mousePosition;
             InputManager.EnqueueEvent(new MouseMoveInputEvent(mousePosition));
+        }
+
+        int charCode;
+        while ((charCode = Raylib.GetCharPressed()) != 0)
+        {
+            var character = (char)charCode;
+            InputManager.EnqueueEvent(new TextInputEvent(character));
         }
     }
 }

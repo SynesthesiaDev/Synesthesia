@@ -1,7 +1,6 @@
 using System.Numerics;
 using Common.Logger;
 using Common.Util;
-using osuTK.Input;
 using Raylib_cs;
 using Synesthesia.Engine.Configuration;
 using Synesthesia.Engine.Graphics.Two;
@@ -15,7 +14,7 @@ public class EngineDebugOverlay : CompositeDrawable2d
 {
     public static readonly ActionBinding EngineDebugOverlayToggle = new()
     {
-        Key = new KeyboardBinding(KeyboardKey.F1, KeyboardKey.LeftControl), 
+        Keyboard = new KeyboardBinding(KeyboardKey.F1, KeyboardKey.LeftControl), 
         ActionName = "Toggle Engine Debug Overlay",
     };
 
@@ -60,8 +59,6 @@ public class EngineDebugOverlay : CompositeDrawable2d
                 Visible = EngineConfiguration.ShowLogOverlay,
                 Scale = new Vector2(0.8f)
             },
-
-            new EngineDebugSettings { Anchor = Anchor.TopRight, Origin = Anchor.TopRight, Position = new Vector2(-10, 10), }
         ];
 
         InputManager.RegisterActionInput(EngineDebugOverlayToggle);
