@@ -7,15 +7,15 @@ namespace Synesthesia.Engine.Graphics.Two.Drawables.Container;
 
 public class BackgroundContainer2d : Container2d
 {
-    private static readonly Color EmptyColor = new(0, 0, 0, 0);
+    private static readonly Color empty_color = new(0, 0, 0, 0);
 
-    public Color BackgroundColor { get; set; } = EmptyColor;
+    public Color BackgroundColor { get; set; } = empty_color;
 
     public float BackgroundAlpha { get; set; } = 1f;
 
     public float BackgroundCornerRadius { get; set; } = 0f;
 
-    private readonly DrawableBox2d _background = new();
+    private readonly DrawableBox2d background = new();
 
     protected override void OnDraw2d()
     {
@@ -25,22 +25,22 @@ public class BackgroundContainer2d : Container2d
 
     protected override void OnLoading()
     {
-        _background.Load();
+        background.Load();
         base.OnLoading();
     }
 
     protected void DrawBackground()
     {
-        if(!_background.IsLoaded) return;
+        if(!background.IsLoaded) return;
         if (BackgroundColor.A == 0) return;
-        _background.Size = Size;
-        _background.Parent = this;
+        background.Size = Size;
+        background.Parent = this;
 
-        _background.CornerRadius = BackgroundCornerRadius;
-        _background.Color = BackgroundColor;
-        _background.Alpha = BackgroundAlpha;
+        background.CornerRadius = BackgroundCornerRadius;
+        background.Color = BackgroundColor;
+        background.Alpha = BackgroundAlpha;
 
-        _background.OnDraw();
+        background.OnDraw();
     }
 
     public Animation<float> FadeBackgroundAlphaTo(float newAlpha, long duration, Easing easing)
@@ -52,7 +52,7 @@ public class BackgroundContainer2d : Container2d
             newAlpha,
             duration,
             easing,
-            Transforms.Float,
+            Transforms.FLOAT,
             alpha => { BackgroundAlpha = alpha; }
         );
     }
@@ -66,7 +66,7 @@ public class BackgroundContainer2d : Container2d
             newRadius,
             duration,
             easing,
-            Transforms.Float,
+            Transforms.FLOAT,
             radius => { BackgroundCornerRadius = radius; }
         );
     }
@@ -80,14 +80,14 @@ public class BackgroundContainer2d : Container2d
             newColor,
             duration,
             easing,
-            Transforms.Color,
+            Transforms.COLOR,
             color => { BackgroundColor = color; }
         );
     }
 
     protected override void Dispose(bool isDisposing)
     {
-        _background.Dispose();
+        background.Dispose();
         base.Dispose(isDisposing);
     }
 }

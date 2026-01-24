@@ -2,23 +2,25 @@ using Common.Logger;
 
 namespace Synesthesia.Engine.Threading.Runners;
 
-public class UpdateThreadRunner : IThreadRunner
+public class UpdateThreadRunner : ThreadRunner
 {
-    private Game _game = null!;
+    private Game game = null!;
+
+    protected override Logger.LogCategory GetLoggerCategory() => Logger.Runtime;
 
     protected override void OnThreadInit(Game game)
     {
-        _game = game;
+        this.game = game;
     }
 
-    public override void OnLoadComplete(Game game)
+    protected override void OnLoadComplete(Game game)
     {
     }
 
     protected override void OnLoop()
     {
-        _game.RootComposite3d.OnUpdate();
-        _game.RootComposite2d.OnUpdate();
-        _game.EngineDebugOverlay.OnUpdate();
+        game.RootComposite3d.OnUpdate();
+        game.RootComposite2d.OnUpdate();
+        game.EngineDebugOverlay.OnUpdate();
     }
 }

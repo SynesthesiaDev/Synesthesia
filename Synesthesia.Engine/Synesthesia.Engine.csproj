@@ -11,6 +11,7 @@
     <ItemGroup>
         <ProjectReference Include="..\Synesthesia.Common\Synesthesia.Common.csproj"/>
         <ProjectReference Include="..\Synesthesia.Resources\Synesthesia.Resources.csproj"/>
+        <ProjectReference Include="..\Synesthesia.NativeLibs\Synesthesia.NativeLibs.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -20,6 +21,10 @@
       <PackageReference Include="ManagedBass.Wasapi" Version="4.0.2" />
       <PackageReference Include="Raylib-cs" Version="7.0.2" />
       <PackageReference Include="SynesthesiaDev.Codon.IniTranscoder" Version="1.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="native\" />
     </ItemGroup>
 
 </Project>

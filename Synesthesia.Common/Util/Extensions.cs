@@ -30,6 +30,6 @@ public static class Extensions
 
     public static void Complete(this CompletableFuture<Nothing> completableFuture)
     {
-        completableFuture.Complete(Nothing.Instance);
+        completableFuture.Complete(Nothing.INSTANCE);
     }
 }

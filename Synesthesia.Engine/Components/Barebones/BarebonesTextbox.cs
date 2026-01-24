@@ -18,11 +18,11 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
 
     public readonly Bindable<string> Text = new(string.Empty);
 
-    private const long InitialRepeatDelay = 500;
-    private const long RepeatRate = 50;
+    private const long initial_repeat_delay = 500;
+    private const long repeat_rate = 50;
     
-    private bool _backspaceHeld = false;
-    private long _backspacePressTime = -1L;
+    private bool backspaceHeld = false;
+    private long backspacePressTime = -1L;
     
     public bool IsFocused { get; set; }
 
@@ -55,10 +55,10 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
     {
         Text.OnValueChange(e => TextDrawable.Text = e.NewValue);
 
-        Scheduler.Repeating(RepeatRate, _ =>
+        Scheduler.Repeating(repeat_rate, _ =>
         {
             var now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            if (_backspaceHeld && now - _backspacePressTime >= InitialRepeatDelay)
+            if (backspaceHeld && now - backspacePressTime >= initial_repeat_delay)
             {
                 Text.Value = Text.Value.RemoveLastN(1);
             }
@@ -76,8 +76,8 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
         {
             case KeyboardKey.Backspace:
             {
-                _backspaceHeld = true;
-                _backspacePressTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                backspaceHeld = true;
+                backspacePressTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                 Text.Value = Text.Value.RemoveLastN(1);
                 return true;
             }
@@ -93,7 +93,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
 
     protected internal override void OnKeyUp(KeyboardKey e)
     {
-        if (e == KeyboardKey.Backspace) _backspaceHeld = false;
+        if (e == KeyboardKey.Backspace) backspaceHeld = false;
         base.OnKeyUp(e);
     }
 
@@ -123,11 +123,11 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
 
     public class BarebonesTextboxCaret : AbstractTextboxCaret
     {
-        public const long BlinkingSpeed = 500; //half a second is the standard
+        public const long BLINKING_SPEED = 500; //half a second is the standard
 
         public Easing BlinkingEasing { get; set; } = Easing.OutCubic;
 
-        private DrawableBox2d _caretBox = null!;
+        private DrawableBox2d caretBox = null!;
 
         protected override void OnLoading()
         {
@@ -138,7 +138,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
                     RelativeSizeAxes = Axes.Both,
                     Children =
                     [
-                        _caretBox = new DrawableBox2d { RelativeSizeAxes = Axes.Both }
+                        caretBox = new DrawableBox2d { RelativeSizeAxes = Axes.Both }
                     ],
                 },
             ];
@@ -147,8 +147,8 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
         protected override void LoadComplete()
         {
             var animationSequence = new AnimationSequence.Builder()
-                .Add(_caretBox.FadeFromTo(1f, 0f, BlinkingSpeed, BlinkingEasing))
-                .Add(_caretBox.FadeFromTo(0f, 1f, BlinkingSpeed, BlinkingEasing))
+                .Add(caretBox.FadeFromTo(1f, 0f, BLINKING_SPEED, BlinkingEasing))
+                .Add(caretBox.FadeFromTo(0f, 1f, BLINKING_SPEED, BlinkingEasing))
                 .IsLooping(true)
                 .Build();
 

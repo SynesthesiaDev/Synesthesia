@@ -7,38 +7,38 @@ namespace Synesthesia.Engine.Components.Two;
 
 public class DisableableContainer : BackgroundContainer2d, IDisablable
 {
-    private readonly DrawableBox2d _disabledOverlay = new();
+    private readonly DrawableBox2d disabledOverlay = new();
 
-    private bool _disabled;
+    private bool disabled;
 
     public bool Disabled
     {
-        get => _disabled;
+        get => disabled;
         set
         {
-            _disabled = value;
+            disabled = value;
             var newAlpha = value ? 0.5f : 0f;
             if (IsLoaded)
             {
-                _disabledOverlay.FadeTo(newAlpha, 200, Easing.InExpo);
+                disabledOverlay.FadeTo(newAlpha, 200, Easing.InExpo);
             }
             else
             {
-                _disabledOverlay.Alpha = newAlpha;
+                disabledOverlay.Alpha = newAlpha;
             }
         }
     }
 
     protected override void OnLoading()
     {
-        _disabledOverlay.Load();
+        disabledOverlay.Load();
         base.OnLoading();
     }
 
     protected DisableableContainer()
     {
-        _disabledOverlay.Color = new Color(0, 0, 0, 255);
-        _disabledOverlay.Alpha = 0f;
+        disabledOverlay.Color = new Color(0, 0, 0, 255);
+        disabledOverlay.Alpha = 0f;
     }
 
     protected override void OnDraw2d()
@@ -49,20 +49,20 @@ public class DisableableContainer : BackgroundContainer2d, IDisablable
 
     protected void DrawDisabledOverlay()
     {
-        if(!_disabledOverlay.IsLoaded) return;
-        if (_disabledOverlay.Color.A == 0) return;
+        if(!disabledOverlay.IsLoaded) return;
+        if (disabledOverlay.Color.A == 0) return;
 
-        _disabledOverlay.Size = Size;
-        _disabledOverlay.Parent = this;
+        disabledOverlay.Size = Size;
+        disabledOverlay.Parent = this;
 
-        _disabledOverlay.CornerRadius = BackgroundCornerRadius;
+        disabledOverlay.CornerRadius = BackgroundCornerRadius;
 
-        _disabledOverlay.OnDraw();
+        disabledOverlay.OnDraw();
     }
 
     protected override void Dispose(bool isDisposing)
     {
-        _disabledOverlay.Dispose();
+        disabledOverlay.Dispose();
         base.Dispose(isDisposing);
     }
 }

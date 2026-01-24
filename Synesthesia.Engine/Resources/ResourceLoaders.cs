@@ -28,7 +28,7 @@ public static class ResourceLoaders
         if (shader.Id > 0) return shader;
         
         var ex = new Exception("Fragment shader failed to load");
-        Logger.Exception(ex, Logger.RENDER);
+        Logger.Exception(ex, Logger.Render);
         throw ex;
 
     }

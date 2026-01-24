@@ -20,7 +20,7 @@ public static class ThreadSafety
     public static bool IsAudioThread => Thread.CurrentThread.Name == THREAD_AUDIO;
     public static bool IsInputThread => Thread.CurrentThread.Name == THREAD_INPUT;
 
-    public static IThreadRunner CreateThread(IThreadRunner threadRunner, string name, long updateTime, Game game)
+    public static ThreadRunner CreateThread(ThreadRunner threadRunner, string name, long updateTime, Game game)
     {
         var thread = new Thread(threadRunner.InternalLoop) { Name = name, IsBackground = false };
         threadRunner.Start(thread, game);

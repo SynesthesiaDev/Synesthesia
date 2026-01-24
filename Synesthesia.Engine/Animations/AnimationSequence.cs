@@ -18,9 +18,9 @@ public class AnimationSequence : IAnimation
 
     public bool Loop { get; set; } = false;
     
-    private int _currentIndex = 0;
+    private int currentIndex = 0;
 
-    public IAnimation CurrentAnimation => Animations[_currentIndex];
+    public IAnimation CurrentAnimation => Animations[currentIndex];
 
     public AnimationSequence(params IAnimation[] values)
     {
@@ -56,10 +56,10 @@ public class AnimationSequence : IAnimation
 
         if (current.IsCompleted)
         {
-            _currentIndex++;
-            if (_currentIndex < Animations.Count)
+            currentIndex++;
+            if (currentIndex < Animations.Count)
             {
-                Animations[_currentIndex].Start(currentTime);
+                Animations[currentIndex].Start(currentTime);
             }
             else
             {
@@ -72,16 +72,16 @@ public class AnimationSequence : IAnimation
 
     public void Stop()
     {
-        if (_currentIndex < Animations.Count)
+        if (currentIndex < Animations.Count)
         {
-            Animations[_currentIndex].Stop();
+            Animations[currentIndex].Stop();
         }
     }
 
     public void Reset()
     {
         IsCompleted = false;
-        _currentIndex = 0;
+        currentIndex = 0;
         Animations.ForEach(anim =>
         {
             anim.Reset();
@@ -100,32 +100,32 @@ public class AnimationSequence : IAnimation
 
     public class Builder
     {
-        private readonly List<IAnimation> _animations = [];
-        private bool _isLooping = false;
+        private readonly List<IAnimation> animations = [];
+        private bool isLooping = false;
         
         public Builder Add(IAnimation animation)
         {
-            _animations.Add(animation);
+            animations.Add(animation);
             return this;
         }
 
         public Builder Delay(long time)
         {
-            _animations.Add(new AnimationDelay(time));
+            animations.Add(new AnimationDelay(time));
             return this;
         }
 
         public Builder IsLooping(bool isLooping)
         {
-            _isLooping = isLooping;
+            this.isLooping = isLooping;
             return this;
         }
 
         public AnimationSequence Build()
         {
-            return new AnimationSequence(_animations)
+            return new AnimationSequence(animations)
             {
-                Loop = _isLooping
+                Loop = isLooping
             };
         }
     }

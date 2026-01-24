@@ -14,12 +14,12 @@ public class ActionBinding
     public TouchBinding? TouchGesture { get; set; }
     public MouseBinding? MouseButton { get; set; }
 
-    private List<IBinding?> AsBindingList()
+    private List<IBinding?> asBindingList()
     {
         return Lists.Of<IBinding?>(Keyboard, Gamepad, TouchGesture, MouseButton);
     }
 
-    public bool IsDown => AsBindingList().FilterNonNull().Any(b => b!.IsDown());
+    public bool IsDown => asBindingList().FilterNonNull().Any(b => b!.IsDown());
 }
 
 public interface IBinding

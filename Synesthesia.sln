@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.Resources", "Sy
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.Editor", "Synesthesia.Editor\Synesthesia.Editor.csproj", "{3DE2DEB7-7081-4B2E-B7BE-B21A6C88AB41}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.NativeLibs", "Synesthesia.NativeLibs\Synesthesia.NativeLibs.csproj", "{0287BA4A-EAA9-41C5-825D-0E1B0EFDBFFB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{3DE2DEB7-7081-4B2E-B7BE-B21A6C88AB41}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DE2DEB7-7081-4B2E-B7BE-B21A6C88AB41}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DE2DEB7-7081-4B2E-B7BE-B21A6C88AB41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0287BA4A-EAA9-41C5-825D-0E1B0EFDBFFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0287BA4A-EAA9-41C5-825D-0E1B0EFDBFFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0287BA4A-EAA9-41C5-825D-0E1B0EFDBFFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0287BA4A-EAA9-41C5-825D-0E1B0EFDBFFB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

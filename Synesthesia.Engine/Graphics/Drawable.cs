@@ -6,7 +6,6 @@ using Common.Logger;
 using Common.Statistics;
 using Raylib_cs;
 using Synesthesia.Engine.Animations;
-using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Timing.Scheduling;
@@ -51,7 +50,7 @@ public abstract partial class Drawable : IDrawable, IDisposable
 
     protected Drawable()
     {
-        EngineStatistics.Drawables.Increment();
+        EngineStatistics.DRAWABLES.Increment();
 
         OnLoadComplete = BindablePool.BorrowSingleOffDispatcher<Drawable>();
         OnDisposed = BindablePool.BorrowDispatcher<Drawable>();
@@ -102,11 +101,11 @@ public abstract partial class Drawable : IDrawable, IDisposable
 
         if (blocking)
         {
-            Logger.Warning($"{ToString()} took {loadDuration:0.00}ms to load (and blocked the update thread)", Logger.RUNTIME);
+            Logger.Warning($"{ToString()} took {loadDuration:0.00}ms to load (and blocked the update thread)", Logger.Runtime);
         }
         else
         {
-            Logger.Verbose($"{ToString()} took {loadDuration:0.00}ms to load", Logger.RUNTIME);
+            Logger.Verbose($"{ToString()} took {loadDuration:0.00}ms to load", Logger.Runtime);
         }
     }
 
@@ -159,10 +158,10 @@ public abstract partial class Drawable : IDrawable, IDisposable
 
         IsDisposed = true;
 
-        EngineStatistics.Drawables.Decrement();
+        EngineStatistics.DRAWABLES.Decrement();
     }
 
-    protected Color applyAlpha(Color color)
+    protected Color ApplyAlpha(Color color)
     {
         return color with { A = (byte)(Alpha * 255) };
     }

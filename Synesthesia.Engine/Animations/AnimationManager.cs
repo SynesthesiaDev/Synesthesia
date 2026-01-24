@@ -4,11 +4,11 @@ namespace Synesthesia.Engine.Animations;
 
 public class AnimationManager : IDisposable
 {
-    private readonly object _lock = new();
+    private readonly object @lock = new();
     private long currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
-    private Dictionary<string, IAnimationHolder> KeyedAnimations = [];
-    private List<IAnimationHolder> Animations = [];
+    private Dictionary<string, IAnimationHolder> keyedAnimations = [];
+    private List<IAnimationHolder> animations = [];
 
     private Scheduler scheduler;
 
@@ -19,9 +19,9 @@ public class AnimationManager : IDisposable
         {
             currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
-            lock (_lock)
+            lock (@lock)
             {
-                foreach (var holder in Animations.ToList())
+                foreach (var holder in animations.ToList())
                 {
                     holder.Animation.Update(currentTime);
 
@@ -34,10 +34,10 @@ public class AnimationManager : IDisposable
                     }
                     else
                     {
-                        Animations.Remove(holder);
+                        animations.Remove(holder);
                         if (holder is ManagedAnimationHolder managed)
                         {
-                            KeyedAnimations.Remove(managed.Key);
+                            keyedAnimations.Remove(managed.Key);
                         }
                     }
                 }
@@ -54,46 +54,46 @@ public class AnimationManager : IDisposable
 
     public void AddAnimation(IAnimation animation)
     {
-        lock (_lock)
+        lock (@lock)
         {
-            Animations.Add(new UnmanagedAnimationHolder(animation));
+            animations.Add(new UnmanagedAnimationHolder(animation));
             animation.Start(currentTime);
         }
     }
 
     public void AddAnimation(string field, IAnimation animation)
     {
-        lock (_lock)
+        lock (@lock)
         {
-            if (KeyedAnimations.TryGetValue(field, out var existingHolder))
+            if (keyedAnimations.TryGetValue(field, out var existingHolder))
             {
                 existingHolder.Animation.Stop();
                 existingHolder.Animation.Dispose();
-                KeyedAnimations.Remove(field);
-                Animations.Remove(existingHolder);
+                keyedAnimations.Remove(field);
+                animations.Remove(existingHolder);
             }
 
             var managed = new ManagedAnimationHolder(field, animation);
-            KeyedAnimations.Add(field, managed);
-            Animations.Add(managed);
+            keyedAnimations.Add(field, managed);
+            animations.Add(managed);
             animation.Start(currentTime);
         }
     }
 
     public void Clear()
     {
-        lock (_lock)
+        lock (@lock)
         {
-            foreach (var holder in Animations)
+            foreach (var holder in animations)
             {
                 holder.Animation.Stop();
                 if (holder is ManagedAnimationHolder managed)
                 {
-                    KeyedAnimations.Remove(managed.Key);
+                    keyedAnimations.Remove(managed.Key);
                 }
             }
-            Animations.Clear();
-            KeyedAnimations.Clear();
+            animations.Clear();
+            keyedAnimations.Clear();
         }
     }
 

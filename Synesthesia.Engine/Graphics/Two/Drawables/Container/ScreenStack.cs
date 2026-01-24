@@ -8,9 +8,9 @@ namespace Synesthesia.Engine.Graphics.Two.Drawables.Container;
 
 public class ScreenStack : Container2d
 {
-    public Screen? Current => _stack.Count != 0 ? _stack.Peek() : null;
+    public Screen? Current => stack.Count != 0 ? stack.Peek() : null;
 
-    private readonly Stack<Screen> _stack = new();
+    private readonly Stack<Screen> stack = new();
 
     public ScreenStack()
     {
@@ -19,17 +19,17 @@ public class ScreenStack : Container2d
 
     public CompletableFuture<Screen> Push(Screen newScreen)
     {
-        var existingCount = _stack.Count(s => s.GetType() == newScreen.GetType());
+        var existingCount = stack.Count(s => s.GetType() == newScreen.GetType());
         if (existingCount > newScreen.MaximumScreenInstances)
         {
             throw new InvalidOperationException($"There can only be maximum {newScreen.MaximumScreenInstances} instances of {newScreen.ObjectName()}");
         }
 
-        return LoadScreen(newScreen)
+        return loadScreen(newScreen)
             .Then(screen =>
             {
                 var old = Current;
-                _stack.Push(screen);
+                stack.Push(screen);
 
                 Logger.Debug($"Entering {newScreen.ObjectName()}");
 
@@ -56,7 +56,7 @@ public class ScreenStack : Container2d
 
     public void Pop()
     {
-        var old = _stack.Pop();
+        var old = stack.Pop();
 
         var screenTransitionEvent = new ScreenTransitionEvent(old, Current);
         
@@ -83,7 +83,7 @@ public class ScreenStack : Container2d
             });
     }
 
-    private CompletableFuture<Screen> LoadScreen(Screen screen)
+    private CompletableFuture<Screen> loadScreen(Screen screen)
     {
         var game = DependencyContainer.Get<Game>();
         if (screen.LoadState >= DrawableLoadState.Ready)
@@ -95,7 +95,7 @@ public class ScreenStack : Container2d
 
         game.UpdateThread.Schedule(() =>
         {
-            Logger.Verbose($"Loading screen {screen.ObjectName()}", Logger.RUNTIME);
+            Logger.Verbose($"Loading screen {screen.ObjectName()}", Logger.Runtime);
             screen.Load();
             task.Complete(screen);
         });

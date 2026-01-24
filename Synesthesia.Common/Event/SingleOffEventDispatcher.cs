@@ -4,39 +4,39 @@ namespace Common.Event;
 
 public class SingleOffEventDispatcher<T> : IDisposable
 {
-    private List<EventSubscriber<T>> _eventSubscribers = [];
-    private T? _dispatchedValue;
+    private List<EventSubscriber<T>> eventSubscribers = [];
+    private T? dispatchedValue;
 
     public SingleOffEventDispatcher()
     {
-        EngineStatistics.Dispatchers.Increment();
+        EngineStatistics.DISPATCHERS.Increment();
     }
 
     public void Subscribe(Action<T> action)
     {
-        if (_dispatchedValue == null)
+        if (dispatchedValue == null)
         {
             var eventSubscriber = new EventSubscriber<T>(action);
-            _eventSubscribers.Add(eventSubscriber);
+            eventSubscribers.Add(eventSubscriber);
         }
         else
         {
-            action.Invoke(_dispatchedValue!);
+            action.Invoke(dispatchedValue!);
         }
     }
 
     public void Dispatch(T value)
     {
-        if (_dispatchedValue != null) throw new InvalidOperationException("This event dispatcher has already value dispatched!");
-        _dispatchedValue = value;
-        _eventSubscribers.ForEach(_eventSubscriber => _eventSubscriber.action.Invoke(value));
-        _eventSubscribers.Clear();
+        if (dispatchedValue != null) throw new InvalidOperationException("This event dispatcher has already value dispatched!");
+        dispatchedValue = value;
+        eventSubscribers.ForEach(eventSubscriber => eventSubscriber.Action.Invoke(value));
+        eventSubscribers.Clear();
     }
 
 
     public void Dispose()
     {
-        _eventSubscribers.Clear();
-        EngineStatistics.Dispatchers.Decrement();
+        eventSubscribers.Clear();
+        EngineStatistics.DISPATCHERS.Decrement();
     }
 }

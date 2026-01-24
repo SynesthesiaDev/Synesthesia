@@ -23,7 +23,7 @@ public partial class Animation<T> : IAnimation
 
     public bool Loop { get; set; } = false;
 
-    private EasingFunction EasingFunction => new(Easing);
+    private EasingFunction easingFunction => new(Easing);
 
     public bool IsRunning => StartTime != -1 && !IsCompleted && !IsPaused;
 
@@ -76,7 +76,7 @@ public partial class Animation<T> : IAnimation
         }
 
         var progress = (float)elapsed / Duration;
-        var easedProgress = EasingFunction.ApplyEasing(progress).ToFloat();
+        var easedProgress = easingFunction.ApplyEasing(progress).ToFloat();
         var currentValue = Transform.Apply(StartValue, EndValue, easedProgress);
 
         OnUpdate.Invoke(currentValue);

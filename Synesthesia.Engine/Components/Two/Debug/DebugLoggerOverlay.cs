@@ -22,17 +22,17 @@ public class DebugLoggerOverlay : CompositeDrawable2d
     public const int MAX_MESSAGE_LENGHT = 350;
     public const long MESSAGE_LIFESPAN = 5000;
 
-    private FillFlowContainer2d _fillFlowContainer = null!;
-    private EventSubscriber<Logger.LogEvent> _loggerSubscriber = null!;
+    private FillFlowContainer2d fillFlowContainer = null!;
+    private EventSubscriber<Logger.LogEvent> loggerSubscriber = null!;
     private Scheduler scheduler = null!;
-    private Dictionary<Logger.LogEvent, DebugLoggerOverlayMessage> Messages = new();
+    private Dictionary<Logger.LogEvent, DebugLoggerOverlayMessage> messages = new();
 
     protected override void OnLoading()
     {
         AutoSizeAxes = Axes.Both;
         Children =
         [
-            _fillFlowContainer = new FillFlowContainer2d
+            fillFlowContainer = new FillFlowContainer2d
             {
                 Direction = Direction.Vertical,
                 AutoSizeAxes = Axes.Both,
@@ -40,23 +40,23 @@ public class DebugLoggerOverlay : CompositeDrawable2d
         ];
 
         scheduler = new Scheduler();
-        _loggerSubscriber = Logger.MessageLogged.Subscribe(Push);
+        loggerSubscriber = Logger.MESSAGE_LOGGED.Subscribe(Push);
     }
 
     public void Push(Logger.LogEvent logEvent)
     {
         DependencyContainer.Get<UpdateThreadRunner>().Schedule(() =>
         {
-            if (_fillFlowContainer.Children.Count() >= MAX_MESSAGES)
+            if (fillFlowContainer.Children.Count() >= MAX_MESSAGES)
             {
-                var last = _fillFlowContainer.Children.First();
-                _fillFlowContainer.RemoveChild(last);
+                var last = fillFlowContainer.Children.First();
+                fillFlowContainer.RemoveChild(last);
             }
 
             var message = new DebugLoggerOverlayMessage(logEvent);
 
-            Messages.Add(logEvent, message);
-            _fillFlowContainer.AddChild(message);
+            messages.Add(logEvent, message);
+            fillFlowContainer.AddChild(message);
 
             scheduler.Schedule(MESSAGE_LIFESPAN, _ => Pop(logEvent));
         });
@@ -64,15 +64,15 @@ public class DebugLoggerOverlay : CompositeDrawable2d
 
     public void Pop(Logger.LogEvent logEvent)
     {
-        if (Messages.Remove(logEvent, out var value))
+        if (messages.Remove(logEvent, out var value))
         {
-            value.FadeTo(0f, 500, Easing.Out).Then(() => _fillFlowContainer.RemoveChild(value));
+            value.FadeTo(0f, 500, Easing.Out).Then(() => fillFlowContainer.RemoveChild(value));
         }
     }
 
     protected override void Dispose(bool isDisposing)
     {
-        Logger.MessageLogged.Unsubscribe(_loggerSubscriber);
+        Logger.MESSAGE_LOGGED.Unsubscribe(loggerSubscriber);
         scheduler.Dispose();
         base.Dispose(isDisposing);
     }
@@ -87,7 +87,7 @@ public class DebugLoggerOverlay : CompositeDrawable2d
                 new BackgroundContainer2d
                 {
                     AutoSizeAxes = Axes.Both,
-                    BackgroundColor = Defaults.Background2,
+                    BackgroundColor = Defaults.BACKGROUND2,
                     AutoSizePadding = new Vector4(4, 4, 4, 4),
                     BackgroundCornerRadius = 10,
                     BackgroundAlpha = 0.8f,
@@ -107,15 +107,15 @@ public class DebugLoggerOverlay : CompositeDrawable2d
                                     AutoSizeAxes = Axes.Both,
                                     Anchor = Anchor.CentreLeft,
                                     Origin = Anchor.CentreLeft,
-                                    Prefix = $"{logEvent.severity.name} / {logEvent.type.name}",
-                                    Color = ColorUtil.GetOrCacheColor(logEvent.severity.debugOverlayColor)
+                                    Prefix = $"{logEvent.Severity.Name} / {logEvent.Category.Name}",
+                                    Color = ColorUtil.GetOrCacheColor(logEvent.Severity.DebugOverlayColor)
                                 },
                                 new TextDrawable
                                 {
                                     AutoSizeAxes = Axes.Both,
                                     Anchor = Anchor.CentreLeft,
                                     Origin = Anchor.CentreLeft,
-                                    Text = $"{logEvent.message.CutIfTooLong(MAX_MESSAGE_LENGHT, true)} "
+                                    Text = $"{logEvent.Message.CutIfTooLong(MAX_MESSAGE_LENGHT, true)} "
                                 }
                             ]
                         }

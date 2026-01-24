@@ -3,16 +3,18 @@ using Synesthesia.Engine.Input;
 
 namespace Synesthesia.Engine.Threading.Runners;
 
-public class InputThreadRunner : IThreadRunner
+public class InputThreadRunner : ThreadRunner
 {
-    private Game _game = null!;
+    private Game game = null!;
+
+    protected override Logger.LogCategory GetLoggerCategory() => Logger.Input;
 
     protected override void OnThreadInit(Game game)
     {
-        _game = game;
+        this.game = game;
     }
 
-    public override void OnLoadComplete(Game game)
+    protected override void OnLoadComplete(Game game)
     {
     }
 
@@ -20,12 +22,12 @@ public class InputThreadRunner : IThreadRunner
     {
         try
         {
-            InputManager.ProcessQueue(_game);
+            InputManager.ProcessQueue(game);
         }
         catch (Exception ex)
         {
-            Logger.Exception(ex, Logger.INPUT);
+            Logger.Exception(ex, Logger.Input);
         }
-        
+
     }
 }

@@ -15,42 +15,42 @@ public class DefaultEngineCheckbox : CompositeDrawable2d, IDisablable
 {
     public readonly Bindable<bool> Checked = new(true);
 
-    private bool _disabled = false;
+    private bool disabled = false;
 
     public bool Disabled
     {
-        get => _disabled;
+        get => disabled;
         set
         {
-            if (_disabled != value)
+            if (disabled != value)
             {
                 var newColor = value
-                    ? _textDrawable.Color.ChangeBrightness(-0.5f)
-                    : _textDrawable.Color.ChangeBrightness(0.5f);
-                _textDrawable.Color = newColor;
+                    ? textDrawable.Color.ChangeBrightness(-0.5f)
+                    : textDrawable.Color.ChangeBrightness(0.5f);
+                textDrawable.Color = newColor;
             }
 
-            _disabled = value;
-            _checkbox.Disabled = value;
+            disabled = value;
+            checkbox.Disabled = value;
         }
     }
 
     public string Text
     {
-        get => _textDrawable.Text;
-        set => _textDrawable.Text = value;
+        get => textDrawable.Text;
+        set => textDrawable.Text = value;
     }
 
     public float FontSize
     {
-        get => _textDrawable.FontSize;
-        set => _textDrawable.FontSize = value;
+        get => textDrawable.FontSize;
+        set => textDrawable.FontSize = value;
     }
 
-    private TextDrawable _textDrawable;
-    private Checkbox _checkbox;
+    private TextDrawable textDrawable;
+    private Checkbox checkbox;
 
-    public DefaultEngineColorCombination ColorCombination { get; init; } = DefaultEngineColorCombination.Surface2;
+    public DefaultEngineColorCombination ColorCombination { get; init; } = DefaultEngineColorCombination.SURFACE2;
 
     public DefaultEngineCheckbox()
     {
@@ -61,12 +61,12 @@ public class DefaultEngineCheckbox : CompositeDrawable2d, IDisablable
                 RelativeSizeAxes = Axes.Both,
                 Children =
                 [
-                    _checkbox = new Checkbox
+                    checkbox = new Checkbox
                     {
                         Anchor = Anchor.CentreRight,
                         Origin = Anchor.CentreRight,
                     },
-                    _textDrawable = new TextDrawable
+                    textDrawable = new TextDrawable
                     {
                         Text = string.Empty,
                         Anchor = Anchor.CentreLeft,
@@ -75,24 +75,24 @@ public class DefaultEngineCheckbox : CompositeDrawable2d, IDisablable
                 ]
             }
         ];
-        _checkbox.Checked.BindTo(Checked);
+        checkbox.Checked.BindTo(Checked);
     }
 
     protected internal override void OnUpdate()
     {
         base.OnUpdate();
-        _checkbox.Size = new Vector2(Size.Y);
+        checkbox.Size = new Vector2(Size.Y);
     }
 
     protected internal override bool OnHover(HoverEvent e)
     {
-        _checkbox.Hovered.Value = true;
+        checkbox.Hovered.Value = true;
         return true;
     }
 
     protected internal override void OnHoverLost(HoverEvent e)
     {
-        _checkbox.Hovered.Value = false;
+        checkbox.Hovered.Value = false;
         base.OnHoverLost(e);
     }
 
@@ -117,28 +117,28 @@ public class DefaultEngineCheckbox : CompositeDrawable2d, IDisablable
 
     private class Checkbox : DisableableContainer
     {
-        private static DefaultEngineColorCombination _checkboxColor = DefaultEngineColorCombination.Accent;
-        private static DefaultEngineColorCombination _colors = DefaultEngineColorCombination.Surface1;
+        private static DefaultEngineColorCombination checkboxColor = DefaultEngineColorCombination.ACCENT;
+        private static DefaultEngineColorCombination colors = DefaultEngineColorCombination.SURFACE1;
 
-        private readonly BindablePool _pool = new();
+        private readonly BindablePool pool = new();
         public readonly Bindable<bool> Checked;
         public readonly Bindable<bool> Hovered;
 
         public Checkbox()
         {
-            Checked = _pool.Borrow(true);
-            Hovered = _pool.Borrow(true);
+            Checked = pool.Borrow(true);
+            Hovered = pool.Borrow(true);
         }
         
-        private Vector2 InnerSize => new(Size.X - 10);
+        private Vector2 innerSize => new(Size.X - 10);
 
-        private DrawableBox2d _box = null!;
-        private DrawableBox2d _backgroundBox = null!;
+        private DrawableBox2d box = null!;
+        private DrawableBox2d backgroundBox = null!;
 
         protected internal override void OnUpdate()
         {
             base.OnUpdate();
-            _box.Size = InnerSize;
+            box.Size = innerSize;
         }
 
         protected override void OnLoading()
@@ -153,21 +153,21 @@ public class DefaultEngineCheckbox : CompositeDrawable2d, IDisablable
                     Origin = Anchor.Centre,
                     Children =
                     [
-                        _backgroundBox = new DrawableBox2d
+                        backgroundBox = new DrawableBox2d
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Color = Defaults.Background1,
+                            Color = Defaults.BACKGROUND1,
                             CornerRadius = 5,
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
                         },
 
-                        _box = new DrawableBox2d
+                        box = new DrawableBox2d
                         {
-                            Size = InnerSize,
+                            Size = innerSize,
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
-                            Color = Defaults.Accent,
+                            Color = Defaults.ACCENT,
                             Visible = Checked.Value,
                             CornerRadius = 3,
                         }
@@ -179,18 +179,18 @@ public class DefaultEngineCheckbox : CompositeDrawable2d, IDisablable
             {
                 if (e.NewValue)
                 {
-                    _box.ScaleTo(1f, 150, Easing.OutBack);
+                    box.ScaleTo(1f, 150, Easing.OutBack);
                 }
                 else
                 {
-                    _box.ScaleTo(0f, 100, Easing.InBack);
+                    box.ScaleTo(0f, 100, Easing.InBack);
                 }
             });
 
             Hovered.OnValueChange(e =>
             {
-                _box.FadeColorTo(e.NewValue ? _checkboxColor.Hovered : _checkboxColor.Normal, 100, Easing.In);
-                _backgroundBox.FadeColorTo(e.NewValue ? _colors.Hovered : _colors.Normal, 100, Easing.In);
+                box.FadeColorTo(e.NewValue ? checkboxColor.Hovered : checkboxColor.Normal, 100, Easing.In);
+                backgroundBox.FadeColorTo(e.NewValue ? colors.Hovered : colors.Normal, 100, Easing.In);
             });
 
             base.OnLoading();
@@ -198,7 +198,7 @@ public class DefaultEngineCheckbox : CompositeDrawable2d, IDisablable
         
         protected override void Dispose(bool isDisposing)
         {
-            _pool.Dispose();
+            pool.Dispose();
             base.Dispose(isDisposing);
         }
     }

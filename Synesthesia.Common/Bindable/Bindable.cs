@@ -1,29 +1,29 @@
 namespace Common.Bindable;
 
-public class Bindable<T>(T DefaultValue) : IDisposable
+public class Bindable<T>(T defaultValue) : IDisposable
 {
-    private T _default = DefaultValue;
-    private T _value = DefaultValue;
+    private T @default = defaultValue;
+    private T value = defaultValue;
 
     public BoundBindable? Bound = null;
 
     public T Value
     {
-        get => _value;
+        get => value;
         set
         {
-            var oldValue = _value;
-            _value = value;
-            _listeners.ForEach(listener => listener.Invoke(oldValue, value));
+            var oldValue = this.value;
+            this.value = value;
+            listeners.ForEach(listener => listener.Invoke(oldValue, value));
         }
     }
 
-    private List<BindableListener<T>> _listeners = [];
+    private List<BindableListener<T>> listeners = [];
 
     public BindableListener<T> OnValueChange(Action<BindableEvent<T>> func, bool triggerOnce = false)
     {
         var listener = new BindableListener<T>(func);
-        _listeners.Add(listener);
+        listeners.Add(listener);
         if (triggerOnce) listener.Invoke(Value, Value);
         return listener;
     }
@@ -41,31 +41,31 @@ public class Bindable<T>(T DefaultValue) : IDisposable
 
     public void SetSilently(T newValue)
     {
-        _value = newValue;
+        value = newValue;
     }
 
     public void Unbind()
     {
         if (Bound == null) return;
 
-        Bound.bindable.Unregister(Bound.listener);
+        Bound.Bindable.Unregister(Bound.Listener);
         Bound = null;
     }
 
     public void Unregister(BindableListener<T> listener)
     {
-        _listeners.Remove(listener);
+        listeners.Remove(listener);
     }
 
     public void ResetToDefaultValue()
     {
-        Value = _default;
+        Value = @default;
     }
 
     public void Dispose()
     {
         Unbind();
-        _listeners.Clear();
+        listeners.Clear();
     }
 
     public void TriggerChange()
@@ -73,7 +73,7 @@ public class Bindable<T>(T DefaultValue) : IDisposable
         Value = Value;
     }
 
-    public record BoundBindable(Bindable<T> bindable, BindableListener<T> listener);
+    public record BoundBindable(Bindable<T> Bindable, BindableListener<T> Listener);
 }
 
 public record BindableListener<T>(Action<BindableEvent<T>> Func)

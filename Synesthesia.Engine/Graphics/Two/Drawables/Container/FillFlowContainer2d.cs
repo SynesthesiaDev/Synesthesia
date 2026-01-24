@@ -19,7 +19,7 @@ public class FillFlowContainer2d : BackgroundContainer2d
         float maxWidth = 0;
         float maxHeight = 0;
 
-        foreach (var child in _children.Filter(child => child.Visible))
+        foreach (var child in InternalChildren.Filter(child => child.Visible))
         {
             child.Position = new Vector2(currentX, currentY);
 
@@ -54,7 +54,7 @@ public class FillFlowContainer2d : BackgroundContainer2d
     {
         DrawBackground();
 
-        foreach (var child in _children.Filter(child => child.Visible))
+        foreach (var child in InternalChildren.Filter(child => child.Visible))
         {
             child.OnDraw();
         }

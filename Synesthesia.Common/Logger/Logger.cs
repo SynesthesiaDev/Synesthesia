@@ -11,28 +11,28 @@ public static class Logger
 
     public static AtomicInt LogCount { get; } = new(0);
 
-    public static readonly EventDispatcher<LogEvent> MessageLogged = new();
+    public static readonly EventDispatcher<LogEvent> MESSAGE_LOGGED = new();
 
-    private static LogSeverity ERROR { get; } = new LogSeverity("Error", ConsoleColor.Red, "#960000");
-    private static LogSeverity WARNING { get; } = new LogSeverity("Warning", ConsoleColor.Yellow, "#a39800");
-    private static LogSeverity DEBUG { get; } = new LogSeverity("Debug");
-    private static LogSeverity VERBOSE { get; } = new LogSeverity("Verbose", ConsoleColor.Gray, "#004c75");
+    private static LogSeverity error { get; } = new LogSeverity("Error", ConsoleColor.Red, "#960000");
+    private static LogSeverity warning { get; } = new LogSeverity("Warning", ConsoleColor.Yellow, "#a39800");
+    private static LogSeverity debug { get; } = new LogSeverity("Debug");
+    private static LogSeverity verbose { get; } = new LogSeverity("Verbose", ConsoleColor.Gray, "#004c75");
 
-    public static LogType RUNTIME { get; } = new LogType("Runtime");
-    public static LogType INPUT { get; } = new LogType("Input");
-    public static LogType AUDIO { get; } = new LogType("Audio");
-    public static LogType NETWORK { get; } = new LogType("Network");
-    public static LogType RENDER { get; } = new LogType("Render");
-    public static LogType DATABASE { get; } = new LogType("Database");
-    public static LogType IO { get; } = new LogType("IO");
+    public static LogCategory Runtime { get; } = new LogCategory("Runtime");
+    public static LogCategory Input { get; } = new LogCategory("Input");
+    public static LogCategory Audio { get; } = new LogCategory("Audio");
+    public static LogCategory Network { get; } = new LogCategory("Network");
+    public static LogCategory Render { get; } = new LogCategory("Render");
+    public static LogCategory Database { get; } = new LogCategory("Database");
+    public static LogCategory Io { get; } = new LogCategory("IO");
 
-    public record LogSeverity(string name, ConsoleColor? consoleColor = null, string debugOverlayColor = "#4f4f4f");
+    public record LogSeverity(string Name, ConsoleColor? ConsoleColor = null, string DebugOverlayColor = "#4f4f4f");
 
-    public record LogType(string name);
+    public record LogCategory(string Name);
 
-    public record LogEvent(string message, LogSeverity severity, LogType type, bool displayTimestamp, Guid uuid);
+    public record LogEvent(string Message, LogSeverity Severity, LogCategory Category, bool DisplayTimestamp, Guid Uuid);
 
-    private static void log(string message, LogSeverity severity, LogType type, bool displayTimestamp)
+    private static void log(string message, LogSeverity severity, LogCategory category, bool displayTimestamp)
     {
         if (!Enabled) return;
 
@@ -44,34 +44,34 @@ public static class Logger
             logString += $"({formattedTime}) ";
         }
 
-        logString += $"[{severity.name}/{type.name}]: {message}";
+        logString += $"[{severity.Name}/{category.Name}]: {message}";
 
-        if (severity.consoleColor != null)
+        if (severity.ConsoleColor != null)
         {
-            logString = logString.Pastel(severity.consoleColor.Value);
+            logString = logString.Pastel(severity.ConsoleColor.Value);
         }
 
         Console.WriteLine(logString);
-        MessageLogged.Dispatch(new LogEvent(message, severity, type, displayTimestamp, Guid.NewGuid()));
+        MESSAGE_LOGGED.Dispatch(new LogEvent(message, severity, category, displayTimestamp, Guid.NewGuid()));
         LogCount.Increment();
     }
 
-    public static void Debug(string message) => log(message, DEBUG, RUNTIME, true);
-    public static void Verbose(string message) => log(message, VERBOSE, RUNTIME, true);
-    public static void Warning(string message) => log(message, WARNING, RUNTIME, true);
-    public static void Error(string message) => log(message, ERROR, RUNTIME, true);
+    public static void Debug(string message) => log(message, debug, Runtime, true);
+    public static void Verbose(string message) => log(message, verbose, Runtime, true);
+    public static void Warning(string message) => log(message, warning, Runtime, true);
+    public static void Error(string message) => log(message, error, Runtime, true);
 
-    public static void Debug(string message, LogType type) => log(message, DEBUG, type, true);
-    public static void Verbose(string message, LogType type) => log(message, VERBOSE, type, true);
-    public static void Warning(string message, LogType type) => log(message, WARNING, type, true);
-    public static void Error(string message, LogType type) => log(message, ERROR, type, true);
+    public static void Debug(string message, LogCategory category) => log(message, debug, category, true);
+    public static void Verbose(string message, LogCategory category) => log(message, verbose, category, true);
+    public static void Warning(string message, LogCategory category) => log(message, warning, category, true);
+    public static void Error(string message, LogCategory category) => log(message, error, category, true);
 
-    public static void Exception(Exception exception, LogType type)
+    public static void Exception(Exception exception, LogCategory category)
     {
-        log(exception.ToString(), ERROR, type, true);
+        log(exception.ToString(), error, category, true);
         if (exception.InnerException != null)
         {
-            Exception(exception.InnerException, type);
+            Exception(exception.InnerException, category);
         }
     }
 }

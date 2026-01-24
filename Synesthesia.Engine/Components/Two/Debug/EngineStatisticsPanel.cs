@@ -2,7 +2,9 @@ using System.Collections.Immutable;
 using System.Numerics;
 using Common.Statistics;
 using Common.Util;
+using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Configuration;
+using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
@@ -11,29 +13,34 @@ using SynesthesiaUtil.Types;
 
 namespace Synesthesia.Engine.Components.Two.Debug;
 
-public class EngineStatisticsPanel : CompositeDrawable2d
+public class EngineStatisticsPanel : EngineDebugComponent
 {
-    private static GCMemoryInfo GcMemoryInfo => GC.GetGCMemoryInfo();
+    private static GCMemoryInfo gcMemoryInfo => GC.GetGCMemoryInfo();
 
-    private ImmutableList<IEngineStatisticLine> _statistics = Lists.Immutable<IEngineStatisticLine>
+    private ImmutableList<EngineStatisticLine> statistics = Lists.Immutable<EngineStatisticLine>
     (
-        new EngineStatisticAtomicLine("Drawables", EngineStatistics.Drawables),
+        new EngineStatisticAtomicLine("Drawables", EngineStatistics.DRAWABLES),
         new Spacer(),
-        new EngineStatisticAtomicLine("BindablePools", EngineStatistics.BindablePools),
-        new EngineStatisticAtomicLine("Bindables Borrowed", EngineStatistics.BindablesBorrowed),
-        new EngineStatisticAtomicLine("Dispatchers", EngineStatistics.Dispatchers),
-        new EngineStatisticAtomicLine("Dispatcher Borrowed", EngineStatistics.DispatchersBorrowed),
+        new EngineStatisticAtomicLine("BindablePools", EngineStatistics.BINDABLE_POOLS),
+        new EngineStatisticAtomicLine("Bindables Borrowed", EngineStatistics.BINDABLES_BORROWED),
+        new EngineStatisticAtomicLine("Dispatchers", EngineStatistics.DISPATCHERS),
+        new EngineStatisticAtomicLine("Dispatcher Borrowed", EngineStatistics.DISPATCHERS_BORROWED),
         new Spacer(),
         new EngineStatisticTextLine("GC Collections Gen0", () => GC.CollectionCount(0)),
         new EngineStatisticTextLine("GC Collections Gen1", () => GC.CollectionCount(1)),
         new EngineStatisticTextLine("GC Collections Gen2", () => GC.CollectionCount(2)),
-        new EngineStatisticTextLine("GC Size Gen0", () => GcMemoryInfo.GenerationInfo[0].SizeAfterBytes),
-        new EngineStatisticTextLine("GC Size Gen1", () => GcMemoryInfo.GenerationInfo[1].SizeAfterBytes),
-        new EngineStatisticTextLine("GC Size Gen2", () => GcMemoryInfo.GenerationInfo[2].SizeAfterBytes),
-        new EngineStatisticTextLine("Finalization Queue", () => GcMemoryInfo.FinalizationPendingCount),
+        new EngineStatisticTextLine("GC Size Gen0", () => gcMemoryInfo.GenerationInfo[0].SizeAfterBytes),
+        new EngineStatisticTextLine("GC Size Gen1", () => gcMemoryInfo.GenerationInfo[1].SizeAfterBytes),
+        new EngineStatisticTextLine("GC Size Gen2", () => gcMemoryInfo.GenerationInfo[2].SizeAfterBytes),
+        new EngineStatisticTextLine("Finalization Queue", () => gcMemoryInfo.FinalizationPendingCount),
         new Spacer(),
-        new EngineStatisticAtomicLine("Schedulers", EngineStatistics.Schedulers),
-        new EngineStatisticAtomicLine("Scheduler Tasks", EngineStatistics.SchedulerTasks)
+        new EngineStatisticAtomicLine("Schedulers", EngineStatistics.SCHEDULERS),
+        new EngineStatisticAtomicLine("Scheduler Tasks", EngineStatistics.SCHEDULER_TASKS),
+        new Spacer(),
+        new EngineStatisticAtomicLine("Audio Channels", EngineStatistics.AUDIO_CHANNELS),
+        new EngineStatisticAtomicLine("Audio Mixers", EngineStatistics.AUDIO_MIXERS),
+        new EngineStatisticAtomicLine("Cached Audio Samples", EngineStatistics.CACHED_AUDIO_SAMPLES),
+        new EngineStatisticAtomicLine("BASS Cpu %", EngineStatistics.BASS_CPU)
     );
 
     protected override void OnLoading()
@@ -44,7 +51,7 @@ public class EngineStatisticsPanel : CompositeDrawable2d
             new BackgroundContainer2d
             {
                 AutoSizeAxes = Axes.Both,
-                BackgroundColor = Defaults.Background2,
+                BackgroundColor = Defaults.BACKGROUND2,
                 BackgroundAlpha = 0.9f,
                 BackgroundCornerRadius = 10f,
                 AutoSizePadding = new Vector4(10),
@@ -55,17 +62,17 @@ public class EngineStatisticsPanel : CompositeDrawable2d
                         AutoSizeAxes = Axes.Both,
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
-                        Children = [.._statistics.ToList()],
+                        Children = [..statistics.ToList()],
                         Direction = Direction.Vertical
                     },
                 ]
             }
         ];
     }
+    
+    private abstract class EngineStatisticLine : CompositeDrawable2d;
 
-    private abstract class IEngineStatisticLine : CompositeDrawable2d;
-
-    private class Spacer : IEngineStatisticLine
+    private class Spacer : EngineStatisticLine
     {
         protected override void OnLoading()
         {
@@ -73,8 +80,13 @@ public class EngineStatisticsPanel : CompositeDrawable2d
         }
     }
 
-    private class EngineStatisticTextLine(string Name, Func<long> StatisticGetter) : IEngineStatisticLine
+    private class EngineStatisticTextLine(string name, Func<string> statisticGetter) : EngineStatisticLine
     {
+        public EngineStatisticTextLine(string name, Func<long> longGetter) : this(name, () => $"{longGetter.Invoke():##,##0}")
+        {
+            
+        }
+
         protected override void OnLoading()
         {
             Size = new Vector2(250, 24);
@@ -84,17 +96,17 @@ public class EngineStatisticsPanel : CompositeDrawable2d
                 {
                     Anchor = Anchor.CentreLeft,
                     Origin = Anchor.CentreLeft,
-                    Text = Name
+                    Text = name
                 },
                 new FrameUpdatableTextDrawable
                 {
                     Anchor = Anchor.CentreRight,
                     Origin = Anchor.CentreRight,
-                    UpdateOnDraw = () => $"{StatisticGetter.Invoke():##,##0}"
-                }
+                    UpdateOnDraw = () => $"{statisticGetter.Invoke()}"
+                },
             ];
         }
     }
 
-    private class EngineStatisticAtomicLine(string Name, AtomicInt Counter) : EngineStatisticTextLine(Name, () => Counter.Value);
+    private class EngineStatisticAtomicLine(string name, IAtomic counter) : EngineStatisticTextLine(name, counter.GetValueAsString);
 }

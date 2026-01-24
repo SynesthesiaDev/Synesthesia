@@ -10,6 +10,6 @@ public static unsafe class RaylibLoggerProxy
     public static unsafe void HandleRaylibLog(int msgType, sbyte* text, sbyte* args)
     {
         var message = Logging.GetLogMessage(new IntPtr(text), new IntPtr(args));
-        Logger.Verbose($"{message}", Logger.RENDER);
+        // Logger.Verbose($"{message}", Logger.RENDER);
     }
 }

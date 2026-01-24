@@ -15,67 +15,70 @@ public static class Program
         {
         };
 
-        game.RootComposite2d.Children =
-        [
-            new FillFlowContainer2d
-            {
-                AutoSizeAxes = Axes.Both,
-                Direction = Direction.Vertical,
-                Anchor = Anchor.Centre,
-                Origin = Anchor.Centre,
-                Spacing = 10,
-                Children =
-                [
-                    new FillFlowContainer2d
-                    {
-                        AutoSizeAxes = Axes.Both,
-                        Direction = Direction.Horizontal,
-                        Spacing = 5,
-                        Children =
-                        [
-                            new DefaultEngineButton
-                            {
-                                Size = new Vector2(120, 40),
-                                Text = "Disabled :c",
-                                Disabled = true
-                            },
+        game.RootComposite2d.OnLoadComplete.Subscribe(_ =>
+        {
+            game.RootComposite2d.Children =
+            [
+                new FillFlowContainer2d
+                {
+                    AutoSizeAxes = Axes.Both,
+                    Direction = Direction.Vertical,
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    Spacing = 10,
+                    Children =
+                    [
+                        new FillFlowContainer2d
+                        {
+                            AutoSizeAxes = Axes.Both,
+                            Direction = Direction.Horizontal,
+                            Spacing = 5,
+                            Children =
+                            [
+                                new DefaultEngineButton
+                                {
+                                    Size = new Vector2(120, 40),
+                                    Text = "Disabled :c",
+                                    Disabled = true
+                                },
 
-                            new DefaultEngineButton
-                            {
-                                Size = new Vector2(120, 40),
-                                Text = "Clicky Clack",
-                            },
+                                new DefaultEngineButton
+                                {
+                                    Size = new Vector2(120, 40),
+                                    Text = "Clicky Clack",
+                                },
 
-                            new DefaultEngineButton
-                            {
-                                Size = new Vector2(120, 40),
-                                Text = "Click 2",
-                                TextColor = Color.Black,
-                                ColorCombination = DefaultEngineColorCombination.Accent
-                            },
-                        ]
-                    },
-                    
-                    new DefaultEngineCheckbox
-                    {
-                        Text = "Do Stuff",
-                        Size = new Vector2(200, 30),
-                    },
-                    
-                    new DefaultEngineCheckbox
-                    {
-                        Text = "Also disabled :c",
-                        Size = new Vector2(200, 30),
-                        Disabled = true,
-                    },
-                    new DefaultEngineTextbox
-                    {
-                        Size = new Vector2(300, 40),
-                    }
-                ],
-            },
-        ];
-        
+                                new DefaultEngineButton
+                                {
+                                    Size = new Vector2(120, 40),
+                                    Text = "Click 2",
+                                    TextColor = Color.Black,
+                                    ColorCombination = DefaultEngineColorCombination.ACCENT
+                                },
+                            ]
+                        },
+
+                        new DefaultEngineCheckbox
+                        {
+                            Text = "Do Stuff",
+                            Size = new Vector2(200, 30),
+                        },
+
+                        new DefaultEngineCheckbox
+                        {
+                            Text = "Also disabled :c",
+                            Size = new Vector2(200, 30),
+                            Disabled = true,
+                        },
+                        new DefaultEngineTextbox
+                        {
+                            Size = new Vector2(300, 40),
+                        }
+                    ],
+                },
+            ];
+        });
+
         game.Run();
     }
 }

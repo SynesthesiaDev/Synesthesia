@@ -2,13 +2,13 @@ namespace Synesthesia.Engine.Graphics.Three;
 
 public class CompositeDrawable3d : Drawable3d
 {
-    public List<Drawable3d> _children = [];
+    private List<Drawable3d> internalChildren = [];
     public List<Drawable3d> Children
     {
-        get => _children;
+        get => internalChildren;
         set
         {
-            _children = value;
+            internalChildren = value;
             foreach (var child in value)
             {
                 child.Load();

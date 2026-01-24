@@ -15,11 +15,11 @@ public abstract class Drawable3d : Drawable
     {
         get
         {
-            const float degToRad = MathF.PI / 180f;
+            const float deg_to_rad = MathF.PI / 180f;
             var rotation =
-                Matrix4x4.CreateRotationX(Rotation.X * degToRad) *
-                Matrix4x4.CreateRotationY(Rotation.Y * degToRad) *
-                Matrix4x4.CreateRotationZ(Rotation.Z * degToRad);
+                Matrix4x4.CreateRotationX(Rotation.X * deg_to_rad) *
+                Matrix4x4.CreateRotationY(Rotation.Y * deg_to_rad) *
+                Matrix4x4.CreateRotationZ(Rotation.Z * deg_to_rad);
 
             return
                 Matrix4x4.CreateScale(Size) *
@@ -41,20 +41,20 @@ public abstract class Drawable3d : Drawable
     {
         if (!Visible) return;
 
-        BeginLocalSpace();
+        beginLocalSpace();
         try
         {
             OnDraw3d();
         }
         finally
         {
-            EndLocalSpace();
+            endLocalSpace();
         }
     }
 
     protected abstract void OnDraw3d();
 
-    private void BeginLocalSpace()
+    private void beginLocalSpace()
     {
         Rlgl.PushMatrix();
 
@@ -69,7 +69,7 @@ public abstract class Drawable3d : Drawable
         //TODO shear
     }
 
-    private void EndLocalSpace()
+    private void endLocalSpace()
     {
         Rlgl.PopMatrix();
     }

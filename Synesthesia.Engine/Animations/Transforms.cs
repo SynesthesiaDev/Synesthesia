@@ -10,25 +10,25 @@ public abstract class Transform<T>
 
 public static class Transforms
 {
-    public static readonly Transform<float> Float =
+    public static readonly Transform<float> FLOAT =
         new FloatTranform((start, end, progress) => start + (end - start) * progress);
 
-    public static readonly Transform<int> Int =
+    public static readonly Transform<int> INT =
         new IntTransform((start, end, progress) => (int)(start + (end - start) * progress));
 
-    public static readonly Transform<long> Long =
+    public static readonly Transform<long> LONG =
         new LongTransform((start, end, progress) => (long)(start + (end - start) * progress));
 
-    public static readonly Transform<Vector2> Vector2 = new Vector2Transform((start, end, progress) =>
+    public static readonly Transform<Vector2> VECTOR2 = new Vector2Transform((start, end, progress) =>
         new Vector2(start.X + (end.X - start.X) * progress, start.Y + (end.Y - start.Y) * progress));
 
-    public static readonly Transform<Vector3> Vector3 = new Vector3Transform((start, end, progress) => new Vector3(
+    public static readonly Transform<Vector3> VECTOR3 = new Vector3Transform((start, end, progress) => new Vector3(
         start.X + (end.X - start.X) * progress,
         start.Y + (end.Y - start.Y) * progress,
         start.Z + (end.Z - start.Z) * progress
     ));
 
-    public static readonly Transform<Color> Color = new ColorTransform((start, end, progress) => new Color(
+    public static readonly Transform<Color> COLOR = new ColorTransform((start, end, progress) => new Color(
         start.R / 255f + (end.R / 255f - start.R / 255f) * progress,
         start.G / 255f + (end.G / 255f - start.G / 255f) * progress,
         start.B / 255f + (end.B / 255f - start.B / 255f) * progress,

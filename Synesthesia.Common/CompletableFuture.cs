@@ -4,26 +4,26 @@ namespace Common;
 
 public class CompletableFuture<T> : IFuture
 {
-    private Action<T>? _then = null;
+    private Action<T>? then = null;
 
-    private T? _result = default;
-    private Exception? _exception = null;
+    private T? result = default;
+    private Exception? exception = null;
 
-    private List<Action<T>> _successCallbacks = [];
-    private List<Action<Exception>> _failCallbacks = [];
-    private List<Action> _anyCompletionCallbacks = [];
+    private List<Action<T>> successCallbacks = [];
+    private List<Action<Exception>> failCallbacks = [];
+    private List<Action> anyCompletionCallbacks = [];
 
     public bool IsComplete { get; private set; } = false;
 
     public CompletableFuture<T> Then(Action<T> then)
     {
-        if (IsComplete && _exception == null)
+        if (IsComplete && exception == null)
         {
-            then.Invoke(_result!);
+            then.Invoke(result!);
         }
         else
         {
-            _successCallbacks.Add(then);
+            successCallbacks.Add(then);
         }
 
         return this;
@@ -33,26 +33,26 @@ public class CompletableFuture<T> : IFuture
     {
         if (IsComplete) return;
 
-        _result = value;
+        result = value;
         IsComplete = true;
-        _successCallbacks.ForEach(a => a.Invoke(value));
-        _anyCompletionCallbacks.ForEach(a => a.Invoke());
+        successCallbacks.ForEach(a => a.Invoke(value));
+        anyCompletionCallbacks.ForEach(a => a.Invoke());
     }
 
     public void Fail(Exception ex)
     {
         if (IsComplete) return;
-        _exception = ex;
+        exception = ex;
         IsComplete = true;
-        _failCallbacks.ForEach(a => a.Invoke(ex));
-        _anyCompletionCallbacks.ForEach(a => a.Invoke());
+        failCallbacks.ForEach(a => a.Invoke(ex));
+        anyCompletionCallbacks.ForEach(a => a.Invoke());
     }
 
 
     public void OnCompleted(Action callback)
     {
         if (IsComplete) callback();
-        else _anyCompletionCallbacks.Add(callback);
+        else anyCompletionCallbacks.Add(callback);
     }
 }
 
@@ -70,7 +70,7 @@ public static class CompletableFuture
         var returnedPromise = new CompletableFuture<Nothing>();
         if (futures.Length == 0)
         {
-            returnedPromise.Complete(Nothing.Instance);
+            returnedPromise.Complete(Nothing.INSTANCE);
             return returnedPromise;
         }
 
@@ -81,7 +81,7 @@ public static class CompletableFuture
             {
                 if (Interlocked.Decrement(ref remaining) == 0)
                 {
-                    returnedPromise.Complete(Nothing.Instance);
+                    returnedPromise.Complete(Nothing.INSTANCE);
                 }
             });
         }

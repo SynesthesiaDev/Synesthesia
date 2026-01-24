@@ -8,11 +8,11 @@ namespace Synesthesia.Engine.Host;
 
 public class WindowHost : IDisposable
 {
-    private BindablePool _bindablePool = new();
+    private BindablePool bindablePool = new();
 
     public bool ShouldWindowClose => Raylib.WindowShouldClose();
 
-    public Vector2 WindowScaleDPI => Raylib.GetWindowScaleDPI();
+    public Vector2 WindowScaleDpi => Raylib.GetWindowScaleDPI();
 
     public Bindable<WindowState> WindowState = null!;
 
@@ -20,7 +20,7 @@ public class WindowHost : IDisposable
 
     public Bindable<Vector2> WindowPosition = null!;
 
-    private bool _closing;
+    private bool closing;
 
     public unsafe void Initialize(Game game)
     {
@@ -31,9 +31,9 @@ public class WindowHost : IDisposable
         Raylib.InitWindow(400, 800, game.WindowTitle.Value);
 
 
-        WindowState = _bindablePool.Borrow(Host.WindowState.Normal);
-        IsFullscreen = _bindablePool.Borrow(EngineEnvironment.StartFullscreen);
-        WindowPosition = _bindablePool.Borrow(Raylib.GetWindowPosition());
+        WindowState = bindablePool.Borrow(Host.WindowState.Normal);
+        IsFullscreen = bindablePool.Borrow(EngineEnvironment.START_FULLSCREEN);
+        WindowPosition = bindablePool.Borrow(Raylib.GetWindowPosition());
 
         WindowState.OnValueChange(e =>
         {
@@ -57,11 +57,11 @@ public class WindowHost : IDisposable
 
     public void Dispose()
     {
-        if (_closing) return;
-        _closing = true;
-        Logger.Debug("Disposing WindowHost..", Logger.RENDER);
+        if (closing) return;
+        closing = true;
+        Logger.Debug("Disposing WindowHost..", Logger.Render);
         Close();
-        _bindablePool.Dispose();
+        bindablePool.Dispose();
     }
 
     public void ToggleFlag(ConfigFlags flag)

@@ -14,7 +14,7 @@ public class EditorLevelMetaScreen(Level level) : Screen
 {
     public readonly Level Level = level;
 
-    private DefaultEngineTextbox _textbox = null!;
+    private DefaultEngineTextbox textbox = null!;
 
     protected override void OnLoading()
     {
@@ -26,7 +26,7 @@ public class EditorLevelMetaScreen(Level level) : Screen
                 Origin = Anchor.Centre,
                 AutoSizeAxes = Axes.Both,
                 Direction = Direction.Vertical,
-                BackgroundColor = Defaults.Background1,
+                BackgroundColor = Defaults.BACKGROUND1,
                 BackgroundAlpha = 0.8f,
                 AutoSizePadding = new Vector4(20),
                 BackgroundCornerRadius = 10,
@@ -54,7 +54,7 @@ public class EditorLevelMetaScreen(Level level) : Screen
                         }
                     },
 
-                    _textbox = new DefaultEngineTextbox
+                    textbox = new DefaultEngineTextbox
                     {
                         Size = new Vector2(300, 40),
                         Anchor = Anchor.Centre,
@@ -83,6 +83,6 @@ public class EditorLevelMetaScreen(Level level) : Screen
 
     protected override void LoadComplete()
     {
-        _textbox.Text.Value = Level.DisplayName;
+        textbox.Text.Value = Level.DisplayName;
     }
 }

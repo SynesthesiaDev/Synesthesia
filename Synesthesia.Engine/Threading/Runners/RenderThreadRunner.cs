@@ -7,18 +7,20 @@ using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Threading.Runners;
 
-public class RenderThreadRunner : IThreadRunner
+public class RenderThreadRunner : ThreadRunner
 {
-    private Game _game = null!;
-    private Camera3D _camera;
+    private Game game = null!;
+    private Camera3D camera;
     public static Shader SignedDistanceFieldShader;
     public static Shader AlphaShader;
 
+    protected override Logger.LogCategory GetLoggerCategory() => Logger.Render;
+
     protected override void OnThreadInit(Game game)
     {
-        _game = game;
+        this.game = game;
         Logger.Debug("Loading window host..");
-        _game.WindowHost.Initialize(_game);
+        this.game.WindowHost.Initialize(this.game);
 
         // Load resources dependent on gl
         ResourceManager.ResolveAll("ttf");
@@ -28,7 +30,7 @@ public class RenderThreadRunner : IThreadRunner
         SignedDistanceFieldShader = ResourceManager.Get<Shader>("SynesthesiaResources.Shaders.sdf_font.fsh");
         AlphaShader = ResourceManager.Get<Shader>("SynesthesiaResources.Shaders.alpha.fsh");
 
-        _camera = new Camera3D
+        camera = new Camera3D
         {
             Position = new Vector3(6f, 6f, 6f),
             Target = Vector3.Zero,
@@ -38,73 +40,73 @@ public class RenderThreadRunner : IThreadRunner
         };
     }
 
-    public override void OnLoadComplete(Game game)
+    protected override void OnLoadComplete(Game game)
     {
     }
 
     protected override void OnLoop()
     {
-        _game.WindowHost.PollEvents();
+        game.WindowHost.PollEvents();
 
-        PollKeyboardEvents();
+        pollKeyboardEvents();
 
-        if (Raylib.IsWindowReady() && _game.WindowHost.ShouldWindowClose)
+        if (Raylib.IsWindowReady() && game.WindowHost.ShouldWindowClose)
         {
-            _game.Dispose();
+            game.Dispose();
         }
 
-        _game.RootComposite2d.Size = _game.WindowHost.WindowSize;
-        _game.EngineDebugOverlay.Size = _game.WindowHost.WindowSize;
+        game.RootComposite2d.Size = game.WindowHost.WindowSize;
+        game.EngineDebugOverlay.Size = game.WindowHost.WindowSize;
 
-        Raylib.UpdateCamera(ref _camera, CameraMode.Custom);
+        Raylib.UpdateCamera(ref camera, CameraMode.Custom);
 
         Raylib.BeginDrawing();
         Raylib.ClearBackground(Color.Black);
 
-        Raylib.BeginMode3D(_camera);
+        Raylib.BeginMode3D(camera);
         // Raylib.DrawGrid(20, 1.0f);
-        _game.RootComposite3d.OnDraw();
+        game.RootComposite3d.OnDraw();
         Raylib.EndMode3D();
 
-        _game.RootComposite2d.OnDraw();
-        _game.EngineDebugOverlay.OnDraw();
+        game.RootComposite2d.OnDraw();
+        game.EngineDebugOverlay.OnDraw();
 
         Raylib.EndDrawing();
         Raylib.EndBlendMode();
 
-        PollKeyboardEvents();
+        pollKeyboardEvents();
     }
 
-    private readonly HashSet<KeyboardKey> _activeKeys = [];
-    private readonly bool[] _activeMouseButtons = new bool[6];
+    private readonly HashSet<KeyboardKey> activeKeys = [];
+    private readonly bool[] activeMouseButtons = new bool[6];
 
-    private void PollKeyboardEvents()
+    private void pollKeyboardEvents()
     {
         int key;
         while ((key = Raylib.GetKeyPressed()) != 0)
         {
             var keyboardKey = (KeyboardKey)key;
             InputManager.EnqueueEvent(new KeyInputEvent(keyboardKey, true));
-            _activeKeys.Add(keyboardKey);
+            activeKeys.Add(keyboardKey);
         }
 
-        _activeKeys.ToList().Filter(k => Raylib.IsKeyReleased(k)).ForEach(keyboardKey =>
+        activeKeys.ToList().Filter(k => Raylib.IsKeyReleased(k)).ForEach(keyboardKey =>
         {
-            _activeKeys.Remove(keyboardKey);
+            activeKeys.Remove(keyboardKey);
             InputManager.EnqueueEvent(new KeyInputEvent(keyboardKey, false));
         });
 
         for (var i = 0; i < 6; i++)
         {
             var mouseButton = (MouseButton)i;
-            var previousState = _activeMouseButtons[i];
+            var previousState = activeMouseButtons[i];
             var currentState = Raylib.IsMouseButtonDown(mouseButton);
             if (previousState == currentState) continue;
-            
+
             InputManager.EnqueueEvent(new MouseButtonInputEvent(mouseButton, currentState));
-            _activeMouseButtons[i] = currentState;
+            activeMouseButtons[i] = currentState;
         }
-        
+
         var mousePosition = Raylib.GetMousePosition();
         if (mousePosition != InputManager.LastMousePosition)
         {

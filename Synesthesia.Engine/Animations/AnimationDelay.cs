@@ -5,9 +5,9 @@ public class AnimationDelay(long duration) : IAnimation
     public bool IsCompleted { get; set; }
     public bool Loop { get; set; } = false;
 
-    private long _startTime = -1;
+    private long startTime = -1;
 
-    public void Start(long currentTime) => _startTime = currentTime;
+    public void Start(long currentTime) => startTime = currentTime;
 
     public Action? OnComplete { get; set; } = null;
 
@@ -17,9 +17,9 @@ public class AnimationDelay(long duration) : IAnimation
 
     public bool Update(long currentTime)
     {
-        if (_startTime == -1 || IsCompleted) return IsCompleted;
+        if (startTime == -1 || IsCompleted) return IsCompleted;
 
-        if (currentTime - _startTime >= duration)
+        if (currentTime - startTime >= duration)
         {
             IsCompleted = true;
         }
@@ -29,7 +29,7 @@ public class AnimationDelay(long duration) : IAnimation
 
     public void Reset()
     {
-        _startTime = -1;
+        startTime = -1;
         IsCompleted = false;
     }
 

@@ -12,9 +12,9 @@ namespace Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 
 public class DefaultEngineTextbox : DisableableContainer, IAcceptsFocus
 {
-    private BackgroundContainer2d _outline = null!;
-    private BackgroundContainer2d _backgroundContainer2d = null!;
-    private BarebonesTextbox _textbox = null!;
+    private BackgroundContainer2d outline = null!;
+    private BackgroundContainer2d backgroundContainer2d = null!;
+    private BarebonesTextbox textbox = null!;
 
     public string Hint { get; set; } = string.Empty;
 
@@ -25,19 +25,19 @@ public class DefaultEngineTextbox : DisableableContainer, IAcceptsFocus
     {
         Children =
         [
-            _outline = new BackgroundContainer2d
+            outline = new BackgroundContainer2d
             {
                 RelativeSizeAxes = Axes.Both,
-                BackgroundColor = Defaults.Background3,
+                BackgroundColor = Defaults.BACKGROUND3,
                 BackgroundCornerRadius = 10,
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
                 Children =
                 [
-                    _backgroundContainer2d = new BackgroundContainer2d
+                    backgroundContainer2d = new BackgroundContainer2d
                     {
                         RelativeSizeAxes = Axes.Both,
-                        BackgroundColor = Defaults.Background1,
+                        BackgroundColor = Defaults.BACKGROUND1,
                         BackgroundCornerRadius = 10,
                         Margin = new Vector4(1),
                         Anchor = Anchor.Centre,
@@ -52,7 +52,7 @@ public class DefaultEngineTextbox : DisableableContainer, IAcceptsFocus
                                 Margin = new Vector4(5),
                                 Children =
                                 [
-                                    _textbox = new BarebonesTextbox
+                                    textbox = new BarebonesTextbox
                                     {
                                         RelativeSizeAxes = Axes.Both,
                                         Caret = () => new BarebonesTextbox.BarebonesTextboxCaret
@@ -74,23 +74,23 @@ public class DefaultEngineTextbox : DisableableContainer, IAcceptsFocus
 
     protected override void LoadComplete()
     {
-        Focused.OnValueChange(_ => UpdateVisualState());
-        UpdateVisualState();
+        Focused.OnValueChange(_ => updateVisualState());
+        updateVisualState();
         
-        Text.BindTo(_textbox.Text);
+        Text.BindTo(textbox.Text);
     }
 
     protected internal override bool OnHover(HoverEvent e)
     {
         IsHovered = true;
-        UpdateVisualState();
+        updateVisualState();
         return true;
     }
 
     protected internal override void OnHoverLost(HoverEvent e)
     {
         IsHovered = false;
-        UpdateVisualState();
+        updateVisualState();
     }
 
     protected internal override void OnMouseUp(PointInput e)
@@ -106,38 +106,38 @@ public class DefaultEngineTextbox : DisableableContainer, IAcceptsFocus
 
     public Drawable2d GetOwningDrawable() => this;
 
-    private void UpdateVisualState()
+    private void updateVisualState()
     {
         var borderColor = Focused.Value switch
         {
-            true when IsHovered => DefaultEngineColorCombination.Accent.Hovered,
-            true => DefaultEngineColorCombination.Accent.Normal,
-            _ => IsHovered ? DefaultEngineColorCombination.Surface3.Hovered : DefaultEngineColorCombination.Surface3.Normal
+            true when IsHovered => DefaultEngineColorCombination.ACCENT.Hovered,
+            true => DefaultEngineColorCombination.ACCENT.Normal,
+            _ => IsHovered ? DefaultEngineColorCombination.SURFACE3.Hovered : DefaultEngineColorCombination.SURFACE3.Normal
         };
 
         
-        _outline.FadeBackgroundTo(borderColor, 150, Easing.OutCubic);
+        outline.FadeBackgroundTo(borderColor, 150, Easing.OutCubic);
         
-        _backgroundContainer2d.FadeBackgroundTo(IsHovered ? DefaultEngineColorCombination.Surface1.Hovered : DefaultEngineColorCombination.Surface1.Normal, 100, Easing.OutCubic);
+        backgroundContainer2d.FadeBackgroundTo(IsHovered ? DefaultEngineColorCombination.SURFACE1.Hovered : DefaultEngineColorCombination.SURFACE1.Normal, 100, Easing.OutCubic);
     }
 
     public void OnFocusGained()
     {
         Focused.Value = true;
-        _textbox.OnFocusGained();
-        UpdateVisualState();
+        textbox.OnFocusGained();
+        updateVisualState();
     }
 
     public void OnFocusLost()
     {
         Focused.Value = false;
-        _textbox.OnFocusLost();
-        UpdateVisualState();
+        textbox.OnFocusLost();
+        updateVisualState();
     }
 
     public void OnCharacterTyped(char character)
     {
-        _textbox.OnCharacterTyped(character);
+        textbox.OnCharacterTyped(character);
     }
 
     protected override void Dispose(bool isDisposing)

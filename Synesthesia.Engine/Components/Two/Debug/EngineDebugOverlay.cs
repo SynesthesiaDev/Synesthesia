@@ -12,7 +12,7 @@ namespace Synesthesia.Engine.Components.Two.Debug;
 
 public class EngineDebugOverlay : CompositeDrawable2d
 {
-    public static readonly ActionBinding EngineDebugOverlayToggle = new()
+    public static readonly ActionBinding ENGINE_DEBUG_OVERLAY_TOGGLE = new()
     {
         Keyboard = new KeyboardBinding(KeyboardKey.F1, KeyboardKey.LeftControl), 
         ActionName = "Toggle Engine Debug Overlay",
@@ -24,9 +24,9 @@ public class EngineDebugOverlay : CompositeDrawable2d
     // public static readonly HotKey EngineStatisticsToggle = new(KeyboardKey.F3, KeyboardKey.LeftControl);
     // public static readonly HotKey LoggerOverlayToggle = new(KeyboardKey.F4, KeyboardKey.LeftControl);
 
-    private FrameCounter _frameCounter = null!;
-    private EngineStatisticsPanel _engineStatisticsPanel = null!;
-    private DebugLoggerOverlay _debugLoggerOverlay = null!;
+    private FrameCounter frameCounter = null!;
+    private EngineStatisticsPanel engineStatisticsPanel = null!;
+    private DebugLoggerOverlay debugLoggerOverlay = null!;
 
     protected internal override void OnUpdate()
     {
@@ -46,12 +46,12 @@ public class EngineDebugOverlay : CompositeDrawable2d
                 Spacing = 10f,
                 Children =
                 [
-                    _frameCounter = new FrameCounter { Visible = EngineConfiguration.ShowFps, Scale = new Vector2(0.8f) },
-                    _engineStatisticsPanel = new EngineStatisticsPanel { Visible = EngineConfiguration.ShowEngineStatistics, Scale = new Vector2(0.8f) },
+                    frameCounter = new FrameCounter { Visible = EngineConfiguration.ShowFps, Scale = new Vector2(0.8f) },
+                    engineStatisticsPanel = new EngineStatisticsPanel { Visible = EngineConfiguration.ShowEngineStatistics, Scale = new Vector2(0.8f) },
                 ]
             },
 
-            _debugLoggerOverlay = new DebugLoggerOverlay
+            debugLoggerOverlay = new DebugLoggerOverlay
             {
                 Anchor = Anchor.BottomLeft,
                 Origin = Anchor.BottomLeft,
@@ -61,14 +61,14 @@ public class EngineDebugOverlay : CompositeDrawable2d
             },
         ];
 
-        InputManager.RegisterActionInput(EngineDebugOverlayToggle);
+        InputManager.RegisterActionInput(ENGINE_DEBUG_OVERLAY_TOGGLE);
 
         base.OnLoading();
     }
 
     protected internal override bool OnActionBindingDown(ActionBinding e)
     {
-        if (e != EngineDebugOverlayToggle) return base.OnActionBindingDown(e);
+        if (e != ENGINE_DEBUG_OVERLAY_TOGGLE) return base.OnActionBindingDown(e);
         
         Visible = !Visible;
         return true;

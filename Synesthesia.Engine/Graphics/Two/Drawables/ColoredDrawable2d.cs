@@ -19,7 +19,7 @@ public abstract class ColoredDrawable2d : Drawable2d
             newColor,
             duration,
             easing,
-            Transforms.Color,
+            Transforms.COLOR,
             (color) => { Color = color; }
         );
     }

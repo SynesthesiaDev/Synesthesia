@@ -26,11 +26,11 @@ public abstract class Screen : Container2d
         base.OnUpdate();
     }
 
-    public virtual CompletableFuture<Nothing> OnEntering(ScreenTransitionEvent e) => CompletableFuture.Completed(Nothing.Instance);
+    public virtual CompletableFuture<Nothing> OnEntering(ScreenTransitionEvent e) => CompletableFuture.Completed(Nothing.INSTANCE);
 
-    public virtual CompletableFuture<Nothing> OnExiting(ScreenExitEvent e) => CompletableFuture.Completed(Nothing.Instance);
+    public virtual CompletableFuture<Nothing> OnExiting(ScreenExitEvent e) => CompletableFuture.Completed(Nothing.INSTANCE);
 
-    public virtual CompletableFuture<Nothing> OnResuming(ScreenTransitionEvent e) => CompletableFuture.Completed(Nothing.Instance);
+    public virtual CompletableFuture<Nothing> OnResuming(ScreenTransitionEvent e) => CompletableFuture.Completed(Nothing.INSTANCE);
 
-    public virtual CompletableFuture<Nothing> OnSuspending(ScreenTransitionEvent e) => CompletableFuture.Completed(Nothing.Instance);
+    public virtual CompletableFuture<Nothing> OnSuspending(ScreenTransitionEvent e) => CompletableFuture.Completed(Nothing.INSTANCE);
 }

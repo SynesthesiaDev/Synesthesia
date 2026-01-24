@@ -7,49 +7,49 @@ namespace Synesthesia.Engine.Graphics.Two.Drawables.Text;
 
 public class TextDrawable : ColoredDrawable2d
 {
-    public static readonly Font DefaultFont = ResourceManager.Get<Font>("SynesthesiaResources.Quicksand-Regular.ttf");
+    public static readonly Font DEFAULT_FONT = ResourceManager.Get<Font>("SynesthesiaResources.Quicksand-Regular.ttf");
 
-    private Font _font = DefaultFont;
-    private string _text = string.Empty;
-    private float _fontSize = 24f;
-    private float _spacing = 0f;
+    private Font font = DEFAULT_FONT;
+    private string text = string.Empty;
+    private float fontSize = 24f;
+    private float spacing = 0f;
 
     public Font Font
     {
-        get => _font;
+        get => font;
         set
         {
-            _font = value;
+            font = value;
             updateSize();
         }
     }
 
     public string Text
     {
-        get => _text;
+        get => text;
         set
         {
-            _text = value;
+            text = value;
             updateSize();
         }
     }
 
     public float FontSize
     {
-        get => _fontSize;
+        get => fontSize;
         set
         {
-            _fontSize = value;
+            fontSize = value;
             updateSize();
         }
     }
 
     public float Spacing
     {
-        get => _spacing;
+        get => spacing;
         set
         {
-            _spacing = value;
+            spacing = value;
             updateSize();
         }
     }
@@ -64,7 +64,7 @@ public class TextDrawable : ColoredDrawable2d
         Raylib.SetShaderValue(shader, alphaLoc, InheritedAlpha, ShaderUniformDataType.Float);
         
         Raylib.BeginShaderMode(shader);
-        Raylib.DrawTextEx(Font, Text, Vector2.Zero, FontSize, Spacing, applyAlpha(Color));
+        Raylib.DrawTextEx(Font, Text, Vector2.Zero, FontSize, Spacing, ApplyAlpha(Color));
         Raylib.EndShaderMode();
     }
 

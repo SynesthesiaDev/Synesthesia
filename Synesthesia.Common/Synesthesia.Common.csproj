@@ -11,7 +11,7 @@
     <ItemGroup>
       <PackageReference Include="Pastel" Version="7.0.1" />
       <PackageReference Include="SynesthesiaDev.Codon.Codon" Version="1.0.1" />
-      <PackageReference Include="SynesthesiaUtils" Version="1.1.0" />
+      <PackageReference Include="SynesthesiaUtils" Version="1.2.0" />
     </ItemGroup>
 
 </Project>

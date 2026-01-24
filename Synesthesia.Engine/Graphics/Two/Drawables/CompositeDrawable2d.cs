@@ -9,16 +9,16 @@ namespace Synesthesia.Engine.Graphics.Two.Drawables;
 
 public class CompositeDrawable2d : Drawable2d
 {
-    protected List<Drawable2d> _children = [];
+    protected List<Drawable2d> InternalChildren = [];
 
     public Vector4 AutoSizePadding { get; set; } = new(0);
 
     public IEnumerable<Drawable2d> Children
     {
-        get => _children;
+        get => InternalChildren;
         set
         {
-            _children = value.ToList();
+            InternalChildren = value.ToList();
             foreach (var child in value)
             {
                 child.Parent = this;
@@ -29,7 +29,7 @@ public class CompositeDrawable2d : Drawable2d
 
     protected internal void UpdateHoverState(HoverEvent e)
     {
-        foreach (var child in _children.Filter(c => c.AcceptsInputs()).Reversed())
+        foreach (var child in InternalChildren.Filter(c => c.AcceptsInputs()).Reversed())
         {
             if (child.IsHovered && !child.Contains(e.MousePosition))
             {
@@ -51,7 +51,7 @@ public class CompositeDrawable2d : Drawable2d
 
     protected internal void UpdatePointInputState(PointInput e, bool down)
     {
-        foreach (var child in _children.Filter(c => c.AcceptsInputs()).Reversed())
+        foreach (var child in InternalChildren.Filter(c => c.AcceptsInputs()).Reversed())
         {
             if (down && !child.IsMouseDown && child.IsHovered && child.OnMouseDown(e))
             {
@@ -73,31 +73,31 @@ public class CompositeDrawable2d : Drawable2d
 
     protected internal void UpdateActionBindingState(ActionBinding e, bool down)
     {
-        foreach (var child in _children.Filter(c => c.AcceptsInputs()).Reversed())
+        foreach (var child in InternalChildren.Filter(c => c.AcceptsInputs()).Reversed())
         {
             var handled = down && child.OnActionBindingDown(e);
 
             if (!down) child.OnActionBindingUp(e);
 
             if (handled) continue;
-            
+
             if (child is CompositeDrawable2d drawable2d)
             {
                 drawable2d.UpdateActionBindingState(e, down);
             }
         }
     }
-    
+
     protected internal void UpdateKeyState(KeyboardKey e, bool down)
     {
-        foreach (var child in _children.Filter(c => c.AcceptsInputs()).Reversed())
+        foreach (var child in InternalChildren.Filter(c => c.AcceptsInputs()).Reversed())
         {
             var handled = down && child.OnKeyDown(e);
 
             if (!down) child.OnKeyUp(e);
 
             if (handled) continue;
-            
+
             if (child is CompositeDrawable2d drawable2d)
             {
                 drawable2d.UpdateKeyState(e, down);
@@ -107,14 +107,14 @@ public class CompositeDrawable2d : Drawable2d
 
     public void AddChild(Drawable2d child)
     {
-        _children.Add(child);
+        InternalChildren.Add(child);
         child.Parent = this;
         child.Load();
     }
 
     public void RemoveChild(Drawable2d child)
     {
-        _children.Remove(child);
+        InternalChildren.Remove(child);
         child.Dispose();
     }
 
@@ -132,13 +132,13 @@ public class CompositeDrawable2d : Drawable2d
 
     protected override void OnDraw2d()
     {
-        _children.Filter(c => c.Visible).ForEach(child => child.OnDraw());
+        InternalChildren.Filter(c => c.Visible).ForEach(child => child.OnDraw());
     }
 
     protected override void Dispose(bool isDisposing)
     {
-        _children.ForEach(c => c.Dispose());
-        _children.Clear();
+        InternalChildren.ForEach(c => c.Dispose());
+        InternalChildren.Clear();
         base.Dispose(isDisposing);
     }
 
@@ -158,12 +158,12 @@ public class CompositeDrawable2d : Drawable2d
 
     public Vector2 GetChildrenSize()
     {
-        if (_children.Count == 0) return Vector2.Zero;
+        if (InternalChildren.Count == 0) return Vector2.Zero;
 
         float minX = float.MaxValue, minY = float.MaxValue;
         float maxX = float.MinValue, maxY = float.MinValue;
 
-        foreach (var child in _children)
+        foreach (var child in InternalChildren)
         {
             minX = Math.Min(minX, child.Position.X);
             minY = Math.Min(minY, child.Position.Y);
@@ -183,7 +183,7 @@ public class CompositeDrawable2d : Drawable2d
 
     private static void getChildrenRecursive(CompositeDrawable2d compositeDrawable2d, List<Drawable2d> outList)
     {
-        foreach (var child in compositeDrawable2d._children)
+        foreach (var child in compositeDrawable2d.InternalChildren)
         {
             outList.Add(child);
             if (child is CompositeDrawable2d compositeChild)

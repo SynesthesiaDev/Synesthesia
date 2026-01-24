@@ -6,7 +6,7 @@ namespace Synesthesia.Engine.Utility;
 
 public static class ColorUtil
 {
-    private static Dictionary<string, Color> _cachedColors = new();
+    private static readonly Dictionary<string, Color> cached_colors = new();
 
     public static Color ChangeBrightness(this Color color, float correctionFactor)
     {
@@ -41,10 +41,10 @@ public static class ColorUtil
     public static Color GetOrCacheColor(string hex)
     {
         hex = hex.RemovePrefix("#");
-        if (_cachedColors.TryGetValue(hex, out var color)) return color!;
+        if (cached_colors.TryGetValue(hex, out var color)) return color!;
 
         var newColor = FromHex(hex);
-        _cachedColors[hex] = newColor;
+        cached_colors[hex] = newColor;
         return newColor;
     }
 

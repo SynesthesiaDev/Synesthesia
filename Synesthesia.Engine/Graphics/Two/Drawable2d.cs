@@ -45,11 +45,11 @@ public abstract class Drawable2d : Drawable
             var anchorPos = Vector2.Zero;
             if (Parent != null)
             {
-                anchorPos = Parent.ScreenSpacePosition + GetAnchorOffset(Parent.Size, Anchor);
+                anchorPos = Parent.ScreenSpacePosition + getAnchorOffset(Parent.Size, Anchor);
             }
 
-            var originOffset = GetAnchorOffset(Size, Origin) * Scale;
-            return anchorPos + Position + GetMarginOffset() - originOffset;
+            var originOffset = getAnchorOffset(Size, Origin) * Scale;
+            return anchorPos + Position + getMarginOffset() - originOffset;
         }
     }
 
@@ -70,15 +70,15 @@ public abstract class Drawable2d : Drawable
         var pointInParentSpace = Parent.ToLocalSpace(screenSpacePoint);
 
         // offset applied in matrix4
-        var anchorOffset = GetAnchorOffset(Parent.Size, Anchor);
-        var originOffset = GetAnchorOffset(Size, Origin);
+        var anchorOffset = getAnchorOffset(Parent.Size, Anchor);
+        var originOffset = getAnchorOffset(Size, Origin);
 
         var localPoint = (pointInParentSpace - (anchorOffset + Position + new Vector2(Margin.X, Margin.Y))) + originOffset;
 
         return localPoint / Scale;
     }
 
-    private Vector2 GetMarginOffset()
+    private Vector2 getMarginOffset()
     {
         var x = Anchor.HasFlag(Anchor.Left) ? Margin.X : (Anchor.HasFlag(Anchor.Right) ? -Margin.Z : 0);
         var y = Anchor.HasFlag(Anchor.Top) ? Margin.Y : (Anchor.HasFlag(Anchor.Bottom) ? -Margin.W : 0);
@@ -155,19 +155,19 @@ public abstract class Drawable2d : Drawable
     }
 
     //TODO proper shader caching
-    private static int _alphaUniformLoc = -1;
+    private static int alphaUniformLoc = -1;
 
     protected internal sealed override void OnDraw()
     {
         if (!Visible || InheritedAlpha <= 0.001f) return; // Skip if effectively invisible
-        if (_alphaUniformLoc == -1)
-            _alphaUniformLoc = Raylib.GetShaderLocation(RenderThreadRunner.AlphaShader, "alpha");
+        if (alphaUniformLoc == -1)
+            alphaUniformLoc = Raylib.GetShaderLocation(RenderThreadRunner.AlphaShader, "alpha");
 
-        Raylib.SetShaderValue(RenderThreadRunner.AlphaShader, _alphaUniformLoc, InheritedAlpha, ShaderUniformDataType.Float);
+        Raylib.SetShaderValue(RenderThreadRunner.AlphaShader, alphaUniformLoc, InheritedAlpha, ShaderUniformDataType.Float);
         Raylib.BeginShaderMode(RenderThreadRunner.AlphaShader);
         Raylib.BeginBlendMode(BlendMode.Alpha);
 
-        BeginLocalSpace();
+        beginLocalSpace();
 
         try
         {
@@ -175,7 +175,7 @@ public abstract class Drawable2d : Drawable
         }
         finally
         {
-            EndLocalSpace();
+            endLocalSpace();
             Raylib.EndBlendMode();
             Raylib.EndShaderMode();
         }
@@ -188,18 +188,18 @@ public abstract class Drawable2d : Drawable
 
     protected abstract void OnDraw2d();
 
-    private void BeginLocalSpace()
+    private void beginLocalSpace()
     {
         Rlgl.PushMatrix();
 
         var anchorPos = Vector2.Zero;
-        var marginOffset = GetMarginOffset();
+        var marginOffset = getMarginOffset();
         if (Parent != null)
         {
-            anchorPos = GetAnchorOffset(Parent.Size, Anchor);
+            anchorPos = getAnchorOffset(Parent.Size, Anchor);
         }
 
-        var originOffset = GetAnchorOffset(Size, Origin);
+        var originOffset = getAnchorOffset(Size, Origin);
 
         Rlgl.Translatef(anchorPos.X + Position.X + Margin.X, anchorPos.Y + Position.Y + Margin.Y, 0);
 
@@ -212,12 +212,12 @@ public abstract class Drawable2d : Drawable
         // Rlgl.Translatef(anchorPos.X + Position.X + marginOffset.X, anchorPos.Y + Position.Y + marginOffset.Y, 0);
     }
 
-    private void EndLocalSpace()
+    private void endLocalSpace()
     {
         Rlgl.PopMatrix();
     }
 
-    private static Vector2 GetAnchorOffset(Vector2 size, Anchor anchor)
+    private static Vector2 getAnchorOffset(Vector2 size, Anchor anchor)
     {
         return anchor switch
         {
@@ -261,22 +261,22 @@ public abstract class Drawable2d : Drawable
 
     public Animation<Vector2> ScaleTo(Vector2 newScale, long duration, Easing easing)
     {
-        return TransformTo(nameof(Scale), Scale, newScale, duration, easing, Transforms.Vector2, vec => { Scale = vec; });
+        return TransformTo(nameof(Scale), Scale, newScale, duration, easing, Transforms.VECTOR2, vec => { Scale = vec; });
     }
 
     public Animation<Vector3> RotateTo(Vector3 newRotation, long duration, Easing easing)
     {
-        return TransformTo(nameof(Rotation), Rotation, newRotation, duration, easing, Transforms.Vector3, vec => { Rotation = vec; });
+        return TransformTo(nameof(Rotation), Rotation, newRotation, duration, easing, Transforms.VECTOR3, vec => { Rotation = vec; });
     }
     
     public Animation<float> FadeTo(float newAlpha, long duration, Easing easing)
     {
-        return TransformTo(nameof(Alpha), Alpha, newAlpha, duration, easing, Transforms.Float, a => Alpha = a);
+        return TransformTo(nameof(Alpha), Alpha, newAlpha, duration, easing, Transforms.FLOAT, a => Alpha = a);
     }
 
     public Animation<float> FadeFromTo(float startAlpha, float endAlpha, long duration, Easing easing)
     {
-        return TransformTo(nameof(Alpha), startAlpha, endAlpha, duration, easing, Transforms.Float, a => Alpha = a);
+        return TransformTo(nameof(Alpha), startAlpha, endAlpha, duration, easing, Transforms.FLOAT, a => Alpha = a);
     }
     
     protected override void Dispose(bool isDisposing)
