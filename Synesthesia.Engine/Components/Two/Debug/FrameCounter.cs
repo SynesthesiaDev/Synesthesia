@@ -11,6 +11,12 @@ namespace Synesthesia.Engine.Components.Two.Debug;
 
 public class FrameCounter : EngineDebugComponent
 {
+    protected internal override void OnUpdate()
+    {
+        if(!Visible) return;
+        base.OnUpdate();
+    }
+
     protected override void OnLoading()
     {
         var game = DependencyContainer.Get<Game>();

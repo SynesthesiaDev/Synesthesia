@@ -14,7 +14,7 @@ public class EngineDebugOverlay : CompositeDrawable2d
 {
     public static readonly ActionBinding ENGINE_DEBUG_OVERLAY_TOGGLE = new()
     {
-        Keyboard = new KeyboardBinding(KeyboardKey.F1, KeyboardKey.LeftControl), 
+        Keyboard = new KeyboardBinding(KeyboardKey.F1, KeyboardKey.LeftControl),
         ActionName = "Toggle Engine Debug Overlay",
     };
 
@@ -46,8 +46,20 @@ public class EngineDebugOverlay : CompositeDrawable2d
                 Spacing = 10f,
                 Children =
                 [
-                    frameCounter = new FrameCounter { Visible = EngineConfiguration.ShowFps, Scale = new Vector2(0.8f) },
-                    engineStatisticsPanel = new EngineStatisticsPanel { Visible = EngineConfiguration.ShowEngineStatistics, Scale = new Vector2(0.8f) },
+                    frameCounter = new FrameCounter
+                    {
+                        Visible = EngineConfiguration.ShowFps,
+                        Scale = new Vector2(0.8f)
+                    },
+                    new AudioDebugOverlay()
+                    {
+                        Scale = new Vector2(0.8f)
+                    },
+                    engineStatisticsPanel = new EngineStatisticsPanel
+                    {
+                        Visible = EngineConfiguration.ShowEngineStatistics,
+                        Scale = new Vector2(0.8f)
+                    },
                 ]
             },
 
@@ -69,7 +81,7 @@ public class EngineDebugOverlay : CompositeDrawable2d
     protected internal override bool OnActionBindingDown(ActionBinding e)
     {
         if (e != ENGINE_DEBUG_OVERLAY_TOGGLE) return base.OnActionBindingDown(e);
-        
+
         Visible = !Visible;
         return true;
     }
@@ -77,7 +89,8 @@ public class EngineDebugOverlay : CompositeDrawable2d
     private static void toggle(Drawable2d drawable)
     {
         drawable.Visible = !drawable.Visible;
-        var name = drawable.GetType().Name;
+        var name = drawable.GetType()
+            .Name;
         Logger.Verbose($"Toggled visibility of {name} to {drawable.Visible}");
     }
 }

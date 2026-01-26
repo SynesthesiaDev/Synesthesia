@@ -145,13 +145,8 @@ public class CompositeDrawable2d : Drawable2d
     {
         var childrenSize = GetChildrenSize();
 
-        var newWidth = Size.X;
-        var newHeight = Size.Y;
-
-        if (AutoSizeAxes.HasFlag(Axes.X)) newWidth = childrenSize.X + AutoSizePadding.X + AutoSizePadding.Z;
-        if (AutoSizeAxes.HasFlag(Axes.Y)) newHeight = childrenSize.Y + AutoSizePadding.Y + AutoSizePadding.W;
-
-        Size = new Vector2(newWidth, newHeight);
+        if (AutoSizeAxes.HasFlag(Axes.X)) Width = childrenSize.X + AutoSizePadding.X + AutoSizePadding.Z;
+        if (AutoSizeAxes.HasFlag(Axes.Y)) Height = childrenSize.Y + AutoSizePadding.Y + AutoSizePadding.W;
     }
 
 

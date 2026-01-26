@@ -5,7 +5,7 @@ using Synesthesia.Engine.Audio.Controls;
 
 namespace Synesthesia.Engine.Audio;
 
-public class AudioChannel : IAudioControl, IHasAudioHandle
+public class AudioChannel : BassDspAudioHandler, IHasAudioHandle
 {
     protected internal bool IsDisposed { get; private set; }
 
@@ -41,7 +41,7 @@ public class AudioChannel : IAudioControl, IHasAudioHandle
 
     public void UpdateSampleLifetimes() => mixers.ForEach(mixer => mixer.UpdateLifetimes());
 
-    public float Volume
+    public override float Volume
     {
         get
         {
@@ -66,6 +66,8 @@ public class AudioChannel : IAudioControl, IHasAudioHandle
         if (MixdownHandle == 0)
             throw new InvalidOperationException($"Failed to create channel mixdown: {name}: {Bass.LastError}");
 
+        AttachDspHandle(MixdownHandle);
+
         Bass.ChannelPlay(MixdownHandle);
         EngineStatistics.AUDIO_CHANNELS.Increment();
     }
@@ -86,7 +88,7 @@ public class AudioChannel : IAudioControl, IHasAudioHandle
         return mixer;
     }
 
-    public void Dispose()
+    public new void Dispose()
     {
         if (IsDisposed) return;
 
@@ -94,6 +96,8 @@ public class AudioChannel : IAudioControl, IHasAudioHandle
 
         if (OutputHandle != 0)
             BassMix.MixerRemoveChannel(MixdownHandle);
+
+        DisposeDspHandle(MixdownHandle);
 
         Bass.StreamFree(MixdownHandle);
         EngineStatistics.AUDIO_CHANNELS.Decrement();

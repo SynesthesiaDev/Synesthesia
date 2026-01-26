@@ -1,3 +1,5 @@
+using Common.Bindable;
+using Common.Event;
 using Common.Statistics;
 using ManagedBass;
 using ManagedBass.Mix;
@@ -5,7 +7,7 @@ using Synesthesia.Engine.Audio.Controls;
 
 namespace Synesthesia.Engine.Audio;
 
-public class AudioMixer : IAudioControl, IHasAudioHandle
+public class AudioMixer : BassDspAudioHandler, IHasAudioHandle
 {
     protected internal bool IsDisposed { get; private set; }
 
@@ -27,7 +29,13 @@ public class AudioMixer : IAudioControl, IHasAudioHandle
 
     public int GetAudioHandle() => MixdownHandle;
 
-    public float Volume
+    private readonly BindablePool bindablePool = new();
+
+    public EventDispatcher<AudioSampleInstance> OnSamplePlay;
+
+    public EventDispatcher<AudioSampleInstance> OnSampleDispose;
+
+    public override float Volume
     {
         get
         {
@@ -88,7 +96,14 @@ public class AudioMixer : IAudioControl, IHasAudioHandle
         MixdownHandle = BassMix.CreateMixerStream(AudioManager.PLAYBACK_SAMPLE_RATE, 2, BassFlags.MixerNonStop | BassFlags.Float | BassFlags.Decode);
         if (MixdownHandle == 0) throw new InvalidOperationException($"Failed to create mixer with identifier '{Identifier}': {Bass.LastError}");
 
+        OnSamplePlay = bindablePool.BorrowDispatcher<AudioSampleInstance>();
+        OnSampleDispose = bindablePool.BorrowDispatcher<AudioSampleInstance>();
+
         EngineStatistics.AUDIO_MIXERS.Increment();
+
+        Bass.Configure(ManagedBass.Configuration.FloatDSP, true);
+
+        AttachDspHandle(MixdownHandle);
 
         Bass.ChannelPlay(MixdownHandle);
     }
@@ -184,14 +199,18 @@ public class AudioMixer : IAudioControl, IHasAudioHandle
         return instance;
     }
 
-    public void Dispose()
+    public new void Dispose()
     {
         if (IsDisposed) return;
+
+        bindablePool.Dispose();
 
         foreach (var fxHandle in activeEffects.Values)
             Bass.ChannelRemoveFX(MixdownHandle, fxHandle);
 
         activeEffects.Clear();
+
+        DisposeDspHandle(MixdownHandle);
 
         if (MixdownHandle != 0)
         {

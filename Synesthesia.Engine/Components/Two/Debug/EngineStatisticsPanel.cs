@@ -42,6 +42,13 @@ public class EngineStatisticsPanel : EngineDebugComponent
         new EngineStatisticAtomicLine("BASS Cpu %", EngineStatistics.BASS_CPU)
     );
 
+    protected internal override void OnUpdate()
+    {
+        if(!Visible) return;
+        base.OnUpdate();
+    }
+
+
     protected override void OnLoading()
     {
         AutoSizeAxes = Axes.Both;

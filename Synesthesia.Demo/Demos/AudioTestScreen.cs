@@ -7,11 +7,13 @@ using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine;
 using Synesthesia.Engine.Audio;
+using Synesthesia.Engine.Components.Two.Debug;
 using Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
 using Synesthesia.Engine.Resources;
+using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Demo.Demos;
 
@@ -19,9 +21,12 @@ public class AudioTestScreen : Screen
 {
     private DefaultEngineButton togglePlayButton = null!;
     private TextDrawable text = null!;
+    private DebugAudioMeter mixerAudioMeter = null!;
+    private DebugAudioMeter channelAudioMeter = null!;
 
-    private readonly AudioSample music = ResourceManager.Get<AudioSample>("SynesthesiaResources.audio.mp3");
-    private AudioMixer mixer = null!;
+    private readonly AudioSample music = ResourceManager.Get<AudioSample>($"SynesthesiaResources.{new List<string> {"audio", "audio2"}.Random()}.mp3");
+    private AudioMixer masterMixer = null!;
+    private AudioChannel masterChannel = null!;
 
     private readonly Bindable<bool> audioPlaying = new(false);
     private AudioSampleInstance? audioSampleInstance = null;
@@ -45,13 +50,21 @@ public class AudioTestScreen : Screen
                         AutoSizeAxes = Axes.Both,
                         Anchor = Anchor.TopCentre,
                         Origin = Anchor.TopCentre,
+                        Spacing = 5f,
+                        // Scale = new Vector2(3f),
                         Children =
                         [
-                            text = new TextDrawable
-                            {
-                                Anchor = Anchor.Centre,
-                                Origin = Anchor.Centre,
-                            }
+                            new AudioDebugOverlay()
+                            // channelAudioMeter = new DebugAudioMeter
+                            // {
+                            //     Anchor = Anchor.TopCentre,
+                            //     Origin = Anchor.TopCentre,
+                            // },
+                            // mixerAudioMeter = new DebugAudioMeter
+                            // {
+                            //     Anchor = Anchor.TopCentre,
+                            //     Origin = Anchor.TopCentre,
+                            // }
                         ]
                     },
                     new FillFlowContainer2d
@@ -75,8 +88,8 @@ public class AudioTestScreen : Screen
                                 {
                                     if (audioSampleInstance == null)
                                     {
-                                        mixer.Volume = 0.5f;
-                                        audioSampleInstance = mixer.Play(music);
+                                        masterChannel.Volume = 0.10f;
+                                        audioSampleInstance = masterMixer.Play(music);
                                         audioSampleInstance.Pause();
                                         audioPlaying.Value = true;
                                     }
@@ -96,9 +109,12 @@ public class AudioTestScreen : Screen
     protected override void LoadComplete()
     {
         var game = DependencyContainer.Get<Game>();
-        mixer = game.MasterAudioMixer;
+        masterMixer = game.MasterAudioMixer;
+        masterChannel = game.MasterAudioChannel;
 
-        text.Text = $"music data: {music.Data.Length} bytes";
+        // audioMeter.Progress.Value = 0.63f;
+        // mixerAudioMeter.AudioSource.Value = masterMixer;
+        // channelAudioMeter.AudioSource.Value = masterChannel;
 
         audioPlaying.OnValueChange(e =>
         {

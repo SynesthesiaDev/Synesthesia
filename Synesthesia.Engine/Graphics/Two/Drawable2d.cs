@@ -21,7 +21,19 @@ public abstract class Drawable2d : Drawable
 
     public Axes RelativeSizeAxes { get; set; } = Axes.None;
 
-    public Vector2 Size { get; set; } = new(1);
+    public float Height = 0f;
+
+    public float Width = 0f;
+
+    public Vector2 Size
+    {
+        get => new(Width, Height);
+        set
+        {
+            Width = value.X;
+            Height = value.Y;
+        }
+    }
 
     public Vector2 Scale { get; set; } = new(1);
 
@@ -36,7 +48,7 @@ public abstract class Drawable2d : Drawable
     public long Depth = 0;
 
     protected internal virtual bool AcceptsInputs() => true;
-    
+
     public Vector2 ScreenSpacePosition
     {
         get
@@ -110,12 +122,12 @@ public abstract class Drawable2d : Drawable
     protected internal virtual void OnMouseUp(PointInput e)
     {
     }
-    
+
     protected internal virtual bool OnKeyDown(KeyboardKey e)
     {
         return false;
     }
-    
+
     protected internal virtual void OnKeyUp(KeyboardKey e)
     {
     }
@@ -133,7 +145,6 @@ public abstract class Drawable2d : Drawable
     {
     }
 
-
     protected internal override void OnUpdate()
     {
         if (RelativeSizeAxes != Axes.None && AutoSizeAxes != Axes.None)
@@ -143,13 +154,11 @@ public abstract class Drawable2d : Drawable
 
         if (Parent != null)
         {
-            Size = RelativeSizeAxes switch
-            {
-                Axes.X => Size with { X = Parent.Size.X - Margin.X - Margin.Z },
-                Axes.Y => Size with { Y = Parent.Size.Y - Margin.Y - Margin.W },
-                Axes.Both => Size with { X = Parent.Size.X - Margin.X - Margin.Z } with { Y = Parent.Size.Y - Margin.Y - Margin.W },
-                _ => Size
-            };
+            if (RelativeSizeAxes.HasFlag(Axes.X))
+                Width = Parent.Size.X - Margin.X - Margin.Z;
+
+            if (RelativeSizeAxes.HasFlag(Axes.Y))
+                Height = Parent.Size.Y - Margin.Y - Margin.W;
         }
     }
 
@@ -208,7 +217,6 @@ public abstract class Drawable2d : Drawable
 
         Rlgl.Translatef(-originOffset.X, -originOffset.Y, 0);
         Rlgl.Translatef(-Margin.X, -Margin.Y, 0);
-        // Rlgl.Translatef(anchorPos.X + Position.X + marginOffset.X, anchorPos.Y + Position.Y + marginOffset.Y, 0);
     }
 
     private void endLocalSpace()
@@ -258,16 +266,31 @@ public abstract class Drawable2d : Drawable
         return ScaleTo(new Vector2(newScale), duration, easing);
     }
 
+    public Animation<float> ResizeWidthTo(float newWidth, long duration, Easing easing)
+    {
+        return TransformTo(nameof(Width), Width, newWidth, duration, easing, Transforms.FLOAT, a => Width = a);
+    }
+
+    public Animation<float> ResizeHeightTo(float newHeight, long duration, Easing easing)
+    {
+        return TransformTo(nameof(Height), Height, newHeight, duration, easing, Transforms.FLOAT, a => Height = a);
+    }
+
     public Animation<Vector2> ScaleTo(Vector2 newScale, long duration, Easing easing)
     {
         return TransformTo(nameof(Scale), Scale, newScale, duration, easing, Transforms.VECTOR2, vec => { Scale = vec; });
+    }
+
+    public Animation<Vector2> ResizeTo(Vector2 newSize, long duration, Easing easing)
+    {
+        return TransformTo(nameof(Size), Size, newSize, duration, easing, Transforms.VECTOR2, vec => { Size = vec; });
     }
 
     public Animation<Vector3> RotateTo(Vector3 newRotation, long duration, Easing easing)
     {
         return TransformTo(nameof(Rotation), Rotation, newRotation, duration, easing, Transforms.VECTOR3, vec => { Rotation = vec; });
     }
-    
+
     public Animation<float> FadeTo(float newAlpha, long duration, Easing easing)
     {
         return TransformTo(nameof(Alpha), Alpha, newAlpha, duration, easing, Transforms.FLOAT, a => Alpha = a);
@@ -277,7 +300,7 @@ public abstract class Drawable2d : Drawable
     {
         return TransformTo(nameof(Alpha), startAlpha, endAlpha, duration, easing, Transforms.FLOAT, a => Alpha = a);
     }
-    
+
     protected override void Dispose(bool isDisposing)
     {
         if (AnimationManager == null)
