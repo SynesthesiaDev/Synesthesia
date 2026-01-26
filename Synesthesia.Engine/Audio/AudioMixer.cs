@@ -1,3 +1,4 @@
+using Common.Statistics;
 using ManagedBass;
 using ManagedBass.Mix;
 using Synesthesia.Engine.Audio.Controls;
@@ -46,7 +47,9 @@ public class AudioMixer : IAudioControl, IHasAudioHandle
     {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        foreach (var instance in activeInstances.ToList().Where(instance => Bass.ChannelIsActive(instance.StreamHandle) == PlaybackState.Stopped))
+        foreach (var instance in activeInstances
+                     .ToList()
+                     .Where(instance => Bass.ChannelIsActive(instance.StreamHandle) == PlaybackState.Stopped))
         {
             activeInstances.Remove(instance);
             instance.Dispose();
@@ -84,6 +87,8 @@ public class AudioMixer : IAudioControl, IHasAudioHandle
 
         MixdownHandle = BassMix.CreateMixerStream(AudioManager.PLAYBACK_SAMPLE_RATE, 2, BassFlags.MixerNonStop | BassFlags.Float | BassFlags.Decode);
         if (MixdownHandle == 0) throw new InvalidOperationException($"Failed to create mixer with identifier '{Identifier}': {Bass.LastError}");
+
+        EngineStatistics.AUDIO_MIXERS.Increment();
 
         Bass.ChannelPlay(MixdownHandle);
     }
@@ -150,14 +155,14 @@ public class AudioMixer : IAudioControl, IHasAudioHandle
         var streamHandle = Bass.CreateStream(byteArr, 0, byteArr.Length, BassFlags.Decode | BassFlags.Prescan);
 
         if (streamHandle == 0)
-            throw new InvalidOperationException($"Failed to create stream for {sample.Name}: {Bass.LastError}");
+            throw new InvalidOperationException($"Failed to create stream for a sample: {Bass.LastError}");
 
         if (sample.Looping) Bass.ChannelFlags(streamHandle, BassFlags.Loop, BassFlags.Loop);
 
         if (!BassMix.MixerAddChannel(MixdownHandle, streamHandle, BassFlags.Default))
         {
             Bass.StreamFree(streamHandle);
-            throw new InvalidOperationException($"Failed to add stream to mixer for {sample.Name}: {Bass.LastError}");
+            throw new InvalidOperationException($"Failed to add stream to mixer for a sample: {Bass.LastError}");
         }
 
         var instance = new AudioSampleInstance(sample, this, streamHandle);
@@ -165,7 +170,16 @@ public class AudioMixer : IAudioControl, IHasAudioHandle
         instance.Volume = volume;
         instance.Pitch = pitch;
 
-        if (IsPaused) instance.Pause();
+        activeInstances.Add(instance);
+
+        if (IsPaused)
+        {
+            instance.Pause();
+        }
+        else
+        {
+            Bass.ChannelPlay(streamHandle);
+        }
 
         return instance;
     }
@@ -190,5 +204,6 @@ public class AudioMixer : IAudioControl, IHasAudioHandle
         }
 
         IsDisposed = true;
+        EngineStatistics.AUDIO_MIXERS.Decrement();
     }
 }

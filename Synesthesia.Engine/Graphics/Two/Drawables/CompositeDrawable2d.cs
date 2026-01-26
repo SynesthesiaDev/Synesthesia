@@ -1,5 +1,4 @@
 using System.Numerics;
-using Common.Logger;
 using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Input;

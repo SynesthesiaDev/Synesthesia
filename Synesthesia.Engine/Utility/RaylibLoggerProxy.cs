@@ -1,5 +1,4 @@
 using System.Runtime.InteropServices;
-using Common.Logger;
 using Raylib_cs;
 
 namespace Synesthesia.Engine.Utility;

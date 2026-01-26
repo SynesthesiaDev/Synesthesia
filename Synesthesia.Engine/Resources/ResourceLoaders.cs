@@ -1,6 +1,8 @@
 using System.Text;
+using Codon.Buffer;
 using Common.Logger;
 using Raylib_cs;
+using Synesthesia.Engine.Audio;
 using Synesthesia.Engine.Utility;
 
 namespace Synesthesia.Engine.Resources;
@@ -26,7 +28,7 @@ public static class ResourceLoaders
         var shader = Raylib.LoadShaderFromMemory(null, text);
 
         if (shader.Id > 0) return shader;
-        
+
         var ex = new Exception("Fragment shader failed to load");
         Logger.Exception(ex, Logger.Render);
         throw ex;
@@ -45,5 +47,17 @@ public static class ResourceLoaders
         using var memoryStream = new MemoryStream();
         stream.CopyTo(memoryStream);
         return memoryStream.ToArray();
+    }
+
+    public static object LoadBinaryBuffer(Stream stream)
+    {
+        var array = LoadByteAray(stream) as byte[];
+        return BinaryBuffer.FromArray(array!);
+    }
+
+    public static object LoadAudioSample(Stream stream)
+    {
+        var buffer = LoadBinaryBuffer(stream) as BinaryBuffer;
+        return new AudioSample(buffer!);
     }
 }

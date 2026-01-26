@@ -64,7 +64,12 @@ public class Game : IDisposable
 
         ResourceManager.RegisterLoader("vsh", ResourceLoaders.LoadVertexShader, true); // Vertex Shader
         ResourceManager.RegisterLoader("fsh", ResourceLoaders.LoadFragmentShader, true); // Fragment Shader
+
         ResourceManager.RegisterLoader("ttf", ResourceLoaders.LoadFont, true); // Default Font (unresolved until gl initialized)
+
+        ResourceManager.RegisterLoader("mp3", ResourceLoaders.LoadAudioSample);
+        ResourceManager.RegisterLoader("ogg", ResourceLoaders.LoadAudioSample);
+        ResourceManager.RegisterLoader("wav", ResourceLoaders.LoadAudioSample);
 
         ResourceManager.CacheAll(SynesthesiaResources.AssemblyInfo.ResourceAssembly);
         Logger.Debug($"Cached {ResourceManager.CachedSize} built-in engine resources, {ResourceManager.UnresolvedSize} waiting to be resolved, {ResourceManager.Size} total", Logger.Io);

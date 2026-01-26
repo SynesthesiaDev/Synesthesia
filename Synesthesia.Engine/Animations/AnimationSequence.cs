@@ -1,4 +1,3 @@
-using Common.Logger;
 using Common.Util;
 using SynesthesiaUtil.Extensions;
 

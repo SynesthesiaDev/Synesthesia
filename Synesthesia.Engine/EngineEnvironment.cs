@@ -1,5 +1,4 @@
 using Common.Util;
-using Synesthesia.Engine.Configuration;
 
 namespace Synesthesia.Engine;
 

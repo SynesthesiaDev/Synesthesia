@@ -74,6 +74,7 @@ public class AudioChannel : IAudioControl, IHasAudioHandle
     {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
         mixers.Add(mixer);
+        mixer.AttachTo(this);
     }
 
     public AudioMixer CreateMixer(string identifier)

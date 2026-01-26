@@ -2,9 +2,7 @@ using System.Collections.Immutable;
 using System.Numerics;
 using Common.Statistics;
 using Common.Util;
-using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Configuration;
-using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
@@ -17,7 +15,7 @@ public class EngineStatisticsPanel : EngineDebugComponent
 {
     private static GCMemoryInfo gcMemoryInfo => GC.GetGCMemoryInfo();
 
-    private ImmutableList<EngineStatisticLine> statistics = Lists.Immutable<EngineStatisticLine>
+    private readonly ImmutableList<EngineStatisticLine> statistics = Lists.Immutable<EngineStatisticLine>
     (
         new EngineStatisticAtomicLine("Drawables", EngineStatistics.DRAWABLES),
         new Spacer(),
@@ -40,6 +38,7 @@ public class EngineStatisticsPanel : EngineDebugComponent
         new EngineStatisticAtomicLine("Audio Channels", EngineStatistics.AUDIO_CHANNELS),
         new EngineStatisticAtomicLine("Audio Mixers", EngineStatistics.AUDIO_MIXERS),
         new EngineStatisticAtomicLine("Cached Audio Samples", EngineStatistics.CACHED_AUDIO_SAMPLES),
+        new EngineStatisticAtomicLine("Audio Sample Instances", EngineStatistics.AUDIO_SAMPLE_INSTANCES),
         new EngineStatisticAtomicLine("BASS Cpu %", EngineStatistics.BASS_CPU)
     );
 
@@ -52,7 +51,6 @@ public class EngineStatisticsPanel : EngineDebugComponent
             {
                 AutoSizeAxes = Axes.Both,
                 BackgroundColor = Defaults.BACKGROUND2,
-                BackgroundAlpha = 0.9f,
                 BackgroundCornerRadius = 10f,
                 AutoSizePadding = new Vector4(10),
                 Children =
@@ -69,7 +67,7 @@ public class EngineStatisticsPanel : EngineDebugComponent
             }
         ];
     }
-    
+
     private abstract class EngineStatisticLine : CompositeDrawable2d;
 
     private class Spacer : EngineStatisticLine
@@ -84,7 +82,7 @@ public class EngineStatisticsPanel : EngineDebugComponent
     {
         public EngineStatisticTextLine(string name, Func<long> longGetter) : this(name, () => $"{longGetter.Invoke():##,##0}")
         {
-            
+
         }
 
         protected override void OnLoading()

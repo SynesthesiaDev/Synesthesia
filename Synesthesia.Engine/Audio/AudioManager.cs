@@ -21,8 +21,6 @@ public class AudioManager : DeferredActionQueue, IHasAudioHandle
 
     private const int bass_default_device = 1;
 
-    public bool ExecuteScheduledTasksImmediately { get; set; } = false;
-
     public int MasterMixdownHandle { get; private set; }
 
     public int GetAudioHandle() => MasterMixdownHandle;
@@ -82,7 +80,6 @@ public class AudioManager : DeferredActionQueue, IHasAudioHandle
         ensureMaster();
         FlushAndSwitchToImmediate();
     }
-
 
     public AudioChannel CreateChannel(string name)
     {

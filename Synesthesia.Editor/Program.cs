@@ -1,5 +1,4 @@
 ﻿using Common.Editor;
-using Synesthesia.Engine;
 using Synesthesia.Engine.Dependency;
 
 namespace Synesthesia.Editor;

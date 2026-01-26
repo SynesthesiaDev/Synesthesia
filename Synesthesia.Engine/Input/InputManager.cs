@@ -3,9 +3,7 @@ using System.Numerics;
 using Common.Logger;
 using Common.Util;
 using Raylib_cs;
-using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Two;
-using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Input;
 

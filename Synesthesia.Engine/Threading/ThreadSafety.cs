@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Synesthesia.Engine.Threading.Runners;
 
 namespace Synesthesia.Engine.Threading;

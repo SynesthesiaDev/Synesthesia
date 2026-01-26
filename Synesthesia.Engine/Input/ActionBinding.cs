@@ -2,7 +2,6 @@ using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Utility;
 using SynesthesiaUtil;
-using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Input;
 

@@ -5,7 +5,6 @@ using Raylib_cs;
 using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Input;
-using Synesthesia.Engine.Resources;
 using Synesthesia.Engine.Threading.Runners;
 
 namespace Synesthesia.Engine.Graphics.Two;

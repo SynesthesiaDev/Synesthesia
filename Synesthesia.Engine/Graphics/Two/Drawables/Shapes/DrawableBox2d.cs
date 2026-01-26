@@ -1,5 +1,4 @@
 using System.Numerics;
-using Common.Logger;
 using Raylib_cs;
 
 namespace Synesthesia.Engine.Graphics.Two.Drawables.Shapes;

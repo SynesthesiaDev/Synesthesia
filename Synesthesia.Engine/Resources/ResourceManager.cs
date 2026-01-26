@@ -29,7 +29,11 @@ public static class ResourceManager
         if (cachedResources.ContainsKey(resourceName)) return;
 
         var extension = Path.GetExtension(resourceName).ToLowerInvariant().RemovePrefix(".");
-        if (!loaderRegistry.TryGetValue(extension, out var loaderFunction)) throw new NotSupportedException($"No resource loader registered for type '{extension}'");
+        if (!loaderRegistry.TryGetValue(extension, out var loaderFunction))
+        {
+            Logger.Warning($"No resource loader registered for type {extension}, skipping");
+            return;
+        }
 
         using var stream = assembly.GetManifestResourceStream(resourceName);
         if (stream == null) throw new FileNotFoundException($"Embedded resource '{resourceName}' does not exist!");
