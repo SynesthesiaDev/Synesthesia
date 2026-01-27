@@ -6,17 +6,17 @@ namespace Synesthesia.Engine.Animations;
 public class AnimationSequence : IAnimation
 {
     public List<IAnimation> Animations = [];
-    
+
     public bool IsCompleted { get; set; }
 
     public Action? OnComplete { get; set; } = null;
-    
+
     public bool IsPaused { get; set; } = false;
-    
+
     public long PausedTime { get; set; } = 0L;
 
     public bool Loop { get; set; } = false;
-    
+
     private int currentIndex = 0;
 
     public IAnimation CurrentAnimation => Animations[currentIndex];
@@ -33,7 +33,7 @@ public class AnimationSequence : IAnimation
     {
         Animations.AddAll(values);
     }
-    
+
     public void Start(long currentTime)
     {
         if (Animations.IsEmpty())
@@ -45,11 +45,11 @@ public class AnimationSequence : IAnimation
         IsCompleted = false;
         CurrentAnimation.Start(currentTime);
     }
-    
+
     public bool Update(long currentTime)
     {
         if (IsCompleted || Animations.IsEmpty()) return IsCompleted;
-        
+
         var current = CurrentAnimation;
         current.Update(currentTime);
 
@@ -86,7 +86,7 @@ public class AnimationSequence : IAnimation
             anim.Reset();
         });
     }
-    
+
     public void Dispose()
     {
         Stop();
@@ -101,7 +101,8 @@ public class AnimationSequence : IAnimation
     {
         private readonly List<IAnimation> animations = [];
         private bool isLooping = false;
-        
+        private Action? then = null;
+
         public Builder Add(IAnimation animation)
         {
             animations.Add(animation);
@@ -111,6 +112,12 @@ public class AnimationSequence : IAnimation
         public Builder Delay(long time)
         {
             animations.Add(new AnimationDelay(time));
+            return this;
+        }
+
+        public Builder Then(Action action)
+        {
+            then = action;
             return this;
         }
 
@@ -124,7 +131,8 @@ public class AnimationSequence : IAnimation
         {
             return new AnimationSequence(animations)
             {
-                Loop = isLooping
+                Loop = isLooping,
+                OnComplete = then
             };
         }
     }

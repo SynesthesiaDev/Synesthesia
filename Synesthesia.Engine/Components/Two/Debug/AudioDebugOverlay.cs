@@ -63,7 +63,7 @@ public class AudioDebugOverlay : EngineDebugComponent
             childrenContainer.RemoveChild(child);
         }
 
-        var newChildren = new List<Drawable2d> { new NestedContainer("Output", 0, null) };
+        var newChildren = new List<Drawable2d> { new NestedContainer("Output", 0, audioManager) };
 
         foreach (var channel in audioManager.Channels)
         {

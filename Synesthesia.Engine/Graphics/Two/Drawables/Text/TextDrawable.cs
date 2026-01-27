@@ -59,10 +59,10 @@ public class TextDrawable : ColoredDrawable2d
         var shader = RenderThreadRunner.SignedDistanceFieldShader;
         var sizeLoc = Raylib.GetShaderLocation(shader, "renderSize");
         var alphaLoc = Raylib.GetShaderLocation(shader, "alpha");
-        
+
         Raylib.SetShaderValue(shader, sizeLoc, FontSize, ShaderUniformDataType.Float);
         Raylib.SetShaderValue(shader, alphaLoc, InheritedAlpha, ShaderUniformDataType.Float);
-        
+
         Raylib.BeginShaderMode(shader);
         Raylib.DrawTextEx(Font, Text, Vector2.Zero, FontSize, Spacing, ApplyAlpha(Color));
         Raylib.EndShaderMode();

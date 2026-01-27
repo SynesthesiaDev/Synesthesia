@@ -12,6 +12,7 @@ using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Threading.Runners;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Timing.Scheduling;
+using Synesthesia.Engine.Utility;
 
 namespace Synesthesia.Engine;
 
@@ -33,11 +34,13 @@ public class Game : IDisposable
 
     public AudioMixer MasterAudioMixer = null!;
 
+    public DeferredActionQueue DeferredActionQueue = new();
+
     public Game()
     {
         WindowTitle = bindablePool.Borrow("Synesthesia Engine");
 
-        AudioManager.Enqueue(() =>
+        AudioManager.DeferredActionQueue.Enqueue(() =>
         {
             MasterAudioChannel = AudioManager.CreateChannel("Master");
             MasterAudioMixer = MasterAudioChannel.CreateMixer("master");
@@ -101,6 +104,7 @@ public class Game : IDisposable
         RootComposite3d.Load();
 
         Logger.Debug($"Load Complete, took {GameRuntimeClock.Elapsed.Milliseconds}ms.", Logger.Runtime);
+        DeferredActionQueue.FlushAndSwitchToImmediate();
 
         InputThread.Thread.Join();
         RenderThread.Thread.Join();

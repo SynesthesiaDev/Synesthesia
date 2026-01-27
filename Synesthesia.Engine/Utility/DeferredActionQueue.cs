@@ -1,13 +1,13 @@
 
 namespace Synesthesia.Engine.Utility;
 
-public abstract class DeferredActionQueue
+public class DeferredActionQueue
 {
     private bool immediate = false;
 
     private readonly List<Action> queuedActions = [];
 
-    protected void FlushAndSwitchToImmediate()
+    public void FlushAndSwitchToImmediate()
     {
         immediate = true;
         queuedActions.ForEach(p => p.Invoke());

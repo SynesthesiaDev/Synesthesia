@@ -24,12 +24,12 @@ public class WindowHost : IDisposable
 
     public unsafe void Initialize(Game game)
     {
-        
+
         Raylib.SetTraceLogCallback(&RaylibLoggerProxy.HandleRaylibLog);
         Raylib.SetConfigFlags(ConfigFlags.ResizableWindow);
         Raylib.SetConfigFlags(ConfigFlags.Msaa4xHint);
         Raylib.InitWindow(400, 800, game.WindowTitle.Value);
-
+        Raylib.SetExitKey(KeyboardKey.Null);
 
         WindowState = bindablePool.Borrow(Host.WindowState.Normal);
         IsFullscreen = bindablePool.Borrow(EngineEnvironment.START_FULLSCREEN);

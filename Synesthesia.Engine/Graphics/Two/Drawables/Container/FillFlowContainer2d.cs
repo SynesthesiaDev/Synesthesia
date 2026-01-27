@@ -10,10 +10,10 @@ public class FillFlowContainer2d : BackgroundContainer2d
 
     public float Spacing { get; set; } = 0f;
 
-    protected internal override void OnUpdate()
+protected internal override void OnUpdate()
     {
         base.OnUpdate();
-        
+
         float currentY = 0;
         float currentX = 0;
         float maxWidth = 0;
@@ -23,17 +23,34 @@ public class FillFlowContainer2d : BackgroundContainer2d
         {
             child.Position = new Vector2(currentX, currentY);
 
+            if (Direction == Direction.Horizontal && child.FillRemainingAxes.HasFlag(Axes.X))
+            {
+                var remainingParentX = Math.Max(0f, Size.X - currentX);
+                var sx = child.Scale.X;
+                child.Width = sx == 0 ? 0 : (remainingParentX / sx);
+            }
+
+            if (Direction == Direction.Vertical && child.FillRemainingAxes.HasFlag(Axes.Y))
+            {
+                var remainingParentY = Math.Max(0f, Size.Y - currentY);
+                var sy = child.Scale.Y;
+                child.Height = sy == 0 ? 0 : (remainingParentY / sy);
+            }
+
             child.OnUpdate();
+
+            var childDrawWidth = child.Size.X * child.Scale.X;
+            var childDrawHeight = child.Size.Y * child.Scale.Y;
 
             if (Direction == Direction.Vertical)
             {
-                currentY += (child.Size.Y + Spacing) * child.Scale.Y;
-                maxWidth = Math.Max(maxWidth, child.Size.X);
+                currentY += childDrawHeight + Spacing;
+                maxWidth = Math.Max(maxWidth, childDrawWidth);
             }
             else
             {
-                currentX += (child.Size.X + Spacing) * child.Scale.X;
-                maxHeight = Math.Max(maxHeight, child.Size.Y);
+                currentX += childDrawWidth + Spacing;
+                maxHeight = Math.Max(maxHeight, childDrawHeight);
             }
         }
 

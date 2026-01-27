@@ -19,6 +19,8 @@ public abstract class Drawable2d : Drawable
 
     public Axes AutoSizeAxes { get; set; } = Axes.None;
 
+    public Axes FillRemainingAxes { get; set; } = Axes.None;
+
     public Axes RelativeSizeAxes { get; set; } = Axes.None;
 
     public float Height = 0f;
@@ -49,18 +51,24 @@ public abstract class Drawable2d : Drawable
 
     protected internal virtual bool AcceptsInputs() => true;
 
+    public Vector2 InheritedScale => Parent == null ? Scale : Parent.InheritedScale * Scale;
+
     public Vector2 ScreenSpacePosition
     {
         get
         {
+            var parentScale = Parent?.InheritedScale ?? Vector2.One;
+
             var anchorPos = Vector2.Zero;
             if (Parent != null)
             {
-                anchorPos = Parent.ScreenSpacePosition + getAnchorOffset(Parent.Size, Anchor);
+                anchorPos = Parent.ScreenSpacePosition + getAnchorOffset(Parent.Size, Anchor) * parentScale;
             }
 
-            var originOffset = getAnchorOffset(Size, Origin) * Scale;
-            return anchorPos + Position + getMarginOffset() - originOffset;
+            var posOffset = (Position + getMarginOffset()) * parentScale;
+            var originOffset = getAnchorOffset(Size, Origin) * InheritedScale;
+
+            return anchorPos + posOffset + getMarginOffset() - originOffset;
         }
     }
 
@@ -69,9 +77,10 @@ public abstract class Drawable2d : Drawable
         if (!Visible) return false;
 
         var pos = ScreenSpacePosition;
-        var scaledSize = Size * Scale;
+        var scaledSize = Size * InheritedScale;
 
-        return screenSpacePoint.X >= pos.X && screenSpacePoint.X <= pos.X + scaledSize.X && screenSpacePoint.Y >= pos.Y && screenSpacePoint.Y <= pos.Y + scaledSize.Y;
+        return screenSpacePoint.X >= pos.X && screenSpacePoint.X <= pos.X + scaledSize.X &&
+               screenSpacePoint.Y >= pos.Y && screenSpacePoint.Y <= pos.Y + scaledSize.Y;
     }
 
     public Vector2 ToLocalSpace(Vector2 screenSpacePoint)
@@ -266,6 +275,12 @@ public abstract class Drawable2d : Drawable
         return ScaleTo(new Vector2(newScale), duration, easing);
     }
 
+    public Animation<Vector2> ScaleFromTo(float oldScale, float newScale, long duration, Easing easing)
+    {
+        return ScaleFromTo(new Vector2(oldScale), new Vector2(newScale), duration, easing);
+    }
+
+
     public Animation<float> ResizeWidthTo(float newWidth, long duration, Easing easing)
     {
         return TransformTo(nameof(Width), Width, newWidth, duration, easing, Transforms.FLOAT, a => Width = a);
@@ -280,6 +295,12 @@ public abstract class Drawable2d : Drawable
     {
         return TransformTo(nameof(Scale), Scale, newScale, duration, easing, Transforms.VECTOR2, vec => { Scale = vec; });
     }
+
+    public Animation<Vector2> ScaleFromTo(Vector2 oldScale, Vector2 newScale, long duration, Easing easing)
+    {
+        return TransformTo(nameof(Scale), oldScale, newScale, duration, easing, Transforms.VECTOR2, vec => { Scale = vec; });
+    }
+
 
     public Animation<Vector2> ResizeTo(Vector2 newSize, long duration, Easing easing)
     {

@@ -13,7 +13,7 @@ using SynesthesiaUtil;
 
 namespace Synesthesia.Engine.Audio;
 
-public class AudioManager : DeferredActionQueue, IHasAudioHandle
+public class AudioManager : BassDspAudioHandler, IHasAudioHandle
 {
     public const int PLAYBACK_SAMPLE_RATE = 44100;
 
@@ -25,9 +25,11 @@ public class AudioManager : DeferredActionQueue, IHasAudioHandle
 
     public int GetAudioHandle() => MasterMixdownHandle;
 
+    public DeferredActionQueue DeferredActionQueue = new();
+
     public void AttachTo(IHasAudioHandle audioHandle) => throw new NotSupportedException();
 
-    public float MasterVolume
+    public override float Volume
     {
         get
         {
@@ -78,7 +80,7 @@ public class AudioManager : DeferredActionQueue, IHasAudioHandle
         CurrentAudioDevice = AudioDevices[bass_default_device];
 
         ensureMaster();
-        FlushAndSwitchToImmediate();
+        DeferredActionQueue.FlushAndSwitchToImmediate();
     }
 
     public AudioChannel CreateChannel(string name)
@@ -122,7 +124,9 @@ public class AudioManager : DeferredActionQueue, IHasAudioHandle
         if (MasterMixdownHandle == 0)
             throw new InvalidOperationException($"Failed to create master mixer: {Bass.LastError}");
 
-        MasterVolume = 1f;
+        Volume = 1f;
+
+        AttachDspHandle(MasterMixdownHandle);
 
         EngineStatistics.AUDIO_CHANNELS.Increment();
         Bass.ChannelPlay(MasterMixdownHandle);
@@ -231,4 +235,5 @@ public class AudioManager : DeferredActionQueue, IHasAudioHandle
 
         return devices.MoveToImmutable();
     }
+
 }

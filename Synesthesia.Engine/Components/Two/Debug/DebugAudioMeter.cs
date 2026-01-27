@@ -74,17 +74,34 @@ public class DebugAudioMeter(BassDspAudioHandler? audioHandler = null) : Composi
                         ]
                     },
 
-                    new FrameUpdatableTextDrawable
+                    new Container2d
                     {
-                        FontSize = 20,
-                        Color = Color.White,
-                        UpdateOnDraw = () => AudioSource.Value == null ? "0.0db" : $"{MathUtil.LevelToDb(AudioSource.Value!.Peak.Peak):0.0}db"
-                    }
+                        Size = new Vector2(80, 20),
+                        Children =
+                        [
+                            new FrameUpdatableTextDrawable
+                            {
+                                FontSize = 20,
+                                Anchor = Anchor.CentreRight,
+                                Origin = Anchor.CentreRight,
+                                Color = Color.White,
+                                UpdateOnDraw = () => AudioSource.Value == null ? "0.0db" : $"{getAudioLevelString(audioHandler)}"
+                            }
+                        ]
+                    },
                 ]
             },
-
         ];
         AutoSizeAxes = Axes.Both;
+    }
+
+    private string getAudioLevelString(BassDspAudioHandler? handler)
+    {
+        if (handler == null) return "-inf db";
+        var db = $"{MathUtil.LevelToDb(AudioSource.Value!.Peak.Peak):0.0}";
+        if (db == "-90.0") db = "-inf";
+
+        return $"{db} db";
     }
 
     protected override void Dispose(bool isDisposing)

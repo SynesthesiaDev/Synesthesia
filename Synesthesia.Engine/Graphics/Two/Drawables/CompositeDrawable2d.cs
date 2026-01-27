@@ -159,10 +159,12 @@ public class CompositeDrawable2d : Drawable2d
 
         foreach (var child in InternalChildren)
         {
+            var scaledSize = child.Size * child.Scale;
+
             minX = Math.Min(minX, child.Position.X);
             minY = Math.Min(minY, child.Position.Y);
-            maxX = Math.Max(maxX, child.Position.X + child.Size.X);
-            maxY = Math.Max(maxY, child.Position.Y + child.Size.Y);
+            maxX = Math.Max(maxX, child.Position.X + scaledSize.X);
+            maxY = Math.Max(maxY, child.Position.Y + scaledSize.Y);
         }
 
         return new Vector2(maxX - minX, maxY - minY);

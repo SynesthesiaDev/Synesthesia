@@ -11,22 +11,10 @@ public static class EngineConfiguration
 
     private static RawConfigurationFile current = RawConfigurationFile.DEFAULT;
 
-    public static bool ShowLogOverlay
+    public static bool ShowDebugOverlay
     {
-        get => current.ShowLogOverlay;
-        set => current = current with { ShowLogOverlay = value };
-    }
-
-    public static bool ShowEngineStatistics
-    {
-        get => current.ShowEngineStatistics;
-        set => current = current with { ShowEngineStatistics = value };
-    }
-
-    public static bool ShowFps
-    {
-        get => current.ShowFps;
-        set => current = current with { ShowFps = value };
+        get => current.ShowDebugOverlay;
+        set => current = current with { ShowDebugOverlay = value };
     }
 
     public static GarbageCollectionMode GarbageCollectionMode
@@ -55,25 +43,21 @@ public static class EngineConfiguration
 
     private record RawConfigurationFile
     (
-        bool ShowLogOverlay,
-        bool ShowEngineStatistics,
-        bool ShowFps,
+        bool ShowDebugOverlay,
         GarbageCollectionMode GarbageCollectionMode,
         ExecutionMode ExecutionMode,
         bool ExperimentalAudioWasapi
     )
     {
-        public static readonly RawConfigurationFile DEFAULT = new(false, false, false, GarbageCollectionMode.Default, ExecutionMode.MultiThreaded, false);
+        public static readonly RawConfigurationFile DEFAULT = new(false, GarbageCollectionMode.Default, ExecutionMode.MultiThreaded, false);
 
         public static readonly StructCodec<RawConfigurationFile> CODEC = StructCodec.Of
         (
-            "showLogOverlay", Codecs.Boolean, r => r.ShowLogOverlay,
-            "showEngineStatistics", Codecs.Boolean, r => r.ShowEngineStatistics,
-            "showFps", Codecs.Boolean, r => r.ShowFps,
+            "showDebugOverlay", Codecs.Boolean, r => r.ShowDebugOverlay,
             "garbageCollectionMode", Codecs.Enum<GarbageCollectionMode>(), r => r.GarbageCollectionMode,
             "executionMode", Codecs.Enum<ExecutionMode>(), r => r.ExecutionMode,
             "experimentalAudioWasapi", Codecs.Boolean, r => r.ExperimentalAudioWasapi,
-            (showLogOverlay, showEngineStatistics, showFps, garbage, execution, wasapi) => new RawConfigurationFile(showLogOverlay, showEngineStatistics, showFps, garbage, execution, wasapi)
+            (showDebugOverlay, garbage, execution, wasapi) => new RawConfigurationFile(showDebugOverlay, garbage, execution, wasapi)
         );
     }
 

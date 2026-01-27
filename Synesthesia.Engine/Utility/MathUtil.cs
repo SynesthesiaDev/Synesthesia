@@ -11,11 +11,10 @@ public static class MathUtil
         return clamped * max;
     }
 
-
     internal static double LevelToDb(double level)
     {
-        if (level == 0) return 0;
+        if (level <= 0) return -90;
 
-        return Math.Log(level, 10) * 20f;
+        return 20 * Math.Log10(level);
     }
 }
