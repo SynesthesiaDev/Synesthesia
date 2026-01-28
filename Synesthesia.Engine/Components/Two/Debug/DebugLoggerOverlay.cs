@@ -10,7 +10,6 @@ using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
 using Synesthesia.Engine.Threading.Runners;
-using Synesthesia.Engine.Timing.Scheduling;
 using Synesthesia.Engine.Utility;
 using SynesthesiaUtil.Extensions;
 
@@ -24,8 +23,11 @@ public class DebugLoggerOverlay : CompositeDrawable2d
 
     private FillFlowContainer2d fillFlowContainer = null!;
     private EventSubscriber<Logger.LogEvent> loggerSubscriber = null!;
-    private Scheduler scheduler = null!;
-    private Dictionary<Logger.LogEvent, DebugLoggerOverlayMessage> messages = new();
+
+    private readonly Dictionary<Logger.LogEvent, MessageEntry> messages = new();
+    private readonly Queue<Logger.LogEvent> messageOrder = new();
+
+    private sealed record MessageEntry(DebugLoggerOverlayMessage Message, long ExpiresAtMs);
 
     protected override void OnLoading()
     {
@@ -39,41 +41,67 @@ public class DebugLoggerOverlay : CompositeDrawable2d
             }
         ];
 
-        scheduler = new Scheduler();
         loggerSubscriber = Logger.MESSAGE_LOGGED.Subscribe(Push);
+    }
+
+    protected internal override void OnUpdate()
+    {
+        base.OnUpdate();
+
+        var now = Environment.TickCount64;
+
+        while (messageOrder.Count > 0 && messages.TryGetValue(messageOrder.Peek(), out var entry) && now >= entry.ExpiresAtMs)
+        {
+            Pop(messageOrder.Peek());
+        }
     }
 
     public void Push(Logger.LogEvent logEvent)
     {
-        DependencyContainer.Get<UpdateThreadRunner>().Schedule(() =>
-        {
-            if (fillFlowContainer.Children.Count() >= MAX_MESSAGES)
+        DependencyContainer
+            .Get<UpdateThreadRunner>()
+            .Schedule(() =>
             {
-                var last = fillFlowContainer.Children.First();
-                fillFlowContainer.RemoveChild(last);
-            }
+                while (messageOrder.Count is >= MAX_MESSAGES and > 0)
+                {
+                    pop(messageOrder.Peek(), instant: true);
+                }
 
-            var message = new DebugLoggerOverlayMessage(logEvent);
+                var message = new DebugLoggerOverlayMessage(logEvent);
 
-            messages.Add(logEvent, message);
-            fillFlowContainer.AddChild(message);
+                messages[logEvent] = new MessageEntry(message, Environment.TickCount64 + MESSAGE_LIFESPAN);
+                messageOrder.Enqueue(logEvent);
 
-            scheduler.Schedule(MESSAGE_LIFESPAN, _ => Pop(logEvent));
-        });
+                fillFlowContainer.AddChild(message);
+            });
     }
 
-    public void Pop(Logger.LogEvent logEvent)
+    public void Pop(Logger.LogEvent logEvent) => pop(logEvent, instant: false);
+
+    private void pop(Logger.LogEvent logEvent, bool instant)
     {
-        if (messages.Remove(logEvent, out var value))
+        while (messageOrder.Count > 0 && EqualityComparer<Logger.LogEvent>.Default.Equals(messageOrder.Peek(), logEvent))
+            messageOrder.Dequeue();
+
+        if (!messages.Remove(logEvent, out var entry))
+            return;
+
+        var message = entry.Message;
+
+        if (instant)
         {
-            value.FadeTo(0f, 500, Easing.Out).Then(() => fillFlowContainer.RemoveChild(value));
+            fillFlowContainer.RemoveChild(message);
+            return;
         }
+
+        message
+            .FadeTo(0f, 500, Easing.Out)
+            .Then(() => fillFlowContainer.RemoveChild(message));
     }
 
     protected override void Dispose(bool isDisposing)
     {
         Logger.MESSAGE_LOGGED.Unsubscribe(loggerSubscriber);
-        scheduler.Dispose();
         base.Dispose(isDisposing);
     }
 

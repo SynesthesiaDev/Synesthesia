@@ -1,8 +1,9 @@
+using Common.Bindable;
 using Common.Statistics;
 
 namespace Common.Event;
 
-public class EventDispatcher<T> : IDisposable
+public class EventDispatcher<T> : IEventDispatcher
 {
     private List<EventSubscriber<T>> eventSubscribers = [];
 

@@ -99,7 +99,7 @@ public class EngineDebugOverlay : CompositeDrawable2d
                 .Build();
         }
 
-        AnimationManager.AddAnimation(sequence);
+        Animator.Value.AddAnimation(sequence);
 
         return true;
     }

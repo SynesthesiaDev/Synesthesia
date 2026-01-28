@@ -46,6 +46,13 @@ public record MouseMoveInputEvent(Vector2 Position) : IInputEvent
     public bool IsDown => false;
 }
 
+public record MouseWheelInputEvent(float Delta) : IInputEvent
+{
+    public InputSource Source => InputSource.Mouse;
+    public float Timestamp => (float)Raylib.GetTime();
+    public bool IsDown => false;
+}
+
 public record TouchInputEvent(Gesture Gesture, Vector2 Position, bool IsDown) : IInputEvent
 {
     public InputSource Source => InputSource.Touch;

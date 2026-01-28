@@ -90,6 +90,12 @@ public class RenderThreadRunner : ThreadRunner
             activeKeys.Add(keyboardKey);
         }
 
+        float wheelDelta;
+        if ((wheelDelta = Raylib.GetMouseWheelMove()) != 0f)
+        {
+            InputManager.EnqueueEvent(new MouseWheelInputEvent(wheelDelta));
+        }
+
         activeKeys.ToList().Filter(k => Raylib.IsKeyReleased(k)).ForEach(keyboardKey =>
         {
             activeKeys.Remove(keyboardKey);

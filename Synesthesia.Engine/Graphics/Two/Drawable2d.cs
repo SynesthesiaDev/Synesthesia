@@ -154,6 +154,11 @@ public abstract class Drawable2d : Drawable
     {
     }
 
+    protected internal virtual bool OnMouseWheel(float delta)
+    {
+        return false;
+    }
+
     protected internal override void OnUpdate()
     {
         if (RelativeSizeAxes != Axes.None && AutoSizeAxes != Axes.None)
@@ -266,8 +271,13 @@ public abstract class Drawable2d : Drawable
             OnComplete = onComplete,
             Delay = delay
         };
-        AnimationManager.AddAnimation(field, animation);
+        Animator.Value.AddAnimation(field, animation);
         return animation;
+    }
+
+    public Animation<Vector2> MoveTo(Vector2 newPosition, long duration, Easing easing)
+    {
+        return TransformTo(nameof(Position), Position, newPosition, duration, easing, Transforms.VECTOR2, vec => { Position = vec; });
     }
 
     public Animation<Vector2> ScaleTo(float newScale, long duration, Easing easing)
@@ -324,13 +334,13 @@ public abstract class Drawable2d : Drawable
 
     protected override void Dispose(bool isDisposing)
     {
-        if (AnimationManager == null)
+        if (Animator == null)
         {
-            Logger.Warning($"AnimationManager was null when disposing {GetType().Name}");
+            Logger.Warning($"Animator was null when disposing {GetType().Name}");
         }
         else
         {
-            AnimationManager.Dispose();
+            Animator.Value.Dispose();
         }
 
         Parent = null;

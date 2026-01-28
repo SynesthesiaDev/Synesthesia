@@ -17,6 +17,17 @@ public class CompositeDrawable2d : Drawable2d
         get => InternalChildren;
         set
         {
+            if (InternalChildren.Count > 0)
+            {
+                foreach (var oldChild in InternalChildren)
+                {
+                    oldChild.Parent = null;
+                    oldChild.Dispose();
+                }
+
+                InternalChildren.Clear();
+            }
+
             InternalChildren = value.ToList();
             foreach (var child in value)
             {
@@ -87,6 +98,21 @@ public class CompositeDrawable2d : Drawable2d
         }
     }
 
+    protected internal void UpdateScrollWheelState(MouseWheelInputEvent e)
+    {
+        foreach (var child in InternalChildren.Filter(c => c.AcceptsInputs() && c.Contains(InputManager.MousePosition)).Reversed())
+        {
+            var handled = child.OnMouseWheel(e.Delta);
+
+            if (handled) continue;
+
+            if (child is CompositeDrawable2d drawable2d)
+            {
+                drawable2d.UpdateScrollWheelState(e);
+            }
+        }
+    }
+
     protected internal void UpdateKeyState(KeyboardKey e, bool down)
     {
         foreach (var child in InternalChildren.Filter(c => c.AcceptsInputs()).Reversed())
@@ -119,7 +145,7 @@ public class CompositeDrawable2d : Drawable2d
 
     protected internal override void OnUpdate()
     {
-        foreach (var child in Children)
+        foreach (var child in Children.ToArray())
         {
             child.OnUpdate();
         }

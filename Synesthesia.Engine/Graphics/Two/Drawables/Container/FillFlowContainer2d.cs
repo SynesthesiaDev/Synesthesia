@@ -10,7 +10,7 @@ public class FillFlowContainer2d : BackgroundContainer2d
 
     public float Spacing { get; set; } = 0f;
 
-protected internal override void OnUpdate()
+    protected internal override void OnUpdate()
     {
         base.OnUpdate();
 
@@ -23,14 +23,13 @@ protected internal override void OnUpdate()
         {
             child.Position = new Vector2(currentX, currentY);
 
-            if (Direction == Direction.Horizontal && child.FillRemainingAxes.HasFlag(Axes.X))
+            if (child.FillRemainingAxes.HasFlag(Axes.X))
             {
                 var remainingParentX = Math.Max(0f, Size.X - currentX);
                 var sx = child.Scale.X;
                 child.Width = sx == 0 ? 0 : (remainingParentX / sx);
             }
-
-            if (Direction == Direction.Vertical && child.FillRemainingAxes.HasFlag(Axes.Y))
+            if (child.FillRemainingAxes.HasFlag(Axes.Y))
             {
                 var remainingParentY = Math.Max(0f, Size.Y - currentY);
                 var sy = child.Scale.Y;

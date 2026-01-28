@@ -14,17 +14,53 @@ public class Scheduler : IDisposable
     private readonly Stopwatch stopwatch = new Stopwatch();
     private readonly UpdateThreadRunner updateThreadRunner = DependencyContainer.Get<UpdateThreadRunner>();
 
+    private readonly object timerLock = new();
+    private bool timerRunning;
+
     public Scheduler()
     {
         stopwatch.Start();
-        timer = new Timer(tick, null, 0, 1);
+        timer = new Timer(tick, null, Timeout.Infinite, Timeout.Infinite);
+        timerRunning = false;
+
         EngineStatistics.SCHEDULERS.Increment();
+    }
+
+    private void wakeUp()
+    {
+        lock (timerLock)
+        {
+            if (timerRunning) return;
+            timer.Change(0, 1);
+            timerRunning = true;
+            EngineStatistics.ACTIVE_SCHEDULERS.Increment();
+        }
+    }
+
+    private void stopTimerIfIdle()
+    {
+        lock (timerLock)
+        {
+            if (!timerRunning) return;
+
+            if (scheduledTasks.Keys.Count != 0 || repeatingTasks.Keys.Count != 0) return;
+
+            timer.Change(Timeout.Infinite, Timeout.Infinite);
+            timerRunning = false;
+            EngineStatistics.ACTIVE_SCHEDULERS.Decrement();
+        }
     }
 
     private void tick(object? state)
     {
         var now = stopwatch.ElapsedMilliseconds;
         Interlocked.Exchange(ref currentTime, now);
+
+        if (scheduledTasks.Keys.Count == 0 && repeatingTasks.Keys.Count == 0)
+        {
+            stopTimerIfIdle();
+            return;
+        }
 
         updateThreadRunner.Schedule(() =>
         {
@@ -69,11 +105,17 @@ public class Scheduler : IDisposable
         var now = Interlocked.Read(ref currentTime);
         var intervals = repeatingTasks.Keys.ToList();
 
-        foreach (var list in intervals.Select(interval => repeatingTasks.Get(interval)))
+        foreach (var interval in intervals)
         {
-            list
-                .Filter(t => t.CancellationToken.IsCancellationRequested)
-                .ForEach(t => t.Dispose());
+            var list = repeatingTasks.Get(interval);
+            for (var i = list.Count - 1; i >= 0; i--)
+            {
+                var t = list[i];
+                if (!t.CancellationToken.IsCancellationRequested) continue;
+
+                t.Dispose();
+                list.RemoveAt(i);
+            }
 
             foreach (var task in list)
             {
@@ -83,9 +125,10 @@ public class Scheduler : IDisposable
 
                 task.Iteration++;
                 task.Action.Invoke(task);
-
                 task.NextRunTime += task.Interval;
             }
+
+            if (list.Count == 0) repeatingTasks.Remove(interval);
         }
     }
 
@@ -95,6 +138,9 @@ public class Scheduler : IDisposable
         var task = new ScheduledTask(this, false, time, action, new CancellationTokenSource());
         scheduledTasks.AddValue(now + time, task);
         EngineStatistics.SCHEDULER_TASKS.Increment();
+
+        wakeUp();
+
         return task;
     }
 
@@ -104,12 +150,17 @@ public class Scheduler : IDisposable
         repeatingTasks.AddValue(interval, task);
         EngineStatistics.SCHEDULER_TASKS.Increment();
 
+        wakeUp();
+
         return task;
     }
 
     public RepeatingTask Iterate(long iterations, long interval, Action<IterativeTask> action, Action then)
     {
         var currentLoop = 0L;
+
+        wakeUp();
+
         return Repeating(interval, repeating =>
         {
             if (currentLoop >= iterations)
@@ -133,14 +184,24 @@ public class Scheduler : IDisposable
 
     public void Dispose()
     {
+        lock (timerLock)
+        {
+            if (timerRunning)
+            {
+                EngineStatistics.ACTIVE_SCHEDULERS.Decrement();
+            }
+            timer.Change(Timeout.Infinite, Timeout.Infinite);
+            timerRunning = false;
+        }
+
         foreach (var scheduledTask in scheduledTasks.SelectMany(keyValuePair => keyValuePair.Value))
         {
-            scheduledTask.CancellationToken.Dispose();
+            scheduledTask.Dispose();
         }
 
         foreach (var repeatingTask in repeatingTasks.SelectMany(keyValuePair => keyValuePair.Value))
         {
-            repeatingTask.CancellationToken.Dispose();
+            repeatingTask.Dispose();
         }
 
         EngineStatistics.SCHEDULERS.Decrement();
@@ -154,14 +215,24 @@ public class Scheduler : IDisposable
         Scheduler Parent { get; }
         CancellationTokenSource CancellationToken { get; }
         CancellationToken Token => CancellationToken.Token;
+
+        bool AlreadyDisposed { get; set; }
     }
 
     public record ScheduledTask(Scheduler Parent, bool HasBeenRun, long ScheduledTime, Action<ScheduledTask> Action, CancellationTokenSource CancellationToken) : ITask
     {
         public bool HasBeenRun { get; set; } = HasBeenRun;
 
+        public bool AlreadyDisposed { get; set; }
+
         public void Dispose()
         {
+            if(AlreadyDisposed) return;
+            AlreadyDisposed = true;
+
+            if (!CancellationToken.IsCancellationRequested)
+                CancellationToken.Cancel();
+
             CancellationToken.Dispose();
             EngineStatistics.SCHEDULER_TASKS.Decrement();
         }
@@ -178,8 +249,18 @@ public class Scheduler : IDisposable
         public long Iteration { get; set; } = Iteration;
         public long NextRunTime { get; set; }
 
+        public bool AlreadyDisposed { get; set; }
+
         public void Dispose()
         {
+            if(AlreadyDisposed) return;
+            AlreadyDisposed = true;
+
+
+            if (!CancellationToken.IsCancellationRequested)
+                CancellationToken.Cancel();
+
+
             CancellationToken.Dispose();
             EngineStatistics.SCHEDULER_TASKS.Decrement();
         }
@@ -194,8 +275,16 @@ public class Scheduler : IDisposable
         CancellationTokenSource CancellationToken
     ) : ITask
     {
+        public bool AlreadyDisposed { get; set; }
+
         public void Dispose()
         {
+            if(AlreadyDisposed) return;
+            AlreadyDisposed = true;
+
+            if (!CancellationToken.IsCancellationRequested)
+                CancellationToken.Cancel();
+
             CancellationToken.Dispose();
             EngineStatistics.SCHEDULER_TASKS.Decrement();
         }

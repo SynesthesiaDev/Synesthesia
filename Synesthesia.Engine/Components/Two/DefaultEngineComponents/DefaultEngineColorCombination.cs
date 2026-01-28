@@ -12,5 +12,6 @@ public record DefaultEngineColorCombination(Color Normal, Color Hovered)
     public static readonly DefaultEngineColorCombination SURFACE3 = new(Defaults.BACKGROUND3, Defaults.BACKGROUND4);
     public static readonly DefaultEngineColorCombination SURFACE4 = new(Defaults.BACKGROUND4, Defaults.BACKGROUND5);
     public static readonly DefaultEngineColorCombination ACCENT = new(Defaults.ACCENT, Defaults.ACCENT.ChangeBrightness(0.4f));
-    
+    public static readonly DefaultEngineColorCombination RED = new(Defaults.RED, Defaults.RED.ChangeBrightness(0.4f));
+
 }

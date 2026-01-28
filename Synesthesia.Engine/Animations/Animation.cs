@@ -16,9 +16,9 @@ public partial class Animation<T> : IAnimation
 
     public long StartTime { get; private set; } = -1;
     public bool IsPaused { get; set; } = false;
-    
+
     public long PausedTime { get; set; } = 0L;
-    
+
     public bool IsCompleted { get; set; } = false;
 
     public bool Loop { get; set; } = false;
@@ -71,7 +71,6 @@ public partial class Animation<T> : IAnimation
         {
             OnUpdate.Invoke(EndValue);
             IsCompleted = true;
-            OnComplete?.Invoke();
             return true;
         }
 

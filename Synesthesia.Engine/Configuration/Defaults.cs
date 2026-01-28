@@ -21,4 +21,7 @@ public static class Defaults
     public static readonly Color BACKGROUND3 = ColorUtil.FromHex("#515151");
     public static readonly Color BACKGROUND4 = ColorUtil.FromHex("#7B7B7B");
     public static readonly Color BACKGROUND5 = ColorUtil.FromHex("#9E9E9E");
+
+    public static readonly Color RED = new(230, 77, 77);
+
 }

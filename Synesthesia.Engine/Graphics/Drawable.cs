@@ -26,10 +26,6 @@ public abstract partial class Drawable : IDrawable, IDisposable
 
     public readonly SingleOffEventDispatcher<Drawable> OnLoadComplete;
 
-    public readonly EventDispatcher<Drawable> OnInvalidated;
-
-    public readonly EventDispatcher<Drawable> OnDisposed;
-    
     public Vector3 Rotation { get; set; } = Vector3.Zero;
 
     public Vector3 Shear { get; set; } = Vector3.Zero;
@@ -39,22 +35,24 @@ public abstract partial class Drawable : IDrawable, IDisposable
     public BlendMode BlendMode { get; set; } = BlendMode.Alpha;
 
     public float Alpha { get; set; } = 1f;
-    
+
     public bool IsLoaded => LoadState >= DrawableLoadState.Loaded;
 
     private static readonly StopwatchClock performance_watch = new(true);
 
-    public Scheduler Scheduler = null!;
-    
-    public AnimationManager AnimationManager = null!;
+    public Lazy<Scheduler> Scheduler;
+
+    public Lazy<Animator> Animator;
+
 
     protected Drawable()
     {
         EngineStatistics.DRAWABLES.Increment();
 
         OnLoadComplete = BindablePool.BorrowSingleOffDispatcher<Drawable>();
-        OnDisposed = BindablePool.BorrowDispatcher<Drawable>();
-        OnInvalidated = BindablePool.BorrowDispatcher<Drawable>();
+
+        Scheduler = new Lazy<Scheduler>(() => new Scheduler());
+        Animator = new Lazy<Animator>(() => new Animator(this.Scheduler.Value));
     }
 
     public enum DrawableLoadState
@@ -117,9 +115,9 @@ public abstract partial class Drawable : IDrawable, IDisposable
     {
         if (LoadState < DrawableLoadState.Ready) return false;
 
-        Scheduler = new Scheduler();
-        AnimationManager = new AnimationManager(Scheduler);
         LoadState = DrawableLoadState.Loaded;
+
+        OnUpdate();
 
         LoadComplete();
 
@@ -153,10 +151,9 @@ public abstract partial class Drawable : IDrawable, IDisposable
     {
         if (IsDisposed) return;
 
-        OnDisposed.Dispatch(this);
         BindablePool.Dispose();
-
         IsDisposed = true;
+        Scheduler.Value.Dispose();
 
         EngineStatistics.DRAWABLES.Decrement();
     }

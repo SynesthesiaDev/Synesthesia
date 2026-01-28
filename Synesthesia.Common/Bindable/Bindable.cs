@@ -1,6 +1,6 @@
 namespace Common.Bindable;
 
-public class Bindable<T>(T defaultValue) : IDisposable
+public class Bindable<T>(T defaultValue) : IBindable
 {
     private T @default = defaultValue;
     private T value = defaultValue;

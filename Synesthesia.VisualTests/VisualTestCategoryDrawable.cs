@@ -10,7 +10,7 @@ using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 
 namespace Synesthesia.VisualTests;
 
-public class VisualTestCategoryDrawable(VisualTestCategory visualTestCategory) : CompositeDrawable2d
+public class VisualTestCategoryDrawable(VisualTestCategory visualTestCategory, TestLibrary owningLibrary) : CompositeDrawable2d
 {
     private FillFlowContainer2d testContainer = null!;
     private bool expanded = false;
@@ -48,26 +48,27 @@ public class VisualTestCategoryDrawable(VisualTestCategory visualTestCategory) :
                         Anchor = Anchor.TopCentre,
                         Origin = Anchor.TopCentre,
                         Spacing = 5f,
-
-                        Children =
-                        [
-                            new DefaultEngineButton()
-                            {
-                                Size = new Vector2(button_width, button_height),
-                                Text = "Random Test",
-                                ColorCombination = DefaultEngineColorCombination.SURFACE1
-                            },
-
-                            new DefaultEngineButton()
-                            {
-                                Size = new Vector2(button_width, button_height),
-                                Text = "More Testings",
-                                ColorCombination = DefaultEngineColorCombination.SURFACE1
-                            },
-                        ]
                     }
                 ]
             },
         ];
+    }
+
+    protected override void LoadComplete()
+    {
+        visualTestCategory.VisualTests.ForEach(visualTest =>
+        {
+            testContainer.AddChild(new DefaultEngineButton
+            {
+                Size = new Vector2(button_width, button_height),
+                Text = visualTest.Name,
+                ColorCombination = DefaultEngineColorCombination.SURFACE1,
+                OnClick = () =>
+                {
+                    owningLibrary.CurrentSelectedTest.Value = visualTest;
+                }
+            });
+        });
+        base.LoadComplete();
     }
 }

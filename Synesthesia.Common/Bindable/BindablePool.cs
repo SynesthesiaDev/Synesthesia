@@ -1,14 +1,13 @@
 using Common.Event;
 using Common.Statistics;
-using SynesthesiaUtil.Extensions;
 
 namespace Common.Bindable;
 
 public class BindablePool : IDisposable
 {
-    private List<Bindable<object>> bindables = [];
-    private List<EventDispatcher<object>> dispatchers = [];
-    private List<SingleOffEventDispatcher<object>> singleOffDispatchers = [];
+    private List<IBindable> bindables = [];
+    private List<IEventDispatcher> dispatchers = [];
+    private List<IEventDispatcher> singleOffDispatchers = [];
 
     public BindablePool()
     {
@@ -18,7 +17,7 @@ public class BindablePool : IDisposable
     public Bindable<T> Borrow<T>(T defaultValue)
     {
         var bindable = new Bindable<T>(defaultValue);
-        bindables.Add((bindable as Bindable<object>)!);
+        bindables.Add(bindable);
         EngineStatistics.BINDABLES_BORROWED.Increment();
         return bindable;
     }
@@ -26,7 +25,7 @@ public class BindablePool : IDisposable
     public EventDispatcher<T> BorrowDispatcher<T>()
     {
         var dispatcher = new EventDispatcher<T>();
-        dispatchers.Add((dispatcher as EventDispatcher<object>)!);
+        dispatchers.Add(dispatcher);
         EngineStatistics.DISPATCHERS_BORROWED.Increment();
         return dispatcher;
     }
@@ -34,42 +33,43 @@ public class BindablePool : IDisposable
     public SingleOffEventDispatcher<T> BorrowSingleOffDispatcher<T>()
     {
         var dispatcher = new SingleOffEventDispatcher<T>();
-        singleOffDispatchers.Add((dispatcher as SingleOffEventDispatcher<object>)!);
+        singleOffDispatchers.Add(dispatcher);
         EngineStatistics.DISPATCHERS_BORROWED.Increment();
         return dispatcher;
     }
 
-    public void UnregisterDispatcher<T>(EventDispatcher<T> dispatcher)
+    public void UnregisterDispatcher<T>(IEventDispatcher dispatcher)
     {
-        var cast = (dispatcher as EventDispatcher<object>)!;
+        if (!dispatchers.Contains(dispatcher)) return;
 
-        if (!dispatchers.Contains(cast)) return;
-
-        dispatchers.Remove(cast);
-        cast.Dispose();
+        dispatchers.Remove(dispatcher);
+        dispatcher.Dispose();
         EngineStatistics.DISPATCHERS_BORROWED.Decrement();
     }
 
-    public void Unregister<T>(Bindable<T> bindable)
+    public void Unregister<T>(IBindable bindable)
     {
-        var cast = (bindable as Bindable<object>)!;
+        if (!bindables.Contains(bindable)) return;
 
-        if (!bindables.Contains(cast)) return;
-
-        bindables.Remove(cast);
-        cast.Dispose();
+        bindables.Remove(bindable);
+        bindable.Dispose();
         EngineStatistics.BINDABLES_BORROWED.Decrement();
     }
 
     public void Dispose()
     {
-        // ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        bindables.Filter(p => p != null).ForEach(b => b.Dispose());
-        dispatchers.Filter(p => p != null).ForEach(b => b.Dispose());
-        singleOffDispatchers.Filter(p => p != null).ForEach(b => b.Dispose());
+        bindables.ForEach(b => b.Dispose());
+        EngineStatistics.BINDABLES_BORROWED.Update(current => current - bindables.Count);
         bindables.Clear();
+
+        dispatchers.ForEach(b => b.Dispose());
+        EngineStatistics.DISPATCHERS_BORROWED.Update(current => current - dispatchers.Count);
         dispatchers.Clear();
+
+        singleOffDispatchers.ForEach(b => b.Dispose());
+        EngineStatistics.DISPATCHERS_BORROWED.Update(current => current - singleOffDispatchers.Count);
         singleOffDispatchers.Clear();
+
         EngineStatistics.BINDABLE_POOLS.Decrement();
     }
 }

@@ -10,7 +10,7 @@ namespace Synesthesia.Engine.Input;
 public static class InputManager
 {
     private static readonly Queue<IInputEvent> event_queue = new();
-    
+
     public static Vector2 LastMousePosition = new(x: 0, 0);
 
     private static readonly List<ActionBinding> action_bindings = [];
@@ -25,7 +25,7 @@ public static class InputManager
     {
         LastMousePosition = Vector2.Zero;
     }
-    
+
     public static Vector2 MousePosition { get; private set; } = Vector2.Zero;
 
     public static ImmutableList<KeyboardKey> HeldKeys => held_keys.ToImmutableList();
@@ -101,7 +101,7 @@ public static class InputManager
                     {
                         held_keys.Remove(keyInputEvent.Key);
                     }
-                    
+
                     game.EngineDebugOverlay.UpdateKeyState(keyInputEvent.Key, keyInputEvent.IsDown);
                     game.RootComposite2d.UpdateKeyState(keyInputEvent.Key, keyInputEvent.IsDown);
                     break;
@@ -137,6 +137,13 @@ public static class InputManager
                     var hoverEvent = new Drawable2d.HoverEvent(true, MousePosition);
                     game.EngineDebugOverlay.UpdateHoverState(hoverEvent);
                     game.RootComposite2d.UpdateHoverState(hoverEvent);
+                    break;
+                }
+
+                case MouseWheelInputEvent mouseWheelInputEvent:
+                {
+                    game.EngineDebugOverlay.UpdateScrollWheelState(mouseWheelInputEvent);
+                    game.RootComposite2d.UpdateScrollWheelState(mouseWheelInputEvent);
                     break;
                 }
 

@@ -20,10 +20,10 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
 
     private const long initial_repeat_delay = 500;
     private const long repeat_rate = 50;
-    
+
     private bool backspaceHeld = false;
     private long backspacePressTime = -1L;
-    
+
     public bool IsFocused { get; set; }
 
     public Drawable2d GetOwningDrawable() => this;
@@ -47,7 +47,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
                 ]
             }
         ];
-        
+
         CaretDrawable.Alpha = 0;
     }
 
@@ -55,7 +55,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
     {
         Text.OnValueChange(e => TextDrawable.Text = e.NewValue);
 
-        Scheduler.Repeating(repeat_rate, _ =>
+        Scheduler.Value.Repeating(repeat_rate, _ =>
         {
             var now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             if (backspaceHeld && now - backspacePressTime >= initial_repeat_delay)
@@ -69,7 +69,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
     {
         Text.Value += character;
     }
-    
+
     protected internal override bool OnKeyDown(KeyboardKey e)
     {
         switch (e)
@@ -152,7 +152,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
                 .IsLooping(true)
                 .Build();
 
-            AnimationManager.AddAnimation(animationSequence);
+            Animator.Value.AddAnimation(animationSequence);
         }
 
         public override void Show()
