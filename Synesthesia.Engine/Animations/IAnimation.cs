@@ -2,27 +2,29 @@ namespace Synesthesia.Engine.Animations;
 
 public interface IAnimation : IDisposable
 {
-    public bool IsCompleted { get; set; }
+    AnimationState State { get; set; }
 
-    public bool Update(long currentTime);
+    bool IsCompleted => State == AnimationState.Finished;
 
-    public bool Loop { get; set; }
+    void Update(long currentTime);
 
-    public void Stop();
-    
-    public void Reset();
-    
-    public void Start(long currentTime);
-    
-    public Action? OnComplete { get; set; }
-    
-    public bool IsPaused { get; set; }
-    
-    public long PausedTime { get; set; }
+    bool Loop { get; set; }
 
-    public void MakeLooping()
+    void Stop();
+
+    void Reset();
+
+    void Start(long currentTime);
+
+    Action? OnComplete { get; set; }
+
+    bool IsPaused => State == AnimationState.Paused;
+
+    long PausedTime { get; set; }
+
+    void MakeLooping()
     {
         Loop = true;
     }
-    
 }
+

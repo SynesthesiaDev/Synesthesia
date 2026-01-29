@@ -117,7 +117,8 @@ public abstract partial class Drawable : IDrawable, IDisposable
 
         LoadState = DrawableLoadState.Loaded;
 
-        OnUpdate();
+        // OnUpdate();
+        //TODO Update layout
 
         LoadComplete();
 
@@ -127,9 +128,8 @@ public abstract partial class Drawable : IDrawable, IDisposable
 
     protected internal abstract void OnDraw();
 
-    protected internal virtual void OnUpdate()
+    protected internal virtual void OnUpdate(FrameInfo frameInfo)
     {
-
     }
 
     protected virtual void LoadAsyncComplete()

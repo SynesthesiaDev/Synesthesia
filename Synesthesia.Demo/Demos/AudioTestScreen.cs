@@ -19,7 +19,7 @@ namespace Synesthesia.Demo.Demos;
 
 public class AudioTestScreen : Screen
 {
-    private DefaultEngineButton togglePlayButton = null!;
+    private DefaultButton togglePlayButton = null!;
     private TextDrawable text = null!;
     private DebugAudioMeter mixerAudioMeter = null!;
     private DebugAudioMeter channelAudioMeter = null!;
@@ -76,7 +76,7 @@ public class AudioTestScreen : Screen
 
                         Children =
                         [
-                            togglePlayButton = new DefaultEngineButton
+                            togglePlayButton = new DefaultButton
                             {
                                 Anchor = Anchor.Centre,
                                 Origin = Anchor.Centre,

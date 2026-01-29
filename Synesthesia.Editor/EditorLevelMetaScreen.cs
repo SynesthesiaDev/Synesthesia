@@ -33,7 +33,7 @@ public class EditorLevelMetaScreen(Level level) : Screen
 
                 Children =
                 [
-                    new DefaultEngineButton
+                    new DefaultButton
                     {
                         Size = new Vector2(120, 40),
                         Text = "Back",
@@ -43,7 +43,7 @@ public class EditorLevelMetaScreen(Level level) : Screen
                             editor.ScreenStack.Pop();
                         }
                     },
-                    new DefaultEngineButton
+                    new DefaultButton
                     {
                         Size = new Vector2(120, 40),
                         Text = "DEEPER!!",

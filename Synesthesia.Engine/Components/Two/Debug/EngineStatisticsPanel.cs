@@ -3,6 +3,7 @@ using System.Numerics;
 using Common.Statistics;
 using Common.Util;
 using Synesthesia.Engine.Configuration;
+using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
@@ -47,10 +48,10 @@ public class EngineStatisticsPanel : EngineDebugComponent
         new EngineStatisticAtomicLine("BASS Cpu %", EngineStatistics.BASS_CPU)
     );
 
-    protected internal override void OnUpdate()
+    protected internal override void OnUpdate(FrameInfo frameInfo)
     {
         if(!Visible) return;
-        base.OnUpdate();
+        base.OnUpdate(frameInfo);
     }
 
 

@@ -6,7 +6,7 @@ namespace Synesthesia.Engine.Graphics.Two.Drawables.Container;
 public abstract class Screen : Container2d
 {
     public bool IsSuspended { get; set; } = false;
-    
+
     public bool IsTransitioning { get; set; } = false;
 
     protected internal override bool AcceptsInputs() => !IsSuspended && !IsTransitioning;
@@ -20,10 +20,10 @@ public abstract class Screen : Container2d
         Origin = Anchor.Centre;
     }
 
-    protected internal override void OnUpdate()
+    protected internal override void OnUpdate(FrameInfo frameInfo)
     {
         if (IsSuspended) return;
-        base.OnUpdate();
+        base.OnUpdate(frameInfo);
     }
 
     public virtual CompletableFuture<Nothing> OnEntering(ScreenTransitionEvent e) => CompletableFuture.Completed(Nothing.INSTANCE);

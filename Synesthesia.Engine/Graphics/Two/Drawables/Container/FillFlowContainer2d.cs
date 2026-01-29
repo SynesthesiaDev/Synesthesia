@@ -10,9 +10,9 @@ public class FillFlowContainer2d : BackgroundContainer2d
 
     public float Spacing { get; set; } = 0f;
 
-    protected internal override void OnUpdate()
+    protected internal override void OnUpdate(FrameInfo frameInfo)
     {
-        base.OnUpdate();
+        base.OnUpdate(frameInfo);
 
         float currentY = 0;
         float currentX = 0;
@@ -36,7 +36,7 @@ public class FillFlowContainer2d : BackgroundContainer2d
                 child.Height = sy == 0 ? 0 : (remainingParentY / sy);
             }
 
-            child.OnUpdate();
+            child.OnUpdate(frameInfo);
 
             var childDrawWidth = child.Size.X * child.Scale.X;
             var childDrawHeight = child.Size.Y * child.Scale.Y;

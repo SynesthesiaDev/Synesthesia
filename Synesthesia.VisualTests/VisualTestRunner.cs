@@ -14,14 +14,16 @@ internal static class VisualTestRunner
 
     public static readonly List<VisualTestCategory> Tests =
     [
-        new VisualTestCategory("Containers", [new ScrollableContainerTest()])
+        new VisualTestCategory("Containers", [new ScrollableContainerTest()]),
+        new VisualTestCategory("Audio", [new SimpleAudioTest()]),
+        new VisualTestCategory("Controls", [new SliderTest()])
     ];
 
     public static void Load()
     {
         if (!File.Exists(path))
         {
-            File.Create(path).Close();
+            File .Create(path) .Close();
             File.WriteAllText(path, VisualTestsState.CODEC.Encode(IniTranscoder.Instance, VisualTestsState.DEFAULT).ToString());
         }
         else
@@ -30,12 +32,15 @@ internal static class VisualTestRunner
             var decoded = VisualTestsState.CODEC.Decode(IniTranscoder.Instance, IniSection.Parse(text));
             TestConfiguration = decoded;
         }
+
         Logger.Verbose("Loaded test runner state file", Logger.Io);
     }
 
     public static void Save()
     {
-        File.WriteAllText(path, VisualTestsState.CODEC.Encode(IniTranscoder.Instance, TestConfiguration).ToString());
+        File.WriteAllText(path, VisualTestsState
+            .CODEC.Encode(IniTranscoder.Instance, TestConfiguration)
+            .ToString());
     }
 
     private static void Main(string[] args)

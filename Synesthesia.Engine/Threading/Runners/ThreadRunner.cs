@@ -3,10 +3,12 @@ using System.Diagnostics;
 using Common.Bindable;
 using Common.Event;
 using Common.Logger;
+using Synesthesia.Engine.Graphics;
+using Synesthesia.Engine.Timing;
 
 namespace Synesthesia.Engine.Threading.Runners;
 
-public abstract class ThreadRunner : IDisposable
+public abstract class ThreadRunner(ThreadType type) : IDisposable
 {
     public Thread Thread { get; private set; } = null!;
 
@@ -16,7 +18,11 @@ public abstract class ThreadRunner : IDisposable
 
     private readonly ConcurrentQueue<Action> workQueue = new();
 
+    private readonly StopwatchClock stopwatchClock = new(true);
+
     private Game game = null!;
+
+    public ThreadType ThreadType { get; init; } = type;
 
     private bool isRunning;
 
@@ -38,7 +44,7 @@ public abstract class ThreadRunner : IDisposable
         OnLoadComplete(game);
     }
 
-    protected abstract void OnLoop();
+    protected abstract void OnLoop(FrameInfo frameInfo);
 
     protected abstract Logger.LogCategory GetLoggerCategory();
 
@@ -74,19 +80,25 @@ public abstract class ThreadRunner : IDisposable
             OnThreadInit(game);
             MarkLoaded();
 
+            var lastFrameStart = Stopwatch.GetTimestamp();
+
             while (isRunning)
             {
                 var frameStart = Stopwatch.GetTimestamp();
+                var deltaTime = Stopwatch.GetElapsedTime(lastFrameStart, frameStart).TotalMilliseconds;
 
+                var frameInfo = new FrameInfo
+                {
+                    Delta = deltaTime,
+                    Type = ThreadType,
+                    Time = stopwatchClock.ElapsedMilliseconds
+                };
 
-                OnLoop();
+                OnLoop(frameInfo);
                 executeScheduledActions();
 
-
-                //
                 var frameTime = Stopwatch.GetElapsedTime(frameStart);
                 Interlocked.Exchange(ref frameTimeTicks, frameTime.Ticks);
-
 
                 var target = TargetUpdateRate.Value;
                 if (target > TimeSpan.Zero)
@@ -113,6 +125,8 @@ public abstract class ThreadRunner : IDisposable
                 var current = Stopwatch.GetElapsedTime(frameStart);
                 var fps = current.TotalSeconds > 0 ? 1.0 / current.TotalSeconds : 0.0;
                 Interlocked.Exchange(ref fpsBits, BitConverter.DoubleToInt64Bits(fps));
+
+                lastFrameStart = frameStart;
             }
         }
         catch (Exception ex)

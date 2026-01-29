@@ -2,7 +2,8 @@ namespace Synesthesia.Engine.Animations;
 
 public class AnimationDelay(long duration) : IAnimation
 {
-    public bool IsCompleted { get; set; }
+    public AnimationState State { get; set; } = AnimationState.Ready;
+    public bool IsCompleted => State == AnimationState.Finished;
     public bool Loop { get; set; } = false;
 
     private long startTime = -1;
@@ -11,29 +12,29 @@ public class AnimationDelay(long duration) : IAnimation
 
     public Action? OnComplete { get; set; } = null;
 
-    public bool IsPaused { get; set; } = false;
+    public bool IsPaused => State == AnimationState.Paused;
 
     public long PausedTime { get; set; } = 0L;
 
-    public bool Update(long currentTime)
+    public void Update(long currentTime)
     {
-        if (startTime == -1 || IsCompleted) return IsCompleted;
+        if (startTime == -1 || IsCompleted) return;
 
         if (currentTime - startTime >= duration)
         {
-            IsCompleted = true;
+            State = AnimationState.Finished;
         }
 
-        return IsCompleted;
+        return;
     }
 
     public void Reset()
     {
         startTime = -1;
-        IsCompleted = false;
+        State = AnimationState.Ready;
     }
 
-    public void Stop() => IsCompleted = true;
+    public void Stop() => State = AnimationState.Finished;
 
     public void Dispose()
     {

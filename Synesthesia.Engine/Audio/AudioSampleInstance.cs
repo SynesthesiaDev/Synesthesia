@@ -88,6 +88,11 @@ public record AudioSampleInstance : IPlaybackAudioControl
         IsPaused = false;
     }
 
+    public void Stop()
+    {
+        Bass.ChannelStop(StreamHandle);
+    }
+
     public void Dispose()
     {
         BassMix.MixerRemoveChannel(StreamHandle);

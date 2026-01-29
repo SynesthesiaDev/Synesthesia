@@ -15,11 +15,12 @@ public partial class Animation<T> : IAnimation
     public required long Delay { get; init; }
 
     public long StartTime { get; private set; } = -1;
-    public bool IsPaused { get; set; } = false;
+    public bool IsPaused => State == AnimationState.Paused;
 
     public long PausedTime { get; set; } = 0L;
 
-    public bool IsCompleted { get; set; } = false;
+    public AnimationState State { get; set; } = AnimationState.Ready;
+    public bool IsCompleted => State == AnimationState.Finished;
 
     public bool Loop { get; set; } = false;
 
@@ -37,7 +38,7 @@ public partial class Animation<T> : IAnimation
 
     public void Pause()
     {
-        if (!IsPaused) IsPaused = true;
+        State = AnimationState.Paused;
     }
 
     public void Resume(long currentTime)
@@ -45,33 +46,32 @@ public partial class Animation<T> : IAnimation
         if (!IsPaused) return;
 
         StartTime = currentTime - PausedTime;
-        IsPaused = false;
+        State = AnimationState.Playing;
     }
 
     public void Stop()
     {
-        IsCompleted = true;
+        State = AnimationState.Finished;
     }
 
     public void Reset()
     {
         StartTime = -1;
-        IsCompleted = false;
-        IsPaused = false;
         PausedTime = 0;
+        State = AnimationState.Ready;
     }
 
-    public bool Update(long currentTime)
+    public void Update(long currentTime)
     {
-        if (StartTime == -1 || IsCompleted || IsPaused) return false;
-        if (currentTime < StartTime) return false;
+        if (StartTime == -1 || IsCompleted || IsPaused) return;
+        if (currentTime < StartTime) return;
 
         var elapsed = currentTime - StartTime;
         if (elapsed >= Duration)
         {
             OnUpdate.Invoke(EndValue);
-            IsCompleted = true;
-            return true;
+            State = AnimationState.Finished;
+            return;
         }
 
         var progress = (float)elapsed / Duration;
@@ -79,11 +79,7 @@ public partial class Animation<T> : IAnimation
         var currentValue = Transform.Apply(StartValue, EndValue, easedProgress);
 
         OnUpdate.Invoke(currentValue);
-
-        return false;
     }
-
-
 
     public void Dispose()
     {

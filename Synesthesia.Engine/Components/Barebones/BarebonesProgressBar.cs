@@ -6,6 +6,7 @@ using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Configuration;
+using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Shapes;
@@ -39,18 +40,23 @@ public class BarebonesProgressBar : CompositeDrawable2d
 
     public Easing AnimationEasing { get; set; } = Easing.In;
 
-    public int AnimationTime { get; set; } = 10;
+    public int AnimationTime { get; set; } = 100;
 
     public readonly Bindable<float> Progress = new(0.0f);
 
     private BackgroundContainer2d backgroundContainer = null!;
     private DrawableBox2d box = null!;
 
-    protected internal override void OnUpdate()
+    private float lastProgressValue = 0.0f;
+
+    protected internal override void OnUpdate(FrameInfo frameInfo)
     {
-        base.OnUpdate();
+        base.OnUpdate(frameInfo);
+
+        if(Progress.Value.Equals(lastProgressValue)) return;
 
         box.ResizeWidthTo(getWidth(Progress.Value), AnimationTime, AnimationEasing);
+        lastProgressValue = Progress.Value;
     }
 
     protected override void OnLoading()

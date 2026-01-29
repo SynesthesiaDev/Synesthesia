@@ -6,6 +6,7 @@ using Raylib_cs;
 using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Configuration;
 using Synesthesia.Engine.Dependency;
+using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
@@ -44,9 +45,9 @@ public class DebugLoggerOverlay : CompositeDrawable2d
         loggerSubscriber = Logger.MESSAGE_LOGGED.Subscribe(Push);
     }
 
-    protected internal override void OnUpdate()
+    protected internal override void OnUpdate(FrameInfo frameInfo)
     {
-        base.OnUpdate();
+        base.OnUpdate(frameInfo);
 
         var now = Environment.TickCount64;
 

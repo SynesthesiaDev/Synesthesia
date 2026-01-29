@@ -3,6 +3,7 @@ using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Configuration;
 using Synesthesia.Engine.Dependency;
+using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
@@ -11,10 +12,10 @@ namespace Synesthesia.Engine.Components.Two.Debug;
 
 public class FrameCounter : EngineDebugComponent
 {
-    protected internal override void OnUpdate()
+    protected internal override void OnUpdate(FrameInfo frameInfo)
     {
         if(!Visible) return;
-        base.OnUpdate();
+        base.OnUpdate(frameInfo);
     }
 
     protected override void OnLoading()

@@ -3,6 +3,7 @@ using Common.Bindable;
 using Common.Util;
 using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Configuration;
+using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Shapes;
@@ -78,9 +79,9 @@ public class DefaultEngineCheckbox : CompositeDrawable2d, IDisablable
         checkbox.Checked.BindTo(Checked);
     }
 
-    protected internal override void OnUpdate()
+    protected internal override void OnUpdate(FrameInfo frameInfo)
     {
-        base.OnUpdate();
+        base.OnUpdate(frameInfo);
         checkbox.Size = new Vector2(Size.Y);
     }
 
@@ -129,15 +130,15 @@ public class DefaultEngineCheckbox : CompositeDrawable2d, IDisablable
             Checked = pool.Borrow(true);
             Hovered = pool.Borrow(true);
         }
-        
+
         private Vector2 innerSize => new(Size.X - 10);
 
         private DrawableBox2d box = null!;
         private DrawableBox2d backgroundBox = null!;
 
-        protected internal override void OnUpdate()
+        protected internal override void OnUpdate(FrameInfo frameInfo)
         {
-            base.OnUpdate();
+            base.OnUpdate(frameInfo);
             box.Size = innerSize;
         }
 
@@ -195,7 +196,7 @@ public class DefaultEngineCheckbox : CompositeDrawable2d, IDisablable
 
             base.OnLoading();
         }
-        
+
         protected override void Dispose(bool isDisposing)
         {
             pool.Dispose();

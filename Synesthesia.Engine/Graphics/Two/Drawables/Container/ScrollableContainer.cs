@@ -98,12 +98,11 @@ public class ScrollableContainer : MaskingContainer2d
             CurrentScrollPosition = Math.Clamp(CurrentScrollPosition, 0.0, extent);
         }
 
-
         var newPosition = ScrollDirection == Direction.Vertical
             ? new Vector2(0f, -(float)CurrentScrollPosition)
             : new Vector2(-(float)CurrentScrollPosition, 0f);
 
-        scrollableContainer.MoveTo(newPosition, 100, Easing.In);
+        scrollableContainer.MoveTo(newPosition, 350, Easing.OutQuart);
 
         Logger.Verbose($"Scroll: {CurrentScrollPosition} ({viewport.Position}");
     }

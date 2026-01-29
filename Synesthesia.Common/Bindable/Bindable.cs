@@ -1,29 +1,29 @@
 namespace Common.Bindable;
 
-public class Bindable<T>(T defaultValue) : IBindable
+public class Bindable<T>(T defaultInternalValue) : IBindable
 {
-    private T @default = defaultValue;
-    private T value = defaultValue;
+    private T defaultInternal = defaultInternalValue;
+    protected T InternalValue = defaultInternalValue;
 
     public BoundBindable? Bound = null;
 
     public T Value
     {
-        get => value;
+        get => InternalValue;
         set
         {
-            var oldValue = this.value;
-            this.value = value;
-            listeners.ForEach(listener => listener.Invoke(oldValue, value));
+            var oldValue = this.InternalValue;
+            this.InternalValue = value;
+            Listeners.ForEach(listener => listener.Invoke(oldValue, value));
         }
     }
 
-    private List<BindableListener<T>> listeners = [];
+    protected readonly List<BindableListener<T>> Listeners = [];
 
     public BindableListener<T> OnValueChange(Action<BindableEvent<T>> func, bool triggerOnce = false)
     {
         var listener = new BindableListener<T>(func);
-        listeners.Add(listener);
+        Listeners.Add(listener);
         if (triggerOnce) listener.Invoke(Value, Value);
         return listener;
     }
@@ -41,7 +41,7 @@ public class Bindable<T>(T defaultValue) : IBindable
 
     public void SetSilently(T newValue)
     {
-        value = newValue;
+        InternalValue = newValue;
     }
 
     public void Unbind()
@@ -54,18 +54,18 @@ public class Bindable<T>(T defaultValue) : IBindable
 
     public void Unregister(BindableListener<T> listener)
     {
-        listeners.Remove(listener);
+        Listeners.Remove(listener);
     }
 
     public void ResetToDefaultValue()
     {
-        Value = @default;
+        Value = defaultInternal;
     }
 
     public void Dispose()
     {
         Unbind();
-        listeners.Clear();
+        Listeners.Clear();
     }
 
     public void TriggerChange()

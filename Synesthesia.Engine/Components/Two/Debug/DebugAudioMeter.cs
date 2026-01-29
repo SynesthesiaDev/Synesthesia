@@ -7,6 +7,7 @@ using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Audio.Controls;
 using Synesthesia.Engine.Components.Barebones;
+using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
@@ -21,9 +22,9 @@ public class DebugAudioMeter(BassDspAudioHandler? audioHandler = null) : Composi
     private BarebonesProgressBar audioRight = null!;
     private BarebonesProgressBar audioLeft = null!;
 
-    protected internal override void OnUpdate()
+    protected internal override void OnUpdate(FrameInfo frameInfo)
     {
-        base.OnUpdate();
+        base.OnUpdate(frameInfo);
         if (AudioSource.Value == null) return;
 
         var peak = AudioSource.Value.Peak;

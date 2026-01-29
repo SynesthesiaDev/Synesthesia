@@ -27,7 +27,7 @@ public class BaseEditorScreen : Screen
                         Text = "Base Editor Screen",
                         Color = Color.White
                     },
-                    new DefaultEngineButton
+                    new DefaultButton
                     {
                         Size = new Vector2(120, 40),
                         Text = "Edit Screen",

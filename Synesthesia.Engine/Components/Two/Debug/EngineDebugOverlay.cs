@@ -4,6 +4,7 @@ using Raylib_cs;
 using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Configuration;
+using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Input;
@@ -18,10 +19,10 @@ public class EngineDebugOverlay : CompositeDrawable2d
         ActionName = "Toggle Engine Debug Overlay",
     };
 
-    protected internal override void OnUpdate()
+    protected internal override void OnUpdate(FrameInfo frameInfo)
     {
         if (!Visible) return;
-        base.OnUpdate();
+        base.OnUpdate(frameInfo);
     }
 
     private Container2d mainContainer = null!;

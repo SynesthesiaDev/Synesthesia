@@ -5,9 +5,11 @@ namespace Synesthesia.Engine.Animations;
 
 public class AnimationSequence : IAnimation
 {
-    public List<IAnimation> Animations = [];
+    public readonly List<IAnimation> Animations = [];
 
-    public bool IsCompleted { get; set; }
+    public AnimationState State { get; set; } = AnimationState.Ready;
+
+    public bool IsCompleted => State == AnimationState.Finished;
 
     public Action? OnComplete { get; set; } = null;
 
@@ -38,17 +40,17 @@ public class AnimationSequence : IAnimation
     {
         if (Animations.IsEmpty())
         {
-            IsCompleted = true;
+            State = AnimationState.Finished;
             return;
         }
 
-        IsCompleted = false;
+        State = AnimationState.Playing;
         CurrentAnimation.Start(currentTime);
     }
 
-    public bool Update(long currentTime)
+    public void Update(long currentTime)
     {
-        if (IsCompleted || Animations.IsEmpty()) return IsCompleted;
+        if (IsCompleted || Animations.IsEmpty()) return;
 
         var current = CurrentAnimation;
         current.Update(currentTime);
@@ -62,11 +64,9 @@ public class AnimationSequence : IAnimation
             }
             else
             {
-                IsCompleted = true;
+                State = AnimationState.Finished;
             }
         }
-
-        return IsCompleted;
     }
 
     public void Stop()
@@ -79,7 +79,7 @@ public class AnimationSequence : IAnimation
 
     public void Reset()
     {
-        IsCompleted = false;
+        State = AnimationState.Ready;
         currentIndex = 0;
         Animations.ForEach(anim =>
         {

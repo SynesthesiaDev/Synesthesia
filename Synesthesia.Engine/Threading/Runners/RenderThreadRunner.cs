@@ -1,13 +1,14 @@
 using System.Numerics;
 using Common.Logger;
 using Raylib_cs;
+using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Resources;
 using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Threading.Runners;
 
-public class RenderThreadRunner : ThreadRunner
+public class RenderThreadRunner(ThreadType type) : ThreadRunner(type)
 {
     private Game game = null!;
     private Camera3D camera;
@@ -44,7 +45,7 @@ public class RenderThreadRunner : ThreadRunner
     {
     }
 
-    protected override void OnLoop()
+    protected override void OnLoop(FrameInfo frameInfo)
     {
         game.WindowHost.PollEvents();
 

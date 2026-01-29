@@ -44,6 +44,8 @@ public class Game : IDisposable
         {
             MasterAudioChannel = AudioManager.CreateChannel("Master");
             MasterAudioMixer = MasterAudioChannel.CreateMixer("master");
+
+            MasterAudioChannel.Volume = 0.25f;
         });
     }
 
@@ -80,10 +82,10 @@ public class Game : IDisposable
         var loadSignal = new CountdownEvent(4);
         Action<ThreadRunner> onThreadLoaded = _ => loadSignal.Signal();
 
-        UpdateThread = ThreadSafety.CreateThread(new UpdateThreadRunner(), ThreadSafety.THREAD_UPDATE, Defaults.UPDATE_RATE, this);
-        RenderThread = ThreadSafety.CreateThread(new RenderThreadRunner(), ThreadSafety.THREAD_RENDER, Defaults.RENDERER_RATE, this);
-        InputThread = ThreadSafety.CreateThread(new InputThreadRunner(), ThreadSafety.THREAD_INPUT, Defaults.INPUT_RATE, this);
-        AudioThread = ThreadSafety.CreateThread(new AudioThreadRunner(), ThreadSafety.THREAD_AUDIO, Defaults.AUDIO_RATE, this);
+        UpdateThread = ThreadSafety.CreateThread(new UpdateThreadRunner(ThreadType.Update), ThreadSafety.THREAD_UPDATE, Defaults.UPDATE_RATE, this);
+        RenderThread = ThreadSafety.CreateThread(new RenderThreadRunner(ThreadType.Draw), ThreadSafety.THREAD_RENDER, Defaults.RENDERER_RATE, this);
+        InputThread = ThreadSafety.CreateThread(new InputThreadRunner(ThreadType.Input), ThreadSafety.THREAD_INPUT, Defaults.INPUT_RATE, this);
+        AudioThread = ThreadSafety.CreateThread(new AudioThreadRunner(ThreadType.Audio), ThreadSafety.THREAD_AUDIO, Defaults.AUDIO_RATE, this);
 
         UpdateThread.ThreadLoadedDispatcher.Subscribe(onThreadLoaded);
         RenderThread.ThreadLoadedDispatcher.Subscribe(onThreadLoaded);

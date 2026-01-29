@@ -29,7 +29,7 @@ public class VisualTestCategoryDrawable(VisualTestCategory visualTestCategory, T
                 Direction = Direction.Vertical,
                 Children =
                 [
-                    new DefaultEngineButton
+                    new DefaultButton
                     {
                         Size = new Vector2(button_width, button_height),
                         Text = visualTestCategory.Name,
@@ -58,7 +58,7 @@ public class VisualTestCategoryDrawable(VisualTestCategory visualTestCategory, T
     {
         visualTestCategory.VisualTests.ForEach(visualTest =>
         {
-            testContainer.AddChild(new DefaultEngineButton
+            testContainer.AddChild(new DefaultButton
             {
                 Size = new Vector2(button_width, button_height),
                 Text = visualTest.Name,

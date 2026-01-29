@@ -2,11 +2,12 @@ using Common.Logger;
 using Common.Statistics;
 using ManagedBass;
 using Synesthesia.Engine.Audio;
+using Synesthesia.Engine.Graphics;
 using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Threading.Runners;
 
-public class AudioThreadRunner : ThreadRunner
+public class AudioThreadRunner(ThreadType type) : ThreadRunner(type)
 {
     protected override Logger.LogCategory GetLoggerCategory() => Logger.Audio;
 
@@ -28,7 +29,7 @@ public class AudioThreadRunner : ThreadRunner
 
     private long frameCount;
 
-    protected override void OnLoop()
+    protected override void OnLoop(FrameInfo frameInfo)
     {
         if (frameCount++ % 1000 == 0)
         {

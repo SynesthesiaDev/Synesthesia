@@ -55,7 +55,7 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
             ]
         };
 
-        childs.Add(new DefaultEngineButton
+        childs.Add(new DefaultButton
         {
             Size = new Vector2(240, 40),
             Text = "Clear Current Test",

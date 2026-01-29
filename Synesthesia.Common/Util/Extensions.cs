@@ -10,6 +10,13 @@ public static class Extensions
             .Name;
     }
 
+    public static int CycleIndex<T>(this List<T> list, int currentIndex)
+    {
+        if (list.IsEmpty()) return 0;
+
+        return (currentIndex + 1) % list.Count;
+    }
+
     public static List<T?> FilterNonNull<T>(this List<T?> list)
     {
         return list.Filter(p => p != null);

@@ -159,7 +159,7 @@ public abstract class Drawable2d : Drawable
         return false;
     }
 
-    protected internal override void OnUpdate()
+    protected internal override void OnUpdate(FrameInfo frameInfo)
     {
         if (RelativeSizeAxes != Axes.None && AutoSizeAxes != Axes.None)
         {
@@ -173,6 +173,11 @@ public abstract class Drawable2d : Drawable
 
             if (RelativeSizeAxes.HasFlag(Axes.Y))
                 Height = Parent.Size.Y - Margin.Y - Margin.W;
+        }
+
+        if (Animator.IsValueCreated)
+        {
+            Animator.Value.Update(frameInfo);
         }
     }
 
@@ -289,7 +294,6 @@ public abstract class Drawable2d : Drawable
     {
         return ScaleFromTo(new Vector2(oldScale), new Vector2(newScale), duration, easing);
     }
-
 
     public Animation<float> ResizeWidthTo(float newWidth, long duration, Easing easing)
     {

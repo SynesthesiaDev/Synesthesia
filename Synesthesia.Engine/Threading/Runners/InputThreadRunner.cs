@@ -1,9 +1,10 @@
 using Common.Logger;
+using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Input;
 
 namespace Synesthesia.Engine.Threading.Runners;
 
-public class InputThreadRunner : ThreadRunner
+public class InputThreadRunner(ThreadType type) : ThreadRunner(type)
 {
     private Game game = null!;
 
@@ -18,7 +19,7 @@ public class InputThreadRunner : ThreadRunner
     {
     }
 
-    protected override void OnLoop()
+    protected override void OnLoop(FrameInfo frameInfo)
     {
         try
         {

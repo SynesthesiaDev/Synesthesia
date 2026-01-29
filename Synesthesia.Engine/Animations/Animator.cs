@@ -1,5 +1,7 @@
 using Common.Statistics;
+using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Timing.Scheduling;
+using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Animations;
 
@@ -8,55 +10,42 @@ public class Animator : IDisposable
     protected internal bool IsDisposed { get; private set; }
 
     private readonly object @lock = new();
-    private readonly object schedulerLock = new();
 
     private readonly Dictionary<string, IAnimationHolder> keyedAnimations = [];
     private readonly List<IAnimationHolder> animations = [];
 
-    private static long currentTime => DateTimeOffset.Now.ToUnixTimeMilliseconds();
-
-    private Scheduler.RepeatingTask? updateTask;
-    private readonly Scheduler scheduler;
-
     public Animator(Scheduler scheduler)
     {
-        this.scheduler = scheduler;
         EngineStatistics.ANIMATORS.Increment();
     }
 
-    private void sleep()
+    public void Update(FrameInfo frameInfo)
     {
-        if (updateTask == null) return;
-
-        updateTask?.Dispose();
-        updateTask = null;
-        EngineStatistics.ACTIVE_ANIMATORS.Decrement();
-    }
-
-    private void wakeUp()
-    {
-        if (updateTask != null) return;
-
-        lock (schedulerLock)
+        lock (@lock)
         {
-            EngineStatistics.ACTIVE_ANIMATORS.Increment();
+            if (animations.IsEmpty()) return;
 
-            updateTask = scheduler.Repeating(1, _ =>
+            foreach (var holder in animations.ToList())
             {
-                lock (@lock)
+                switch (holder.Animation.State)
                 {
-                    if (animations.Count == 0)
+                    case AnimationState.Ready:
                     {
-                        sleep();
-                        return;
+                        holder.Animation.Start(frameInfo.Time);
+                        holder.Animation.State = AnimationState.Playing;
+                        holder.Animation.Update(frameInfo.Time);
+                        break;
                     }
 
-                    foreach (var holder in animations.ToList())
+                    case AnimationState.Playing:
                     {
-                        holder.Animation.Update(currentTime);
-
-                        if (!holder.Animation.IsCompleted) continue;
-
+                        holder.Animation.Update(frameInfo.Time);
+                        break;
+                    }
+                    case AnimationState.Paused:
+                        continue;
+                    case AnimationState.Finished:
+                    {
                         holder.Animation.OnComplete?.Invoke();
                         if (holder.Animation.Loop)
                         {
@@ -70,25 +59,17 @@ public class Animator : IDisposable
                                 keyedAnimations.Remove(managed.Key);
                             }
                         }
-                    }
-
-                    if (animations.Count == 0)
-                    {
-                        sleep();
+                        break;
                     }
                 }
-            });
+            }
         }
     }
 
     public void Restart(IAnimation animation)
     {
-        wakeUp();
-
         animation.Reset();
-        wakeUp();
-
-        animation.Start(currentTime);
+        animation.State = AnimationState.Ready;
     }
 
     public void AddAnimation(IAnimation animation)
@@ -99,8 +80,7 @@ public class Animator : IDisposable
         {
             addAnimation(new UnmanagedAnimationHolder(animation));
 
-            wakeUp();
-            animation.Start(currentTime);
+            animation.State = AnimationState.Ready;
         }
     }
 
@@ -122,8 +102,7 @@ public class Animator : IDisposable
             keyedAnimations.Add(field, managed);
             addAnimation(managed);
 
-            wakeUp();
-            animation.Start(currentTime);
+            animation.State = AnimationState.Ready;
         }
     }
 
@@ -172,17 +151,11 @@ public class Animator : IDisposable
 
     public void Dispose()
     {
-        if(IsDisposed) return;
-
-        if (updateTask != null)
-        {
-            sleep();
-        }
+        if (IsDisposed) return;
 
         Clear();
         EngineStatistics.ANIMATORS.Decrement();
         IsDisposed = true;
-
     }
 
     private interface IAnimationHolder

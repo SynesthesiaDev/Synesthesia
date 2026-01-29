@@ -143,16 +143,16 @@ public class CompositeDrawable2d : Drawable2d
         child.Dispose();
     }
 
-    protected internal override void OnUpdate()
+    protected internal override void OnUpdate(FrameInfo frameInfo)
     {
         foreach (var child in Children.ToArray())
         {
-            child.OnUpdate();
+            child.OnUpdate(frameInfo);
         }
 
         if (AutoSizeAxes != Axes.None) UpdateAutoSize();
 
-        base.OnUpdate();
+        base.OnUpdate(frameInfo);
     }
 
     protected override void OnDraw2d()

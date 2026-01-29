@@ -1,8 +1,9 @@
 using Common.Logger;
+using Synesthesia.Engine.Graphics;
 
 namespace Synesthesia.Engine.Threading.Runners;
 
-public class UpdateThreadRunner : ThreadRunner
+public class UpdateThreadRunner(ThreadType type) : ThreadRunner(type)
 {
     private Game game = null!;
 
@@ -17,10 +18,10 @@ public class UpdateThreadRunner : ThreadRunner
     {
     }
 
-    protected override void OnLoop()
+    protected override void OnLoop(FrameInfo frameInfo)
     {
-        game.RootComposite3d.OnUpdate();
-        game.RootComposite2d.OnUpdate();
-        game.EngineDebugOverlay.OnUpdate();
+        game.RootComposite3d.OnUpdate(frameInfo);
+        game.RootComposite2d.OnUpdate(frameInfo);
+        game.EngineDebugOverlay.OnUpdate(frameInfo);
     }
 }

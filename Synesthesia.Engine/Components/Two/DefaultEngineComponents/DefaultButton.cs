@@ -6,7 +6,7 @@ using Synesthesia.Engine.Graphics.Two.Drawables.Text;
 
 namespace Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 
-public class DefaultEngineButton : DisableableContainer
+public class DefaultButton : DisableableContainer
 {
     public string Text
     {
@@ -51,7 +51,7 @@ public class DefaultEngineButton : DisableableContainer
         }
     }
 
-    public DefaultEngineButton()
+    public DefaultButton()
     {
         Children =
         [
