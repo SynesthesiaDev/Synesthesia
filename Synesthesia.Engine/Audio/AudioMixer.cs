@@ -4,6 +4,7 @@ using Common.Statistics;
 using ManagedBass;
 using ManagedBass.Mix;
 using Synesthesia.Engine.Audio.Controls;
+using Synesthesia.Engine.Audio.Effect;
 
 namespace Synesthesia.Engine.Audio;
 
@@ -15,7 +16,7 @@ public class AudioMixer : BassDspAudioHandler, IHasAudioHandle
 
     public AudioChannel OwningAudioChannel { get; private set; }
 
-    private readonly Dictionary<IEffectParameter, int> activeEffects = new();
+    private readonly Dictionary<IAudioEffect, int> activeEffects = new();
 
     private readonly List<AudioSampleInstance> activeInstances = [];
 
@@ -122,33 +123,22 @@ public class AudioMixer : BassDspAudioHandler, IHasAudioHandle
         IsPaused = false;
     }
 
-    public void AddEffect(IEffectParameter effect, int priority)
+    public void AddEffect(IAudioEffect effect)
     {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        var handle = Bass.ChannelSetFX(MixdownHandle, effect.FXType, priority);
-        Bass.FXSetParameters(handle, effect);
+        effect.AttachTo(this);
 
-        activeEffects[effect] = handle;
+        activeEffects[effect] = effect.GetAudioHandle();
     }
 
-    public void RemoveEffect(IEffectParameter effect)
+    public void RemoveEffect(IAudioEffect effect)
     {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
         if (!activeEffects.Remove(effect, out var handle)) return;
 
-        Bass.ChannelRemoveFX(MixdownHandle, handle);
-    }
-
-    public void UpdateEffect(IEffectParameter effect)
-    {
-        ObjectDisposedException.ThrowIf(IsDisposed, this);
-
-        if (!activeEffects.TryGetValue(effect, out var handle))
-            return;
-
-        Bass.FXSetParameters(handle, effect);
+        effect.Detach();
     }
 
     public AudioSampleInstance Play(AudioSample sample)
@@ -194,9 +184,15 @@ public class AudioMixer : BassDspAudioHandler, IHasAudioHandle
         else
         {
             Bass.ChannelPlay(streamHandle);
+            ensureEffects();
         }
 
         return instance;
+    }
+
+    private void ensureEffects()
+    {
+        foreach (var (effect, _) in activeEffects) effect.ApplyToStream();
     }
 
     public new void Dispose()

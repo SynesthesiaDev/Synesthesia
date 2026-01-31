@@ -57,12 +57,13 @@ public abstract class Drawable2d : Drawable
     {
         get
         {
-            var parentScale = Parent?.InheritedScale ?? Vector2.One;
+            var parent = Parent;
+            var parentScale = parent?.InheritedScale ?? Vector2.One;
 
             var anchorPos = Vector2.Zero;
-            if (Parent != null)
+            if (parent != null)
             {
-                anchorPos = Parent.ScreenSpacePosition + getAnchorOffset(Parent.Size, Anchor) * parentScale;
+                anchorPos = parent.ScreenSpacePosition + getAnchorOffset(parent.Size, Anchor) * parentScale;
             }
 
             var posOffset = (Position + getMarginOffset()) * parentScale;

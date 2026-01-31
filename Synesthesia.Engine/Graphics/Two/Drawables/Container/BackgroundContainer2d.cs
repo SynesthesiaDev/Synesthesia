@@ -26,6 +26,7 @@ public class BackgroundContainer2d : Container2d
     protected override void OnLoading()
     {
         background.Load();
+        background.Parent = this;
         base.OnLoading();
     }
 
@@ -34,7 +35,6 @@ public class BackgroundContainer2d : Container2d
         if(!background.IsLoaded) return;
         if (BackgroundColor.A == 0) return;
         background.Size = Size;
-        background.Parent = this;
 
         background.CornerRadius = BackgroundCornerRadius;
         background.Color = BackgroundColor;

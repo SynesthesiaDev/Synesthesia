@@ -5,6 +5,7 @@ using Common.Util;
 using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Components.Barebones;
 using Synesthesia.Engine.Configuration;
+using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Shapes;
 using Synesthesia.Engine.Utility;
@@ -15,6 +16,8 @@ public class DefaultSliderBarBody : SliderBarBody
 {
     private DrawableBox2d filledBox = null!;
     private BackgroundContainer2d container = null!;
+
+    private float? afterLoadProgress = null;
 
     protected override void OnLoading()
     {
@@ -59,8 +62,26 @@ public class DefaultSliderBarBody : SliderBarBody
         container.FadeBackgroundTo(Defaults.BACKGROUND2, 100, Easing.OutCubic);
     }
 
+    protected internal override void OnUpdate(FrameInfo frameInfo)
+    {
+        if (Width != 0 && afterLoadProgress != null)
+        {
+            var p = afterLoadProgress.Value;
+            afterLoadProgress = null;
+            ValueChanged(p);
+        }
+
+        base.OnUpdate(frameInfo);
+    }
+
     public override void ValueChanged(float newValue)
     {
+        if (Width == 0)
+        {
+            afterLoadProgress = newValue;
+            return;
+        }
+
         filledBox.ResizeWidthTo(getWidth(newValue), 10, Easing.InCubic);
     }
 

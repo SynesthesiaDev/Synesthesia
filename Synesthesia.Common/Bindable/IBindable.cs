@@ -5,5 +5,5 @@ namespace Common.Bindable;
 
 public interface IBindable : IDisposable
 {
-
+    static readonly BindableEventSource GLOBAL_EVENT_SOURCE = new();
 }

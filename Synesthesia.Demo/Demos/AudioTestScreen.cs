@@ -24,7 +24,7 @@ public class AudioTestScreen : Screen
     private DebugAudioMeter mixerAudioMeter = null!;
     private DebugAudioMeter channelAudioMeter = null!;
 
-    private readonly AudioSample music = ResourceManager.Get<AudioSample>($"SynesthesiaResources.{new List<string> {"audio", "audio2", "audio3", "audio4"}.Random()}.mp3");
+    private readonly AudioSample music = ResourceManager.Get<AudioSample>($"SynesthesiaResources.{new List<string> { "audio", "audio2", "audio3", "audio4" }.Random()}.mp3");
     private AudioMixer masterMixer = null!;
     private AudioChannel masterChannel = null!;
 
@@ -100,7 +100,7 @@ public class AudioTestScreen : Screen
                                 }
                             },
                         ]
-                    }
+                    },
                 ]
             }
         ];
@@ -115,6 +115,8 @@ public class AudioTestScreen : Screen
         // audioMeter.Progress.Value = 0.63f;
         // mixerAudioMeter.AudioSource.Value = masterMixer;
         // channelAudioMeter.AudioSource.Value = masterChannel;
+
+
 
         audioPlaying.OnValueChange(e =>
         {

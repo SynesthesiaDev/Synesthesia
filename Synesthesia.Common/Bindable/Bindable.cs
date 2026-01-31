@@ -1,8 +1,10 @@
+using SynesthesiaUtil.Extensions;
+
 namespace Common.Bindable;
 
 public class Bindable<T>(T defaultInternalValue) : IBindable
 {
-    private T defaultInternal = defaultInternalValue;
+    private readonly T defaultInternal = defaultInternalValue;
     protected T InternalValue = defaultInternalValue;
 
     public BoundBindable? Bound = null;
@@ -10,20 +12,22 @@ public class Bindable<T>(T defaultInternalValue) : IBindable
     public T Value
     {
         get => InternalValue;
-        set
-        {
-            var oldValue = this.InternalValue;
-            this.InternalValue = value;
-            Listeners.ForEach(listener => listener.Invoke(oldValue, value));
-        }
+        set => Set(value, IBindable.GLOBAL_EVENT_SOURCE);
     }
 
-    protected readonly List<BindableListener<T>> Listeners = [];
+    public virtual void Set(T newValue, BindableEventSource source)
+    {
+        var oldValue = InternalValue;
+        InternalValue = newValue;
+        Listeners.Filter(p => p.Value != source).Keys.ToList().ForEach(listener => listener.Invoke(oldValue, newValue));
+    }
 
-    public BindableListener<T> OnValueChange(Action<BindableEvent<T>> func, bool triggerOnce = false)
+    protected readonly Dictionary<BindableListener<T>, BindableEventSource?> Listeners = [];
+
+    public BindableListener<T> OnValueChange(Action<BindableEvent<T>> func, bool triggerOnce = false, BindableEventSource? ignoresSource = null)
     {
         var listener = new BindableListener<T>(func);
-        Listeners.Add(listener);
+        Listeners.Add(listener, ignoresSource);
         if (triggerOnce) listener.Invoke(Value, Value);
         return listener;
     }
@@ -85,3 +89,8 @@ public record BindableListener<T>(Action<BindableEvent<T>> Func)
 }
 
 public record BindableEvent<T>(T OldValue, T NewValue);
+
+public class BindableEventSource
+{
+    public Guid Uuid = Guid.NewGuid();
+}

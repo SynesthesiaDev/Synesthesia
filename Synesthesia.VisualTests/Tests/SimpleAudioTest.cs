@@ -2,10 +2,12 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Numerics;
+using Common.Bindable;
 using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine;
 using Synesthesia.Engine.Audio;
+using Synesthesia.Engine.Audio.Effect;
 using Synesthesia.Engine.Components.Two.Debug;
 using Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 using Synesthesia.Engine.Dependency;
@@ -26,6 +28,15 @@ public class SimpleAudioTest : VisualTest
 
     private AudioManager audioManager = null!;
     private AudioMixer masterAudioMixer = null!;
+
+    private readonly LowpassAudioEffect lowpassEffect = new(0f);
+
+    private readonly BindableFloat audioVolume = new()
+    {
+        Min = 0f,
+        Max = 1f,
+        Default = 0.5f,
+    };
 
     public override List<Drawable2d> Setup()
     {
@@ -83,7 +94,7 @@ public class SimpleAudioTest : VisualTest
                                     currentSampleIndex = samples.CycleIndex(currentSampleIndex);
                                     var next = samples[currentSampleIndex];
                                     currentlyPlayingSample = masterAudioMixer.Play(next);
-                                    if(isPaused) currentlyPlayingSample.Pause();
+                                    if (isPaused) currentlyPlayingSample.Pause();
                                 }
                             },
 
@@ -108,14 +119,30 @@ public class SimpleAudioTest : VisualTest
                                 }
                             },
                         ]
-                    }
+                    },
+                    new DefaultSliderBar
+                    {
+                        Current = audioVolume,
+                        Size = new Vector2(240, 40),
+                    },
+                    new DefaultSliderBar
+                    {
+                        Current = lowpassEffect.Cutoff,
+                        Size = new Vector2(240, 40),
+                    },
                 ]
             },
         ];
 
+        masterAudioMixer.AddEffect(lowpassEffect);
+
+        audioVolume.OnValueChange(e =>
+        {
+            masterAudioMixer.Volume = e.NewValue;
+        }, true);
+
         return children;
     }
-
 
     public override void Cleanup()
     {

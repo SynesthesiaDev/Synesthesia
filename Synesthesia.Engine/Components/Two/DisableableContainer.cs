@@ -32,6 +32,7 @@ public class DisableableContainer : BackgroundContainer2d, IDisablable
     protected override void OnLoading()
     {
         disabledOverlay.Load();
+        disabledOverlay.Parent = this;
         base.OnLoading();
     }
 
@@ -53,7 +54,6 @@ public class DisableableContainer : BackgroundContainer2d, IDisablable
         if (disabledOverlay.Color.A == 0) return;
 
         disabledOverlay.Size = Size;
-        disabledOverlay.Parent = this;
 
         disabledOverlay.CornerRadius = BackgroundCornerRadius;
 

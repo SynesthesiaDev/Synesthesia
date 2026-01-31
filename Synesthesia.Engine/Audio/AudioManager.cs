@@ -172,19 +172,21 @@ public class AudioManager : BassDspAudioHandler, IHasAudioHandle
 
         if (AudioDevices.IsEmpty || RuntimeInfo.IsMobile) return false;
 
-        if (!Bass.Init(device.Index, Flags: (DeviceInitFlags)128)) // 128 == BASS_DEVICE_REINIT
-            return false;
-
-        // TODO wasapi support
+        Bass.Stop();
+        Bass.Free();
+        BassWasapi.Free();
         BassWasapi.Stop();
         BassWasapi.Free();
 
         // Set latency to sanest minimum
-        Bass.DeviceBufferLength = 10;
-        Bass.PlaybackBufferLength = 100;
+        Bass.DeviceBufferLength = 20;
+        Bass.PlaybackBufferLength = 150;
 
         // Makes the audio device run 24/7 even if there is no audio playing just to make sure there are no delays when staring new audio clip after silence
         Bass.DeviceNonStop = true;
+
+        if (!Bass.Init(device.Index, Flags: (DeviceInitFlags)128)) // 128 == BASS_DEVICE_REINIT
+            return false;
 
         // without this, if bass falls back to directsound legacy mode the audio playback offset will be way off.
         Bass.Configure(ManagedBass.Configuration.TruePlayPosition, 0);

@@ -12,6 +12,8 @@ public abstract class BarebonesSliderBar : Container2d
 {
     public required BindableFloat Current { get; init; }
 
+    private readonly BindableEventSource selfEventSource = new();
+
     public float Precision { get; set; } = 0;
 
     protected abstract SliderBarBody GetBody();
@@ -41,21 +43,29 @@ public abstract class BarebonesSliderBar : Container2d
             finalValue = rawValue;
         }
 
-        Current.Value = finalValue;
+        Current.Set(finalValue, selfEventSource);
 
         // Snap nub to the actual value position
         var snappedProgress = (finalValue - Current.Min) / (Current.Max - Current.Min);
         var newNubPos = nub.Position with { X = snappedProgress * (Size.X - nub.Size.X) };
         nub.MoveTo(newNubPos, 10, Easing.InCubic);
+
         body.ValueChanged(snappedProgress);
     }
 
-    // protected internal override bool OnMouseDown(PointInput e)
-    // {
-    //     UpdateFromPositionalInput(e.MousePosition);
-    //     return true;
-    //     // return base.OnMouseDown(e);
-    // }
+    protected override void LoadComplete()
+    {
+        Current.OnValueChange(e =>
+        {
+            var progress = (e.NewValue - Current.Min) / (Current.Max - Current.Min);
+
+            var newNubPos = nub.Position with { X = progress * (Size.X - nub.Size.X) };
+            nub.MoveTo(newNubPos, 10, Easing.InCubic);
+
+            body.ValueChanged(progress);
+
+        }, true, selfEventSource);
+    }
 
     protected override void OnLoading()
     {
@@ -65,5 +75,4 @@ public abstract class BarebonesSliderBar : Container2d
             nub = GetNub()
         ];
     }
-
 }
