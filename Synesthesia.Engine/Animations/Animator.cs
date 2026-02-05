@@ -160,7 +160,7 @@ public class Animator : IDisposable
 
     private interface IAnimationHolder
     {
-        public IAnimation Animation { get; }
+        IAnimation Animation { get; }
     }
 
     private record UnmanagedAnimationHolder(IAnimation Animation) : IAnimationHolder;

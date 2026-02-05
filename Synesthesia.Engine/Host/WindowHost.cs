@@ -8,7 +8,7 @@ namespace Synesthesia.Engine.Host;
 
 public class WindowHost : IDisposable
 {
-    private BindablePool bindablePool = new();
+    private readonly BindablePool bindablePool = new();
 
     public bool ShouldWindowClose => Raylib.WindowShouldClose();
 

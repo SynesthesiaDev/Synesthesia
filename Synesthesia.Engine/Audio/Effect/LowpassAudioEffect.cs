@@ -7,7 +7,7 @@ using ManagedBass.Fx;
 
 namespace Synesthesia.Engine.Audio.Effect;
 
-public class LowpassAudioEffect : AudioEffect<BQFParameters>
+public class LowpassAudioEffect : AudioEffect<BQFParameters>, IDisposable
 {
     public const int MAX_LOWPASS_CUTOFF_HZ = 17640;
 
@@ -41,4 +41,9 @@ public class LowpassAudioEffect : AudioEffect<BQFParameters>
     protected override EffectType GetEffectType() => EffectType.BQF;
 
     protected override int GetEffectPriority() => 1;
+
+    public void Dispose()
+    {
+        Cutoff.Dispose();
+    }
 }

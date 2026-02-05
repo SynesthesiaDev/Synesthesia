@@ -65,7 +65,7 @@ public class VisualTestCategoryDrawable(VisualTestCategory visualTestCategory, T
                 ColorCombination = DefaultEngineColorCombination.SURFACE1,
                 OnClick = () =>
                 {
-                    owningLibrary.CurrentSelectedTest.Value = visualTest;
+                    owningLibrary.CurrentSelectedTest.Value = Activator.CreateInstance(visualTest) as VisualTest;
                 }
             });
         });

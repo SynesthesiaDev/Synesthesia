@@ -47,7 +47,7 @@ public abstract class AudioEffect<T> : IAudioEffect where T : IEffectParameter
     {
         if (!IsActive) return;
 
-        Bass.ChannelRemoveFX(EffectHandle, AttachedAudioMixer!.GetAudioHandle());
+        Bass.ChannelRemoveFX(AttachedAudioMixer!.GetAudioHandle(), EffectHandle);
         EffectHandle = 0;
         AttachedAudioMixer = null;
     }

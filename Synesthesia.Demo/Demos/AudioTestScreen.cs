@@ -138,6 +138,7 @@ public class AudioTestScreen : Screen
     protected override void Dispose(bool isDisposing)
     {
         music.Dispose();
+        audioPlaying.Dispose();
         base.Dispose(isDisposing);
     }
 }

@@ -5,7 +5,6 @@ using System.Numerics;
 using Common.Bindable;
 using Common.Util;
 using Synesthesia.Engine.Components.Two.DefaultEngineComponents;
-using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
 
@@ -13,8 +12,6 @@ namespace Synesthesia.VisualTests.Tests;
 
 public class SliderTest : VisualTest
 {
-    public override string Name => "Slider Component";
-
     private readonly BindableFloat currentValue = new()
     {
         Max = 10f,
@@ -23,9 +20,10 @@ public class SliderTest : VisualTest
 
     private TextDrawable text = null!;
 
-    public override List<Drawable2d> Setup()
+    protected override void OnLoading()
     {
-         List<Drawable2d> children = [
+        Children =
+        [
             new FillFlowContainer2d
             {
                 AutoSizeAxes = Axes.Both,
@@ -53,12 +51,11 @@ public class SliderTest : VisualTest
         {
             text.Text = $"{e.NewValue}";
         });
-
-        return children;
     }
 
-    public override void Cleanup()
+    protected override void Dispose(bool isDisposing)
     {
         currentValue.Dispose();
+        base.Dispose(isDisposing);
     }
 }

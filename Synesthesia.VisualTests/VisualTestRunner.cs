@@ -14,9 +14,9 @@ internal static class VisualTestRunner
 
     public static readonly List<VisualTestCategory> Tests =
     [
-        new VisualTestCategory("Containers", [new ScrollableContainerTest()]),
-        new VisualTestCategory("Audio", [new SimpleAudioTest()]),
-        new VisualTestCategory("Controls", [new SliderTest()])
+        new VisualTestCategory("Containers", [typeof(ScrollableContainerTest)]),
+        new VisualTestCategory("Audio", [typeof(SimpleAudioTest)]),
+        new VisualTestCategory("Controls", [typeof(SliderTest)])
     ];
 
     public static void Load()

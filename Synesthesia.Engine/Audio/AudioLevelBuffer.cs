@@ -5,7 +5,8 @@ namespace Synesthesia.Engine.Audio;
 
 public struct AudioLevelBuffer(float peakLeft, float peakRight, float peak)
 {
-    public float PeakLeft = peakLeft;
-    public float PeakRight = peakRight;
-    public float Peak = peak;
+    public readonly float PeakLeft = peakLeft;
+    public readonly float PeakRight = peakRight;
+    public readonly float Peak = peak;
 };
+

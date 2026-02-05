@@ -3,4 +3,4 @@
 
 namespace Synesthesia.VisualTests;
 
-public record VisualTestCategory(string Name, List<VisualTest> VisualTests);
+public record VisualTestCategory(string Name, List<Type> VisualTests);

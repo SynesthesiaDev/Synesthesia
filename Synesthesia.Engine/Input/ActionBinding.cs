@@ -23,7 +23,7 @@ public class ActionBinding
 
 public interface IBinding
 {
-    public bool IsDown();
+    bool IsDown();
 }
 
 public record KeyboardBinding(KeyboardKey Key, params KeyboardKey[] Modifiers) : IBinding

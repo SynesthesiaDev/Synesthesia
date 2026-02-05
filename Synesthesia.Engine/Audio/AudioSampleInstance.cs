@@ -99,11 +99,4 @@ public record AudioSampleInstance : IPlaybackAudioControl
         Bass.StreamFree(StreamHandle);
         EngineStatistics.AUDIO_SAMPLE_INSTANCES.Decrement();
     }
-
-    public void Deconstruct(out AudioSample Sample, out AudioMixer OwningAudioMixer, out int StreamHandle)
-    {
-        Sample = this.Sample;
-        OwningAudioMixer = this.OwningAudioMixer;
-        StreamHandle = this.StreamHandle;
-    }
 }

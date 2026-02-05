@@ -3,11 +3,11 @@ using Synesthesia.Engine.Dependency;
 
 namespace Synesthesia.Editor;
 
-static class Program
+internal static class Program
 {
     public static Level CurrentLevel = new Level("Test", "Synesthesia");
-    
-    static void Main(string[] args)
+
+    private static void Main(string[] args)
     {
         var editor = new Editor();
         DependencyContainer.Add(editor);

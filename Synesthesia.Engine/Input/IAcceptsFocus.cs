@@ -4,14 +4,13 @@ namespace Synesthesia.Engine.Input;
 
 public interface IAcceptsFocus
 {
-    public Drawable2d GetOwningDrawable();
-    
-    public void OnFocusGained();
+    Drawable2d GetOwningDrawable();
 
-    public void OnFocusLost();
+    void OnFocusGained();
 
-    public virtual void OnCharacterTyped(char character)
+    void OnFocusLost();
+
+    void OnCharacterTyped(char character)
     {
-        
     }
 }

@@ -11,7 +11,6 @@ using Synesthesia.Engine.Audio.Effect;
 using Synesthesia.Engine.Components.Two.Debug;
 using Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 using Synesthesia.Engine.Dependency;
-using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Resources;
 
@@ -19,8 +18,6 @@ namespace Synesthesia.VisualTests.Tests;
 
 public class SimpleAudioTest : VisualTest
 {
-    public override string Name => "Audio Test";
-
     private int currentSampleIndex = 0;
     private AudioSampleInstance currentlyPlayingSample = null!;
 
@@ -38,7 +35,7 @@ public class SimpleAudioTest : VisualTest
         Default = 0.5f,
     };
 
-    public override List<Drawable2d> Setup()
+    protected override void OnLoading()
     {
         audioManager = DependencyContainer.Get<AudioManager>();
         masterAudioMixer = DependencyContainer.Get<Game>().MasterAudioMixer;
@@ -55,7 +52,14 @@ public class SimpleAudioTest : VisualTest
         currentlyPlayingSample = masterAudioMixer.Play(samples[currentSampleIndex]);
         currentlyPlayingSample.Pause();
 
-        List<Drawable2d> children =
+        masterAudioMixer.AddEffect(lowpassEffect);
+
+        audioVolume.OnValueChange(e =>
+        {
+            masterAudioMixer.Volume = e.NewValue;
+        }, true);
+
+        Children =
         [
             new FillFlowContainer2d
             {
@@ -131,22 +135,19 @@ public class SimpleAudioTest : VisualTest
                         Size = new Vector2(240, 40),
                     },
                 ]
-            },
+            }
         ];
-
-        masterAudioMixer.AddEffect(lowpassEffect);
-
-        audioVolume.OnValueChange(e =>
-        {
-            masterAudioMixer.Volume = e.NewValue;
-        }, true);
-
-        return children;
     }
 
-    public override void Cleanup()
+
+    protected override void Dispose(bool isDisposing)
     {
         currentlyPlayingSample.Stop();
         samples.Clear();
+        audioVolume.Dispose();
+        masterAudioMixer.RemoveEffect(lowpassEffect);
+        lowpassEffect.Dispose();
+
+        base.Dispose(isDisposing);
     }
 }

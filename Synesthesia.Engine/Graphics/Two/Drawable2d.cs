@@ -214,6 +214,13 @@ public abstract class Drawable2d : Drawable
     {
     }
 
+    public Vector2 GetScreenSpaceCenter()
+    {
+        var screenPos = ScreenSpacePosition;
+        var scaledSize = Size * InheritedScale;
+        return screenPos + scaledSize / 2f;
+    }
+
     protected abstract void OnDraw2d();
 
     private void beginLocalSpace()

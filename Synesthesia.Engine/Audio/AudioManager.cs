@@ -25,7 +25,7 @@ public class AudioManager : BassDspAudioHandler, IHasAudioHandle
 
     public int GetAudioHandle() => MasterMixdownHandle;
 
-    public DeferredActionQueue DeferredActionQueue = new();
+    public readonly DeferredActionQueue DeferredActionQueue = new();
 
     public void AttachTo(IHasAudioHandle audioHandle) => throw new NotSupportedException();
 

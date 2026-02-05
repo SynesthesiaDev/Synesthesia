@@ -6,17 +6,10 @@ using Synesthesia.Engine.Graphics.Two.Drawables;
 
 namespace Synesthesia.VisualTests;
 
-public class VisualTestDrawable(VisualTest test) : CompositeDrawable2d
+public class VisualTestDrawable : CompositeDrawable2d
 {
     protected override void OnLoading()
     {
         RelativeSizeAxes = Axes.Both;
-        Children = test.Setup();
-    }
-
-    protected override void Dispose(bool isDisposing)
-    {
-        test.Cleanup();
-        base.Dispose(isDisposing);
     }
 }

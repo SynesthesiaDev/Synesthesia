@@ -13,7 +13,7 @@ public abstract class BassDspAudioHandler : IAudioControl
     public abstract float Volume { get; set; }
 
     // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
-    //NOTICE: must stay here to keep the delegate alive
+    //NOTICE: must stay here to keep the delegate alive!!!!!!!!!
     private DSPProcedure levelMeterDsp = null!;
 
     protected void AttachDspHandle(int channelMixdownHandle)

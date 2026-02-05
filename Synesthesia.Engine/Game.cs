@@ -34,7 +34,7 @@ public class Game : IDisposable
 
     public AudioMixer MasterAudioMixer = null!;
 
-    public DeferredActionQueue DeferredActionQueue = new();
+    public readonly DeferredActionQueue DeferredActionQueue = new();
 
     public Game()
     {

@@ -12,27 +12,32 @@ public class CompositeDrawable2d : Drawable2d
 
     public Vector4 AutoSizePadding { get; set; } = new(0);
 
+    private object childrenLock = new();
+
     public IEnumerable<Drawable2d> Children
     {
         get => InternalChildren;
         set
         {
-            if (InternalChildren.Count > 0)
+            lock (childrenLock)
             {
-                foreach (var oldChild in InternalChildren)
+                if (InternalChildren.Count > 0)
                 {
-                    oldChild.Parent = null;
-                    oldChild.Dispose();
+                    foreach (var oldChild in InternalChildren)
+                    {
+                        oldChild.Parent = null;
+                        oldChild.Dispose();
+                    }
+
+                    InternalChildren.Clear();
                 }
 
-                InternalChildren.Clear();
-            }
-
-            InternalChildren = value.ToList();
-            foreach (var child in value)
-            {
-                child.Parent = this;
-                child.Load();
+                InternalChildren = value.ToList();
+                foreach (var child in value)
+                {
+                    child.Parent = this;
+                    child.Load();
+                }
             }
         }
     }
@@ -145,12 +150,15 @@ public class CompositeDrawable2d : Drawable2d
 
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {
-        foreach (var child in Children.ToArray())
+        lock (childrenLock)
         {
-            child.OnUpdate(frameInfo);
-        }
+            foreach (var child in Children.ToList())
+            {
+                child.OnUpdate(frameInfo);
+            }
 
-        if (AutoSizeAxes != Axes.None) UpdateAutoSize();
+            if (AutoSizeAxes != Axes.None) UpdateAutoSize();
+        }
 
         base.OnUpdate(frameInfo);
     }
@@ -175,7 +183,6 @@ public class CompositeDrawable2d : Drawable2d
         if (AutoSizeAxes.HasFlag(Axes.Y)) Height = childrenSize.Y + AutoSizePadding.Y + AutoSizePadding.W;
     }
 
-
     public Vector2 GetChildrenSize()
     {
         if (InternalChildren.Count == 0) return Vector2.Zero;
@@ -183,7 +190,7 @@ public class CompositeDrawable2d : Drawable2d
         float minX = float.MaxValue, minY = float.MaxValue;
         float maxX = float.MinValue, maxY = float.MinValue;
 
-        foreach (var child in InternalChildren)
+        foreach (var child in InternalChildren.ToArray())
         {
             var scaledSize = child.Size * child.Scale;
 

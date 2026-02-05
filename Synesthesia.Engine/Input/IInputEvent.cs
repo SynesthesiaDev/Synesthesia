@@ -10,7 +10,7 @@ public interface IInputEvent
 
     bool IsDown { get; }
 
-    public bool IsPrimary()
+    bool IsPrimary()
     {
         return this switch
         {

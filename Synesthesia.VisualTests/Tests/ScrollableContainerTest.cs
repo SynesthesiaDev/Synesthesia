@@ -4,22 +4,22 @@
 using System.Numerics;
 using Common.Util;
 using Raylib_cs;
-using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
+using Synesthesia.Engine.Input;
 
 namespace Synesthesia.VisualTests.Tests;
 
 public class ScrollableContainerTest : VisualTest
 {
-    public override string Name => "Scrollable Container";
-
     private FillFlowContainer2d contentFillFlow = null!;
+    private ScrollableContainer scrollableContainer = null!;
 
-    public override List<Drawable2d> Setup()
+    protected override void OnLoading()
     {
-        List<Drawable2d> children = [
-            new ScrollableContainer
+        Children =
+        [
+            scrollableContainer = new ScrollableContainer
             {
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
@@ -39,20 +39,48 @@ public class ScrollableContainerTest : VisualTest
             }
         ];
 
-        for (int i = 1; i < 100; i++)
+        AddStep("Add children", () =>
         {
-            contentFillFlow.AddChild(new TextDrawable
+            for (int i = 1; i < 100; i++)
             {
-                Text = $"Random Text {i}",
-                Color = Color.White,
-                FontSize = 24
-            });
-        }
+                contentFillFlow.AddChild(new TextDrawable
+                {
+                    Text = $"Random Text {i}",
+                    Color = Color.White,
+                    FontSize = 24
+                });
+            }
+        });
 
-        return children;
-    }
+        AddAssert("scroll position is 0", () => scrollableContainer.ScrollPosition == 0.0);
 
-    public override void Cleanup()
-    {
+        AddStep("Scroll using mouse", () =>
+        {
+            InputManager.EnqueueEvent(new MouseMoveInputEvent(scrollableContainer.GetScreenSpaceCenter()));
+            InputManager.EnqueueEvent(new MouseWheelInputEvent(-1));
+        });
+
+        AddAssert("scroll position is 80", () => Equals(scrollableContainer.ScrollPosition, 80.0));
+
+        AddStep("Scroll down to bottom", () => scrollableContainer.ScrollTo(float.MaxValue));
+
+        AddAssert("scroll position is maximum", () => Equals(scrollableContainer.ScrollPosition, scrollableContainer.MaxScrollPosition));
+
+        AddStep("Remove half of children", () =>
+        {
+            for (int i = 0; i < 50; i++)
+            {
+                var child = contentFillFlow.Children.ToList().RandomFixed();
+                contentFillFlow.RemoveChild(child);
+            }
+        });
+
+        AddAssert("scroll position is maximum", () => Equals(scrollableContainer.ScrollPosition, scrollableContainer.MaxScrollPosition));
+
+        AddStep("Reset Scroll", () => scrollableContainer.ResetScrollPosition());
+
+        AddAssert("scroll position is 0", () => scrollableContainer.ScrollPosition == 0.0);
+
+        base.OnLoading();
     }
 }

@@ -4,7 +4,6 @@
 using System.Numerics;
 using Codon.Optionals;
 using Common.Bindable;
-using Common.Logger;
 using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Components.Two.DefaultEngineComponents;
@@ -13,6 +12,7 @@ using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
+using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.VisualTests;
 
@@ -20,8 +20,10 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
 {
     private FillFlowContainer2d sidebar = null!;
     private Container2d visualTestScene = null!;
+    private Container2d stepContainer = null!;
 
     public readonly Bindable<VisualTest?> CurrentSelectedTest = new(null);
+    public readonly VisualTest.StepContainer? CurrentStepContainer = null;
 
     protected override void OnLoading()
     {
@@ -41,7 +43,13 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
                     RelativeSizeAxes = Axes.Y,
                     Width = 260f * 0.8f,
                     Spacing = 10f,
-                    BackgroundColor = Defaults.BACKGROUND0,
+                    BackgroundColor = Defaults.BACKGROUND1,
+                },
+
+                stepContainer = new BackgroundContainer2d()
+                {
+                    RelativeSizeAxes = Axes.Y,
+                    Width = 260f * 0.8f,
                 },
 
                 visualTestScene = new BackgroundContainer2d
@@ -70,6 +78,24 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
             }
         });
 
+        childs.Add(new DefaultButton
+        {
+            Size = new Vector2(240, 40),
+            Text = "Reset Current Test",
+            Scale = new Vector2(0.8f),
+            ColorCombination = DefaultEngineColorCombination.ORANGE,
+            TextColor = Color.Black,
+            Anchor = Anchor.TopCentre,
+            Origin = Anchor.TopCentre,
+            OnClick = () =>
+            {
+                if(CurrentSelectedTest.Value == null) return;
+                var current = CurrentSelectedTest.Value!.GetType();
+                CurrentSelectedTest.Value = null;
+                CurrentSelectedTest.Value = Activator.CreateInstance(current) as VisualTest;
+            }
+        });
+
         categories.ForEach(category =>
         {
             childs.Add(new VisualTestCategoryDrawable(category, this)
@@ -88,10 +114,13 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
         {
             if (e.NewValue != null && e.OldValue == e.NewValue) return;
 
-            foreach (var child in visualTestScene.Children.ToList())
+            foreach (var test in visualTestScene.Children.ToList().Filter(p => p is VisualTest).Select(child => (child as VisualTest)!))
             {
-                visualTestScene.RemoveChild(child);
+                stepContainer.RemoveChild(test.StepsContainer);
+                visualTestScene.RemoveChild(test);
             }
+
+            visualTestScene.Children = [];
 
             if (e.NewValue == null)
             {
@@ -107,7 +136,8 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
             }
             else
             {
-                visualTestScene.AddChild(new VisualTestDrawable(e.NewValue));
+                visualTestScene.AddChild(e.NewValue);
+                stepContainer.AddChild(e.NewValue.StepsContainer);
                 VisualTestRunner.TestConfiguration.CurrentlySelectedTest = Optional.Of(e.NewValue.Name);
             }
         });
@@ -121,10 +151,9 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
         // this is an ugly hack
         if (selectedTest.Value != "null")
         {
-            Logger.Verbose($"Not null: {selectedTest.Value}");
             foreach (var test in from category in categories from test in category.VisualTests where test.Name == selectedTest.Value! select test)
             {
-                CurrentSelectedTest.Value = test;
+                CurrentSelectedTest.Value = Activator.CreateInstance(test) as VisualTest;
             }
         }
         else
