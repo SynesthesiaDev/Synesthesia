@@ -26,6 +26,22 @@ public class Scheduler : IDisposable
         EngineStatistics.SCHEDULERS.Increment();
     }
 
+    public void CancelAllTasks()
+    {
+        foreach (var scheduledTask in scheduledTasks.SelectMany(keyValuePair => keyValuePair.Value))
+        {
+            scheduledTask.Dispose();
+        }
+
+        foreach (var repeatingTask in repeatingTasks.SelectMany(keyValuePair => keyValuePair.Value))
+        {
+            repeatingTask.Dispose();
+        }
+
+        scheduledTasks.Clear();
+        repeatingTasks.Clear();
+    }
+
     private void wakeUp()
     {
         lock (timerLock)

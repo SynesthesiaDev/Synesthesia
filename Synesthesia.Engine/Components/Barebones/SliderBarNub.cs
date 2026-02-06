@@ -17,8 +17,11 @@ public abstract class SliderBarNub(BarebonesSliderBar owningSliderBar) : Composi
 
     protected internal override bool OnMouseDown(PointInput e)
     {
+        if (!Contains(e.MousePosition)) return false;
+
         IsDragged = true;
         return true;
+
     }
 
     protected internal override void OnMouseUp(PointInput e)

@@ -1,6 +1,7 @@
 // Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using Common;
 using Common.Logger;
 using Common.Util;
 using Raylib_cs;
@@ -20,7 +21,7 @@ public class StepButton : CompositeDrawable2d
 
     public required string Name { get; set; }
 
-    protected Color RunningColor => Defaults.ACCENT;
+    protected Color RunningColor => Defaults.YELLOW;
 
     protected Color IdleColor = Defaults.ACCENT;
 
@@ -29,6 +30,10 @@ public class StepButton : CompositeDrawable2d
     protected DrawableBox2d Highlight = null!;
 
     protected TextDrawable Text = null!;
+
+    public bool RunNextStepImmediately = false;
+
+    protected readonly CompletableFuture<bool> Future = new();
 
     protected override bool OnHover(HoverEvent e)
     {
@@ -79,7 +84,7 @@ public class StepButton : CompositeDrawable2d
                         Anchor = Anchor.CentreLeft,
                         Origin = Anchor.CentreLeft,
                         Text = Name,
-                        FontSize = 22
+                        FontSize = 19
                     }
                 ]
             }
@@ -88,14 +93,10 @@ public class StepButton : CompositeDrawable2d
         base.OnLoading();
     }
 
-    public virtual void Reset()
-    {
-        Highlight.FadeColorTo(IdleColor, 1000, Easing.OutQuint);
-    }
-
-    public virtual void PerformStep(bool userTriggered = false)
+    public virtual CompletableFuture<bool> PerformStep(bool userTriggered = false)
     {
         Highlight.FadeColorTo(RunningColor, 400, Easing.OutQuad);
+        BackgroundContainer.FlashBackground(Defaults.BACKGROUND3, 100, 300, Easing.In, Easing.Out);
         try
         {
             Action?.Invoke();
@@ -105,17 +106,21 @@ public class StepButton : CompositeDrawable2d
         {
             Failure();
             Logger.Exception(exception, Logger.Runtime);
-            throw;
         }
+
+        return Future;
     }
 
     protected virtual void Failure()
     {
         Highlight.FadeColorTo(Defaults.RED, 200, Easing.OutQuad);
+        BackgroundContainer.FadeBackgroundTo(Defaults.BACKGROUND2_FAILED, 300, Easing.OutCubic);
+        Future.Complete(false);
     }
 
     protected virtual void Success()
     {
         Highlight.FadeColorTo(Defaults.GREEN, 200, Easing.OutQuad);
+        Future.Complete(true);
     }
 }

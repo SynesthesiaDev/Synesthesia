@@ -10,7 +10,7 @@ using Synesthesia.Engine.Input;
 
 namespace Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 
-public class DefaultEngineTextbox : DisableableContainer, IAcceptsFocus
+public class DefaultTextbox : DisableableContainer, IAcceptsFocus
 {
     private BackgroundContainer2d outline = null!;
     private BackgroundContainer2d backgroundContainer2d = null!;

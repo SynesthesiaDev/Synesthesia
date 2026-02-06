@@ -8,7 +8,10 @@ namespace Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 
 public class DefaultSliderBar : BarebonesSliderBar
 {
-    protected override SliderBarBody GetBody() => new DefaultSliderBarBody();
+    public SliderBarBody Body = null!;
+    public SliderBarNub Nub = null!;
 
-    protected override SliderBarNub GetNub() => new DefaultSliderBarNub(this);
+    protected override SliderBarBody GetBody() => Body = new DefaultSliderBarBody(this);
+
+    protected override SliderBarNub GetNub() => Nub = new DefaultSliderBarNub(this);
 }

@@ -83,6 +83,8 @@ public class RenderThreadRunner(ThreadType type) : ThreadRunner(type)
 
     private void pollKeyboardEvents()
     {
+        if(InputSimulator.SimulatingInput) return;
+
         int key;
         while ((key = Raylib.GetKeyPressed()) != 0)
         {

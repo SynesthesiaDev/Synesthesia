@@ -16,7 +16,10 @@ internal static class VisualTestRunner
     [
         new VisualTestCategory("Containers", [typeof(ScrollableContainerTest)]),
         new VisualTestCategory("Audio", [typeof(SimpleAudioTest)]),
-        new VisualTestCategory("Controls", [typeof(SliderTest)])
+        new VisualTestCategory("Controls", [typeof(SliderTest), typeof(TextboxTest)]),
+        new VisualTestCategory("Animations", [typeof(AnimationTest), typeof(ComplexContainerAnimationTest)]),
+        new VisualTestCategory("Layout", [typeof(AnchorOriginTest), typeof(AutoSizeStackTest), typeof(RelativeSizeMarginTest), typeof(ShowcaseTest)]),
+        new VisualTestCategory("Performance", [typeof(DrawableSpawnPerformanceTest), typeof(AnimationStormPerformanceTest)]),
     ];
 
     public static void Load()

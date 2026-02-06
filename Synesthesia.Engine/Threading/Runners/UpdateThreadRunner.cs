@@ -1,5 +1,6 @@
 using Common.Logger;
 using Synesthesia.Engine.Graphics;
+using Synesthesia.Engine.Input;
 
 namespace Synesthesia.Engine.Threading.Runners;
 
@@ -23,5 +24,6 @@ public class UpdateThreadRunner(ThreadType type) : ThreadRunner(type)
         game.RootComposite3d.OnUpdate(frameInfo);
         game.RootComposite2d.OnUpdate(frameInfo);
         game.EngineDebugOverlay.OnUpdate(frameInfo);
+        InputSimulator.Update(frameInfo);
     }
 }

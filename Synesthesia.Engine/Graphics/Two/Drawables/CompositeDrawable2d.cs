@@ -12,7 +12,7 @@ public class CompositeDrawable2d : Drawable2d
 
     public Vector4 AutoSizePadding { get; set; } = new(0);
 
-    private object childrenLock = new();
+    private readonly object childrenLock = new();
 
     public IEnumerable<Drawable2d> Children
     {
@@ -137,15 +137,21 @@ public class CompositeDrawable2d : Drawable2d
 
     public void AddChild(Drawable2d child)
     {
-        InternalChildren.Add(child);
-        child.Parent = this;
-        child.Load();
+        lock (childrenLock)
+        {
+            InternalChildren.Add(child);
+            child.Parent = this;
+            child.Load();
+        }
     }
 
     public void RemoveChild(Drawable2d child)
     {
-        InternalChildren.Remove(child);
-        child.Dispose();
+        lock (childrenLock)
+        {
+            InternalChildren.Remove(child);
+            child.Dispose();
+        }
     }
 
     protected internal override void OnUpdate(FrameInfo frameInfo)
@@ -170,8 +176,12 @@ public class CompositeDrawable2d : Drawable2d
 
     protected override void Dispose(bool isDisposing)
     {
-        InternalChildren.ForEach(c => c.Dispose());
-        InternalChildren.Clear();
+        lock (childrenLock)
+        {
+            InternalChildren.ForEach(c => c.Dispose());
+            InternalChildren.Clear();
+        }
+
         base.Dispose(isDisposing);
     }
 

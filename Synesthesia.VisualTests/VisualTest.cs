@@ -15,12 +15,25 @@ public abstract class VisualTest : CompositeDrawable2d
 
     public readonly StepContainer StepsContainer = new();
 
-    protected void AddStep(string name, Action action)
+    protected void AddWaitUntil(string name, Func<bool> condition, long? timeout = null)
+    {
+        var button = new WaitUntilButton
+        {
+            Name = name,
+            Condition = condition,
+            Timeout = timeout,
+        };
+
+        StepsContainer.Add(button);
+    }
+
+    protected void AddStep(string name, Action action, bool runNextImmediately = false)
     {
         var button = new StepButton
         {
             Name = name,
-            Action = action
+            Action = action,
+            RunNextStepImmediately = runNextImmediately
         };
 
         StepsContainer.Add(button);
@@ -49,8 +62,13 @@ public abstract class VisualTest : CompositeDrawable2d
     {
         protected FillFlowContainer2d StepsContainer = null!;
 
+        private readonly List<StepButton> testSteps = [];
+
+        public IEnumerable<StepButton> TestSteps => testSteps;
+
         public void Add(StepButton stepButton)
         {
+            testSteps.Add(stepButton);
             OnLoadComplete.Subscribe(_ => StepsContainer.AddChild(stepButton));
         }
 

@@ -162,10 +162,10 @@ public abstract class Drawable2d : Drawable
 
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {
-        if (RelativeSizeAxes != Axes.None && AutoSizeAxes != Axes.None)
-        {
-            throw new InvalidOperationException("Cannot have both 'AutoSizeAxis' and 'RelativeSizeAxes'");
-        }
+        // if (RelativeSizeAxes != Axes.None && AutoSizeAxes != Axes.None)
+        // {
+        //     throw new InvalidOperationException("Cannot have both 'AutoSizeAxis' and 'RelativeSizeAxes'");
+        // }
 
         if (Parent != null)
         {

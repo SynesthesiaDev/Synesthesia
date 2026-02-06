@@ -7,6 +7,7 @@ using Common.Util;
 using Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
+using Synesthesia.Engine.Input;
 
 namespace Synesthesia.VisualTests.Tests;
 
@@ -19,6 +20,7 @@ public class SliderTest : VisualTest
     };
 
     private TextDrawable text = null!;
+    private DefaultSliderBar sliderBar = null!;
 
     protected override void OnLoading()
     {
@@ -37,7 +39,7 @@ public class SliderTest : VisualTest
                     {
                         Text = $"{currentValue.Value}"
                     },
-                    new DefaultSliderBar
+                    sliderBar = new DefaultSliderBar
                     {
                         Current = currentValue,
                         Size = new Vector2(400, 40),
@@ -51,6 +53,26 @@ public class SliderTest : VisualTest
         {
             text.Text = $"{e.NewValue}";
         });
+
+        AddAssert("Is 0", () => currentValue.Value == 0.0);
+
+        AddStep("Click in the middle", () =>
+        {
+            InputSimulator.SimulateMove(sliderBar.GetScreenSpaceCenter());
+            InputSimulator.SimulateClick();
+        });
+
+        AddAssert("Is 5", () => Precision.IsSame(currentValue.Value, 5.0));
+
+        AddStep("Manually set to 0.0", () => currentValue.Value = 0.0f);
+
+        AddAssert("Is 0.0", () => Precision.IsSame(currentValue.Value, 0.0));
+
+        AddStep("Drag to center", () => InputSimulator.SimulateDrag(sliderBar.Nub.GetScreenSpaceCenter(), sliderBar.Body.GetScreenSpaceCenter(), 1000), true);
+
+        AddWaitUntil("Wait for drag", () => Precision.IsSame(currentValue.Value, 5.0));
+
+        AddAssert("Is 5", () => Precision.IsSame(currentValue.Value, 5.0));
     }
 
     protected override void Dispose(bool isDisposing)

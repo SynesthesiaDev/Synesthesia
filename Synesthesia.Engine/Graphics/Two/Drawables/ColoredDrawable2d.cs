@@ -23,4 +23,11 @@ public abstract class ColoredDrawable2d : Drawable2d
             (color) => { Color = color; }
         );
     }
+
+    public Animation<Color> Flash(Color flashColor, long durationIn, long durationOut, Easing easingIn, Easing easingOut)
+    {
+        var currentColor = Color;
+        return FadeColorTo(flashColor, durationIn, easingIn).Then(() => FadeColorTo(currentColor, durationOut, easingOut));
+    }
+
 }

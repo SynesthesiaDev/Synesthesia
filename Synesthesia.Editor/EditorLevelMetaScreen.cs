@@ -14,7 +14,7 @@ public class EditorLevelMetaScreen(Level level) : Screen
 {
     public readonly Level Level = level;
 
-    private DefaultEngineTextbox textbox = null!;
+    private DefaultTextbox textbox = null!;
 
     protected override void OnLoading()
     {
@@ -54,7 +54,7 @@ public class EditorLevelMetaScreen(Level level) : Screen
                         }
                     },
 
-                    textbox = new DefaultEngineTextbox
+                    textbox = new DefaultTextbox
                     {
                         Size = new Vector2(300, 40),
                         Anchor = Anchor.Centre,

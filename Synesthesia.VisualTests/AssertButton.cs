@@ -43,9 +43,4 @@ public class AssertButton : StepButton
             throw ExceptionDispatchInfo.SetRemoteStackTrace(new InvalidOperationException(builder.ToString()), CallStack.ToString());
         }
     }
-
-    public override void PerformStep(bool userTriggered = false)
-    {
-        base.PerformStep(userTriggered);
-    }
 }

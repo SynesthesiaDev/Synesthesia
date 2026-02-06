@@ -39,18 +39,15 @@ public class ScrollableContainerTest : VisualTest
             }
         ];
 
-        AddStep("Add children", () =>
+        for (int i = 1; i < 100; i++)
         {
-            for (int i = 1; i < 100; i++)
+            contentFillFlow.AddChild(new TextDrawable
             {
-                contentFillFlow.AddChild(new TextDrawable
-                {
-                    Text = $"Random Text {i}",
-                    Color = Color.White,
-                    FontSize = 24
-                });
-            }
-        });
+                Text = $"Random Text {i}",
+                Color = Color.White,
+                FontSize = 24
+            });
+        }
 
         AddAssert("scroll position is 0", () => scrollableContainer.ScrollPosition == 0.0);
 

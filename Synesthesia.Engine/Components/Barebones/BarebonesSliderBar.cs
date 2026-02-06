@@ -48,7 +48,7 @@ public abstract class BarebonesSliderBar : Container2d
         // Snap nub to the actual value position
         var snappedProgress = (finalValue - Current.Min) / (Current.Max - Current.Min);
         var newNubPos = nub.Position with { X = snappedProgress * (Size.X - nub.Size.X) };
-        nub.MoveTo(newNubPos, 10, Easing.InCubic);
+        nub.MoveTo(newNubPos, 10, Easing.OutQuart);
 
         body.ValueChanged(snappedProgress);
     }
@@ -60,7 +60,7 @@ public abstract class BarebonesSliderBar : Container2d
             var progress = (e.NewValue - Current.Min) / (Current.Max - Current.Min);
 
             var newNubPos = nub.Position with { X = progress * (Size.X - nub.Size.X) };
-            nub.MoveTo(newNubPos, 10, Easing.InCubic);
+            nub.MoveTo(newNubPos, 10, Easing.OutQuart);
 
             body.ValueChanged(progress);
 

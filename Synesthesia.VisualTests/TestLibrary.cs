@@ -6,6 +6,7 @@ using Codon.Optionals;
 using Common.Bindable;
 using Common.Util;
 using Raylib_cs;
+using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 using Synesthesia.Engine.Configuration;
 using Synesthesia.Engine.Graphics.Two;
@@ -20,10 +21,43 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
 {
     private FillFlowContainer2d sidebar = null!;
     private Container2d visualTestScene = null!;
-    private Container2d stepContainer = null!;
+    private Container2d stepContainerContainer = null!;
 
     public readonly Bindable<VisualTest?> CurrentSelectedTest = new(null);
-    public readonly VisualTest.StepContainer? CurrentStepContainer = null;
+    public VisualTest.StepContainer? CurrentStepContainer = null;
+
+    public DefaultCheckbox RunAutomatically = null!;
+
+    private int currentStepIndex = 0;
+    private StepButton? currentStep = null;
+
+    public void AutoRunNext()
+    {
+        if (!RunAutomatically.Checked.Value) return;
+
+        if (CurrentStepContainer == null || !CurrentStepContainer.TestSteps.Any()) return;
+        if (currentStepIndex >= CurrentStepContainer.TestSteps.Count()) return;
+
+        currentStep = CurrentStepContainer.TestSteps.ToList()[currentStepIndex];
+
+        currentStep!.PerformStep().Then(success =>
+        {
+            if (!success) return;
+            if (currentStep.RunNextStepImmediately)
+            {
+                currentStepIndex++;
+                AutoRunNext();
+            }
+            else
+            {
+                Scheduler.Value.Schedule(200, _ =>
+                {
+                    currentStepIndex++;
+                    AutoRunNext();
+                });
+            }
+        });
+    }
 
     protected override void OnLoading()
     {
@@ -41,21 +75,20 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
                 {
                     Direction = Direction.Vertical,
                     RelativeSizeAxes = Axes.Y,
-                    Width = 260f * 0.8f,
+                    Width = 280f * 0.8f,
                     Spacing = 10f,
                     BackgroundColor = Defaults.BACKGROUND1,
                 },
 
-                stepContainer = new BackgroundContainer2d()
+                stepContainerContainer = new BackgroundContainer2d()
                 {
                     RelativeSizeAxes = Axes.Y,
                     Width = 260f * 0.8f,
                 },
 
-                visualTestScene = new BackgroundContainer2d
+                visualTestScene = new MaskingContainer2d
                 {
                     FillRemainingAxes = Axes.Both,
-                    BackgroundColor = Color.Black,
                     Children =
                     [
                     ],
@@ -63,37 +96,61 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
             ]
         };
 
-        childs.Add(new DefaultButton
+        childs.Add(new BackgroundContainer2d
         {
-            Size = new Vector2(240, 40),
-            Text = "Clear Current Test",
-            Scale = new Vector2(0.8f),
-            ColorCombination = DefaultEngineColorCombination.RED,
-            TextColor = Color.Black,
+            AutoSizeAxes = Axes.Both,
+            AutoSizePadding = new Vector4(10),
+            BackgroundColor = Defaults.BACKGROUND1,
+            BackgroundCornerRadius = 10,
             Anchor = Anchor.TopCentre,
             Origin = Anchor.TopCentre,
-            OnClick = () =>
-            {
-                CurrentSelectedTest.Value = null;
-            }
-        });
-
-        childs.Add(new DefaultButton
-        {
-            Size = new Vector2(240, 40),
-            Text = "Reset Current Test",
-            Scale = new Vector2(0.8f),
-            ColorCombination = DefaultEngineColorCombination.ORANGE,
-            TextColor = Color.Black,
-            Anchor = Anchor.TopCentre,
-            Origin = Anchor.TopCentre,
-            OnClick = () =>
-            {
-                if(CurrentSelectedTest.Value == null) return;
-                var current = CurrentSelectedTest.Value!.GetType();
-                CurrentSelectedTest.Value = null;
-                CurrentSelectedTest.Value = Activator.CreateInstance(current) as VisualTest;
-            }
+            Children =
+            [
+                new FillFlowContainer2d
+                {
+                    Direction = Direction.Vertical,
+                    AutoSizeAxes = Axes.Both,
+                    Spacing = 5f,
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    Children =
+                    [
+                        new DefaultButton
+                        {
+                            Size = new Vector2(240, 40),
+                            Text = "Clear Current Test",
+                            Scale = new Vector2(0.8f),
+                            ColorCombination = DefaultEngineColorCombination.RED,
+                            TextColor = Color.Black,
+                            Anchor = Anchor.TopCentre,
+                            Origin = Anchor.TopCentre,
+                            OnClick = () =>
+                            {
+                                CurrentSelectedTest.Value = null;
+                            }
+                        },
+                        new DefaultButton
+                        {
+                            Size = new Vector2(240, 40),
+                            Text = "Reset Current Test",
+                            Scale = new Vector2(0.8f),
+                            ColorCombination = DefaultEngineColorCombination.ORANGE,
+                            TextColor = Color.Black,
+                            Anchor = Anchor.TopCentre,
+                            Origin = Anchor.TopCentre,
+                            OnClick = ResetCurrentTest
+                        },
+                        RunAutomatically = new DefaultCheckbox(VisualTestRunner.TestConfiguration.RunAutomatically)
+                        {
+                            Size = new Vector2(240, 40),
+                            Scale = new Vector2(0.8f),
+                            Anchor = Anchor.TopCentre,
+                            Origin = Anchor.TopCentre,
+                            Text = "Run Automatically",
+                        }
+                    ]
+                }
+            ]
         });
 
         categories.ForEach(category =>
@@ -116,8 +173,11 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
 
             foreach (var test in visualTestScene.Children.ToList().Filter(p => p is VisualTest).Select(child => (child as VisualTest)!))
             {
-                stepContainer.RemoveChild(test.StepsContainer);
+                stepContainerContainer.RemoveChild(test.StepsContainer);
                 visualTestScene.RemoveChild(test);
+                Scheduler.Value.CancelAllTasks();
+                currentStepIndex = 0;
+                currentStep = null;
             }
 
             visualTestScene.Children = [];
@@ -137,8 +197,32 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
             else
             {
                 visualTestScene.AddChild(e.NewValue);
-                stepContainer.AddChild(e.NewValue.StepsContainer);
+                stepContainerContainer.AddChild(CurrentStepContainer = e.NewValue.StepsContainer);
                 VisualTestRunner.TestConfiguration.CurrentlySelectedTest = Optional.Of(e.NewValue.Name);
+                if (!e.NewValue.StepsContainer.TestSteps.Any())
+                {
+                    stepContainerContainer.ResizeWidthTo(0f, 250, Easing.OutCubic);
+                }
+                else
+                {
+                    if (stepContainerContainer.Width == 0)
+                    {
+                        stepContainerContainer.ResizeWidthTo(260f * 0.8f, 250, Easing.OutCubic).Then(() =>
+                        {
+                            CurrentStepContainer!.OnLoadComplete.Subscribe(_ =>
+                            {
+                                Scheduler.Value.Schedule(100, _ => AutoRunNext());
+                            });
+                        });
+                    }
+                    else
+                    {
+                        CurrentStepContainer!.OnLoadComplete.Subscribe(_ =>
+                        {
+                            Scheduler.Value.Schedule(100, _ => AutoRunNext());
+                        });
+                    }
+                }
             }
         });
     }
@@ -161,6 +245,23 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
             CurrentSelectedTest.Value = null;
         }
 
+        RunAutomatically.Checked.OnValueChange(e =>
+        {
+            VisualTestRunner.TestConfiguration.RunAutomatically = e.NewValue;
+            if (!e.NewValue || e.OldValue == e.NewValue) return;
+            if (CurrentSelectedTest.Value == null) return;
+
+            ResetCurrentTest();
+        });
+
+
         base.LoadComplete();
+    }
+
+    public void ResetCurrentTest()
+    {
+        var current = CurrentSelectedTest.Value!.GetType();
+        CurrentSelectedTest.Value = null;
+        CurrentSelectedTest.Value = Activator.CreateInstance(current) as VisualTest;
     }
 }

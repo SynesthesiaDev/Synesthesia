@@ -12,7 +12,7 @@ using Synesthesia.Engine.Utility;
 
 namespace Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 
-public class DefaultSliderBarBody : SliderBarBody
+public class DefaultSliderBarBody(BarebonesSliderBar owningSliderBar) : SliderBarBody(owningSliderBar)
 {
     private DrawableBox2d filledBox = null!;
     private BackgroundContainer2d container = null!;
@@ -82,7 +82,7 @@ public class DefaultSliderBarBody : SliderBarBody
             return;
         }
 
-        filledBox.ResizeWidthTo(getWidth(newValue), 10, Easing.InCubic);
+        filledBox.ResizeWidthTo(getWidth(newValue), 10, Easing.OutQuart);
     }
 
     private float getWidth(float progress)

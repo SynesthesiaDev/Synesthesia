@@ -12,9 +12,9 @@ using Synesthesia.Engine.Utility;
 
 namespace Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 
-public class DefaultEngineCheckbox : CompositeDrawable2d, IDisablable
+public class DefaultCheckbox : CompositeDrawable2d, IDisablable
 {
-    public readonly Bindable<bool> Checked = new(true);
+    public readonly Bindable<bool> Checked;
 
     private bool disabled = false;
 
@@ -53,8 +53,10 @@ public class DefaultEngineCheckbox : CompositeDrawable2d, IDisablable
 
     public DefaultEngineColorCombination ColorCombination { get; init; } = DefaultEngineColorCombination.SURFACE2;
 
-    public DefaultEngineCheckbox()
+    public DefaultCheckbox(bool checkedByDefault = true)
     {
+        Checked = new Bindable<bool>(checkedByDefault);
+
         Children =
         [
             new BackgroundContainer2d

@@ -90,4 +90,10 @@ public class BackgroundContainer2d : Container2d
         background.Dispose();
         base.Dispose(isDisposing);
     }
+
+    public Animation<Color> FlashBackground(Color flashColor, long durationIn, long durationOut, Easing easingIn, Easing easingOut)
+    {
+        var currentColor = BackgroundColor;
+        return FadeBackgroundTo(flashColor, durationIn, easingIn).Then(() => FadeBackgroundTo(currentColor, durationOut, easingOut));
+    }
 }

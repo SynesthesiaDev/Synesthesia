@@ -1,5 +1,4 @@
-﻿using Synesthesia.Demo.Demos;
-using Synesthesia.Engine;
+﻿using Synesthesia.Engine;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 
 namespace Synesthesia.Demo;
@@ -21,7 +20,7 @@ public static class Program
                 ScreenStack = new ScreenStack()
             ];
 
-            ScreenStack.Push(new AudioTestScreen());
+            // ScreenStack.Push(new AudioTestScreen());
         });
 
         game.Run();
