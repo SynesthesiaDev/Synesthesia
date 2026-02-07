@@ -20,6 +20,7 @@ internal static class VisualTestRunner
         new VisualTestCategory("Animations", [typeof(AnimationTest), typeof(ComplexContainerAnimationTest)]),
         new VisualTestCategory("Layout", [typeof(AnchorOriginTest), typeof(AutoSizeStackTest), typeof(RelativeSizeMarginTest), typeof(ShowcaseTest)]),
         new VisualTestCategory("Performance", [typeof(DrawableSpawnPerformanceTest), typeof(AnimationStormPerformanceTest)]),
+        new VisualTestCategory("Platform", [typeof(WindowActiveStateTest)])
     ];
 
     public static void Load()

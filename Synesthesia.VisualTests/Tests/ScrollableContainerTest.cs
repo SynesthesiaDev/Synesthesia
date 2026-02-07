@@ -53,7 +53,7 @@ public class ScrollableContainerTest : VisualTest
 
         AddStep("Scroll using mouse", () =>
         {
-            InputManager.EnqueueEvent(new MouseMoveInputEvent(scrollableContainer.GetScreenSpaceCenter()));
+            InputSimulator.SimulateMove(scrollableContainer.GetScreenSpaceCenter());
             InputManager.EnqueueEvent(new MouseWheelInputEvent(-1));
         });
 

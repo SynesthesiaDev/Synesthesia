@@ -5,7 +5,7 @@ namespace Common.Event;
 
 public class EventDispatcher<T> : IEventDispatcher
 {
-    private List<EventSubscriber<T>> eventSubscribers = [];
+    private readonly List<EventSubscriber<T>> eventSubscribers = [];
 
     public EventDispatcher()
     {
@@ -24,9 +24,9 @@ public class EventDispatcher<T> : IEventDispatcher
         eventSubscribers.ForEach(eventSubscriber => eventSubscriber.Action.Invoke(value));
     }
 
-    public void Unsubscribe(EventSubscriber<T> subscriber)
+    public void Unsubscribe(IEventSubscriber subscriber)
     {
-        eventSubscribers.Remove(subscriber);
+        eventSubscribers.Remove((subscriber as EventSubscriber<T>)!);
     }
 
     public void UnsubscribeAll()

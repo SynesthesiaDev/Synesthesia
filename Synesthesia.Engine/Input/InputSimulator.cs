@@ -15,7 +15,7 @@ public static class InputSimulator
 
     public static void SimulateMove(Vector2 position)
     {
-        InputManager.EnqueueEvent(new MouseMoveInputEvent(position));
+        InputManager.EnqueueEvent(new MouseMoveInputEvent(position, Vector2.Zero));
     }
 
     public static void SimulateClickState(MouseButton mouseButton, bool down)

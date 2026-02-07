@@ -17,6 +17,12 @@ public static class EngineConfiguration
         set => current = current with { ShowDebugOverlay = value };
     }
 
+    public static bool LeftAltEscapesCursorConsume
+    {
+        get => current.LeftAltEscapesCursorConsume;
+        set => current = current with { LeftAltEscapesCursorConsume = value };
+    }
+
     public static GarbageCollectionMode GarbageCollectionMode
     {
         get => current.GarbageCollectionMode;
@@ -41,15 +47,21 @@ public static class EngineConfiguration
         Save();
     }
 
-    private record RawConfigurationFile
-    (
+    private record RawConfigurationFile(
         bool ShowDebugOverlay,
         GarbageCollectionMode GarbageCollectionMode,
         ExecutionMode ExecutionMode,
-        bool ExperimentalAudioWasapi
+        bool ExperimentalAudioWasapi,
+        bool LeftAltEscapesCursorConsume
     )
     {
-        public static readonly RawConfigurationFile DEFAULT = new(false, GarbageCollectionMode.Default, ExecutionMode.MultiThreaded, false);
+        public static readonly RawConfigurationFile DEFAULT = new(
+            ShowDebugOverlay: false,
+            GarbageCollectionMode.Default,
+            ExecutionMode.MultiThreaded,
+            false,
+            true
+        );
 
         public static readonly StructCodec<RawConfigurationFile> CODEC = StructCodec.Of
         (
@@ -57,7 +69,8 @@ public static class EngineConfiguration
             "garbageCollectionMode", Codecs.Enum<GarbageCollectionMode>(), r => r.GarbageCollectionMode,
             "executionMode", Codecs.Enum<ExecutionMode>(), r => r.ExecutionMode,
             "experimentalAudioWasapi", Codecs.Boolean, r => r.ExperimentalAudioWasapi,
-            (showDebugOverlay, garbage, execution, wasapi) => new RawConfigurationFile(showDebugOverlay, garbage, execution, wasapi)
+            "leftAltEscapesCursorConsume", Codecs.Boolean, r => r.LeftAltEscapesCursorConsume,
+            (showDebugOverlay, garbage, execution, wasapi, leftAltToEscapeCursorConsume) => new RawConfigurationFile(showDebugOverlay, garbage, execution, wasapi, leftAltToEscapeCursorConsume)
         );
     }
 
@@ -74,6 +87,7 @@ public static class EngineConfiguration
             var decoded = RawConfigurationFile.CODEC.Decode(IniTranscoder.Instance, IniSection.Parse(text));
             current = decoded;
         }
+
         Logger.Verbose("Loaded engine configuration file", Logger.Io);
     }
 
@@ -88,6 +102,7 @@ public static class EngineConfiguration
         {
             File.WriteAllText(path, RawConfigurationFile.CODEC.Encode(IniTranscoder.Instance, current).GetAsValueOrThrow().ToString());
         }
+
         Logger.Verbose("Updated engine configuration file", Logger.Io);
     }
 }

@@ -74,7 +74,7 @@ public class Animator : IDisposable
 
     public void AddAnimation(IAnimation animation)
     {
-        ObjectDisposedException.ThrowIf(IsDisposed, this);
+        if(IsDisposed) return;
 
         lock (@lock)
         {
@@ -86,7 +86,7 @@ public class Animator : IDisposable
 
     public void AddAnimation(string field, IAnimation animation)
     {
-        ObjectDisposedException.ThrowIf(IsDisposed, this);
+        if(IsDisposed) return;
 
         lock (@lock)
         {

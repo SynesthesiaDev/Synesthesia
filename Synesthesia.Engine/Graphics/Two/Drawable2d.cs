@@ -1,5 +1,4 @@
 using System.Numerics;
-using Common.Logger;
 using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Animations;
@@ -46,8 +45,6 @@ public abstract class Drawable2d : Drawable
     public bool IsHovered { get; set; } = false;
 
     public bool IsMouseDown { get; set; } = false;
-
-    public long Depth = 0;
 
     protected internal virtual bool AcceptsInputs() => true;
 
@@ -112,8 +109,8 @@ public abstract class Drawable2d : Drawable
         return new Vector2(x, y);
     }
 
-    // for properly applying alpha to all children, multiply local alpha by parent's inherited alpha recursively
-    protected float InheritedAlpha => Alpha * Parent?.InheritedAlpha ?? Alpha;
+    protected float InheritedAlpha => Alpha * (Parent?.InheritedAlpha ?? 1f);
+
 
     protected internal virtual bool OnHover(HoverEvent e)
     {
@@ -162,11 +159,6 @@ public abstract class Drawable2d : Drawable
 
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {
-        // if (RelativeSizeAxes != Axes.None && AutoSizeAxes != Axes.None)
-        // {
-        //     throw new InvalidOperationException("Cannot have both 'AutoSizeAxis' and 'RelativeSizeAxes'");
-        // }
-
         if (Parent != null)
         {
             if (RelativeSizeAxes.HasFlag(Axes.X))
@@ -346,15 +338,7 @@ public abstract class Drawable2d : Drawable
 
     protected override void Dispose(bool isDisposing)
     {
-        if (Animator == null)
-        {
-            Logger.Warning($"Animator was null when disposing {GetType().Name}");
-        }
-        else
-        {
-            Animator.Value.Dispose();
-        }
-
+        if(Animator.IsValueCreated) Animator.Value.Dispose();
         Parent = null;
         base.Dispose(isDisposing);
     }

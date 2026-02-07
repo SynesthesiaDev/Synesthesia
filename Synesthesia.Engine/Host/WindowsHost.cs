@@ -6,7 +6,7 @@ using Synesthesia.Engine.Utility;
 
 namespace Synesthesia.Engine.Host;
 
-public class WindowHost : IDisposable
+public class WindowsHost : IDisposable
 {
     private readonly BindablePool bindablePool = new();
 
@@ -20,10 +20,15 @@ public class WindowHost : IDisposable
 
     public Bindable<Vector2> WindowPosition = null!;
 
+    public Bindable<bool> WindowFocused = null!;
+
     private bool closing;
+
+    private Game owningGame = null!;
 
     public unsafe void Initialize(Game game)
     {
+        owningGame = game;
 
         Raylib.SetTraceLogCallback(&RaylibLoggerProxy.HandleRaylibLog);
         Raylib.SetConfigFlags(ConfigFlags.ResizableWindow);
@@ -34,6 +39,7 @@ public class WindowHost : IDisposable
         WindowState = bindablePool.Borrow(Host.WindowState.Normal);
         IsFullscreen = bindablePool.Borrow(EngineEnvironment.START_FULLSCREEN);
         WindowPosition = bindablePool.Borrow(Raylib.GetWindowPosition());
+        WindowFocused = bindablePool.Borrow<bool>(Raylib.IsWindowFocused());
 
         WindowState.OnValueChange(e =>
         {
@@ -42,14 +48,21 @@ public class WindowHost : IDisposable
             if (e.NewValue == Host.WindowState.Maximized) Raylib.MaximizeWindow();
         }, true);
 
-        WindowPosition.OnValueChange(e => Raylib.SetWindowPosition((int)e.NewValue.X, (int)e.NewValue.Y));
-
         IsFullscreen.OnValueChange(_ => Raylib.ToggleFullscreen());
 
         game.WindowTitle.OnValueChange(e => Raylib.SetWindowTitle(e.NewValue));
     }
 
-    public void PollEvents() => Raylib.PollInputEvents();
+    public void PollEvents()
+    {
+        Raylib.PollInputEvents();
+
+        var windowFocused = Raylib.IsWindowFocused();
+        var windowPos = Raylib.GetWindowPosition();
+
+        if (WindowPosition.Value != windowPos) owningGame.UpdateThread.Schedule(() => WindowPosition.Value = windowPos);
+        if (WindowFocused.Value != windowFocused) owningGame.UpdateThread.Schedule(() => WindowFocused.Value = windowFocused);
+    }
 
     public Vector2 WindowSize => new(Raylib.GetRenderWidth(), Raylib.GetRenderHeight());
 

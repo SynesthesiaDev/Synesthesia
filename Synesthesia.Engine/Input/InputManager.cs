@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Numerics;
+using Common.Event;
 using Common.Logger;
 using Common.Util;
 using Raylib_cs;
@@ -13,6 +14,8 @@ public static class InputManager
 
     public static Vector2 LastMousePosition = new(x: 0, 0);
 
+    public static Vector2 LastMousePositionDelta = new(x: 0, 0);
+
     private static readonly List<ActionBinding> action_bindings = [];
 
     private static readonly List<ActionBinding> held_action_bindings = [];
@@ -20,6 +23,14 @@ public static class InputManager
     private static readonly List<KeyboardKey> held_keys = [];
 
     private static readonly List<MouseButton> held_mouse_buttons = [];
+
+    public static readonly EventDispatcher<KeyboardKey> ON_KEY_DOWN = new();
+
+    public static readonly EventDispatcher<KeyboardKey> ON_KEY_UP = new();
+
+    public static readonly EventDispatcher<Vector2> ON_MOUSE_MOVE = new();
+
+    public static readonly EventDispatcher<Vector2> ON_MOUSE_MOVE_DELTA = new();
 
     public static void InvalidMousePosition()
     {
@@ -96,10 +107,12 @@ public static class InputManager
                     if (keyInputEvent.IsDown)
                     {
                         held_keys.Add(keyInputEvent.Key);
+                        ON_KEY_DOWN.Dispatch(keyInputEvent.Key);
                     }
                     else
                     {
                         held_keys.Remove(keyInputEvent.Key);
+                        ON_KEY_UP.Dispatch(keyInputEvent.Key);
                     }
 
                     game.EngineDebugOverlay.UpdateKeyState(keyInputEvent.Key, keyInputEvent.IsDown);
@@ -134,6 +147,10 @@ public static class InputManager
                 case MouseMoveInputEvent mouseMoveInputEvent:
                 {
                     MousePosition = mouseMoveInputEvent.Position;
+
+                    ON_MOUSE_MOVE.Dispatch(mouseMoveInputEvent.Position);
+                    ON_MOUSE_MOVE_DELTA.Dispatch(mouseMoveInputEvent.PositionDelta);
+
                     var hoverEvent = new Drawable2d.HoverEvent(true, MousePosition);
                     game.EngineDebugOverlay.UpdateHoverState(hoverEvent);
                     game.RootComposite2d.UpdateHoverState(hoverEvent);

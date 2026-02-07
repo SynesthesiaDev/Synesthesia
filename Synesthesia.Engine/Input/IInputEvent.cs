@@ -39,7 +39,7 @@ public record MouseButtonInputEvent(MouseButton Button, bool IsDown) : IInputEve
     public float Timestamp { get; } = (float)Raylib.GetTime();
 }
 
-public record MouseMoveInputEvent(Vector2 Position) : IInputEvent
+public record MouseMoveInputEvent(Vector2 Position, Vector2 PositionDelta) : IInputEvent
 {
     public InputSource Source => InputSource.Mouse;
     public float Timestamp => (float)Raylib.GetTime();

@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Numerics;
 using Common.Util;
 using Raylib_cs;
@@ -158,7 +159,7 @@ public class CompositeDrawable2d : Drawable2d
     {
         lock (childrenLock)
         {
-            foreach (var child in Children.ToList())
+            foreach (var child in Children)
             {
                 child.OnUpdate(frameInfo);
             }
@@ -171,7 +172,29 @@ public class CompositeDrawable2d : Drawable2d
 
     protected override void OnDraw2d()
     {
-        InternalChildren.Filter(c => c.Visible).ForEach(child => child.OnDraw());
+        Drawable2d[] snapshot;
+        int count = 0;
+
+        lock (childrenLock)
+        {
+            snapshot = ArrayPool<Drawable2d>.Shared.Rent(InternalChildren.Count);
+            foreach (var child in InternalChildren.Where(child => child.Visible))
+            {
+                snapshot[count++] = child;
+            }
+        }
+
+        try
+        {
+            for (int i = 0; i < count; i++)
+            {
+                snapshot[i].OnDraw();
+            }
+        }
+        finally
+        {
+            ArrayPool<Drawable2d>.Shared.Return(snapshot, true);
+        }
     }
 
     protected override void Dispose(bool isDisposing)

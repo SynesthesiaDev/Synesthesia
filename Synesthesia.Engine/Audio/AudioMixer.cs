@@ -52,13 +52,13 @@ public class AudioMixer : BassDspAudioHandler, IHasAudioHandle
         }
     }
 
+    private object instanceListLock = new();
+
     public void UpdateLifetimes()
     {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-        foreach (var instance in activeInstances
-                     .ToList()
-                     .Where(instance => Bass.ChannelIsActive(instance.StreamHandle) == PlaybackState.Stopped))
+        foreach (var instance in activeInstances.Where(instance => Bass.ChannelIsActive(instance.StreamHandle) == PlaybackState.Stopped).ToList())
         {
             activeInstances.Remove(instance);
             instance.Dispose();

@@ -40,4 +40,9 @@ public class SingleOffEventDispatcher<T> : IEventDispatcher
         eventSubscribers.Clear();
         EngineStatistics.DISPATCHERS.Decrement();
     }
+
+    public void Unsubscribe(IEventSubscriber subscriber)
+    {
+        throw new NotSupportedException();
+    }
 }

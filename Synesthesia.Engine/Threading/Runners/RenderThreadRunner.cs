@@ -1,19 +1,20 @@
-using System.Numerics;
 using Common.Logger;
 using Raylib_cs;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Resources;
-using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Threading.Runners;
 
 public class RenderThreadRunner(ThreadType type) : ThreadRunner(type)
 {
     private Game game = null!;
-    private Camera3D camera;
     public static Shader SignedDistanceFieldShader;
     public static Shader AlphaShader;
+
+    public Camera3d FallbackCamera { get; private set; } = null!;
+
+    public Camera3d ActiveCamera => game.RootComposite3d.ActiveCamera3d ?? FallbackCamera;
 
     protected override Logger.LogCategory GetLoggerCategory() => Logger.Render;
 
@@ -21,7 +22,7 @@ public class RenderThreadRunner(ThreadType type) : ThreadRunner(type)
     {
         this.game = game;
         Logger.Debug("Loading window host..");
-        this.game.WindowHost.Initialize(this.game);
+        this.game.WindowsHost.Initialize(this.game);
 
         // Load resources dependent on gl
         ResourceManager.ResolveAll("ttf");
@@ -31,14 +32,7 @@ public class RenderThreadRunner(ThreadType type) : ThreadRunner(type)
         SignedDistanceFieldShader = ResourceManager.Get<Shader>("SynesthesiaResources.Shaders.sdf_font.fsh");
         AlphaShader = ResourceManager.Get<Shader>("SynesthesiaResources.Shaders.alpha.fsh");
 
-        camera = new Camera3D
-        {
-            Position = new Vector3(6f, 6f, 6f),
-            Target = Vector3.Zero,
-            Up = Vector3.UnitY,
-            FovY = 60f,
-            Projection = CameraProjection.Perspective,
-        };
+        FallbackCamera = new Camera3d();
     }
 
     protected override void OnLoadComplete(Game game)
@@ -47,25 +41,22 @@ public class RenderThreadRunner(ThreadType type) : ThreadRunner(type)
 
     protected override void OnLoop(FrameInfo frameInfo)
     {
-        game.WindowHost.PollEvents();
+        game.WindowsHost.PollEvents();
 
-        pollKeyboardEvents();
+        PollInputEvents();
 
-        if (Raylib.IsWindowReady() && game.WindowHost.ShouldWindowClose)
+        if (Raylib.IsWindowReady() && game.WindowsHost.ShouldWindowClose)
         {
             game.Dispose();
         }
 
-        game.RootComposite2d.Size = game.WindowHost.WindowSize;
-        game.EngineDebugOverlay.Size = game.WindowHost.WindowSize;
-
-        Raylib.UpdateCamera(ref camera, CameraMode.Custom);
+        game.RootComposite2d.Size = game.WindowsHost.WindowSize;
+        game.EngineDebugOverlay.Size = game.WindowsHost.WindowSize;
 
         Raylib.BeginDrawing();
         Raylib.ClearBackground(Color.Black);
 
-        Raylib.BeginMode3D(camera);
-        // Raylib.DrawGrid(20, 1.0f);
+        Raylib.BeginMode3D(ActiveCamera.RaylibCamera);
         game.RootComposite3d.OnDraw();
         Raylib.EndMode3D();
 
@@ -75,13 +66,14 @@ public class RenderThreadRunner(ThreadType type) : ThreadRunner(type)
         Raylib.EndDrawing();
         Raylib.EndBlendMode();
 
-        pollKeyboardEvents();
+        PollInputEvents();
     }
 
     private readonly HashSet<KeyboardKey> activeKeys = [];
     private readonly bool[] activeMouseButtons = new bool[6];
+    private readonly List<KeyboardKey> releasedKeysBuffer = new(32);
 
-    private void pollKeyboardEvents()
+    public void PollInputEvents()
     {
         if(InputSimulator.SimulatingInput) return;
 
@@ -99,11 +91,17 @@ public class RenderThreadRunner(ThreadType type) : ThreadRunner(type)
             InputManager.EnqueueEvent(new MouseWheelInputEvent(wheelDelta));
         }
 
-        activeKeys.ToList().Filter(k => Raylib.IsKeyReleased(k)).ForEach(keyboardKey =>
+        releasedKeysBuffer.Clear();
+        foreach (var activeKey in activeKeys.Where(activeKey => Raylib.IsKeyReleased(activeKey)))
         {
-            activeKeys.Remove(keyboardKey);
-            InputManager.EnqueueEvent(new KeyInputEvent(keyboardKey, false));
-        });
+            releasedKeysBuffer.Add(activeKey);
+        }
+
+        foreach (var activeKey in releasedKeysBuffer)
+        {
+            activeKeys.Remove(activeKey);
+            InputManager.EnqueueEvent(new KeyInputEvent(activeKey, false));
+        }
 
         for (var i = 0; i < 6; i++)
         {
@@ -117,10 +115,13 @@ public class RenderThreadRunner(ThreadType type) : ThreadRunner(type)
         }
 
         var mousePosition = Raylib.GetMousePosition();
-        if (mousePosition != InputManager.LastMousePosition)
+        var deltaMousePosition = Raylib.GetMouseDelta();
+        if (deltaMousePosition.X != 0 || deltaMousePosition.Y != 0)
         {
+            InputManager.LastMousePositionDelta = deltaMousePosition;
             InputManager.LastMousePosition = mousePosition;
-            InputManager.EnqueueEvent(new MouseMoveInputEvent(mousePosition));
+
+            InputManager.EnqueueEvent(new MouseMoveInputEvent(mousePosition, deltaMousePosition));
         }
 
         int charCode;

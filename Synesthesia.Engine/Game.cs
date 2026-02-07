@@ -1,12 +1,17 @@
+// Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 using Common.Bindable;
 using Common.Logger;
+using Raylib_cs;
 using Synesthesia.Engine.Audio;
 using Synesthesia.Engine.Components.Two.Debug;
 using Synesthesia.Engine.Configuration;
 using Synesthesia.Engine.Dependency;
-using Synesthesia.Engine.Graphics.Three;
+using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Host;
+using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Resources;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Threading.Runners;
@@ -22,9 +27,9 @@ public class Game : IDisposable
 
     public readonly Bindable<string> WindowTitle;
 
-    public bool ConsumesMouse = false;
+    public readonly Bindable<bool> ConsumesCursor = new Bindable<bool>(false);
 
-    public readonly WindowHost WindowHost = new();
+    public readonly WindowsHost WindowsHost = new();
 
     public Scheduler GameScheduler = null!;
 
@@ -35,6 +40,8 @@ public class Game : IDisposable
     public AudioMixer MasterAudioMixer = null!;
 
     public readonly DeferredActionQueue DeferredActionQueue = new();
+
+    public bool CursorConsumed { get; private set; } = false; // nom nom
 
     public Game()
     {
@@ -47,6 +54,52 @@ public class Game : IDisposable
 
             MasterAudioChannel.Volume = 0.25f;
         });
+
+        ConsumesCursor.OnValueChange(_ => updateCursorState());
+
+        InputManager.ON_KEY_DOWN.Subscribe(key =>
+        {
+            if (key == KeyboardKey.LeftAlt) updateCursorState();
+        });
+        InputManager.ON_KEY_UP.Subscribe(key =>
+        {
+            if (key == KeyboardKey.LeftAlt) updateCursorState();
+        });
+    }
+
+    private bool holdingLeftAltToEscapeCursorConsume()
+    {
+        return EngineConfiguration.LeftAltEscapesCursorConsume switch
+        {
+            false => false,
+            true when KeyboardKey.LeftAlt.IsDown() => true,
+            _ => false
+        };
+    }
+
+    private void updateCursorState()
+    {
+        var renderThread = (RenderThread as RenderThreadRunner)!;
+        bool shouldConsume = ConsumesCursor.Value &&
+                             !holdingLeftAltToEscapeCursorConsume() &&
+                             WindowsHost.WindowFocused.Value;
+
+        renderThread.Schedule(() =>
+        {
+            if (shouldConsume && !CursorConsumed)
+            {
+                Raylib.DisableCursor();
+                CursorConsumed = true;
+
+                renderThread.PollInputEvents();
+            }
+
+            else if (!shouldConsume && CursorConsumed)
+            {
+                Raylib.EnableCursor();
+                CursorConsumed = false;
+            }
+        });
     }
 
     public ThreadRunner InputThread { get; private set; } = null!;
@@ -54,7 +107,7 @@ public class Game : IDisposable
     public ThreadRunner UpdateThread { get; private set; } = null!;
     public ThreadRunner AudioThread { get; private set; } = null!;
 
-    public readonly CompositeDrawable3d RootComposite3d = new();
+    public readonly DrawableScene3d RootComposite3d = new();
     public readonly CompositeDrawable2d RootComposite2d = new();
     public readonly EngineDebugOverlay EngineDebugOverlay = new();
 
@@ -105,6 +158,8 @@ public class Game : IDisposable
         RootComposite2d.Load();
         RootComposite3d.Load();
 
+        WindowsHost.WindowFocused.OnValueChange(_ => updateCursorState());
+
         Logger.Debug($"Load Complete, took {GameRuntimeClock.Elapsed.Milliseconds}ms.", Logger.Runtime);
         DeferredActionQueue.FlushAndSwitchToImmediate();
 
@@ -118,7 +173,7 @@ public class Game : IDisposable
     {
         Logger.Debug("Disposing Game..", Logger.Runtime);
         bindablePool.Dispose();
-        WindowHost.Dispose();
+        WindowsHost.Dispose();
         InputThread.Dispose();
         RenderThread.Dispose();
         UpdateThread.Dispose();
