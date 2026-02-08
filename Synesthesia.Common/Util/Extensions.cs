@@ -1,3 +1,4 @@
+using System.Numerics;
 using SynesthesiaUtil.Extensions;
 using SynesthesiaUtil.Randomness;
 
@@ -22,15 +23,16 @@ public static class Extensions
         return newList;
     }
 
+    public static string ToPrettyString(this Vector3 vector3)
+    {
+        return $"{vector3.X:0.0}, {vector3.Y:0.0}, {vector3.Z:0.0}";
+    }
+
     public static T RandomFixed<T>(this IList<T> source)
     {
-        // 1. Guard against empty lists to avoid crashes
         if (source.Count == 0)
-            return default; // Or throw an exception depending on your needs
+            return default;
 
-        // 2. Ensure the upper bound is correctly handled
-        // If RNG.RandomInt is exclusive, source.Count is correct.
-        // If RNG.RandomInt is inclusive, you must use source.Count - 1.
         int index = RNG.RandomInt(0, source.Count);
 
         return source[index];

@@ -27,7 +27,6 @@ public class Game : IDisposable
 
     public readonly Bindable<string> WindowTitle;
 
-    public readonly Bindable<bool> ConsumesCursor = new Bindable<bool>(false);
 
     public readonly WindowsHost WindowsHost = new();
 
@@ -39,13 +38,18 @@ public class Game : IDisposable
 
     public AudioMixer MasterAudioMixer = null!;
 
+    public readonly Bindable<bool> ConsumesCursor = null!;
+
     public readonly DeferredActionQueue DeferredActionQueue = new();
+
+    public BindableProxy BindableProxy = new();
 
     public bool CursorConsumed { get; private set; } = false; // nom nom
 
     public Game()
     {
         WindowTitle = bindablePool.Borrow("Synesthesia Engine");
+        ConsumesCursor = bindablePool.Borrow(false);
 
         AudioManager.DeferredActionQueue.Enqueue(() =>
         {
@@ -57,11 +61,12 @@ public class Game : IDisposable
 
         ConsumesCursor.OnValueChange(_ => updateCursorState());
 
-        InputManager.ON_KEY_DOWN.Subscribe(key =>
+        BindableProxy.Subscribe(InputManager.ON_KEY_DOWN, key =>
         {
             if (key == KeyboardKey.LeftAlt) updateCursorState();
         });
-        InputManager.ON_KEY_UP.Subscribe(key =>
+
+        BindableProxy.Subscribe(InputManager.ON_KEY_UP, key =>
         {
             if (key == KeyboardKey.LeftAlt) updateCursorState();
         });
@@ -172,6 +177,7 @@ public class Game : IDisposable
     public void Dispose()
     {
         Logger.Debug("Disposing Game..", Logger.Runtime);
+        BindableProxy.Dispose();
         bindablePool.Dispose();
         WindowsHost.Dispose();
         InputThread.Dispose();
