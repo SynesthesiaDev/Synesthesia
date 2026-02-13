@@ -5,8 +5,10 @@ using System.Numerics;
 using Common.Bindable;
 using Common.Util;
 using Raylib_cs;
+using Synesthesia.Engine.Audio;
 using Synesthesia.Engine.Audio.Controls;
 using Synesthesia.Engine.Components.Barebones;
+using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
@@ -22,19 +24,33 @@ public class DebugAudioMeter(BassDspAudioHandler? audioHandler = null) : Composi
     private BarebonesProgressBar audioRight = null!;
     private BarebonesProgressBar audioLeft = null!;
 
+    private AudioManager audioManager = null!;
+
+    private double updateTimer = 0f;
+    private const double interval = 500;
+
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {
         base.OnUpdate(frameInfo);
         if (AudioSource.Value == null) return;
 
-        var peak = AudioSource.Value.Peak;
+        updateTimer += frameInfo.Delta;
 
-        audioLeft.Progress.Value = peak.PeakLeft;
-        audioRight.Progress.Value = peak.PeakRight;
+        if (updateTimer >= interval)
+        {
+            var peak = AudioSource.Value.Peak;
+
+            audioLeft.Progress.Value = peak.PeakLeft;
+            audioRight.Progress.Value = peak.PeakRight;
+
+            updateTimer -= interval;
+        }
     }
 
     protected override void LoadComplete()
     {
+        audioManager = DependencyContainer.Get<AudioManager>();
+
         AudioSource.OnValueChange(e =>
         {
             if (e.NewValue != null) return;
@@ -86,7 +102,7 @@ public class DebugAudioMeter(BassDspAudioHandler? audioHandler = null) : Composi
                                 Anchor = Anchor.CentreRight,
                                 Origin = Anchor.CentreRight,
                                 Color = Color.White,
-                                UpdateOnDraw = () => AudioSource.Value == null ? "0.0db" : $"{getAudioLevelString(audioHandler)}"
+                                UpdateOnDraw = () => AudioSource.Value == null ? "-inf db" : $"{getAudioLevelString(audioHandler)}"
                             }
                         ]
                     },

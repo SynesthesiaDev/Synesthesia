@@ -40,9 +40,9 @@ public abstract partial class Drawable : IDrawable, IDisposable
 
     private static readonly StopwatchClock performance_watch = new(true);
 
-    public Lazy<Scheduler> Scheduler;
+    public readonly Lazy<Scheduler> Scheduler;
 
-    public Lazy<Animator> Animator;
+    public readonly Lazy<Animator> Animator;
 
 
     protected Drawable()

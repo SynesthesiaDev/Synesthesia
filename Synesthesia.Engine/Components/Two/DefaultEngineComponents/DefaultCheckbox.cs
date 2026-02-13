@@ -14,7 +14,7 @@ namespace Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 
 public class DefaultCheckbox : CompositeDrawable2d, IDisablable
 {
-    public readonly Bindable<bool> Checked;
+    public required Bindable<bool> Checked { get; init; }
 
     private bool disabled;
 
@@ -36,27 +36,44 @@ public class DefaultCheckbox : CompositeDrawable2d, IDisablable
         }
     }
 
+    private string text = string.Empty;
+
     public string Text
     {
-        get => textDrawable.Text;
-        set => textDrawable.Text = value;
+        get => text;
+        set
+        {
+            text = value;
+            if (IsLoaded)
+            {
+                textDrawable.Text = value;
+            }
+        }
     }
+
+
+    private float fontSize = 24;
 
     public float FontSize
     {
-        get => textDrawable.FontSize;
-        set => textDrawable.FontSize = value;
+        get => fontSize;
+        set
+        {
+            fontSize = value;
+            if (IsLoaded)
+            {
+                textDrawable.FontSize = value;
+            }
+        }
     }
 
-    private TextDrawable textDrawable;
-    private Checkbox checkbox;
+    private TextDrawable textDrawable = null!;
+    private Checkbox checkbox = null!;
 
     public DefaultEngineColorCombination ColorCombination { get; init; } = DefaultEngineColorCombination.SURFACE2;
 
-    public DefaultCheckbox(bool checkedByDefault = true)
+    protected override void OnLoading()
     {
-        Checked = new Bindable<bool>(checkedByDefault);
-
         Children =
         [
             new BackgroundContainer2d
@@ -71,7 +88,7 @@ public class DefaultCheckbox : CompositeDrawable2d, IDisablable
                     },
                     textDrawable = new TextDrawable
                     {
-                        Text = string.Empty,
+                        Text = Text,
                         Anchor = Anchor.CentreLeft,
                         Origin = Anchor.CentreLeft,
                     },
@@ -79,6 +96,7 @@ public class DefaultCheckbox : CompositeDrawable2d, IDisablable
             }
         ];
         checkbox.Checked.BindTo(Checked);
+        base.OnLoading();
     }
 
     protected internal override void OnUpdate(FrameInfo frameInfo)

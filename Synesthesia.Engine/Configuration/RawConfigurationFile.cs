@@ -19,11 +19,11 @@ public record RawConfigurationFile(
 {
     public static readonly RawConfigurationFile DEFAULT = new(
         ShowDebugOverlay: false,
-        GarbageCollectionMode.Default,
-        ExecutionMode.MultiThreaded,
-        false,
-        true,
-        false
+        GarbageCollectionMode: GarbageCollectionMode.Default,
+        ExecutionMode: ExecutionMode.MultiThreaded,
+        ExperimentalAudioWasapi: true,
+        LeftAltEscapesCursorConsume: true,
+        RawInput: false
     );
 
     private static readonly StructCodec<RawConfigurationFile> codec = StructCodec.Of

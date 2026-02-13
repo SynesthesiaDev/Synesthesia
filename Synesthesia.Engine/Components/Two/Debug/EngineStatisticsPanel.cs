@@ -45,7 +45,8 @@ public class EngineStatisticsPanel : EngineDebugComponent
         new EngineStatisticAtomicLine("Audio Mixers", EngineStatistics.AUDIO_MIXERS),
         new EngineStatisticAtomicLine("Cached Audio Samples", EngineStatistics.CACHED_AUDIO_SAMPLES),
         new EngineStatisticAtomicLine("Audio Sample Instances", EngineStatistics.AUDIO_SAMPLE_INSTANCES),
-        new EngineStatisticAtomicLine("BASS Cpu %", EngineStatistics.BASS_CPU)
+        new EngineStatisticAtomicLine("BASS Cpu %", EngineStatistics.BASS_CPU),
+        new EngineStatisticAtomicLine("BASS Wasapi Cpu %", EngineStatistics.BASS_WASAPI_CPU)
     );
 
     protected internal override void OnUpdate(FrameInfo frameInfo)

@@ -9,8 +9,8 @@ namespace Synesthesia.Tests.Bindable;
 public class BindableProxyTest
 {
 
-    protected EventDispatcher<Vector2> OnMouseMove = new();
-    protected EventDispatcher<KeyboardKey> OnKeyDown = new();
+    protected readonly EventDispatcher<Vector2> OnMouseMove = new();
+    protected readonly EventDispatcher<KeyboardKey> OnKeyDown = new();
 
     [SetUp]
     public void Setup()

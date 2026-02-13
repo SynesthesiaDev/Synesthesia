@@ -124,6 +124,14 @@ public class SimpleAudioTest : VisualTest
                             },
                         ]
                     },
+
+                    new DefaultCheckbox
+                    {
+                        Text = "Use WASAPI",
+                        Size = new Vector2(240, 40),
+                        Checked = audioManager.UseWasapi
+                    },
+
                     new DefaultSliderBar
                     {
                         Current = audioVolume,
@@ -138,7 +146,6 @@ public class SimpleAudioTest : VisualTest
             }
         ];
     }
-
 
     protected override void Dispose(bool isDisposing)
     {

@@ -27,27 +27,32 @@ public class Game : IDisposable
 
     public readonly Bindable<string> WindowTitle;
 
-
     public readonly WindowsHost WindowsHost = new();
 
     public Scheduler GameScheduler = null!;
 
-    public readonly AudioManager AudioManager = new();
+    public readonly AudioManager AudioManager;
 
     public AudioChannel MasterAudioChannel = null!;
 
     public AudioMixer MasterAudioMixer = null!;
 
-    public readonly Bindable<bool> ConsumesCursor = null!;
+    public readonly Bindable<bool> ConsumesCursor;
 
     public readonly DeferredActionQueue DeferredActionQueue = new();
 
-    public BindableProxy BindableProxy = new();
+    public readonly BindableProxy BindableProxy = new();
 
     public bool CursorConsumed { get; private set; } // nom nom
 
     public Game()
     {
+        EngineConfiguration.Load();
+        DependencyContainer.Add(this);
+
+        AudioManager = new AudioManager();
+        DependencyContainer.Add(AudioManager);
+
         WindowTitle = bindablePool.Borrow("Synesthesia Engine");
         ConsumesCursor = bindablePool.Borrow(false);
 
@@ -120,10 +125,6 @@ public class Game : IDisposable
 
     public void Run()
     {
-        EngineConfiguration.Load();
-
-        DependencyContainer.Add(this);
-        DependencyContainer.Add(AudioManager);
 
         ResourceManager.RegisterLoader("vsh", ResourceLoaders.LoadVertexShader, true); // Vertex Shader
         ResourceManager.RegisterLoader("fsh", ResourceLoaders.LoadFragmentShader, true); // Fragment Shader

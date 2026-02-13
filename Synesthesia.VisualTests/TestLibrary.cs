@@ -24,16 +24,17 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
     private Container2d stepContainerContainer = null!;
 
     public readonly Bindable<VisualTest?> CurrentSelectedTest = new(null);
+    public readonly Bindable<bool> RunAutomatically = new(VisualTestRunner.TestConfiguration.RunAutomatically);
     public VisualTest.StepContainer? CurrentStepContainer;
 
-    public DefaultCheckbox RunAutomatically = null!;
+    private DefaultCheckbox defaultCheckbox = null!;
 
     private int currentStepIndex;
     private StepButton? currentStep;
 
     public void AutoRunNext()
     {
-        if (!RunAutomatically.Checked.Value) return;
+        if (!RunAutomatically.Value) return;
 
         if (CurrentStepContainer == null || !CurrentStepContainer.TestSteps.Any()) return;
         if (currentStepIndex >= CurrentStepContainer.TestSteps.Count()) return;
@@ -140,8 +141,9 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
                             Origin = Anchor.TopCentre,
                             OnClick = ResetCurrentTest
                         },
-                        RunAutomatically = new DefaultCheckbox(VisualTestRunner.TestConfiguration.RunAutomatically)
+                        defaultCheckbox = new DefaultCheckbox
                         {
+                            Checked = RunAutomatically,
                             Size = new Vector2(240, 40),
                             Scale = new Vector2(0.8f),
                             Anchor = Anchor.TopCentre,
@@ -245,7 +247,7 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
             CurrentSelectedTest.Value = null;
         }
 
-        RunAutomatically.Checked.OnValueChange(e =>
+        RunAutomatically.OnValueChange(e =>
         {
             VisualTestRunner.TestConfiguration.RunAutomatically = e.NewValue;
             if (!e.NewValue || e.OldValue == e.NewValue) return;
