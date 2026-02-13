@@ -4,6 +4,7 @@ using Raylib_cs;
 using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Configuration;
+using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
@@ -19,6 +20,9 @@ public class EngineDebugOverlay : CompositeDrawable2d
         ActionName = "Toggle Engine Debug Overlay",
     };
 
+    [Resolved]
+    private Game game = null!;
+
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {
         if (!Visible) return;
@@ -29,35 +33,46 @@ public class EngineDebugOverlay : CompositeDrawable2d
 
     protected override void OnLoading()
     {
+        var anchor = game.IsRunningInTestEnvironment ? Anchor.TopRight : Anchor.TopLeft;
+        var paddingX = game.IsRunningInTestEnvironment ? -10 : 10;
+
         Visible = EngineConfiguration.ShowDebugOverlay;
         Children =
         [
             mainContainer = new Container2d
             {
                 RelativeSizeAxes = Axes.Both,
-                Anchor = Anchor.Centre,
-                Origin = Anchor.Centre,
+                Anchor = anchor,
+                Origin = anchor,
                 Children =
                 [
                     new FillFlowContainer2d
                     {
-                        Position = new Vector2(10, 10),
+                        Position = new Vector2(paddingX, 10),
                         AutoSizeAxes = Axes.Both,
                         Direction = Direction.Vertical,
+                        Anchor = anchor,
+                        Origin = anchor,
                         Spacing = 10f,
                         Children =
                         [
                             new FrameCounter
                             {
-                                Scale = new Vector2(0.8f)
+                                Scale = new Vector2(0.8f),
+                                Anchor = anchor,
+                                Origin = anchor,
                             },
                             new AudioDebugOverlay
                             {
-                                Scale = new Vector2(0.8f)
+                                Scale = new Vector2(0.8f),
+                                Anchor = anchor,
+                                Origin = anchor,
                             },
                             new EngineStatisticsPanel
                             {
-                                Scale = new Vector2(0.8f)
+                                Scale = new Vector2(0.8f),
+                                Anchor = anchor,
+                                Origin = anchor,
                             },
                         ]
                     },

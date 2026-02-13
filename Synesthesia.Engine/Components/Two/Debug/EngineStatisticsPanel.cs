@@ -46,7 +46,10 @@ public class EngineStatisticsPanel : EngineDebugComponent
         new EngineStatisticAtomicLine("Cached Audio Samples", EngineStatistics.CACHED_AUDIO_SAMPLES),
         new EngineStatisticAtomicLine("Audio Sample Instances", EngineStatistics.AUDIO_SAMPLE_INSTANCES),
         new EngineStatisticAtomicLine("BASS Cpu %", EngineStatistics.BASS_CPU),
-        new EngineStatisticAtomicLine("BASS Wasapi Cpu %", EngineStatistics.BASS_WASAPI_CPU)
+        new EngineStatisticAtomicLine("BASS Wasapi Cpu %", EngineStatistics.BASS_WASAPI_CPU),
+        new Spacer(),
+        new EngineStatisticAtomicLine("Deps Resolved (total)", EngineStatistics.DEPENDENCIES_RESOLVED),
+        new EngineStatisticAtomicLine("Deps Resolved (reflection)", EngineStatistics.DEPENDENCIES_RESOLVED_REFLECTION)
     );
 
     protected internal override void OnUpdate(FrameInfo frameInfo)
@@ -101,7 +104,7 @@ public class EngineStatisticsPanel : EngineDebugComponent
 
         protected override void OnLoading()
         {
-            Size = new Vector2(250, 24);
+            Size = new Vector2(330, 24);
             Children =
             [
                 new TextDrawable

@@ -16,6 +16,7 @@ namespace Synesthesia.Engine.Components.Two.Debug;
 
 public class AudioDebugOverlay : EngineDebugComponent
 {
+    [Resolved]
     private AudioManager audioManager = null!;
 
     private FillFlowContainer2d childrenContainer = null!;
@@ -49,8 +50,6 @@ public class AudioDebugOverlay : EngineDebugComponent
 
     protected override void LoadComplete()
     {
-        audioManager = DependencyContainer.Get<AudioManager>();
-
         updateChannelTree();
 
         base.LoadComplete();
@@ -74,24 +73,10 @@ public class AudioDebugOverlay : EngineDebugComponent
         childrenContainer.Children = newChildren;
     }
 
-    //
-    // Output            ||||||||__
-    //
-    // └ Master          ||||||____
-    //   └ master        __________
-    //   └ effects       ||||||____
-    //
-    // └ Music           ||||______
-    //   └ foreground    __________
-    //   └ background    |_________
-    //   └ drums         |||_______
-    //
-
     private class NestedContainer(string name, int levelsDeep, BassDspAudioHandler? dspAudioHandler) : CompositeDrawable2d
     {
         protected override void OnLoading()
         {
-            var audioManager = DependencyContainer.Get<AudioManager>();
             Size = new Vector2(330, 24);
 
             Children =

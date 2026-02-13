@@ -19,6 +19,9 @@ public class WindowActiveStateTest : VisualTest
     private DrawableBox2d activeBox = null!;
     private DrawableBox2d hoveredBox = null!;
 
+    [Resolved]
+    private Game game = null!;
+
     protected override void OnLoading()
     {
         Children =
@@ -62,7 +65,6 @@ public class WindowActiveStateTest : VisualTest
 
     protected override void LoadComplete()
     {
-        var game = DependencyContainer.Get<Game>();
         game.WindowsHost.WindowFocused.OnValueChange(e => activeBox.FadeColorTo(e.NewValue ? Defaults.GREEN : Defaults.RED, 50, Easing.In), true);
 
         base.LoadComplete();

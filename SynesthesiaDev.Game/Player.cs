@@ -49,13 +49,14 @@ public class Player : Entity
         Default = 20.0
     };
 
-    private Synesthesia.Engine.Game game => DependencyContainer.Get<Synesthesia.Engine.Game>();
+    [Resolved]
+    private Synesthesia.Engine.Game game = null!;
 
     protected override void OnLoading()
     {
         Children =
         [
-            Camera = new Camera3d()
+            Camera = new Camera3d
             {
                 Position = new Vector3(0f, camera_height, 0f)
             }

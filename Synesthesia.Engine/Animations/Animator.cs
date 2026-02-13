@@ -24,45 +24,57 @@ public class Animator : IDisposable
         lock (@lock)
         {
             if (animations.IsEmpty()) return;
+            var newAnimationsAdded = false;
+            var initialCount = animations.Count;
 
-            foreach (var holder in animations.ToList())
+            do
             {
-                switch (holder.Animation.State)
+                for (int index = animations.Count - 1; index >= 0; index--)
                 {
-                    case AnimationState.Ready:
+                    if (index >= animations.Count) continue;
+
+                    var holder = animations[index];
+                    var anim = holder.Animation;
+
+                    if (anim.State == AnimationState.Ready)
                     {
                         holder.Animation.Start(frameInfo.Time);
                         holder.Animation.State = AnimationState.Playing;
                         holder.Animation.Update(frameInfo.Time);
-                        break;
+                    }
+                    else if (anim.State == AnimationState.Playing)
+                    {
+                        anim.Update(frameInfo.Time);
+                    }
+                    else if (anim.State == AnimationState.Paused)
+                    {
+                        continue;
                     }
 
-                    case AnimationState.Playing:
+                    if (anim.State == AnimationState.Finished)
                     {
-                        holder.Animation.Update(frameInfo.Time);
-                        break;
-                    }
-                    case AnimationState.Paused:
-                        continue;
-                    case AnimationState.Finished:
-                    {
-                        holder.Animation.OnComplete?.Invoke();
-                        if (holder.Animation.Loop)
+                        if (anim.Loop)
                         {
-                            Restart(holder.Animation);
+                            Restart(anim);
+                            anim.Update(frameInfo.Time);
                         }
                         else
                         {
-                            removeAnimation(holder);
+                            removeAnimation(holder, index);
                             if (holder is ManagedAnimationHolder managed)
                             {
                                 keyedAnimations.Remove(managed.Key);
                             }
+                            anim.OnComplete?.Invoke();
                         }
-                        break;
+
+                        if (animations.Count > initialCount)
+                        {
+                            newAnimationsAdded = true;
+                        }
                     }
                 }
-            }
+            } while (newAnimationsAdded);
         }
     }
 
@@ -74,7 +86,7 @@ public class Animator : IDisposable
 
     public void AddAnimation(IAnimation animation)
     {
-        if(IsDisposed) return;
+        if (IsDisposed) return;
 
         lock (@lock)
         {
@@ -86,7 +98,7 @@ public class Animator : IDisposable
 
     public void AddAnimation(string field, IAnimation animation)
     {
-        if(IsDisposed) return;
+        if (IsDisposed) return;
 
         lock (@lock)
         {
@@ -106,16 +118,25 @@ public class Animator : IDisposable
         }
     }
 
-    private void removeAnimation(IAnimationHolder animation)
+    private void removeAnimation(IAnimationHolder animation, int? index = null)
     {
+        bool removed;
         lock (@lock)
         {
-            if (animations.Remove(animation))
+            if (index == null)
             {
-                EngineStatistics.ANIMATIONS.Decrement();
+                removed = animations.Remove(animation);
             }
+            else
+            {
+                animations.RemoveAt(index.Value);
+                removed = true;
+            }
+        }
 
-            ;
+        if (removed)
+        {
+            EngineStatistics.ANIMATIONS.Decrement();
         }
     }
 
@@ -124,6 +145,7 @@ public class Animator : IDisposable
         lock (@lock)
         {
             animations.Add(animation);
+            animation.Animation.State = AnimationState.Ready;
             EngineStatistics.ANIMATIONS.Increment();
         }
     }

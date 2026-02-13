@@ -28,10 +28,13 @@ public partial class Animation<T> : IAnimation
 
     public bool IsRunning => StartTime != -1 && !IsCompleted && !IsPaused;
 
+    public long CurrentTime = 0;
+
     public void Start(long currentTime)
     {
         if (StartTime == -1)
         {
+            CurrentTime = currentTime;
             StartTime = currentTime + Delay;
         }
     }
@@ -45,6 +48,7 @@ public partial class Animation<T> : IAnimation
     {
         if (!IsPaused) return;
 
+        CurrentTime = currentTime;
         StartTime = currentTime - PausedTime;
         State = AnimationState.Playing;
     }
@@ -65,6 +69,7 @@ public partial class Animation<T> : IAnimation
     {
         if (StartTime == -1 || IsCompleted || IsPaused) return;
         if (currentTime < StartTime) return;
+        CurrentTime = currentTime;
 
         var elapsed = currentTime - StartTime;
         if (elapsed >= Duration)

@@ -157,14 +157,24 @@ public class CompositeDrawable2d : Drawable2d
 
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {
+        Snapshot<Drawable2d> snapshot;
         lock (childrenLock)
         {
-            foreach (var child in Children)
+            snapshot = Snapshot.Rent(InternalChildren);
+        }
+
+        try
+        {
+            for (int i = 0; i < snapshot.Count; i++)
             {
-                child.OnUpdate(frameInfo);
+                snapshot.Array[i].OnUpdate(frameInfo);
             }
 
             if (AutoSizeAxes != Axes.None) UpdateAutoSize();
+        }
+        finally
+        {
+            snapshot.Return();
         }
 
         base.OnUpdate(frameInfo);

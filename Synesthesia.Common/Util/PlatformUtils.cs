@@ -10,4 +10,6 @@ public static class PlatformUtils
         if (OperatingSystem.IsIOS()) return "IOS";
         return OperatingSystem.IsAndroid() ? "Android" : "Unknown";
     }
+
+
 }

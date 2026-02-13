@@ -25,6 +25,9 @@ public static class EngineStatistics
     public static readonly AtomicInt CACHED_AUDIO_SAMPLES = new(0);
     public static readonly AtomicInt AUDIO_SAMPLE_INSTANCES = new(0);
 
+    public static readonly AtomicInt DEPENDENCIES_RESOLVED = new(0);
+    public static readonly AtomicInt DEPENDENCIES_RESOLVED_REFLECTION = new(0);
+
     public static readonly Atomic<double> BASS_CPU = new(0.0);
     public static readonly Atomic<double> BASS_WASAPI_CPU = new(0.0);
 

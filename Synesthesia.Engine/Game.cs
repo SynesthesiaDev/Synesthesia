@@ -3,6 +3,7 @@
 
 using Common.Bindable;
 using Common.Logger;
+using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Audio;
 using Synesthesia.Engine.Components.Two.Debug;
@@ -42,6 +43,8 @@ public class Game : IDisposable
     public readonly DeferredActionQueue DeferredActionQueue = new();
 
     public readonly BindableProxy BindableProxy = new();
+
+    public bool IsRunningInTestEnvironment => EnvUtils.IsRunningInTestEnvironment() || WindowTitle.Value == "Synesthesia Engine | Visual Tests";
 
     public bool CursorConsumed { get; private set; } // nom nom
 

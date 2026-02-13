@@ -9,6 +9,7 @@ namespace Synesthesia.VisualTests;
 internal static class VisualTestRunner
 {
     private const string path = "./test_runner.ini";
+    public const string WINDOW_TITLE = "Synesthesia Engine | Visual Tests";
 
     public static VisualTestsState TestConfiguration { get; private set; } = VisualTestsState.DEFAULT;
 
@@ -51,6 +52,7 @@ internal static class VisualTestRunner
     {
         Load();
         var game = new Game();
+        game.WindowTitle.Value = WINDOW_TITLE;
 
         game.DeferredActionQueue.Enqueue(() =>
         {

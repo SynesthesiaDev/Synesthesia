@@ -6,6 +6,7 @@ using Common.Logger;
 using Common.Statistics;
 using Raylib_cs;
 using Synesthesia.Engine.Animations;
+using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Timing.Scheduling;
@@ -85,6 +86,8 @@ public abstract partial class Drawable : IDrawable, IDisposable
     {
         LoadThread = Thread.CurrentThread;
         var timeBefore = performance_watch.CurrentTime;
+
+        DependencyInjector.Inject(this);
 
         OnLoading();
         LoadAsyncComplete();

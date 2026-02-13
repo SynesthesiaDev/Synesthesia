@@ -17,6 +17,9 @@ public class ScreenStack : Container2d
         RelativeSizeAxes = Axes.Both;
     }
 
+    [Resolved]
+    private Game game = null!;
+
     public CompletableFuture<Screen> Push(Screen newScreen)
     {
         var existingCount = stack.Count(s => s.GetType() == newScreen.GetType());
@@ -59,7 +62,7 @@ public class ScreenStack : Container2d
         var old = stack.Pop();
 
         var screenTransitionEvent = new ScreenTransitionEvent(old, Current);
-        
+
         old.IsTransitioning = true;
         old
             .OnExiting(new ScreenExitEvent(Current))
@@ -70,7 +73,7 @@ public class ScreenStack : Container2d
             });
 
         if (Current == null) return;
-        
+
         Logger.Debug($"Resuming {Current.ObjectName()}");
         Current.IsSuspended = false;
         Current.IsTransitioning = true;
@@ -85,7 +88,6 @@ public class ScreenStack : Container2d
 
     private CompletableFuture<Screen> loadScreen(Screen screen)
     {
-        var game = DependencyContainer.Get<Game>();
         if (screen.LoadState >= DrawableLoadState.Ready)
         {
             return CompletableFuture.Completed(screen);

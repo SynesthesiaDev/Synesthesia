@@ -46,6 +46,7 @@ public class AnimationSequence : IAnimation
 
         State = AnimationState.Playing;
         CurrentAnimation.Start(currentTime);
+        CurrentAnimation.Update(currentTime);
     }
 
     public void Update(long currentTime)
@@ -61,6 +62,7 @@ public class AnimationSequence : IAnimation
             if (currentIndex < Animations.Count)
             {
                 Animations[currentIndex].Start(currentTime);
+                Animations[currentIndex].Update(currentTime);
             }
             else
             {

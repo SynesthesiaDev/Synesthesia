@@ -12,6 +12,9 @@ namespace Synesthesia.Engine.Components.Two.Debug;
 
 public class FrameCounter : EngineDebugComponent
 {
+    [Resolved]
+    private Game game = null!;
+
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {
         if(!Visible) return;
@@ -20,7 +23,6 @@ public class FrameCounter : EngineDebugComponent
 
     protected override void OnLoading()
     {
-        var game = DependencyContainer.Get<Game>();
         AutoSizeAxes = Axes.Both;
         Children =
         [

@@ -23,7 +23,12 @@ public class SimpleAudioTest : VisualTest
 
     private List<AudioSample> samples = [];
 
+    [Resolved]
     private AudioManager audioManager = null!;
+
+    [Resolved]
+    private Game game = null!;
+
     private AudioMixer masterAudioMixer = null!;
 
     private readonly LowpassAudioEffect lowpassEffect = new(0f);
@@ -37,8 +42,7 @@ public class SimpleAudioTest : VisualTest
 
     protected override void OnLoading()
     {
-        audioManager = DependencyContainer.Get<AudioManager>();
-        masterAudioMixer = DependencyContainer.Get<Game>().MasterAudioMixer;
+        masterAudioMixer = game.MasterAudioMixer;
 
         samples =
         [
