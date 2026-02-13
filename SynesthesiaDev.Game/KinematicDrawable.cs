@@ -14,7 +14,7 @@ public abstract class KinematicDrawable : CompositeDrawable3d
 
     public bool HandleVelocityUpdates { get; set; } = true;
 
-    public const float GRAVITY = 9.81f;
+    public const float GRAVITY = 10f;
 
     public bool IsGrounded { get; set; } = false;
 

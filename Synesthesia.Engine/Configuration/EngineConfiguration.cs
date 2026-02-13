@@ -1,4 +1,3 @@
-using Codon.Codec;
 using Codon.IniTranscoder;
 using Codon.IniTranscoder.Elements;
 using Common.Logger;
@@ -10,6 +9,8 @@ public static class EngineConfiguration
     private const string path = "./engine.ini";
 
     private static RawConfigurationFile current = RawConfigurationFile.DEFAULT;
+
+    public static bool DidMigrate = false;
 
     public static bool ShowDebugOverlay
     {
@@ -47,48 +48,22 @@ public static class EngineConfiguration
         Save();
     }
 
-    private record RawConfigurationFile(
-        bool ShowDebugOverlay,
-        GarbageCollectionMode GarbageCollectionMode,
-        ExecutionMode ExecutionMode,
-        bool ExperimentalAudioWasapi,
-        bool LeftAltEscapesCursorConsume
-    )
-    {
-        public static readonly RawConfigurationFile DEFAULT = new(
-            ShowDebugOverlay: false,
-            GarbageCollectionMode.Default,
-            ExecutionMode.MultiThreaded,
-            false,
-            true
-        );
-
-        public static readonly StructCodec<RawConfigurationFile> CODEC = StructCodec.Of
-        (
-            "showDebugOverlay", Codecs.Boolean, r => r.ShowDebugOverlay,
-            "garbageCollectionMode", Codecs.Enum<GarbageCollectionMode>(), r => r.GarbageCollectionMode,
-            "executionMode", Codecs.Enum<ExecutionMode>(), r => r.ExecutionMode,
-            "experimentalAudioWasapi", Codecs.Boolean, r => r.ExperimentalAudioWasapi,
-            "leftAltEscapesCursorConsume", Codecs.Boolean, r => r.LeftAltEscapesCursorConsume,
-            (showDebugOverlay, garbage, execution, wasapi, leftAltToEscapeCursorConsume) => new RawConfigurationFile(showDebugOverlay, garbage, execution, wasapi, leftAltToEscapeCursorConsume)
-        );
-    }
-
     public static void Load()
     {
         if (!File.Exists(path))
         {
             File.Create(path).Close();
-            File.WriteAllText(path, RawConfigurationFile.CODEC.Encode(IniTranscoder.Instance, RawConfigurationFile.DEFAULT).ToString());
+            File.WriteAllText(path, RawConfigurationFile.VERSIONED_STRUCT_CODEC.Encode(IniTranscoder.Instance, RawConfigurationFile.DEFAULT).ToString());
         }
         else
         {
             var text = File.ReadAllText(path);
-            var decoded = RawConfigurationFile.CODEC.Decode(IniTranscoder.Instance, IniSection.Parse(text));
+            var decoded = RawConfigurationFile.VERSIONED_STRUCT_CODEC.Decode(IniTranscoder.Instance, IniSection.Parse(text));
             current = decoded;
         }
 
         Logger.Verbose("Loaded engine configuration file", Logger.Io);
+        Save();
     }
 
     public static void Save()
@@ -96,11 +71,11 @@ public static class EngineConfiguration
         if (!File.Exists(path))
         {
             File.Create(path).Close();
-            File.WriteAllText(path, RawConfigurationFile.CODEC.Encode(IniTranscoder.Instance, current).GetAsValueOrThrow().ToString());
+            File.WriteAllText(path, RawConfigurationFile.VERSIONED_STRUCT_CODEC.Encode(IniTranscoder.Instance, current).ToString());
         }
         else
         {
-            File.WriteAllText(path, RawConfigurationFile.CODEC.Encode(IniTranscoder.Instance, current).GetAsValueOrThrow().ToString());
+            File.WriteAllText(path, RawConfigurationFile.VERSIONED_STRUCT_CODEC.Encode(IniTranscoder.Instance, current).ToString());
         }
 
         Logger.Verbose("Updated engine configuration file", Logger.Io);

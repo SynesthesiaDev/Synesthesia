@@ -8,6 +8,11 @@ public static class Extensions
 {
     private static readonly Random random = new Random();
 
+    public static float ToRad(this float deg)
+    {
+        return deg * (MathF.PI / 180f);
+    }
+
     public static List<T> Shuffled<T>(this IList<T> list)
     {
         var newList = new List<T>(list);

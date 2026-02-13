@@ -5,6 +5,12 @@ namespace Synesthesia.Engine.Utility;
 
 public static class MathUtil
 {
+    public static float Lerp(float start, float end, float time)
+    {
+        time = MathF.Max(0, MathF.Min(1, time));
+        return start + (end - start) * time;
+    }
+
     public static float ValueOf(float normalizedPercentage, float max)
     {
         float clamped = Math.Clamp(normalizedPercentage, 0f, 1f);

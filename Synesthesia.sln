@@ -4,8 +4,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.Engine", "Synes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.Common", "Synesthesia.Common\Synesthesia.Common.csproj", "{967F743C-F2B0-4D26-BE85-63A42CC00C39}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.Demo", "Synesthesia.Demo\Synesthesia.Demo.csproj", "{EB636F6B-3AB5-46F5-AE04-F143D06CAF3B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.Resources", "Synesthesia.Resources\Synesthesia.Resources.csproj", "{A6641A68-A720-41F5-B8C4-67C051E24A49}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.Editor", "Synesthesia.Editor\Synesthesia.Editor.csproj", "{3DE2DEB7-7081-4B2E-B7BE-B21A6C88AB41}"
@@ -17,6 +15,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SynesthesiaDev.Game", "SynesthesiaDev.Game\SynesthesiaDev.Game.csproj", "{26DBC019-ED93-46EA-BE0F-DB1DE02AA3AC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.Tests", "Synesthesia.Tests\Synesthesia.Tests.csproj", "{66658B58-315F-4BE1-A129-A625D349F4E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SynesthesiaDev.OsuSpec", "SynesthesiaDev.OsuSpec\SynesthesiaDev.OsuSpec.csproj", "{549325BB-E170-43F1-B0AA-DC9DED55D3D5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,10 +32,6 @@ Global
 		{967F743C-F2B0-4D26-BE85-63A42CC00C39}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{967F743C-F2B0-4D26-BE85-63A42CC00C39}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{967F743C-F2B0-4D26-BE85-63A42CC00C39}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EB636F6B-3AB5-46F5-AE04-F143D06CAF3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EB636F6B-3AB5-46F5-AE04-F143D06CAF3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EB636F6B-3AB5-46F5-AE04-F143D06CAF3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EB636F6B-3AB5-46F5-AE04-F143D06CAF3B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A6641A68-A720-41F5-B8C4-67C051E24A49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A6641A68-A720-41F5-B8C4-67C051E24A49}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A6641A68-A720-41F5-B8C4-67C051E24A49}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -60,5 +56,9 @@ Global
 		{66658B58-315F-4BE1-A129-A625D349F4E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66658B58-315F-4BE1-A129-A625D349F4E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66658B58-315F-4BE1-A129-A625D349F4E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{549325BB-E170-43F1-B0AA-DC9DED55D3D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{549325BB-E170-43F1-B0AA-DC9DED55D3D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{549325BB-E170-43F1-B0AA-DC9DED55D3D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{549325BB-E170-43F1-B0AA-DC9DED55D3D5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

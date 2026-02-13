@@ -15,15 +15,17 @@ namespace SynesthesiaDev.Game;
 public class Player : Entity
 {
     private const float camera_height = 2f;
+    private const float camera_lean_amount = 0.35f;
+    private const float camera_lean_responsiveness = 15f;
 
     private const float max_ground_speed = 6.0f;
     private const float max_air_speed = 6.0f;
 
     private const float ground_acceleration = 400.0f;
-    private const float air_acceleration = 4.0f;
+    private const float air_acceleration = 3.0f;
     private const float ground_friction = 14.0f;
 
-    private const float jump_height = 1.5f;
+    private const float jump_height = 1.1f;
     private const float jump_coyote_time = 0.10f;
     private const float jump_buffer_time = 0.10f;
 
@@ -64,6 +66,7 @@ public class Player : Entity
 
     private float yawDeg;
     private float pitchDeg;
+    private float currentTilt;
 
     //TODO Inverted y axis cause some people use that ????
 
@@ -82,7 +85,6 @@ public class Player : Entity
 
             Rotation = Rotation with { Y = yawDeg };
 
-            Camera.Rotation = Camera.Rotation with { X = pitchDeg, Z = 0f };
         });
 
         base.LoadComplete();
@@ -152,6 +154,13 @@ public class Player : Entity
             var jumpVelocity = MathF.Sqrt(2F * GRAVITY * jump_height);
             Velocity = Velocity with { Y = jumpVelocity };
         }
+
+        float sideVelocity = Vector3.Dot(Velocity, rightVector);
+        float targetTilt = -sideVelocity * camera_lean_amount;
+
+        currentTilt = MathUtil.Lerp(currentTilt, targetTilt, delta * camera_lean_responsiveness);
+
+        Camera.Rotation = new Vector3(pitchDeg, 0, currentTilt);
 
         base.OnUpdate(frameInfo);
     }
