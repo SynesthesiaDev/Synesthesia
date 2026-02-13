@@ -20,7 +20,7 @@ public record AudioSampleInstance : IPlaybackAudioControl
         }
     }
 
-    public bool IsPaused { get; private set; } = false;
+    public bool IsPaused { get; private set; }
 
     private float pitch = 1f;
 

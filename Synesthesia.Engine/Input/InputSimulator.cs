@@ -9,7 +9,7 @@ namespace Synesthesia.Engine.Input;
 
 public static class InputSimulator
 {
-    private static DragSimulation? currentDragSimulation = null;
+    private static DragSimulation? currentDragSimulation;
 
     public static bool SimulatingInput => currentDragSimulation != null;
 
@@ -73,8 +73,8 @@ public static class InputSimulator
         public Vector2 End { get; } = end;
         public double Duration { get; } = duration;
         public MouseButton Button { get; } = button;
-        public double Elapsed { get; set; } = 0;
-        public bool Started { get; set; } = false;
+        public double Elapsed { get; set; }
+        public bool Started { get; set; }
 
         public Vector2 GetCurrentPosition()
         {

@@ -22,9 +22,9 @@ public abstract class Drawable2d : Drawable
 
     public Axes RelativeSizeAxes { get; set; } = Axes.None;
 
-    public float Height = 0f;
+    public float Height;
 
-    public float Width = 0f;
+    public float Width;
 
     public Vector2 Size
     {

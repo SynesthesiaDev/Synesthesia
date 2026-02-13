@@ -19,7 +19,7 @@ public class AudioChannel : BassDspAudioHandler, IHasAudioHandle
 
     public int GetAudioHandle() => MixdownHandle;
 
-    public int OutputHandle { get; private set; } = 0;
+    public int OutputHandle { get; private set; }
 
     public void AttachTo(IHasAudioHandle audioHandle)
     {

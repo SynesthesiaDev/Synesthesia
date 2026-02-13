@@ -17,7 +17,7 @@ public class DefaultSliderBarBody(BarebonesSliderBar owningSliderBar) : SliderBa
     private DrawableBox2d filledBox = null!;
     private BackgroundContainer2d container = null!;
 
-    private float? afterLoadProgress = null;
+    private float? afterLoadProgress;
 
     protected override void OnLoading()
     {

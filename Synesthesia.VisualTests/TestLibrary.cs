@@ -24,12 +24,12 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
     private Container2d stepContainerContainer = null!;
 
     public readonly Bindable<VisualTest?> CurrentSelectedTest = new(null);
-    public VisualTest.StepContainer? CurrentStepContainer = null;
+    public VisualTest.StepContainer? CurrentStepContainer;
 
     public DefaultCheckbox RunAutomatically = null!;
 
-    private int currentStepIndex = 0;
-    private StepButton? currentStep = null;
+    private int currentStepIndex;
+    private StepButton? currentStep;
 
     public void AutoRunNext()
     {

@@ -15,12 +15,12 @@ public abstract class AudioEffect<T> : IAudioEffect where T : IEffectParameter
 
     protected abstract int GetEffectPriority();
 
-    protected int EffectHandle = 0;
+    protected int EffectHandle;
     protected T Parameters;
 
     public bool IsActive => EffectHandle != 0 && AttachedAudioMixer != null;
 
-    protected AudioMixer? AttachedAudioMixer = null;
+    protected AudioMixer? AttachedAudioMixer;
 
     public int GetAudioHandle() => EffectHandle;
 

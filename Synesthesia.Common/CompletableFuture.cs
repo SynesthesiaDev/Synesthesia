@@ -4,16 +4,14 @@ namespace Common;
 
 public class CompletableFuture<T> : IFuture
 {
-    private Action<T>? then = null;
+    private T? result;
+    private Exception? exception;
 
-    private T? result = default;
-    private Exception? exception = null;
+    private readonly List<Action<T>> successCallbacks = [];
+    private readonly List<Action<Exception>> failCallbacks = [];
+    private readonly List<Action> anyCompletionCallbacks = [];
 
-    private List<Action<T>> successCallbacks = [];
-    private List<Action<Exception>> failCallbacks = [];
-    private List<Action> anyCompletionCallbacks = [];
-
-    public bool IsComplete { get; private set; } = false;
+    public bool IsComplete { get; private set; }
 
     public CompletableFuture<T> Then(Action<T> then)
     {
@@ -28,7 +26,7 @@ public class CompletableFuture<T> : IFuture
 
         return this;
     }
-    
+
     public void Complete(T value)
     {
         if (IsComplete) return;
@@ -53,6 +51,18 @@ public class CompletableFuture<T> : IFuture
     {
         if (IsComplete) callback();
         else anyCompletionCallbacks.Add(callback);
+    }
+
+    public void OnSuccess(Action<T> callback)
+    {
+        if(IsComplete && exception == null && result != null) callback.Invoke(result!);
+        else successCallbacks.Add(callback);
+    }
+
+    public void OnFail(Action<Exception> callback)
+    {
+        if (IsComplete && exception != null) callback.Invoke(exception);
+        else failCallbacks.Add(callback);
     }
 }
 

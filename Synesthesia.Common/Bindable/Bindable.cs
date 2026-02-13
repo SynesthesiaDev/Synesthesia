@@ -7,7 +7,7 @@ public class Bindable<T>(T defaultInternalValue) : IBindable
     private readonly T defaultInternal = defaultInternalValue;
     protected T InternalValue = defaultInternalValue;
 
-    public BoundBindable? Bound = null;
+    public BoundBindable? Bound;
 
     public T Value
     {
@@ -34,8 +34,8 @@ public class Bindable<T>(T defaultInternalValue) : IBindable
 
     public virtual void BindTo(Bindable<T> them)
     {
+        if (them == this) throw new InvalidOperationException("Cannot bind to self");
         if (Bound != null) throw new InvalidOperationException("Bindable (self) is already bound");
-        // if (them.Bound != null) throw new InvalidOperationException("Bindable (them) is already bound");
 
         Value = them.Value;
         var boundListener = them.OnValueChange(e => Value = e.NewValue);

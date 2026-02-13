@@ -13,7 +13,7 @@ namespace Synesthesia.VisualTests;
 public class VisualTestCategoryDrawable(VisualTestCategory visualTestCategory, TestLibrary owningLibrary) : CompositeDrawable2d
 {
     private FillFlowContainer2d testContainer = null!;
-    private bool expanded = false;
+    private bool expanded;
 
     private const int button_width = 240;
     private const int button_height = 40;

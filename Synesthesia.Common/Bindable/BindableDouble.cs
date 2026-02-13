@@ -10,7 +10,7 @@ public class BindableDouble() : Bindable<double>(0.0)
     public double Min { get; set; } = double.MinValue;
     public double Max { get; set; } = double.MaxValue;
 
-    private double defaultValue = 0.0f;
+    private double defaultValue;
 
     public double Default
     {

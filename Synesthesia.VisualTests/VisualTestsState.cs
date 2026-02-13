@@ -31,7 +31,7 @@ public class VisualTestsState(Optional<string> currentTest, bool autoRun)
         }
     }
 
-    public static readonly VisualTestsState DEFAULT = new VisualTestsState(Optional.Empty<string>(), false);
+    public static readonly VisualTestsState DEFAULT = new(Optional.Empty<string>(), false);
 
     public static readonly StructCodec<VisualTestsState> CODEC = StructCodec.Of
     (

@@ -12,7 +12,7 @@ public class TextDrawable : ColoredDrawable2d
     private Font font = DEFAULT_FONT;
     private string text = string.Empty;
     private float fontSize = 24f;
-    private float spacing = 0f;
+    private float spacing;
 
     public Font Font
     {

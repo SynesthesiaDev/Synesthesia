@@ -16,7 +16,7 @@ public abstract class KinematicDrawable : CompositeDrawable3d
 
     public const float GRAVITY = 10f;
 
-    public bool IsGrounded { get; set; } = false;
+    public bool IsGrounded { get; set; }
 
     //TODO Real collision
     public float GroundY { get; set; } = 0f;

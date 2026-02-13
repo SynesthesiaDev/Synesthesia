@@ -22,9 +22,9 @@ public class AudioMixer : BassDspAudioHandler, IHasAudioHandle
 
     public IReadOnlyList<AudioSampleInstance> ActiveInstances => activeInstances;
 
-    public bool IsPaused { get; private set; } = false;
+    public bool IsPaused { get; private set; }
 
-    public int OutputHandle { get; private set; } = 0;
+    public int OutputHandle { get; private set; }
 
     public int MixdownHandle { get; private set; }
 

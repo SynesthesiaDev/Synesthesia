@@ -12,18 +12,18 @@ public static class Logger
 
     public static readonly EventDispatcher<LogEvent> MESSAGE_LOGGED = new();
 
-    private static LogSeverity error { get; } = new LogSeverity("Error", ConsoleColor.Red, "#960000");
-    private static LogSeverity warning { get; } = new LogSeverity("Warning", ConsoleColor.Yellow, "#a39800");
-    private static LogSeverity debug { get; } = new LogSeverity("Debug");
-    private static LogSeverity verbose { get; } = new LogSeverity("Verbose", ConsoleColor.Gray, "#004c75");
+    private static LogSeverity error { get; } = new("Error", ConsoleColor.Red, "#960000");
+    private static LogSeverity warning { get; } = new("Warning", ConsoleColor.Yellow, "#a39800");
+    private static LogSeverity debug { get; } = new("Debug");
+    private static LogSeverity verbose { get; } = new("Verbose", ConsoleColor.Gray, "#004c75");
 
-    public static LogCategory Runtime { get; } = new LogCategory("Runtime");
-    public static LogCategory Input { get; } = new LogCategory("Input");
-    public static LogCategory Audio { get; } = new LogCategory("Audio");
-    public static LogCategory Network { get; } = new LogCategory("Network");
-    public static LogCategory Render { get; } = new LogCategory("Render");
-    public static LogCategory Database { get; } = new LogCategory("Database");
-    public static LogCategory Io { get; } = new LogCategory("IO");
+    public static LogCategory Runtime { get; } = new("Runtime");
+    public static LogCategory Input { get; } = new("Input");
+    public static LogCategory Audio { get; } = new("Audio");
+    public static LogCategory Network { get; } = new("Network");
+    public static LogCategory Render { get; } = new("Render");
+    public static LogCategory Database { get; } = new("Database");
+    public static LogCategory Io { get; } = new("IO");
 
     public record LogSeverity(string Name, ConsoleColor? ConsoleColor = null, string DebugOverlayColor = "#4f4f4f");
 

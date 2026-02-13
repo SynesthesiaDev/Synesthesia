@@ -18,7 +18,7 @@ namespace Synesthesia.VisualTests.Tests;
 
 public class SimpleAudioTest : VisualTest
 {
-    private int currentSampleIndex = 0;
+    private int currentSampleIndex;
     private AudioSampleInstance currentlyPlayingSample = null!;
 
     private List<AudioSample> samples = [];

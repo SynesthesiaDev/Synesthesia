@@ -3,7 +3,7 @@ namespace Synesthesia.Engine.Utility;
 
 public class DeferredActionQueue
 {
-    private bool immediate = false;
+    private bool immediate;
 
     private readonly List<Action> queuedActions = [];
 

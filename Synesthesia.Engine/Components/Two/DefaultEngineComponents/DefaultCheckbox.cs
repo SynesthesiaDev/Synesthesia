@@ -16,7 +16,7 @@ public class DefaultCheckbox : CompositeDrawable2d, IDisablable
 {
     public readonly Bindable<bool> Checked;
 
-    private bool disabled = false;
+    private bool disabled;
 
     public bool Disabled
     {

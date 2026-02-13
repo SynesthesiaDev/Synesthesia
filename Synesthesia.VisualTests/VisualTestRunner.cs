@@ -14,13 +14,13 @@ internal static class VisualTestRunner
 
     public static readonly List<VisualTestCategory> Tests =
     [
-        new VisualTestCategory("Containers", [typeof(ScrollableContainerTest)]),
-        new VisualTestCategory("Audio", [typeof(SimpleAudioTest)]),
-        new VisualTestCategory("Controls", [typeof(SliderTest), typeof(TextboxTest)]),
-        new VisualTestCategory("Animations", [typeof(AnimationTest), typeof(ComplexContainerAnimationTest)]),
-        new VisualTestCategory("Layout", [typeof(AnchorOriginTest), typeof(AutoSizeStackTest), typeof(RelativeSizeMarginTest), typeof(ShowcaseTest)]),
-        new VisualTestCategory("Performance", [typeof(DrawableSpawnPerformanceTest), typeof(AnimationStormPerformanceTest)]),
-        new VisualTestCategory("Platform", [typeof(WindowActiveStateTest)])
+        new("Containers", [typeof(ScrollableContainerTest)]),
+        new("Audio", [typeof(SimpleAudioTest)]),
+        new("Controls", [typeof(SliderTest), typeof(TextboxTest)]),
+        new("Animations", [typeof(AnimationTest), typeof(ComplexContainerAnimationTest)]),
+        new("Layout", [typeof(AnchorOriginTest), typeof(AutoSizeStackTest), typeof(RelativeSizeMarginTest), typeof(ShowcaseTest)]),
+        new("Performance", [typeof(DrawableSpawnPerformanceTest), typeof(AnimationStormPerformanceTest)]),
+        new("Platform", [typeof(WindowActiveStateTest)])
     ];
 
     public static void Load()

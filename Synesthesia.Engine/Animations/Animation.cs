@@ -17,12 +17,12 @@ public partial class Animation<T> : IAnimation
     public long StartTime { get; private set; } = -1;
     public bool IsPaused => State == AnimationState.Paused;
 
-    public long PausedTime { get; set; } = 0L;
+    public long PausedTime { get; set; }
 
     public AnimationState State { get; set; } = AnimationState.Ready;
     public bool IsCompleted => State == AnimationState.Finished;
 
-    public bool Loop { get; set; } = false;
+    public bool Loop { get; set; }
 
     private EasingFunction easingFunction => new(Easing);
 

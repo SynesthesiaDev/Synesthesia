@@ -6,7 +6,7 @@ namespace Common.Util;
 
 public static class Extensions
 {
-    private static readonly Random random = new Random();
+    private static readonly Random random = new();
 
     public static float ToRad(this float deg)
     {

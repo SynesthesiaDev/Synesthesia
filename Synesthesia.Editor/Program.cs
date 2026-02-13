@@ -5,7 +5,7 @@ namespace Synesthesia.Editor;
 
 internal static class Program
 {
-    public static Level CurrentLevel = new Level("Test", "Synesthesia");
+    public static Level CurrentLevel = new("Test", "Synesthesia");
 
     private static void Main(string[] args)
     {

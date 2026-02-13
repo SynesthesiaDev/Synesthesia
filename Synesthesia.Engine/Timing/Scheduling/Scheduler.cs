@@ -11,7 +11,7 @@ public class Scheduler : IDisposable
 {
     private readonly Timer timer;
     private long currentTime;
-    private readonly Stopwatch stopwatch = new Stopwatch();
+    private readonly Stopwatch stopwatch = new();
     private readonly UpdateThreadRunner updateThreadRunner = DependencyContainer.Get<UpdateThreadRunner>();
 
     private readonly object timerLock = new();

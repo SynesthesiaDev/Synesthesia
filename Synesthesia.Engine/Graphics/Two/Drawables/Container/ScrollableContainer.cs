@@ -35,7 +35,7 @@ public class ScrollableContainer : MaskingContainer2d
         BackgroundColor = Defaults.BACKGROUND0
     };
 
-    private Container2d scrollableContainer { get; } = new Container2d()
+    private Container2d scrollableContainer { get; } = new()
     {
         RelativeSizeAxes = Axes.Both,
     };

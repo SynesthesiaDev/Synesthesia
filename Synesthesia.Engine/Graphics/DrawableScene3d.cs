@@ -7,7 +7,7 @@ namespace Synesthesia.Engine.Graphics;
 
 public class DrawableScene3d : CompositeDrawable3d
 {
-    private Camera3d? camera = null;
+    private Camera3d? camera;
 
     public Camera3d? ActiveCamera3d
     {

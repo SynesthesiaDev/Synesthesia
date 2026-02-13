@@ -11,15 +11,15 @@ public class AnimationSequence : IAnimation
 
     public bool IsCompleted => State == AnimationState.Finished;
 
-    public Action? OnComplete { get; set; } = null;
+    public Action? OnComplete { get; set; }
 
     public bool IsPaused { get; set; } = false;
 
     public long PausedTime { get; set; } = 0L;
 
-    public bool Loop { get; set; } = false;
+    public bool Loop { get; set; }
 
-    private int currentIndex = 0;
+    private int currentIndex;
 
     public IAnimation CurrentAnimation => Animations[currentIndex];
 
@@ -100,8 +100,8 @@ public class AnimationSequence : IAnimation
     public class Builder
     {
         private readonly List<IAnimation> animations = [];
-        private bool isLooping = false;
-        private Action? then = null;
+        private bool isLooping;
+        private Action? then;
 
         public Builder Add(IAnimation animation)
         {

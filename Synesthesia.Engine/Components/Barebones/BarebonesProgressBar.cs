@@ -47,7 +47,7 @@ public class BarebonesProgressBar : CompositeDrawable2d
     private BackgroundContainer2d backgroundContainer = null!;
     private DrawableBox2d box = null!;
 
-    private float lastProgressValue = 0.0f;
+    private float lastProgressValue;
 
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {

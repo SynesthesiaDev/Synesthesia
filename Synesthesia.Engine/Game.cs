@@ -44,7 +44,7 @@ public class Game : IDisposable
 
     public BindableProxy BindableProxy = new();
 
-    public bool CursorConsumed { get; private set; } = false; // nom nom
+    public bool CursorConsumed { get; private set; } // nom nom
 
     public Game()
     {

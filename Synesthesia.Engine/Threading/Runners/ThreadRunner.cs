@@ -12,7 +12,7 @@ public abstract class ThreadRunner(ThreadType type) : IDisposable
 {
     public Thread Thread { get; private set; } = null!;
 
-    protected readonly BindablePool BindablePool = new BindablePool();
+    protected readonly BindablePool BindablePool = new();
 
     public Bindable<TimeSpan> TargetUpdateRate = null!;
 
@@ -34,7 +34,7 @@ public abstract class ThreadRunner(ThreadType type) : IDisposable
     public double Fps => BitConverter.Int64BitsToDouble(Interlocked.Read(ref fpsBits));
     public TimeSpan FrameTime => new(Interlocked.Read(ref frameTimeTicks));
 
-    public int FpsTarget = 0;
+    public int FpsTarget;
 
     protected void MarkLoaded()
     {

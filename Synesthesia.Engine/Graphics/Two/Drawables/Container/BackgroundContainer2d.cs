@@ -13,7 +13,7 @@ public class BackgroundContainer2d : Container2d
 
     public float BackgroundAlpha { get; set; } = 1f;
 
-    public float BackgroundCornerRadius { get; set; } = 0f;
+    public float BackgroundCornerRadius { get; set; }
 
     private readonly DrawableBox2d background = new();
 

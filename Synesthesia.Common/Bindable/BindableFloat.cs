@@ -10,7 +10,7 @@ public class BindableFloat() : Bindable<float>(0.0f)
     public float Min { get; set; } = float.MinValue;
     public float Max { get; set; } = float.MaxValue;
 
-    private float defaultValue = 0.0f;
+    private float defaultValue;
 
     public float Default
     {

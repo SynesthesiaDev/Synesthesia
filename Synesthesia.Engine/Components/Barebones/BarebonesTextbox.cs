@@ -21,7 +21,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
     private const long initial_repeat_delay = 500;
     private const long repeat_rate = 50;
 
-    private bool backspaceHeld = false;
+    private bool backspaceHeld;
     private long backspacePressTime = -1L;
 
     public bool IsFocused { get; set; }

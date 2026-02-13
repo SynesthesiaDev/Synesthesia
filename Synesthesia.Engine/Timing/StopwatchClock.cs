@@ -4,11 +4,11 @@ namespace Synesthesia.Engine.Timing;
 
 public sealed class StopwatchClock : Stopwatch, IAdjustableClock
 {
-    private double seekOffset = 0;
+    private double seekOffset;
 
-    private double rateChangeUsed = 0;
+    private double rateChangeUsed;
 
-    private double rateChangeAccumulated = 0;
+    private double rateChangeAccumulated;
 
     private double stopwatchMilliseconds => (double)ElapsedTicks / Frequency * 1000;
 

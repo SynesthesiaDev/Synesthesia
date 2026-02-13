@@ -6,7 +6,7 @@ using Raylib_cs;
 
 namespace Synesthesia.Tests.Bindable;
 
-public class Tests
+public class BindableProxyTest
 {
 
     protected EventDispatcher<Vector2> OnMouseMove = new();
@@ -18,7 +18,7 @@ public class Tests
     }
 
     [Test]
-    public void Test1()
+    public void Test()
     {
         var proxy = new BindableProxy();
         var latch = new CountdownEvent(2);
