@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Text;
 using Codon.Buffer;
 using Common.Logger;
@@ -9,11 +10,34 @@ namespace Synesthesia.Engine.Resources;
 
 public static class ResourceLoaders
 {
-    public static object LoadText(Stream stream)
+    private static byte[] getStreamBytes(Stream stream, out int length)
     {
         if (stream.CanSeek) stream.Seek(0, SeekOrigin.Begin);
-        using var reader = new StreamReader(stream, Encoding.UTF8, leaveOpen: true);
-        return reader.ReadToEnd();
+
+        length = (int)stream.Length;
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(length);
+
+        int totalRead = 0;
+        while (totalRead < length)
+        {
+            int read = stream.Read(buffer, totalRead, length - totalRead);
+            if (read == 0) break;
+            totalRead += read;
+        }
+        return buffer;
+    }
+
+    public static object LoadText(Stream stream)
+    {
+        byte[] buffer = getStreamBytes(stream, out int length);
+        try
+        {
+            return Encoding.UTF8.GetString(buffer.AsSpan(0, length));
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
     }
 
     public static object LoadVertexShader(Stream stream)
@@ -37,21 +61,22 @@ public static class ResourceLoaders
 
     public static object LoadFont(Stream stream)
     {
-        var byteArr = LoadByteAray(stream) as byte[];
-        return Unsafe.LoadFontFromMemory(byteArr!);
+        var array = LoadByteArray(stream) as byte[];
+        return Unsafe.LoadFontFromMemory(array!);
     }
 
-    public static object LoadByteAray(Stream stream)
+    public static object LoadByteArray(Stream stream)
     {
         if (stream.CanSeek) stream.Seek(0, SeekOrigin.Begin);
-        using var memoryStream = new MemoryStream();
-        stream.CopyTo(memoryStream);
-        return memoryStream.ToArray();
+
+        byte[] buffer = new byte[stream.Length];
+        stream.ReadExactly(buffer);
+        return buffer;
     }
 
     public static object LoadBinaryBuffer(Stream stream)
     {
-        var array = LoadByteAray(stream) as byte[];
+        var array = LoadByteArray(stream) as byte[];
         return BinaryBuffer.FromArray(array!);
     }
 

@@ -40,7 +40,7 @@ public static class ResourceManager
 
         if (unresolvable.Contains(extension))
         {
-            var byteArray = ResourceLoaders.LoadByteAray(stream) as byte[];
+            var byteArray = ResourceLoaders.LoadByteArray(stream) as byte[];
             var unresolvedResource = new UnresolvedResource(resourceName, extension, byteArray!, loaderFunction);
             unresolved.Add(resourceName, unresolvedResource);
         }

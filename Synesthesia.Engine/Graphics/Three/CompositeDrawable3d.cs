@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Numerics;
+using Common.Util;
 
 namespace Synesthesia.Engine.Graphics.Three;
 
@@ -39,28 +40,22 @@ public class CompositeDrawable3d : Drawable3d
 
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {
-        Drawable3d[] snapshot;
-        int count = 0;
-
+        Snapshot<Drawable3d> snapshot;
         lock (childrenLock)
         {
-            snapshot = ArrayPool<Drawable3d>.Shared.Rent(InternalChildren.Count);
-            foreach (var child in InternalChildren.Where(child => child.Visible))
-            {
-                snapshot[count++] = child;
-            }
+            snapshot = Snapshot.Rent(InternalChildren);
         }
 
         try
         {
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < snapshot.Count; i++)
             {
-                snapshot[i].OnUpdate(frameInfo);
+                snapshot.Array[i].OnUpdate(frameInfo);
             }
         }
         finally
         {
-            ArrayPool<Drawable3d>.Shared.Return(snapshot, true);
+            snapshot.Return();
         }
 
         base.OnUpdate(frameInfo);
