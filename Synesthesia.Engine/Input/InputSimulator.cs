@@ -4,6 +4,7 @@
 using System.Numerics;
 using Raylib_cs;
 using Synesthesia.Engine.Graphics;
+using Synesthesia.Engine.Input.Events;
 
 namespace Synesthesia.Engine.Input;
 
@@ -15,12 +16,23 @@ public static class InputSimulator
 
     public static void SimulateMove(Vector2 position)
     {
-        InputManager.EnqueueEvent(new MouseMoveInputEvent(position, Vector2.Zero));
+        var mouseEvent = new MouseMoveInputEvent
+        {
+            Timestamp = DateTimeOffset.Now.Millisecond,
+            Position = position,
+            PositionDelta = Vector2.Zero
+        };
+
+        InputManager.EnqueueEvent(mouseEvent);
     }
 
     public static void SimulateClickState(MouseButton mouseButton, bool down)
     {
-        InputManager.EnqueueEvent(new MouseButtonInputEvent(mouseButton, down));
+        InputManager.EnqueueEvent(new MouseButtonInputEvent
+        {
+            Button = mouseButton,
+            IsDown = down
+        });
     }
 
     public static void SimulateClick(MouseButton mouseButton = MouseButton.Left)

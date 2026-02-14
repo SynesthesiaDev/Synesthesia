@@ -28,7 +28,12 @@ public static class EngineStatistics
     public static readonly AtomicInt DEPENDENCIES_RESOLVED = new(0);
     public static readonly AtomicInt DEPENDENCIES_RESOLVED_REFLECTION = new(0);
 
+    public static readonly AtomicInt OBJECTS_RENTED = new(0);
+    public static readonly AtomicInt OBJECTS_RETURNED = new(0);
+    public static readonly AtomicInt OBJECTS_ALIVE = new(0);
+
     public static readonly Atomic<double> BASS_CPU = new(0.0);
     public static readonly Atomic<double> BASS_WASAPI_CPU = new(0.0);
+
 
 }

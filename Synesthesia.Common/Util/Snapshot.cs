@@ -27,6 +27,6 @@ public readonly struct Snapshot<T>(T[] array, int count)
 
     public void Return()
     {
-        ArrayPool<T>.Shared.Return(Array, true);
+        ArrayPool<T>.Shared.Return(Array, clearArray: true);
     }
 }

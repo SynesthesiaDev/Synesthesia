@@ -3,6 +3,7 @@
 
 using Common;
 using Common.Logger;
+using Common.Pooling;
 using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Animations.Easings;
@@ -11,11 +12,12 @@ using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Shapes;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
+using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Utility;
 
 namespace Synesthesia.VisualTests;
 
-public class StepButton : CompositeDrawable2d
+public class StepButton : CompositeDrawable2d, IPooledObject
 {
     public Action? Action { get; set; }
 
@@ -33,15 +35,19 @@ public class StepButton : CompositeDrawable2d
 
     public bool RunNextStepImmediately = false;
 
-    protected readonly CompletableFuture<bool> Future = new();
+    protected CompletableFuture<bool> Future = new();
 
-    protected override bool OnHover(HoverEvent e)
+    public bool IsPooled { get; set; }
+
+    public Action<IPooledObject>? ReturnAction { get; set; }
+
+    protected override bool OnHover(MouseMoveInputEvent e)
     {
         BackgroundContainer.FadeBackgroundTo(Defaults.BACKGROUND2.ChangeBrightness(0.1f), 100, Easing.InCubic);
         return true;
     }
 
-    protected override void OnHoverLost(HoverEvent e)
+    protected override void OnHoverLost(MouseMoveInputEvent e)
     {
         BackgroundContainer.FadeBackgroundTo(Defaults.BACKGROUND2, 100, Easing.OutCubic);
     }
@@ -123,4 +129,13 @@ public class StepButton : CompositeDrawable2d
         Highlight.FadeColorTo(Defaults.GREEN, 200, Easing.OutQuad);
         Future.Complete(true);
     }
+
+    public virtual void Reset()
+    {
+        Action = null;
+        Future = new CompletableFuture<bool>();
+        BackgroundContainer.BackgroundColor = Defaults.BACKGROUND2;
+        Highlight.Color = IdleColor;
+    }
+
 }

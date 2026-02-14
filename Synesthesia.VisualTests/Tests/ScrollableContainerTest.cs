@@ -7,6 +7,7 @@ using Raylib_cs;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
 using Synesthesia.Engine.Input;
+using Synesthesia.Engine.Input.Events;
 
 namespace Synesthesia.VisualTests.Tests;
 
@@ -54,7 +55,10 @@ public class ScrollableContainerTest : VisualTest
         AddStep("Scroll using mouse", () =>
         {
             InputSimulator.SimulateMove(scrollableContainer.GetScreenSpaceCenter());
-            InputManager.EnqueueEvent(new MouseWheelInputEvent(-1));
+            InputManager.EnqueueEvent(new MouseScrollWheelInputEvent
+            {
+                Delta = -1
+            });
         });
 
         AddAssert("scroll position is 80", () => Equals(scrollableContainer.ScrollPosition, 80.0));

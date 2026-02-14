@@ -25,7 +25,7 @@ public abstract partial class Drawable : IDrawable, IDisposable
 
     internal readonly BindablePool BindablePool = new();
 
-    public readonly SingleOffEventDispatcher<Drawable> OnLoadComplete;
+    public SingleOffEventDispatcher<Drawable> OnLoadComplete;
 
     public Vector3 Rotation { get; set; } = Vector3.Zero;
 

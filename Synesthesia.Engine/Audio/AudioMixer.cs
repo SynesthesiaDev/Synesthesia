@@ -1,10 +1,12 @@
 using Common.Bindable;
 using Common.Event;
 using Common.Statistics;
+using Common.Util;
 using ManagedBass;
 using ManagedBass.Mix;
 using Synesthesia.Engine.Audio.Controls;
 using Synesthesia.Engine.Audio.Effect;
+using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Audio;
 
@@ -57,11 +59,28 @@ public class AudioMixer : BassDspAudioHandler, IHasAudioHandle
     public void UpdateLifetimes()
     {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
+        if(activeInstances.IsEmpty()) return;
 
-        foreach (var instance in activeInstances.Where(instance => Bass.ChannelIsActive(instance.StreamHandle) == PlaybackState.Stopped).ToList())
+        Snapshot<AudioSampleInstance> snapshot;
+        lock (activeInstances)
         {
-            activeInstances.Remove(instance);
-            instance.Dispose();
+            snapshot = Snapshot.Rent(activeInstances);
+        }
+
+        try
+        {
+            for (int i = 0; i < snapshot.Count; i++)
+            {
+                var instance = snapshot.Array[i];
+                if (Bass.ChannelIsActive(instance.StreamHandle) != PlaybackState.Stopped) continue;
+
+                activeInstances.Remove(instance);
+                instance.Dispose();
+            }
+        }
+        finally
+        {
+            snapshot.Return();
         }
     }
 

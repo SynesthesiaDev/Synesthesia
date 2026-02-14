@@ -4,7 +4,9 @@ using Raylib_cs;
 using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Input;
+using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Threading.Runners;
+using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two;
 
@@ -98,8 +100,8 @@ public abstract class Drawable2d : Drawable
 
     private Vector2 getMarginOffset()
     {
-        var x = Anchor.HasFlag(Anchor.Left) ? Margin.X : (Anchor.HasFlag(Anchor.Right) ? -Margin.Z : 0);
-        var y = Anchor.HasFlag(Anchor.Top) ? Margin.Y : (Anchor.HasFlag(Anchor.Bottom) ? -Margin.W : 0);
+        var x = Anchor.HasFlagFast(Anchor.Left) ? Margin.X : (Anchor.HasFlagFast(Anchor.Right) ? -Margin.Z : 0);
+        var y = Anchor.HasFlagFast(Anchor.Top) ? Margin.Y : (Anchor.HasFlagFast(Anchor.Bottom) ? -Margin.W : 0);
 
         if (Anchor is Anchor.Centre or Anchor.TopCentre or Anchor.BottomCentre)
             x = (Margin.X - Margin.Z) / 2f;
@@ -112,12 +114,12 @@ public abstract class Drawable2d : Drawable
     protected float InheritedAlpha => Alpha * (Parent?.InheritedAlpha ?? 1f);
 
 
-    protected internal virtual bool OnHover(HoverEvent e)
+    protected internal virtual bool OnHover(MouseMoveInputEvent e)
     {
         return false;
     }
 
-    protected internal virtual void OnHoverLost(HoverEvent e)
+    protected internal virtual void OnHoverLost(MouseMoveInputEvent e)
     {
     }
 
@@ -161,10 +163,10 @@ public abstract class Drawable2d : Drawable
     {
         if (Parent != null)
         {
-            if (RelativeSizeAxes.HasFlag(Axes.X))
+            if (RelativeSizeAxes.HasFlagFast(Axes.X))
                 Width = Parent.Size.X - Margin.X - Margin.Z;
 
-            if (RelativeSizeAxes.HasFlag(Axes.Y))
+            if (RelativeSizeAxes.HasFlagFast(Axes.Y))
                 Height = Parent.Size.Y - Margin.Y - Margin.W;
         }
 
@@ -342,8 +344,6 @@ public abstract class Drawable2d : Drawable
         Parent = null;
         base.Dispose(isDisposing);
     }
-
-    public record HoverEvent(bool Hovered, Vector2 MousePosition);
 
     public record PointInput(IInputEvent Event, Vector2 MousePosition, bool IsDown);
 }

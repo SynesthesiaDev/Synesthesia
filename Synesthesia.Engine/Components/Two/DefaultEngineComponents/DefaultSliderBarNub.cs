@@ -6,6 +6,7 @@ using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Components.Barebones;
 using Synesthesia.Engine.Configuration;
 using Synesthesia.Engine.Graphics.Two.Drawables.Shapes;
+using Synesthesia.Engine.Input.Events;
 
 namespace Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 
@@ -30,13 +31,13 @@ public class DefaultSliderBarNub(BarebonesSliderBar owningSliderBar) : SliderBar
         ];
     }
 
-    protected internal override bool OnHover(HoverEvent e)
+    protected internal override bool OnHover(MouseMoveInputEvent e)
     {
         nub.FadeColorTo(Defaults.BACKGROUND4, 100, Easing.InCubic);
         return true;
     }
 
-    protected internal override void OnHoverLost(HoverEvent e)
+    protected internal override void OnHoverLost(MouseMoveInputEvent e)
     {
         nub.FadeColorTo(Defaults.BACKGROUND3, 100, Easing.OutCubic);
     }

@@ -1,5 +1,7 @@
 using System.Collections.Immutable;
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Text;
 using Common.Statistics;
 using Common.Util;
 using Synesthesia.Engine.Configuration;
@@ -18,43 +20,47 @@ public class EngineStatisticsPanel : EngineDebugComponent
 
     private readonly ImmutableList<EngineStatisticLine> statistics = Lists.Immutable<EngineStatisticLine>
     (
-        new EngineStatisticAtomicLine("Drawables", EngineStatistics.DRAWABLES),
+        new EngineLongStatisticAtomicLine("Drawables", EngineStatistics.DRAWABLES),
         new Spacer(),
-        new EngineStatisticAtomicLine("BindablePools", EngineStatistics.BINDABLE_POOLS),
-        new EngineStatisticAtomicLine("Bindables Borrowed", EngineStatistics.BINDABLES_BORROWED),
-        new EngineStatisticAtomicLine("Dispatchers", EngineStatistics.DISPATCHERS),
-        new EngineStatisticAtomicLine("Dispatcher Borrowed", EngineStatistics.DISPATCHERS_BORROWED),
+        new EngineLongStatisticAtomicLine("BindablePools", EngineStatistics.BINDABLE_POOLS),
+        new EngineLongStatisticAtomicLine("Bindables Borrowed", EngineStatistics.BINDABLES_BORROWED),
+        new EngineLongStatisticAtomicLine("Dispatchers", EngineStatistics.DISPATCHERS),
+        new EngineLongStatisticAtomicLine("Dispatcher Borrowed", EngineStatistics.DISPATCHERS_BORROWED),
         new Spacer(),
-        new EngineStatisticTextLine("GC Collections Gen0", () => GC.CollectionCount(0)),
-        new EngineStatisticTextLine("GC Collections Gen1", () => GC.CollectionCount(1)),
-        new EngineStatisticTextLine("GC Collections Gen2", () => GC.CollectionCount(2)),
-        new EngineStatisticTextLine("GC Size Gen0", () => gcMemoryInfo.GenerationInfo[0].SizeAfterBytes),
-        new EngineStatisticTextLine("GC Size Gen1", () => gcMemoryInfo.GenerationInfo[1].SizeAfterBytes),
-        new EngineStatisticTextLine("GC Size Gen2", () => gcMemoryInfo.GenerationInfo[2].SizeAfterBytes),
-        new EngineStatisticTextLine("Finalization Queue", () => gcMemoryInfo.FinalizationPendingCount),
+        new EngineStatisticLongLine("GC Collections Gen0", () => GC.CollectionCount(0)),
+        new EngineStatisticLongLine("GC Collections Gen1", () => GC.CollectionCount(1)),
+        new EngineStatisticLongLine("GC Collections Gen2", () => GC.CollectionCount(2)),
+        new EngineStatisticLongLine("GC Size Gen0", () => gcMemoryInfo.GenerationInfo[0].SizeAfterBytes),
+        new EngineStatisticLongLine("GC Size Gen1", () => gcMemoryInfo.GenerationInfo[1].SizeAfterBytes),
+        new EngineStatisticLongLine("GC Size Gen2", () => gcMemoryInfo.GenerationInfo[2].SizeAfterBytes),
+        new EngineStatisticLongLine("Finalization Queue", () => gcMemoryInfo.FinalizationPendingCount),
         new Spacer(),
-        new EngineStatisticAtomicLine("Schedulers (Lazy)", EngineStatistics.SCHEDULERS),
-        new EngineStatisticAtomicLine("Schedulers (Active)", EngineStatistics.ACTIVE_SCHEDULERS),
-        new EngineStatisticAtomicLine("Scheduler Tasks", EngineStatistics.SCHEDULER_TASKS),
+        new EngineLongStatisticAtomicLine("Schedulers (Lazy)", EngineStatistics.SCHEDULERS),
+        new EngineLongStatisticAtomicLine("Schedulers (Active)", EngineStatistics.ACTIVE_SCHEDULERS),
+        new EngineLongStatisticAtomicLine("Scheduler Tasks", EngineStatistics.SCHEDULER_TASKS),
         new Spacer(),
-        new EngineStatisticAtomicLine("Animators (Lazy)", EngineStatistics.ANIMATORS),
-        new EngineStatisticAtomicLine("Animators (Active)", EngineStatistics.ACTIVE_ANIMATORS),
-        new EngineStatisticAtomicLine("Animations", EngineStatistics.ANIMATIONS),
+        new EngineLongStatisticAtomicLine("Animators (Lazy)", EngineStatistics.ANIMATORS),
+        new EngineLongStatisticAtomicLine("Animators (Active)", EngineStatistics.ACTIVE_ANIMATORS),
+        new EngineLongStatisticAtomicLine("Animations", EngineStatistics.ANIMATIONS),
         new Spacer(),
-        new EngineStatisticAtomicLine("Audio Channels", EngineStatistics.AUDIO_CHANNELS),
-        new EngineStatisticAtomicLine("Audio Mixers", EngineStatistics.AUDIO_MIXERS),
-        new EngineStatisticAtomicLine("Cached Audio Samples", EngineStatistics.CACHED_AUDIO_SAMPLES),
-        new EngineStatisticAtomicLine("Audio Sample Instances", EngineStatistics.AUDIO_SAMPLE_INSTANCES),
-        new EngineStatisticAtomicLine("BASS Cpu %", EngineStatistics.BASS_CPU),
-        new EngineStatisticAtomicLine("BASS Wasapi Cpu %", EngineStatistics.BASS_WASAPI_CPU),
+        new EngineLongStatisticAtomicLine("Audio Channels", EngineStatistics.AUDIO_CHANNELS),
+        new EngineLongStatisticAtomicLine("Audio Mixers", EngineStatistics.AUDIO_MIXERS),
+        new EngineLongStatisticAtomicLine("Cached Audio Samples", EngineStatistics.CACHED_AUDIO_SAMPLES),
+        new EngineLongStatisticAtomicLine("Audio Sample Instances", EngineStatistics.AUDIO_SAMPLE_INSTANCES),
+        new EngineDoubleStatisticAtomicLine("BASS Cpu %", EngineStatistics.BASS_CPU),
+        new EngineDoubleStatisticAtomicLine("BASS Wasapi Cpu %", EngineStatistics.BASS_WASAPI_CPU),
         new Spacer(),
-        new EngineStatisticAtomicLine("Deps Resolved (total)", EngineStatistics.DEPENDENCIES_RESOLVED),
-        new EngineStatisticAtomicLine("Deps Resolved (reflection)", EngineStatistics.DEPENDENCIES_RESOLVED_REFLECTION)
+        new EngineLongStatisticAtomicLine("Deps Resolved (total)", EngineStatistics.DEPENDENCIES_RESOLVED),
+        new EngineLongStatisticAtomicLine("Deps Resolved (reflection)", EngineStatistics.DEPENDENCIES_RESOLVED_REFLECTION),
+        new Spacer(),
+        new EngineLongStatisticAtomicLine("Objects Rented", EngineStatistics.OBJECTS_RENTED),
+        new EngineLongStatisticAtomicLine("Objects Returned", EngineStatistics.OBJECTS_RETURNED),
+        new EngineLongStatisticAtomicLine("Objects Alive", EngineStatistics.OBJECTS_ALIVE)
     );
 
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {
-        if(!Visible) return;
+        if (!Visible) return;
         base.OnUpdate(frameInfo);
     }
 
@@ -95,12 +101,12 @@ public class EngineStatisticsPanel : EngineDebugComponent
         }
     }
 
-    private class EngineStatisticTextLine(string name, Func<string> statisticGetter) : EngineStatisticLine
+    private class EngineStatisticLongLine(string name, Func<long> valueSource) : EngineStatisticLine
     {
-        public EngineStatisticTextLine(string name, Func<long> longGetter) : this(name, () => $"{longGetter.Invoke():##,##0}")
-        {
+        private readonly StringBuilder formatBuffer = new(16);
 
-        }
+        private long lastValue = long.MinValue;
+        private TextDrawable valueText = null!;
 
         protected override void OnLoading()
         {
@@ -113,15 +119,97 @@ public class EngineStatisticsPanel : EngineDebugComponent
                     Origin = Anchor.CentreLeft,
                     Text = name
                 },
-                new FrameUpdatableTextDrawable
+                valueText = new TextDrawable
                 {
                     Anchor = Anchor.CentreRight,
                     Origin = Anchor.CentreRight,
-                    UpdateOnDraw = () => $"{statisticGetter.Invoke()}"
+                    Text = string.Empty
                 },
             ];
         }
+
+        private ThrottledUpdater statUpdater = new(350);
+
+        protected internal override void OnUpdate(FrameInfo frameInfo)
+        {
+            if (statUpdater.TryUpdate(frameInfo.Delta))
+            {
+                var currentValue = valueSource();
+
+                if (currentValue != lastValue)
+                {
+                    lastValue = currentValue;
+                    updateText(currentValue);
+                }
+            }
+
+            base.OnUpdate(frameInfo);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void updateText(long value)
+        {
+            formatBuffer.Clear();
+            formatBuffer.AppendFormat("{0:##,##0}", value);
+            valueText.Text = formatBuffer.ToString();
+        }
     }
 
-    private class EngineStatisticAtomicLine(string name, IAtomic counter) : EngineStatisticTextLine(name, counter.GetValueAsString);
+    private class EngineStatisticDoubleLine(string name, Func<double> valueSource) : EngineStatisticLine
+    {
+        private readonly StringBuilder formatBuffer = new(16);
+
+        private double lastValue = double.MinValue;
+        private TextDrawable valueText = null!;
+
+        private const double epsilon = 0.01;
+
+        protected override void OnLoading()
+        {
+            Size = new Vector2(330, 24);
+            Children =
+            [
+                new TextDrawable
+                {
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreLeft,
+                    Text = name
+                },
+                valueText = new TextDrawable
+                {
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreLeft,
+                    Text = string.Empty
+                },
+            ];
+        }
+
+        private ThrottledUpdater statUpdater = new(100);
+
+        protected internal override void OnUpdate(FrameInfo frameInfo)
+        {
+            if (statUpdater.TryUpdate(frameInfo.Delta))
+            {
+                var currentValue = valueSource();
+
+                if (Precision.IsSame(currentValue, lastValue, epsilon))
+                {
+                    lastValue = currentValue;
+                    updateText(currentValue);
+                }
+            }
+
+            base.OnUpdate(frameInfo);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void updateText(double value)
+        {
+            valueText.Text = value.ToString("N2");
+        }
+    }
+
+    private class EngineLongStatisticAtomicLine(string name, AtomicInt counter) : EngineStatisticLongLine(name, () => counter.Value);
+
+    private class EngineDoubleStatisticAtomicLine(string name, Atomic<double> counter) : EngineStatisticDoubleLine(name, () => counter.Value);
 }

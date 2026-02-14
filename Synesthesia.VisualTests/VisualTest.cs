@@ -29,24 +29,23 @@ public abstract class VisualTest : CompositeDrawable2d
 
     protected void AddStep(string name, Action action, bool runNextImmediately = false)
     {
-        var button = new StepButton
-        {
-            Name = name,
-            Action = action,
-            RunNextStepImmediately = runNextImmediately
-        };
+
+        var button = TestLibrary.STEP_BUTTON_POOL.Rent();
+        button.Name = name;
+        button.Action = action;
+        button.RunNextStepImmediately = runNextImmediately;
 
         StepsContainer.Add(button);
     }
 
     protected void AddAssert(string name, Func<bool> assert, string? extendedDescription = null)
     {
-        var button = new AssertButton
-        {
-            CallStack = new StackTrace(1, true),
-            Name = name,
-            Assertion = assert
-        };
+        var button = TestLibrary.ASSERT_BUTTON_POOL.Rent();
+
+        button.CallStack = new StackTrace(1, true);
+        button.Name = name;
+        button.Assertion = assert;
+        button.ExtendedDescription = extendedDescription;
 
         StepsContainer.Add(button);
     }

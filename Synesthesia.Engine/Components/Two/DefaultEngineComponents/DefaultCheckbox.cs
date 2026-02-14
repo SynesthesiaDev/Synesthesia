@@ -8,6 +8,7 @@ using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Shapes;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
+using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Utility;
 
 namespace Synesthesia.Engine.Components.Two.DefaultEngineComponents;
@@ -105,13 +106,13 @@ public class DefaultCheckbox : CompositeDrawable2d, IDisablable
         checkbox.Size = new Vector2(Size.Y);
     }
 
-    protected internal override bool OnHover(HoverEvent e)
+    protected internal override bool OnHover(MouseMoveInputEvent e)
     {
         checkbox.Hovered.Value = true;
         return true;
     }
 
-    protected internal override void OnHoverLost(HoverEvent e)
+    protected internal override void OnHoverLost(MouseMoveInputEvent e)
     {
         checkbox.Hovered.Value = false;
         base.OnHoverLost(e);

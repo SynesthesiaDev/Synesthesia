@@ -4,6 +4,7 @@
 using System.Numerics;
 using Codon.Optionals;
 using Common.Bindable;
+using Common.Pooling;
 using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Animations.Easings;
@@ -32,6 +33,14 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
     private int currentStepIndex;
     private StepButton? currentStep;
 
+    public static readonly FastObjectPool<StepButton> STEP_BUTTON_POOL = new(() => new StepButton { Name = string.Empty });
+    public static readonly FastObjectPool<AssertButton> ASSERT_BUTTON_POOL = new(() => new AssertButton
+    {
+        Name = string.Empty,
+        CallStack = null,
+        Assertion = null
+    });
+
     public void AutoRunNext()
     {
         if (!RunAutomatically.Value) return;
@@ -59,6 +68,7 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
             }
         });
     }
+
 
     protected override void OnLoading()
     {

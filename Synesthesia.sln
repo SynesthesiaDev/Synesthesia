@@ -16,8 +16,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SynesthesiaDev.Game", "Syne
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.Tests", "Synesthesia.Tests\Synesthesia.Tests.csproj", "{66658B58-315F-4BE1-A129-A625D349F4E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SynesthesiaDev.OsuSpec", "SynesthesiaDev.OsuSpec\SynesthesiaDev.OsuSpec.csproj", "{549325BB-E170-43F1-B0AA-DC9DED55D3D5}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,9 +54,5 @@ Global
 		{66658B58-315F-4BE1-A129-A625D349F4E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66658B58-315F-4BE1-A129-A625D349F4E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66658B58-315F-4BE1-A129-A625D349F4E2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{549325BB-E170-43F1-B0AA-DC9DED55D3D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{549325BB-E170-43F1-B0AA-DC9DED55D3D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{549325BB-E170-43F1-B0AA-DC9DED55D3D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{549325BB-E170-43F1-B0AA-DC9DED55D3D5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -23,13 +23,13 @@ public class FillFlowContainer2d : BackgroundContainer2d
         {
             child.Position = new Vector2(currentX, currentY);
 
-            if (child.FillRemainingAxes.HasFlag(Axes.X))
+            if (child.FillRemainingAxes.HasFlagFast(Axes.X))
             {
                 var remainingParentX = Math.Max(0f, Size.X - currentX);
                 var sx = child.Scale.X;
                 child.Width = sx == 0 ? 0 : (remainingParentX / sx);
             }
-            if (child.FillRemainingAxes.HasFlag(Axes.Y))
+            if (child.FillRemainingAxes.HasFlagFast(Axes.Y))
             {
                 var remainingParentY = Math.Max(0f, Size.Y - currentY);
                 var sy = child.Scale.Y;
@@ -53,13 +53,13 @@ public class FillFlowContainer2d : BackgroundContainer2d
             }
         }
 
-        if (AutoSizeAxes.HasFlag(Axes.X))
+        if (AutoSizeAxes.HasFlagFast(Axes.X))
         {
             var contentWidth = Direction == Direction.Vertical ? maxWidth : (currentX - Spacing);
             Size = Size with { X = contentWidth + AutoSizePadding.X + AutoSizePadding.Z };
         }
 
-        if (AutoSizeAxes.HasFlag(Axes.Y))
+        if (AutoSizeAxes.HasFlagFast(Axes.Y))
         {
             var contentHeight = Direction == Direction.Vertical ? (currentY - Spacing) : maxHeight;
             Size = Size with { Y = contentHeight + AutoSizePadding.Y + AutoSizePadding.W };

@@ -4,19 +4,20 @@
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Text;
+using Common.Logger;
 using Synesthesia.Engine.Configuration;
 
 namespace Synesthesia.VisualTests;
 
 public class AssertButton : StepButton
 {
-    public required StackTrace CallStack { get; init; }
+    public required StackTrace? CallStack { get; set; }
 
-    public required Func<bool> Assertion { get; init; }
+    public required Func<bool>? Assertion { get; set; }
 
-    public Func<string>? GetFailureMessage { get; init; }
+    public Func<string>? GetFailureMessage { get; set; }
 
-    public string? ExtendedDescription { get; init; }
+    public string? ExtendedDescription { get; set; }
 
     public AssertButton()
     {
@@ -26,7 +27,7 @@ public class AssertButton : StepButton
 
     private void checkAssert()
     {
-        if (Assertion())
+        if (Assertion != null && Assertion())
             Success();
         else
         {
@@ -40,7 +41,23 @@ public class AssertButton : StepButton
             if (GetFailureMessage != null)
                 builder.Append($": {GetFailureMessage()}");
 
-            throw ExceptionDispatchInfo.SetRemoteStackTrace(new InvalidOperationException(builder.ToString()), CallStack.ToString());
+            if (CallStack != null)
+            {
+                throw ExceptionDispatchInfo.SetRemoteStackTrace(new InvalidOperationException(builder.ToString()), CallStack.ToString());
+            }
+
+            Logger.Error(builder.ToString());
         }
+    }
+
+    public override void Reset()
+    {
+        GetFailureMessage = null;
+        ExtendedDescription = null;
+        Assertion = null;
+        CallStack = null;
+        OnLoadComplete.Clear();
+
+        base.Reset();
     }
 }

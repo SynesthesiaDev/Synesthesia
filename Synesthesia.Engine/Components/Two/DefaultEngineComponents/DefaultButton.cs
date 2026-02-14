@@ -3,6 +3,7 @@ using Raylib_cs;
 using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
+using Synesthesia.Engine.Input.Events;
 
 namespace Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 
@@ -89,14 +90,14 @@ public class DefaultButton : DisableableContainer
         if (Contains(e.MousePosition)) OnClick?.Invoke();
     }
 
-    protected internal override bool OnHover(HoverEvent e)
+    protected internal override bool OnHover(MouseMoveInputEvent e)
     {
         IsHovered = true;
         updateVisualState();
         return base.OnHover(e);
     }
 
-    protected internal override void OnHoverLost(HoverEvent e)
+    protected internal override void OnHoverLost(MouseMoveInputEvent e)
     {
         IsHovered = false;
         updateVisualState();

@@ -31,7 +31,8 @@ public abstract class ThreadRunner(ThreadType type) : IDisposable
     private long fpsBits;
     private long frameTimeTicks;
 
-    public double Fps => BitConverter.Int64BitsToDouble(Interlocked.Read(ref fpsBits));
+    public long Fps => Interlocked.Read(ref fpsBits);
+
     public TimeSpan FrameTime => new(Interlocked.Read(ref frameTimeTicks));
 
     public int FpsTarget;

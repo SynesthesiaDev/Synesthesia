@@ -2,9 +2,11 @@ using System.Collections.Immutable;
 using System.Numerics;
 using Common.Event;
 using Common.Logger;
+using Common.Pooling;
 using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Graphics.Two;
+using Synesthesia.Engine.Input.Events;
 
 namespace Synesthesia.Engine.Input;
 
@@ -31,6 +33,16 @@ public static class InputManager
     public static readonly EventDispatcher<Vector2> ON_MOUSE_MOVE = new();
 
     public static readonly EventDispatcher<Vector2> ON_MOUSE_MOVE_DELTA = new();
+
+    public static readonly FastObjectPool<TextInputEvent> TEXT_INPUT_EVENT_POOL = new(() => new TextInputEvent());
+
+    public static readonly FastObjectPool<KeyInputEvent> KEY_INPUT_EVENT_POOL = new(() => new KeyInputEvent());
+
+    public static readonly FastObjectPool<MouseButtonInputEvent> MOUSE_BUTTON_INPUT_EVENT_POOL = new(() => new MouseButtonInputEvent());
+
+    public static readonly FastObjectPool<MouseMoveInputEvent> MOUSE_MOVE_INPUT_EVENT_POOL = new(() => new MouseMoveInputEvent());
+
+    public static readonly FastObjectPool<MouseScrollWheelInputEvent> MOUSE_SCROLL_WHEEL_INPUT_EVENT_POOL = new(() => new MouseScrollWheelInputEvent());
 
     public static void InvalidMousePosition()
     {
@@ -104,69 +116,108 @@ public static class InputManager
             {
                 case KeyInputEvent keyInputEvent:
                 {
-                    if (keyInputEvent.IsDown)
+                    try
                     {
-                        held_keys.Add(keyInputEvent.Key);
-                        ON_KEY_DOWN.Dispatch(keyInputEvent.Key);
+                        if (keyInputEvent.IsDown)
+                        {
+                            held_keys.Add(keyInputEvent.Key);
+                            ON_KEY_DOWN.Dispatch(keyInputEvent.Key);
+                        }
+                        else
+                        {
+                            held_keys.Remove(keyInputEvent.Key);
+                            ON_KEY_UP.Dispatch(keyInputEvent.Key);
+                        }
+
+                        game.EngineDebugOverlay.UpdateKeyState(keyInputEvent.Key, keyInputEvent.IsDown);
+                        game.RootComposite2d.UpdateKeyState(keyInputEvent.Key, keyInputEvent.IsDown);
                     }
-                    else
+                    finally
                     {
-                        held_keys.Remove(keyInputEvent.Key);
-                        ON_KEY_UP.Dispatch(keyInputEvent.Key);
+                        if (keyInputEvent.IsPooled) KEY_INPUT_EVENT_POOL.Return(keyInputEvent);
                     }
 
-                    game.EngineDebugOverlay.UpdateKeyState(keyInputEvent.Key, keyInputEvent.IsDown);
-                    game.RootComposite2d.UpdateKeyState(keyInputEvent.Key, keyInputEvent.IsDown);
                     break;
                 }
 
                 case MouseButtonInputEvent mouseButtonInputEvent:
                 {
-                    if (mouseButtonInputEvent.IsDown)
+                    try
                     {
-                        held_mouse_buttons.Add(mouseButtonInputEvent.Button);
-                    }
-                    else
-                    {
-                        held_mouse_buttons.Remove(mouseButtonInputEvent.Button);
-
-                        if (FocusedDrawable != null && !FocusedDrawable
-                                .GetOwningDrawable()
-                                .Contains(MousePosition))
+                        if (mouseButtonInputEvent.IsDown)
                         {
-                            FocusedDrawable = null;
+                            held_mouse_buttons.Add(mouseButtonInputEvent.Button);
                         }
+                        else
+                        {
+                            held_mouse_buttons.Remove(mouseButtonInputEvent.Button);
+
+                            if (FocusedDrawable != null && !FocusedDrawable
+                                    .GetOwningDrawable()
+                                    .Contains(MousePosition))
+                            {
+                                FocusedDrawable = null;
+                            }
+                        }
+
+                        var mouseEvent = new Drawable2d.PointInput(mouseButtonInputEvent, MousePosition, mouseButtonInputEvent.IsDown);
+                        game.EngineDebugOverlay.UpdatePointInputState(mouseEvent, mouseEvent.IsDown);
+                        game.RootComposite2d.UpdatePointInputState(mouseEvent, mouseEvent.IsDown);
+                    }
+                    finally
+                    {
+                        if (mouseButtonInputEvent.IsPooled) MOUSE_BUTTON_INPUT_EVENT_POOL.Return(mouseButtonInputEvent);
                     }
 
-                    var mouseEvent = new Drawable2d.PointInput(mouseButtonInputEvent, MousePosition, mouseButtonInputEvent.IsDown);
-                    game.EngineDebugOverlay.UpdatePointInputState(mouseEvent, mouseEvent.IsDown);
-                    game.RootComposite2d.UpdatePointInputState(mouseEvent, mouseEvent.IsDown);
                     break;
                 }
 
                 case MouseMoveInputEvent mouseMoveInputEvent:
                 {
-                    MousePosition = mouseMoveInputEvent.Position;
+                    try
+                    {
+                        MousePosition = mouseMoveInputEvent.Position;
 
-                    ON_MOUSE_MOVE.Dispatch(mouseMoveInputEvent.Position);
-                    ON_MOUSE_MOVE_DELTA.Dispatch(mouseMoveInputEvent.PositionDelta);
+                        ON_MOUSE_MOVE.Dispatch(mouseMoveInputEvent.Position);
+                        ON_MOUSE_MOVE_DELTA.Dispatch(mouseMoveInputEvent.PositionDelta);
 
-                    var hoverEvent = new Drawable2d.HoverEvent(true, MousePosition);
-                    game.EngineDebugOverlay.UpdateHoverState(hoverEvent);
-                    game.RootComposite2d.UpdateHoverState(hoverEvent);
+                        game.EngineDebugOverlay.UpdateHoverState(mouseMoveInputEvent);
+                        game.RootComposite2d.UpdateHoverState(mouseMoveInputEvent);
+                    }
+                    finally
+                    {
+                        if (mouseMoveInputEvent.IsPooled) MOUSE_MOVE_INPUT_EVENT_POOL.Return(mouseMoveInputEvent);
+                    }
+
                     break;
                 }
 
-                case MouseWheelInputEvent mouseWheelInputEvent:
+                case MouseScrollWheelInputEvent mouseWheelInputEvent:
                 {
-                    game.EngineDebugOverlay.UpdateScrollWheelState(mouseWheelInputEvent);
-                    game.RootComposite2d.UpdateScrollWheelState(mouseWheelInputEvent);
+                    try
+                    {
+                        game.EngineDebugOverlay.UpdateScrollWheelState(mouseWheelInputEvent);
+                        game.RootComposite2d.UpdateScrollWheelState(mouseWheelInputEvent);
+                    }
+                    finally
+                    {
+                        if (mouseWheelInputEvent.IsPooled) MOUSE_SCROLL_WHEEL_INPUT_EVENT_POOL.Return(mouseWheelInputEvent);
+                    }
+
                     break;
                 }
 
                 case TextInputEvent textInputEvent:
                 {
-                    FocusedDrawable?.OnCharacterTyped(textInputEvent.Character);
+                    try
+                    {
+                        FocusedDrawable?.OnCharacterTyped(textInputEvent.Character);
+                    }
+                    finally
+                    {
+                        if (textInputEvent.IsPooled) TEXT_INPUT_EVENT_POOL.Return(textInputEvent);
+                    }
+
                     break;
                 }
             }

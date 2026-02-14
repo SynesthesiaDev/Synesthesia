@@ -1,9 +1,10 @@
-using System.Numerics;
+using Common.Pooling;
 using Raylib_cs;
+using Synesthesia.Engine.Input.Events;
 
 namespace Synesthesia.Engine.Input;
 
-public interface IInputEvent
+public interface IInputEvent : IPooledObject
 {
     InputSource Source { get; }
     float Timestamp { get; }
@@ -16,54 +17,14 @@ public interface IInputEvent
         {
             KeyInputEvent keyInputEvent => keyInputEvent.Key == KeyboardKey.Enter,
             MouseButtonInputEvent mouseInputEvent => mouseInputEvent.Button == MouseButton.Left,
-            TouchInputEvent touchInputEvent => touchInputEvent.Gesture == Gesture.Tap,
             _ => false
         };
     }
-}
-
-public record TextInputEvent(char Character, InputSource Source = InputSource.Keyboard) : IInputEvent
-{
-    public float Timestamp { get; } = (float)Raylib.GetTime();
-    public bool IsDown => true;
-}
-
-public record KeyInputEvent(KeyboardKey Key, bool IsDown, InputSource Source = InputSource.Keyboard) : IInputEvent
-{
-    public float Timestamp { get; } = (float)Raylib.GetTime();
-}
-
-public record MouseButtonInputEvent(MouseButton Button, bool IsDown) : IInputEvent
-{
-    public InputSource Source => InputSource.Mouse;
-    public float Timestamp { get; } = (float)Raylib.GetTime();
-}
-
-public record MouseMoveInputEvent(Vector2 Position, Vector2 PositionDelta) : IInputEvent
-{
-    public InputSource Source => InputSource.Mouse;
-    public float Timestamp => (float)Raylib.GetTime();
-    public bool IsDown => false;
-}
-
-public record MouseWheelInputEvent(float Delta) : IInputEvent
-{
-    public InputSource Source => InputSource.Mouse;
-    public float Timestamp => (float)Raylib.GetTime();
-    public bool IsDown => false;
-}
-
-public record TouchInputEvent(Gesture Gesture, Vector2 Position, bool IsDown) : IInputEvent
-{
-    public InputSource Source => InputSource.Touch;
-    public float Timestamp { get; } = (float)Raylib.GetTime();
 }
 
 public enum InputSource
 {
     Keyboard,
     Mouse,
-
-    // Controller,
-    Touch
+    Touch,
 }

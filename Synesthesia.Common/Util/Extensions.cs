@@ -8,6 +8,8 @@ public static class Extensions
 {
     private static readonly Random random = new();
 
+
+
     public static float ToRad(this float deg)
     {
         return deg * (MathF.PI / 180f);

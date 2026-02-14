@@ -1,8 +1,9 @@
-using System.Buffers;
 using System.Numerics;
+using Common.Pooling;
 using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Input;
+using Synesthesia.Engine.Input.Events;
 using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two.Drawables;
@@ -43,24 +44,43 @@ public class CompositeDrawable2d : Drawable2d
         }
     }
 
-    protected internal void UpdateHoverState(HoverEvent e)
+    protected internal void UpdateHoverState(MouseMoveInputEvent e)
     {
-        foreach (var child in InternalChildren.Filter(c => c.AcceptsInputs()).Reversed())
+        var handled = false;
+
+        for (var i = InternalChildren.Count - 1; i >= 0; i--)
         {
-            if (child.IsHovered && !child.Contains(e.MousePosition))
-            {
-                child.IsHovered = false;
-                child.OnHoverLost(e);
-            }
+            var child = InternalChildren[i];
+            if(!child.AcceptsInputs()) continue;
 
-            if (!child.IsHovered && child.Contains(e.MousePosition) && child.OnHover(e))
-            {
-                child.IsHovered = true;
-            }
+            var containsMouse = child.Contains(e.Position);
 
-            if (child is CompositeDrawable2d drawable2d)
+            if (handled | !containsMouse)
             {
-                drawable2d.UpdateHoverState(e);
+                if (child.IsHovered)
+                {
+                    child.IsHovered = false;
+                    child.OnHoverLost(e);
+                }
+            }
+            else
+            {
+                if (!child.IsHovered)
+                {
+                    if (child.OnHover(e))
+                    {
+                        child.IsHovered = true;
+                        handled = true;
+                    }
+                }
+                else
+                {
+                    handled = true;
+                }
+            }
+            if (child is CompositeDrawable2d composite)
+            {
+                composite.UpdateHoverState(e);
             }
         }
     }
@@ -104,7 +124,7 @@ public class CompositeDrawable2d : Drawable2d
         }
     }
 
-    protected internal void UpdateScrollWheelState(MouseWheelInputEvent e)
+    protected internal void UpdateScrollWheelState(MouseScrollWheelInputEvent e)
     {
         foreach (var child in InternalChildren.Filter(c => c.AcceptsInputs() && c.Contains(InputManager.MousePosition)).Reversed())
         {
@@ -121,18 +141,19 @@ public class CompositeDrawable2d : Drawable2d
 
     protected internal void UpdateKeyState(KeyboardKey e, bool down)
     {
-        foreach (var child in InternalChildren.Filter(c => c.AcceptsInputs()).Reversed())
+        // Iterate backwards manually to respect draw order/depth without allocating
+        for (int i = InternalChildren.Count - 1; i >= 0; i--)
         {
-            var handled = down && child.OnKeyDown(e);
+            var child = InternalChildren[i];
+            if (!child.AcceptsInputs()) continue;
 
+            var handled = down && child.OnKeyDown(e);
             if (!down) child.OnKeyUp(e);
 
-            if (handled) continue;
+            if (handled) break; // Use break instead of continue if the event is "consumed"
 
-            if (child is CompositeDrawable2d drawable2d)
-            {
-                drawable2d.UpdateKeyState(e, down);
-            }
+            if (child is CompositeDrawable2d composite)
+                composite.UpdateKeyState(e, down);
         }
     }
 
@@ -182,28 +203,18 @@ public class CompositeDrawable2d : Drawable2d
 
     protected override void OnDraw2d()
     {
-        Drawable2d[] snapshot;
-        int count = 0;
-
-        lock (childrenLock)
-        {
-            snapshot = ArrayPool<Drawable2d>.Shared.Rent(InternalChildren.Count);
-            foreach (var child in InternalChildren.Where(child => child.Visible))
-            {
-                snapshot[count++] = child;
-            }
-        }
+        var snapshot = Snapshot.Rent(InternalChildren);
 
         try
         {
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < snapshot.Count; i++)
             {
-                snapshot[i].OnDraw();
+                snapshot.Array[i].OnDraw();
             }
         }
         finally
         {
-            ArrayPool<Drawable2d>.Shared.Return(snapshot, true);
+            snapshot.Return();
         }
     }
 
@@ -211,7 +222,21 @@ public class CompositeDrawable2d : Drawable2d
     {
         lock (childrenLock)
         {
-            InternalChildren.ForEach(c => c.Dispose());
+            // ReSharper disable once ForCanBeConvertedToForeach
+            for (int i = 0; i < InternalChildren.Count; i++)
+            {
+                var child = InternalChildren[i];
+
+                if (child is IPooledObject { IsPooled: true, ReturnAction: not null } pooledObject)
+                {
+                    pooledObject.ReturnAction.Invoke(pooledObject);
+                }
+                else
+                {
+                    child.Dispose();
+                }
+            }
+
             InternalChildren.Clear();
         }
 
@@ -222,8 +247,8 @@ public class CompositeDrawable2d : Drawable2d
     {
         var childrenSize = GetChildrenSize();
 
-        if (AutoSizeAxes.HasFlag(Axes.X)) Width = childrenSize.X + AutoSizePadding.X + AutoSizePadding.Z;
-        if (AutoSizeAxes.HasFlag(Axes.Y)) Height = childrenSize.Y + AutoSizePadding.Y + AutoSizePadding.W;
+        if (AutoSizeAxes.HasFlagFast(Axes.X)) Width = childrenSize.X + AutoSizePadding.X + AutoSizePadding.Z;
+        if (AutoSizeAxes.HasFlagFast(Axes.Y)) Height = childrenSize.Y + AutoSizePadding.Y + AutoSizePadding.W;
     }
 
     public Vector2 GetChildrenSize()
@@ -233,8 +258,9 @@ public class CompositeDrawable2d : Drawable2d
         float minX = float.MaxValue, minY = float.MaxValue;
         float maxX = float.MinValue, maxY = float.MinValue;
 
-        foreach (var child in InternalChildren.ToArray())
+        for (int i = 0; i < InternalChildren.Count; i++)
         {
+            var child = InternalChildren[i];
             var scaledSize = child.Size * child.Scale;
 
             minX = Math.Min(minX, child.Position.X);
@@ -260,7 +286,7 @@ public class CompositeDrawable2d : Drawable2d
             outList.Add(child);
             if (child is CompositeDrawable2d compositeChild)
             {
-                getChildrenRecursive(compositeDrawable2d, outList);
+                getChildrenRecursive(compositeChild, outList);
             }
         }
     }

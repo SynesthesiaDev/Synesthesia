@@ -8,6 +8,7 @@ using Synesthesia.Engine.Configuration;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Shapes;
+using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Utility;
 
 namespace Synesthesia.Engine.Components.Two.DefaultEngineComponents;
@@ -48,7 +49,7 @@ public class DefaultSliderBarBody(BarebonesSliderBar owningSliderBar) : SliderBa
         base.OnLoading();
     }
 
-    protected internal override bool OnHover(HoverEvent e)
+    protected internal override bool OnHover(MouseMoveInputEvent e)
     {
         filledBox.FadeColorTo(Defaults.ACCENT.ChangeBrightness(0.4f), 100, Easing.InCubic);
         container.FadeBackgroundTo(Defaults.BACKGROUND2.ChangeBrightness(0.06f), 100, Easing.OutCubic);
@@ -56,7 +57,7 @@ public class DefaultSliderBarBody(BarebonesSliderBar owningSliderBar) : SliderBa
         return true;
     }
 
-    protected internal override void OnHoverLost(HoverEvent e)
+    protected internal override void OnHoverLost(MouseMoveInputEvent e)
     {
         filledBox.FadeColorTo(Defaults.ACCENT, 100, Easing.OutCubic);
         container.FadeBackgroundTo(Defaults.BACKGROUND2, 100, Easing.OutCubic);

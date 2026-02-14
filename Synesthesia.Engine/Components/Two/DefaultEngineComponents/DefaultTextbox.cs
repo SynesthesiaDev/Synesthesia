@@ -7,6 +7,7 @@ using Synesthesia.Engine.Configuration;
 using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Input;
+using Synesthesia.Engine.Input.Events;
 
 namespace Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 
@@ -68,7 +69,7 @@ public class DefaultTextbox : DisableableContainer, IAcceptsFocus
                 ]
             }
         ];
-        
+
         base.OnLoading();
     }
 
@@ -76,18 +77,18 @@ public class DefaultTextbox : DisableableContainer, IAcceptsFocus
     {
         Focused.OnValueChange(_ => updateVisualState());
         updateVisualState();
-        
+
         Text.BindTo(textbox.Text);
     }
 
-    protected internal override bool OnHover(HoverEvent e)
+    protected internal override bool OnHover(MouseMoveInputEvent e)
     {
         IsHovered = true;
         updateVisualState();
         return true;
     }
 
-    protected internal override void OnHoverLost(HoverEvent e)
+    protected internal override void OnHoverLost(MouseMoveInputEvent e)
     {
         IsHovered = false;
         updateVisualState();
@@ -115,9 +116,9 @@ public class DefaultTextbox : DisableableContainer, IAcceptsFocus
             _ => IsHovered ? DefaultEngineColorCombination.SURFACE3.Hovered : DefaultEngineColorCombination.SURFACE3.Normal
         };
 
-        
+
         outline.FadeBackgroundTo(borderColor, 150, Easing.OutCubic);
-        
+
         backgroundContainer2d.FadeBackgroundTo(IsHovered ? DefaultEngineColorCombination.SURFACE1.Hovered : DefaultEngineColorCombination.SURFACE1.Normal, 100, Easing.OutCubic);
     }
 
@@ -144,7 +145,7 @@ public class DefaultTextbox : DisableableContainer, IAcceptsFocus
     {
         Text.Dispose();
         Focused.Dispose();
-        
+
         base.Dispose(isDisposing);
     }
 }

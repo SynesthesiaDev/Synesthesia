@@ -35,9 +35,14 @@ public class SingleOffEventDispatcher<T> : IEventDispatcher
     }
 
 
-    public void Dispose()
+    public void Clear()
     {
         eventSubscribers.Clear();
+    }
+
+    public void Dispose()
+    {
+        Clear();
         EngineStatistics.DISPATCHERS.Decrement();
     }
 

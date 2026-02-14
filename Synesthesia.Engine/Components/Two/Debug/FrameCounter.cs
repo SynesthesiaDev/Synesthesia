@@ -17,7 +17,7 @@ public class FrameCounter : EngineDebugComponent
 
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {
-        if(!Visible) return;
+        if (!Visible) return;
         base.OnUpdate(frameInfo);
     }
 
@@ -47,28 +47,28 @@ public class FrameCounter : EngineDebugComponent
                                 Name = "Draw",
                                 Fps = () => Raylib.GetFPS(),
                                 MaxFps = game.RenderThread.FpsTarget,
-                                FrameTime = () => $"{Raylib.GetFrameTime():0.000}"
+                                FrameTime = () => Raylib.GetFrameTime()
                             },
                             new PerformanceMonitorElement
                             {
                                 Name = "Update",
                                 Fps = () => game.UpdateThread.Fps,
                                 MaxFps = game.UpdateThread.FpsTarget,
-                                FrameTime = () => $"{game.UpdateThread.FrameTime.Milliseconds:0.000}"
+                                FrameTime = () => game.UpdateThread.FrameTime.Milliseconds
                             },
                             new PerformanceMonitorElement
                             {
                                 Name = "Input",
                                 Fps = () => game.InputThread.Fps,
                                 MaxFps = game.InputThread.FpsTarget,
-                                FrameTime = () => $"{game.InputThread.FrameTime.Milliseconds:0.000}"
+                                FrameTime = () => game.InputThread.FrameTime.Milliseconds
                             },
                             new PerformanceMonitorElement
                             {
                                 Name = "Audio",
                                 Fps = () => game.AudioThread.Fps,
                                 MaxFps = game.AudioThread.FpsTarget,
-                                FrameTime = () => $"{game.AudioThread.FrameTime.Milliseconds:0.000}"
+                                FrameTime = () => game.AudioThread.FrameTime.Milliseconds
                             },
                         ],
                         Direction = Direction.Vertical
@@ -81,9 +81,16 @@ public class FrameCounter : EngineDebugComponent
     private class PerformanceMonitorElement : CompositeDrawable2d
     {
         public string Name { get; init; } = "Element";
-        public Func<double> Fps { get; init; } = () => 0;
-        public Func<string> FrameTime { get; init; } = () => "0.00";
+        public Func<long> Fps { get; init; } = () => 0;
+        public Func<double> FrameTime { get; init; } = () => 0;
+
+        private long lastFps = 0;
+        private double lastFrameTime = 0;
+
         public int MaxFps { get; init; }
+
+        private TextDrawable fpsText = null!;
+        private TextDrawable frameTimeText = null!;
 
         protected override void OnLoading()
         {
@@ -108,9 +115,9 @@ public class FrameCounter : EngineDebugComponent
                             AutoSizeAxes = Axes.Both,
                             Children =
                             [
-                                new FrameUpdatableTextDrawable
+                                fpsText = new TextDrawable
                                 {
-                                    UpdateOnDraw = () => $"{Math.Clamp(Fps.Invoke(), 0, MaxFps):0}",
+                                    Text = string.Empty,
                                     Anchor = Anchor.Centre,
                                     Origin = Anchor.CentreRight
                                 },
@@ -122,15 +129,40 @@ public class FrameCounter : EngineDebugComponent
                                 },
                             ]
                         },
-                        new FrameUpdatableTextDrawable
+                        frameTimeText = new TextDrawable
                         {
-                            UpdateOnDraw = () => $"({FrameTime.Invoke()}ms)",
+                            Text = "(0.000 ms)",
                             Anchor = Anchor.CentreRight,
                             Origin = Anchor.CentreRight
                         },
                     ]
                 }
             ];
+        }
+
+        private ThrottledUpdater throttledUpdater = new(350);
+
+        protected internal override void OnUpdate(FrameInfo frameInfo)
+        {
+            if (throttledUpdater.TryUpdate(frameInfo.Delta))
+            {
+                var currentFps = Math.Clamp(Fps(), 0, MaxFps);
+                var currentFrameTime = FrameTime();
+
+                if (currentFps != lastFps)
+                {
+                    lastFps = currentFps;
+                    fpsText.Text = currentFps.ToString();
+                }
+
+                if (!Precision.IsSame(currentFrameTime, lastFrameTime, 0.001))
+                {
+                    lastFrameTime = currentFrameTime;
+                    frameTimeText.Text = $"({currentFrameTime:0.000} ms)";
+                }
+            }
+
+            base.OnUpdate(frameInfo);
         }
     }
 }

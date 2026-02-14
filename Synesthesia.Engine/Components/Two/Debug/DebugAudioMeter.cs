@@ -90,29 +90,52 @@ public class DebugAudioMeter(BassDspAudioHandler? audioHandler = null) : Composi
                         Size = new Vector2(80, 20),
                         Children =
                         [
-                            new FrameUpdatableTextDrawable
+                            new AudioLevelText
                             {
                                 FontSize = 20,
                                 Anchor = Anchor.CentreRight,
                                 Origin = Anchor.CentreRight,
                                 Color = Color.White,
-                                UpdateOnDraw = () => AudioSource.Value == null ? "-inf db" : $"{getAudioLevelString(audioHandler)}"
+                                Source = AudioSource.Value
                             }
                         ]
                     },
                 ]
             },
         ];
+
         AutoSizeAxes = Axes.Both;
     }
 
-    private string getAudioLevelString(BassDspAudioHandler? handler)
+    private class AudioLevelText : TextDrawable
     {
-        if (handler == null) return "-inf db";
-        var db = $"{MathUtil.LevelToDb(AudioSource.Value!.Peak.Peak):0.0}";
-        if (db == "-90.0") db = "-inf";
+        public BassDspAudioHandler? Source { get; set; }
 
-        return $"{db} db";
+        private double lastLevel = double.NaN;
+
+        private ThrottledUpdater throttledUpdater = new(750);
+
+        protected internal override void OnUpdate(FrameInfo frameInfo)
+        {
+            if (throttledUpdater.TryUpdate(frameInfo.Delta))
+            {
+                if (Source?.Peak.Peak == null)
+                {
+                    if (Text != "-inf db") Text = "-inf db";
+                    return;
+                }
+
+                var currentLevel = MathUtil.LevelToDb(Source.Peak.Peak);
+
+                if (!Precision.IsSame(currentLevel, lastLevel, 0.1))
+                {
+                    lastLevel = currentLevel;
+                    Text = currentLevel <= -90 ? "-inf db" : $"{currentLevel:F1} db";
+                };
+            }
+
+            base.OnUpdate(frameInfo);
+        }
     }
 
     protected override void Dispose(bool isDisposing)
