@@ -21,6 +21,7 @@ public class EngineStatisticsPanel : EngineDebugComponent
     private readonly ImmutableList<EngineStatisticLine> statistics = Lists.Immutable<EngineStatisticLine>
     (
         new EngineLongStatisticAtomicLine("Drawables", EngineStatistics.DRAWABLES),
+        new EngineLongStatisticAtomicLine("Layout Invalidations", EngineStatistics.LAYOUT_INVALIDATIONS),
         new Spacer(),
         new EngineLongStatisticAtomicLine("BindablePools", EngineStatistics.BINDABLE_POOLS),
         new EngineLongStatisticAtomicLine("Bindables Borrowed", EngineStatistics.BINDABLES_BORROWED),
@@ -128,7 +129,7 @@ public class EngineStatisticsPanel : EngineDebugComponent
             ];
         }
 
-        private ThrottledUpdater statUpdater = new(350);
+        private ThrottledUpdater statUpdater = new(100);
 
         protected internal override void OnUpdate(FrameInfo frameInfo)
         {

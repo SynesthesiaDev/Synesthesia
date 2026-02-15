@@ -53,7 +53,7 @@ internal abstract class Program
                     AutoSizeAxes = Axes.Both,
                     Children =
                     [
-                        new BackgroundContainer2d()
+                        new BackgroundContainer2d
                         {
                             Size = new Vector2(250, 20),
                             Anchor = Anchor.Centre,

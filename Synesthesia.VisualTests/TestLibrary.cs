@@ -4,6 +4,7 @@
 using System.Numerics;
 using Codon.Optionals;
 using Common.Bindable;
+using Common.Logger;
 using Common.Pooling;
 using Common.Util;
 using Raylib_cs;
@@ -91,7 +92,7 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
                     BackgroundColor = Defaults.BACKGROUND1,
                 },
 
-                stepContainerContainer = new BackgroundContainer2d()
+                stepContainerContainer = new BackgroundContainer2d
                 {
                     RelativeSizeAxes = Axes.Y,
                     Width = 260f * 0.8f,
@@ -266,6 +267,9 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
             ResetCurrentTest();
         });
 
+
+        Logger.Verbose($"{sidebar.Size}");
+        sidebar.Invalidate(Invalidation.All);
 
         base.LoadComplete();
     }

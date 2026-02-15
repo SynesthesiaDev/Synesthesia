@@ -29,24 +29,19 @@ public class Camera3d : Drawable3d
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {
         var worldPos = WorldPosition;
-        var worldRot = WorldRotationQuaternion; // This now contains Pitch, Yaw, and your Tilt
+        var worldRot = WorldRotationQuaternion;
 
         camera.Position = worldPos;
         camera.FovY = FoV;
         camera.Projection = CameraProjection;
 
-        // 1. Extract the Forward vector from the rotation (Where we are looking)
         var forward = Vector3.Transform(Vector3.UnitZ, worldRot);
 
-        // 2. Extract the Up vector from the rotation (Which way is "Up" for the camera)
-        // Because worldRot includes the Z-tilt, this 'up' vector will be tilted!
         var up = Vector3.Transform(Vector3.UnitY, worldRot);
 
-        // 3. Set the Raylib camera properties
         camera.Target = worldPos + forward;
         camera.Up = up;
 
-        // Now Raylib has no choice but to tilt the screen
         Raylib.UpdateCamera(ref camera, CameraMode.Custom);
 
         base.OnUpdate(frameInfo);

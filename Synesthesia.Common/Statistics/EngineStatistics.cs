@@ -5,6 +5,7 @@ namespace Common.Statistics;
 public static class EngineStatistics
 {
     public static readonly AtomicInt DRAWABLES = new(0);
+    public static readonly AtomicInt LAYOUT_INVALIDATIONS = new(0);
 
     public static readonly AtomicInt BINDABLE_POOLS = new(0);
     public static readonly AtomicInt BINDABLES_BORROWED = new(0);
@@ -34,6 +35,5 @@ public static class EngineStatistics
 
     public static readonly Atomic<double> BASS_CPU = new(0.0);
     public static readonly Atomic<double> BASS_WASAPI_CPU = new(0.0);
-
 
 }

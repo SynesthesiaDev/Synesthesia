@@ -86,7 +86,7 @@ public class AudioDebugOverlay : EngineDebugComponent
                     RelativeSizeAxes = Axes.Both,
                     Children =
                     [
-                        new FillFlowContainer2d()
+                        new FillFlowContainer2d
                         {
                             Anchor = Anchor.CentreLeft,
                             Origin = Anchor.CentreLeft,

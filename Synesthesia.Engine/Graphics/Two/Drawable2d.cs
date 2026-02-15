@@ -1,8 +1,10 @@
 using System.Numerics;
+using Common.Statistics;
 using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Animations.Easings;
+using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Threading.Runners;
@@ -12,21 +14,121 @@ namespace Synesthesia.Engine.Graphics.Two;
 
 public abstract class Drawable2d : Drawable
 {
-    public Vector2 Position { get; set; } = new(0, 0);
+    private Invalidation invalidatedFlags = Invalidation.All;
+    private Axes fillRemainingAxes = Axes.None;
+    private Axes autoSizeAxes = Axes.None;
+    private Axes relativeSizeAxes = Axes.None;
+    private Anchor origin = Anchor.TopLeft;
+    private Anchor anchor = Anchor.TopLeft;
+    private Vector2 position = new(0, 0);
+    private Vector2 scale = new(1);
+    private Vector4 margin = new(0);
+    private Drawable2d? parent;
+    private float width;
+    private float height;
 
-    public Anchor Anchor { get; set; } = Anchor.TopLeft;
+    public Vector2 Position
+    {
+        get => position;
+        set
+        {
+            if (position == value) return;
+            position = value;
+            Invalidate(Invalidation.Geometry);
+        }
+    }
 
-    public Anchor Origin { get; set; } = Anchor.TopLeft;
+    public Anchor Anchor
+    {
+        get => anchor;
+        set
+        {
+            if (anchor == value) return;
+            anchor = value;
+            Invalidate(Invalidation.Layout | Invalidation.Size);
+        }
+    }
 
-    public Axes AutoSizeAxes { get; set; } = Axes.None;
+    public Anchor Origin
+    {
+        get => origin;
+        set
+        {
+            if (origin == value) return;
+            origin = value;
+            Invalidate(Invalidation.Layout | Invalidation.Size);
+        }
+    }
 
-    public Axes FillRemainingAxes { get; set; } = Axes.None;
+    public Axes AutoSizeAxes
+    {
+        get => autoSizeAxes;
+        set
+        {
+            if (autoSizeAxes == value) return;
+            autoSizeAxes = value;
+            Invalidate(Invalidation.Layout | Invalidation.Size);
+        }
+    }
 
-    public Axes RelativeSizeAxes { get; set; } = Axes.None;
+    public Axes FillRemainingAxes
+    {
+        get => fillRemainingAxes;
+        set
+        {
+            if (fillRemainingAxes == value) return;
+            fillRemainingAxes = value;
+            Invalidate(Invalidation.Layout);
+        }
+    }
 
-    public float Height;
+    public Axes RelativeSizeAxes
+    {
+        get => relativeSizeAxes;
+        set
+        {
+            if (relativeSizeAxes == value) return;
+            relativeSizeAxes = value;
+            Invalidate(Invalidation.Size | Invalidation.Layout);
+        }
+    }
 
-    public float Width;
+    protected override void InternalLoadComplete()
+    {
+        Invalidate(Invalidation.All);
+        UpdateLayout();
+    }
+
+    public float Height
+    {
+        get => height;
+        set
+        {
+            if (Precision.IsSame(height, value)) return;
+            height = value;
+            Invalidate(Invalidation.Geometry | Invalidation.Layout | Invalidation.Size);
+            parent?.Invalidate(Invalidation.Layout);
+            invalidateChildrenIfComposite(Invalidation.Size | Invalidation.Geometry);
+        }
+    }
+
+    public float Width
+    {
+        get => width;
+        set
+        {
+            if (Precision.IsSame(width, value)) return;
+            width = value;
+            Invalidate(Invalidation.Geometry | Invalidation.Layout | Invalidation.Size);
+            parent?.Invalidate(Invalidation.Layout);
+            invalidateChildrenIfComposite(Invalidation.Size | Invalidation.Geometry);
+        }
+    }
+
+    private void invalidateChildrenIfComposite(Invalidation flags)
+    {
+        if (this is CompositeDrawable2d compositeDrawable2d) compositeDrawable2d.InvalidateChildren(flags);
+    }
 
     public Vector2 Size
     {
@@ -38,11 +140,39 @@ public abstract class Drawable2d : Drawable
         }
     }
 
-    public Vector2 Scale { get; set; } = new(1);
+    public Vector2 Scale
+    {
+        get => scale;
+        set
+        {
+            if (scale == value) return;
+            scale = value;
+            Invalidate(Invalidation.Geometry | Invalidation.Size);
+        }
+    }
 
-    public Vector4 Margin { get; set; } = new(0);
+    public Vector4 Margin
+    {
+        get => margin;
+        set
+        {
+            if (margin == value) return;
+            margin = value;
+            Invalidate(Invalidation.Geometry | Invalidation.Size);
+        }
+    }
 
-    public Drawable2d? Parent { get; set; }
+    public Drawable2d? Parent
+    {
+        get => parent;
+        set
+        {
+            if (parent == value) return;
+            parent = value;
+            if (RelativeSizeAxes != Axes.None || FillRemainingAxes != Axes.None)
+                Invalidate(Invalidation.Layout | Invalidation.Size);
+        }
+    }
 
     public bool IsHovered { get; set; } = false;
 
@@ -50,13 +180,13 @@ public abstract class Drawable2d : Drawable
 
     protected internal virtual bool AcceptsInputs() => true;
 
+
     public Vector2 InheritedScale => Parent == null ? Scale : Parent.InheritedScale * Scale;
 
     public Vector2 ScreenSpacePosition
     {
         get
         {
-            var parent = Parent;
             var parentScale = parent?.InheritedScale ?? Vector2.One;
 
             var anchorPos = Vector2.Zero;
@@ -113,7 +243,6 @@ public abstract class Drawable2d : Drawable
 
     protected float InheritedAlpha => Alpha * (Parent?.InheritedAlpha ?? 1f);
 
-
     protected internal virtual bool OnHover(MouseMoveInputEvent e)
     {
         return false;
@@ -159,16 +288,69 @@ public abstract class Drawable2d : Drawable
         return false;
     }
 
+    public void Invalidate(Invalidation flags)
+    {
+        if ((invalidatedFlags & flags) == flags) return;
+
+        invalidatedFlags |= flags;
+        EngineStatistics.LAYOUT_INVALIDATIONS.Increment();
+
+        if ((flags & Invalidation.Geometry) != 0)
+        {
+            if (this is CompositeDrawable2d composite)
+            {
+                for (int i = 0; i < composite.InternalChildren.Count; i++)
+                    composite.InternalChildren[i].Invalidate(Invalidation.Geometry);
+            }
+        }
+
+        if ((flags & Invalidation.Size) != 0)
+        {
+            Parent?.Invalidate(Invalidation.Size);
+        }
+    }
+
+    protected internal void UpdateLayout()
+    {
+        var dirty = invalidatedFlags;
+        invalidatedFlags = Invalidation.None;
+
+        if (dirty == Invalidation.None) return;
+
+        OnLayout(dirty);
+    }
+
+    protected virtual void OnLayout(Invalidation dirty)
+    {
+        if (dirty.HasFlagFast(Invalidation.Size))
+        {
+            UpdateRelativeSize();
+        }
+    }
+
+    protected virtual void UpdateRelativeSize()
+    {
+        if (Parent == null) return;
+
+        var targetWidth = RelativeSizeAxes.HasFlagFast(Axes.X)
+            ? Parent.Size.X - Margin.X - Margin.Z
+            : width;
+
+        var targetHeight = RelativeSizeAxes.HasFlagFast(Axes.Y)
+            ? Parent.Size.Y - Margin.Y - Margin.W
+            : height;
+
+        // Use size setter only if values actually changed to avoid
+        // triggering unnecessary child invalidations
+        if (!Precision.IsSame(targetWidth, width) || !Precision.IsSame(targetHeight, height))
+        {
+            Size = new Vector2(targetWidth, targetHeight);
+        }
+    }
+
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {
-        if (Parent != null)
-        {
-            if (RelativeSizeAxes.HasFlagFast(Axes.X))
-                Width = Parent.Size.X - Margin.X - Margin.Z;
-
-            if (RelativeSizeAxes.HasFlagFast(Axes.Y))
-                Height = Parent.Size.Y - Margin.Y - Margin.W;
-        }
+        UpdateLayout();
 
         if (Animator.IsValueCreated)
         {
@@ -203,11 +385,6 @@ public abstract class Drawable2d : Drawable
         }
     }
 
-    //TODO layout invalidation and update only when needed
-    private void updateLayout()
-    {
-    }
-
     public Vector2 GetScreenSpaceCenter()
     {
         var screenPos = ScreenSpacePosition;
@@ -222,7 +399,6 @@ public abstract class Drawable2d : Drawable
         Rlgl.PushMatrix();
 
         var anchorPos = Vector2.Zero;
-        var marginOffset = getMarginOffset();
         if (Parent != null)
         {
             anchorPos = getAnchorOffset(Parent.Size, Anchor);
@@ -340,7 +516,7 @@ public abstract class Drawable2d : Drawable
 
     protected override void Dispose(bool isDisposing)
     {
-        if(Animator.IsValueCreated) Animator.Value.Dispose();
+        if (Animator.IsValueCreated) Animator.Value.Dispose();
         Parent = null;
         base.Dispose(isDisposing);
     }

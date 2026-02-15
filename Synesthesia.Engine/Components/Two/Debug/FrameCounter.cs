@@ -140,7 +140,7 @@ public class FrameCounter : EngineDebugComponent
             ];
         }
 
-        private ThrottledUpdater throttledUpdater = new(350);
+        private ThrottledUpdater throttledUpdater = new(100);
 
         protected internal override void OnUpdate(FrameInfo frameInfo)
         {

@@ -10,11 +10,21 @@ namespace Synesthesia.Engine.Graphics.Two.Drawables;
 
 public class CompositeDrawable2d : Drawable2d
 {
-    protected List<Drawable2d> InternalChildren = [];
+    protected internal List<Drawable2d> InternalChildren = [];
 
-    public Vector4 AutoSizePadding { get; set; } = new(0);
+    public Vector4 AutoSizePadding
+    {
+        get => autoSizePadding;
+        set
+        {
+            if(autoSizePadding == value) return;
+            autoSizePadding = value;
+            Invalidate(Invalidation.Size | Invalidation.Geometry | Invalidation.Layout);
+        }
+    }
 
     private readonly object childrenLock = new();
+    private Vector4 autoSizePadding = new(0);
 
     public IEnumerable<Drawable2d> Children
     {
@@ -38,10 +48,38 @@ public class CompositeDrawable2d : Drawable2d
                 foreach (var child in value)
                 {
                     child.Parent = this;
-                    child.Load();
+                    if (IsLoaded)
+                    {
+                        child.Load();
+                    }
                 }
+
+                Invalidate(Invalidation.All);
             }
         }
+    }
+
+    protected internal void InvalidateChildren(Invalidation flags)
+    {
+        foreach (var internalChild in InternalChildren)
+        {
+            internalChild.Invalidate(flags);
+        }
+    }
+
+    protected override void InternalLoadComplete()
+    {
+        base.InternalLoadComplete();
+
+        lock (childrenLock)
+        {
+            foreach (var internalChild in InternalChildren)
+            {
+                internalChild.Load();
+            }
+        }
+
+        UpdateLayout();
     }
 
     protected internal void UpdateHoverState(MouseMoveInputEvent e)
@@ -173,6 +211,7 @@ public class CompositeDrawable2d : Drawable2d
         {
             InternalChildren.Remove(child);
             child.Dispose();
+            Invalidate(Invalidation.Layout | Invalidation.Size);
         }
     }
 
@@ -190,15 +229,32 @@ public class CompositeDrawable2d : Drawable2d
             {
                 snapshot.Array[i].OnUpdate(frameInfo);
             }
-
-            if (AutoSizeAxes != Axes.None) UpdateAutoSize();
         }
+
         finally
         {
             snapshot.Return();
         }
 
         base.OnUpdate(frameInfo);
+    }
+
+    protected override void OnLayout(Invalidation dirty)
+    {
+        base.OnLayout(dirty);
+
+        if (dirty.HasFlagFast(Invalidation.Size) && AutoSizeAxes != Axes.None)
+        {
+            UpdateAutoSize();
+        }
+    }
+
+    protected virtual void UpdateAutoSize()
+    {
+        var childrenSize = GetChildrenSize();
+
+        if (AutoSizeAxes.HasFlagFast(Axes.X)) Width = childrenSize.X + AutoSizePadding.X + AutoSizePadding.Z;
+        if (AutoSizeAxes.HasFlagFast(Axes.Y)) Height = childrenSize.Y + AutoSizePadding.Y + AutoSizePadding.W;
     }
 
     protected override void OnDraw2d()
@@ -243,13 +299,6 @@ public class CompositeDrawable2d : Drawable2d
         base.Dispose(isDisposing);
     }
 
-    protected virtual void UpdateAutoSize()
-    {
-        var childrenSize = GetChildrenSize();
-
-        if (AutoSizeAxes.HasFlagFast(Axes.X)) Width = childrenSize.X + AutoSizePadding.X + AutoSizePadding.Z;
-        if (AutoSizeAxes.HasFlagFast(Axes.Y)) Height = childrenSize.Y + AutoSizePadding.Y + AutoSizePadding.W;
-    }
 
     public Vector2 GetChildrenSize()
     {

@@ -121,7 +121,7 @@ public class BindleTest
 
     public void TestBindableFloat()
     {
-        var bindable = new BindableFloat()
+        var bindable = new BindableFloat
         {
             Max = 100,
             Min = 50

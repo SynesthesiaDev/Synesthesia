@@ -6,64 +6,121 @@ namespace Synesthesia.Engine.Graphics.Two.Drawables.Container;
 
 public class FillFlowContainer2d : BackgroundContainer2d
 {
-    public Direction Direction { get; set; } = Direction.Horizontal;
+    private Direction direction = Direction.Horizontal;
+    private float spacing = 0f;
 
-    public float Spacing { get; set; } = 0f;
-
-    protected internal override void OnUpdate(FrameInfo frameInfo)
+    public Direction Direction
     {
-        base.OnUpdate(frameInfo);
-
-        float currentY = 0;
-        float currentX = 0;
-        float maxWidth = 0;
-        float maxHeight = 0;
-
-        foreach (var child in InternalChildren.Filter(child => child.Visible))
+        get => direction;
+        set
         {
-            child.Position = new Vector2(currentX, currentY);
+            if (direction == value) return;
+            direction = value;
 
-            if (child.FillRemainingAxes.HasFlagFast(Axes.X))
+            Invalidate(Invalidation.Layout | Invalidation.Size);
+        }
+    }
+
+    public float Spacing
+    {
+        get => spacing;
+        set
+        {
+            if (Precision.IsSame(spacing, value)) return;
+            spacing = value;
+            Invalidate(Invalidation.Layout | Invalidation.Size);
+        }
+    }
+
+    protected override void OnLayout(Invalidation dirty)
+    {
+        base.OnLayout(dirty);
+
+        if (dirty.HasFlagFast(Invalidation.Layout) | dirty.HasFlag(Invalidation.Size))
+        {
+            float currentY = 0;
+            float currentX = 0;
+            float maxWidth = 0;
+            float maxHeight = 0;
+
+            foreach (var child in InternalChildren.Filter(child => child.Visible))
             {
-                var remainingParentX = Math.Max(0f, Size.X - currentX);
-                var sx = child.Scale.X;
-                child.Width = sx == 0 ? 0 : (remainingParentX / sx);
+                child.Position = new Vector2(currentX, currentY);
+
+                if (child.FillRemainingAxes.HasFlagFast(Axes.X))
+                {
+                    var remainingParentX = Math.Max(0f, Size.X - currentX);
+                    var sx = child.Scale.X;
+                    child.Width = sx == 0 ? 0 : (remainingParentX / sx);
+                }
+
+                if (child.FillRemainingAxes.HasFlagFast(Axes.Y))
+                {
+                    var remainingParentY = Math.Max(0f, Size.Y - currentY);
+                    var sy = child.Scale.Y;
+                    child.Height = sy == 0 ? 0 : (remainingParentY / sy);
+                }
+
+
+                var childDrawWidth = child.Size.X * child.Scale.X;
+                var childDrawHeight = child.Size.Y * child.Scale.Y;
+
+                if (Direction == Direction.Vertical)
+                {
+                    currentY += childDrawHeight + Spacing;
+                    maxWidth = Math.Max(maxWidth, childDrawWidth);
+                }
+                else
+                {
+                    currentX += childDrawWidth + Spacing;
+                    maxHeight = Math.Max(maxHeight, childDrawHeight);
+                }
             }
-            if (child.FillRemainingAxes.HasFlagFast(Axes.Y))
+
+            if (AutoSizeAxes.HasFlagFast(Axes.X))
             {
-                var remainingParentY = Math.Max(0f, Size.Y - currentY);
-                var sy = child.Scale.Y;
-                child.Height = sy == 0 ? 0 : (remainingParentY / sy);
+                var contentWidth = Direction == Direction.Vertical ? maxWidth : (currentX - Spacing);
+                Size = Size with { X = contentWidth + AutoSizePadding.X + AutoSizePadding.Z };
             }
 
-            child.OnUpdate(frameInfo);
-
-            var childDrawWidth = child.Size.X * child.Scale.X;
-            var childDrawHeight = child.Size.Y * child.Scale.Y;
-
-            if (Direction == Direction.Vertical)
+            if (AutoSizeAxes.HasFlagFast(Axes.Y))
             {
-                currentY += childDrawHeight + Spacing;
-                maxWidth = Math.Max(maxWidth, childDrawWidth);
-            }
-            else
-            {
-                currentX += childDrawWidth + Spacing;
-                maxHeight = Math.Max(maxHeight, childDrawHeight);
+                var contentHeight = Direction == Direction.Vertical ? (currentY - Spacing) : maxHeight;
+                Size = Size with { Y = contentHeight + AutoSizePadding.Y + AutoSizePadding.W };
             }
         }
+    }
 
-        if (AutoSizeAxes.HasFlagFast(Axes.X))
+    protected override void UpdateAutoSize()
+    {
+        var maxWidth = 0f;
+        var maxHeight = 0f;
+        var totalWidth = 0f;
+        var totalHeight = 0f;
+
+        for (int i = 0; i < InternalChildren.Count; i++)
         {
-            var contentWidth = Direction == Direction.Vertical ? maxWidth : (currentX - Spacing);
-            Size = Size with { X = contentWidth + AutoSizePadding.X + AutoSizePadding.Z };
+            var child = InternalChildren[i];
+
+            if (!child.Visible) continue;
+
+            var childSize = child.Size * child.Scale;
+
+            maxWidth = Math.Max(maxWidth, childSize.X);
+            maxHeight = Math.Max(maxHeight, childSize.Y);
+            totalWidth += childSize.X + Spacing;
+            totalHeight += childSize.Y + Spacing;
         }
 
-        if (AutoSizeAxes.HasFlagFast(Axes.Y))
-        {
-            var contentHeight = Direction == Direction.Vertical ? (currentY - Spacing) : maxHeight;
-            Size = Size with { Y = contentHeight + AutoSizePadding.Y + AutoSizePadding.W };
-        }
+        var finalX = Direction == Direction.Vertical ? maxWidth : (totalWidth - Spacing);
+
+        var finalY = Direction == Direction.Vertical ? (totalHeight - Spacing) : maxHeight;
+
+
+        Size = new Vector2(
+            finalX + AutoSizePadding.X + AutoSizePadding.Z,
+            finalY + AutoSizePadding.Y + AutoSizePadding.W
+        );
     }
 
     protected override void OnDraw2d()

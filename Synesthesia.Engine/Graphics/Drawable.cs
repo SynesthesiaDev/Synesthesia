@@ -4,9 +4,11 @@ using Common.Bindable;
 using Common.Event;
 using Common.Logger;
 using Common.Statistics;
+using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Dependency;
+using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Timing.Scheduling;
@@ -82,6 +84,10 @@ public abstract partial class Drawable : IDrawable, IDisposable
         }
     }
 
+    protected virtual void InternalLoadComplete()
+    {
+    }
+
     private void load()
     {
         LoadThread = Thread.CurrentThread;
@@ -91,6 +97,12 @@ public abstract partial class Drawable : IDrawable, IDisposable
 
         OnLoading();
         LoadAsyncComplete();
+
+        if (this is Drawable2d drawable)
+        {
+            drawable.Invalidate(Invalidation.All);
+            drawable.Parent?.Invalidate(Invalidation.All);
+        }
 
         if (!(timeBefore > 1000)) return;
 
@@ -120,8 +132,12 @@ public abstract partial class Drawable : IDrawable, IDisposable
 
         LoadState = DrawableLoadState.Loaded;
 
-        // OnUpdate();
-        //TODO Update layout
+        InternalLoadComplete();
+
+        if (this is Drawable2d drawable2d)
+        {
+            drawable2d.Invalidate(Invalidation.All);
+        }
 
         LoadComplete();
 

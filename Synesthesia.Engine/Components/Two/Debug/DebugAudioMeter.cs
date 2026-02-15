@@ -23,7 +23,7 @@ public class DebugAudioMeter(BassDspAudioHandler? audioHandler = null) : Composi
     private BarebonesProgressBar audioLeft = null!;
 
     private double updateTimer;
-    private const double interval = 500;
+    private const double interval = 100;
 
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {
@@ -58,7 +58,7 @@ public class DebugAudioMeter(BassDspAudioHandler? audioHandler = null) : Composi
     {
         Children =
         [
-            new FillFlowContainer2d()
+            new FillFlowContainer2d
             {
                 AutoSizeAxes = Axes.Both,
                 Spacing = 2f,
@@ -113,7 +113,7 @@ public class DebugAudioMeter(BassDspAudioHandler? audioHandler = null) : Composi
 
         private double lastLevel = double.NaN;
 
-        private ThrottledUpdater throttledUpdater = new(750);
+        private ThrottledUpdater throttledUpdater = new(100);
 
         protected internal override void OnUpdate(FrameInfo frameInfo)
         {

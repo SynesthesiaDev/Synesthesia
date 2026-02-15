@@ -1,4 +1,5 @@
 using Common.Logger;
+using Common.Statistics;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Input;
 
@@ -21,9 +22,17 @@ public class UpdateThreadRunner(ThreadType type) : ThreadRunner(type)
 
     protected override void OnLoop(FrameInfo frameInfo)
     {
-        game.RootComposite3d.OnUpdate(frameInfo);
-        game.RootComposite2d.OnUpdate(frameInfo);
-        game.EngineDebugOverlay.OnUpdate(frameInfo);
-        InputSimulator.Update(frameInfo);
+        try
+        {
+            game.RootComposite3d.OnUpdate(frameInfo);
+            game.RootComposite2d.OnUpdate(frameInfo);
+            game.EngineDebugOverlay.OnUpdate(frameInfo);
+            InputSimulator.Update(frameInfo);
+        }
+        finally
+        {
+            EngineStatistics.LAYOUT_INVALIDATIONS.Update(_ => 0);
+        }
+
     }
 }

@@ -20,7 +20,7 @@ public class EditorLevelMetaScreen(Level level) : Screen
     {
         Children =
         [
-            new FillFlowContainer2d()
+            new FillFlowContainer2d
             {
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
