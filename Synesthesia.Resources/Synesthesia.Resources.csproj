@@ -1,19 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <LangVersion>9</LangVersion>
-        <Nullable>enable</Nullable>
-        <RootNamespace>SynesthesiaResources</RootNamespace>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>9</LangVersion>
+    <Nullable>enable</Nullable>
+    <RootNamespace>SynesthesiaResources</RootNamespace>
 
-    <ItemGroup>
-        <EmbeddedResource Include="**\*" />
-        <EmbeddedResource Remove="bin\**;obj\**;*.csproj;*.cs" />
-    </ItemGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>Synesthesia.Resources</PackageId>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
-    </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="**\*"/>
+    <EmbeddedResource Remove="bin\**;obj\**;*.csproj;*.cs"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="2025.2.4"/>
+  </ItemGroup>
 
 </Project>

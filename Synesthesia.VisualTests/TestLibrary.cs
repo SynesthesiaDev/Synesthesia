@@ -4,7 +4,6 @@
 using System.Numerics;
 using Codon.Optionals;
 using Common.Bindable;
-using Common.Logger;
 using Common.Pooling;
 using Common.Util;
 using Raylib_cs;
@@ -40,6 +39,11 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
         Name = string.Empty,
         CallStack = null,
         Assertion = null
+    });
+    public static readonly FastObjectPool<WaitUntilButton> AWAIT_BUTTON_POOL = new(() => new WaitUntilButton
+    {
+        Name = string.Empty,
+        Condition = () => true
     });
 
     public void AutoRunNext()
@@ -96,6 +100,7 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
                 {
                     RelativeSizeAxes = Axes.Y,
                     Width = 260f * 0.8f,
+                    BackgroundColor = Defaults.BACKGROUND0,
                 },
 
                 visualTestScene = new MaskingContainer2d
@@ -206,6 +211,7 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
                 });
 
                 VisualTestRunner.TestConfiguration.CurrentlySelectedTest = Optional.Empty<string>();
+                // stepContainerContainer.ResizeWidthTo(0f, 250, Easing.OutCubic);
             }
             else
             {
@@ -268,7 +274,6 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
         });
 
 
-        Logger.Verbose($"{sidebar.Size}");
         sidebar.Invalidate(Invalidation.All);
 
         base.LoadComplete();
@@ -276,6 +281,8 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
 
     public void ResetCurrentTest()
     {
+        if(CurrentSelectedTest.Value == null) return;
+
         var current = CurrentSelectedTest.Value!.GetType();
         CurrentSelectedTest.Value = null;
         CurrentSelectedTest.Value = Activator.CreateInstance(current) as VisualTest;

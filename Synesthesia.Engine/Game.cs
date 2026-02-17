@@ -128,54 +128,63 @@ public class Game : IDisposable
 
     public void Run()
     {
+        try
+        {
+            ResourceManager.RegisterLoader("vsh", ResourceLoaders.LoadVertexShader, true); // Vertex Shader
+            ResourceManager.RegisterLoader("fsh", ResourceLoaders.LoadFragmentShader, true); // Fragment Shader
 
-        ResourceManager.RegisterLoader("vsh", ResourceLoaders.LoadVertexShader, true); // Vertex Shader
-        ResourceManager.RegisterLoader("fsh", ResourceLoaders.LoadFragmentShader, true); // Fragment Shader
+            ResourceManager.RegisterLoader("ttf", ResourceLoaders.LoadFont, true); // Default Font (unresolved until gl initialized)
 
-        ResourceManager.RegisterLoader("ttf", ResourceLoaders.LoadFont, true); // Default Font (unresolved until gl initialized)
+            ResourceManager.RegisterLoader("mp3", ResourceLoaders.LoadAudioSample);
+            ResourceManager.RegisterLoader("ogg", ResourceLoaders.LoadAudioSample);
+            ResourceManager.RegisterLoader("wav", ResourceLoaders.LoadAudioSample);
 
-        ResourceManager.RegisterLoader("mp3", ResourceLoaders.LoadAudioSample);
-        ResourceManager.RegisterLoader("ogg", ResourceLoaders.LoadAudioSample);
-        ResourceManager.RegisterLoader("wav", ResourceLoaders.LoadAudioSample);
+            ResourceManager.CacheAll(SynesthesiaResources.AssemblyInfo.ResourceAssembly);
+            Logger.Debug($"Cached {ResourceManager.CachedSize} built-in engine resources, {ResourceManager.UnresolvedSize} waiting to be resolved, {ResourceManager.Size} total", Logger.Io);
 
-        ResourceManager.CacheAll(SynesthesiaResources.AssemblyInfo.ResourceAssembly);
-        Logger.Debug($"Cached {ResourceManager.CachedSize} built-in engine resources, {ResourceManager.UnresolvedSize} waiting to be resolved, {ResourceManager.Size} total", Logger.Io);
+            var loadSignal = new CountdownEvent(4);
+            Action<ThreadRunner> onThreadLoaded = _ => loadSignal.Signal();
 
-        var loadSignal = new CountdownEvent(4);
-        Action<ThreadRunner> onThreadLoaded = _ => loadSignal.Signal();
+            UpdateThread = ThreadSafety.CreateThread(new UpdateThreadRunner(ThreadType.Update), ThreadSafety.THREAD_UPDATE, Defaults.UPDATE_RATE, this);
+            RenderThread = ThreadSafety.CreateThread(new RenderThreadRunner(ThreadType.Draw), ThreadSafety.THREAD_RENDER, Defaults.RENDERER_RATE, this);
+            InputThread = ThreadSafety.CreateThread(new InputThreadRunner(ThreadType.Input), ThreadSafety.THREAD_INPUT, Defaults.INPUT_RATE, this);
+            AudioThread = ThreadSafety.CreateThread(new AudioThreadRunner(ThreadType.Audio), ThreadSafety.THREAD_AUDIO, Defaults.AUDIO_RATE, this);
 
-        UpdateThread = ThreadSafety.CreateThread(new UpdateThreadRunner(ThreadType.Update), ThreadSafety.THREAD_UPDATE, Defaults.UPDATE_RATE, this);
-        RenderThread = ThreadSafety.CreateThread(new RenderThreadRunner(ThreadType.Draw), ThreadSafety.THREAD_RENDER, Defaults.RENDERER_RATE, this);
-        InputThread = ThreadSafety.CreateThread(new InputThreadRunner(ThreadType.Input), ThreadSafety.THREAD_INPUT, Defaults.INPUT_RATE, this);
-        AudioThread = ThreadSafety.CreateThread(new AudioThreadRunner(ThreadType.Audio), ThreadSafety.THREAD_AUDIO, Defaults.AUDIO_RATE, this);
+            UpdateThread.ThreadLoadedDispatcher.Subscribe(onThreadLoaded);
+            RenderThread.ThreadLoadedDispatcher.Subscribe(onThreadLoaded);
+            InputThread.ThreadLoadedDispatcher.Subscribe(onThreadLoaded);
+            AudioThread.ThreadLoadedDispatcher.Subscribe(onThreadLoaded);
 
-        UpdateThread.ThreadLoadedDispatcher.Subscribe(onThreadLoaded);
-        RenderThread.ThreadLoadedDispatcher.Subscribe(onThreadLoaded);
-        InputThread.ThreadLoadedDispatcher.Subscribe(onThreadLoaded);
-        AudioThread.ThreadLoadedDispatcher.Subscribe(onThreadLoaded);
+            DependencyContainer.Add((RenderThread as RenderThreadRunner)!);
+            DependencyContainer.Add((InputThread as InputThreadRunner)!);
+            DependencyContainer.Add((UpdateThread as UpdateThreadRunner)!);
+            DependencyContainer.Add((AudioThread as AudioThreadRunner)!);
 
-        DependencyContainer.Add((RenderThread as RenderThreadRunner)!);
-        DependencyContainer.Add((InputThread as InputThreadRunner)!);
-        DependencyContainer.Add((UpdateThread as UpdateThreadRunner)!);
-        DependencyContainer.Add((AudioThread as AudioThreadRunner)!);
+            loadSignal.Wait();
 
-        loadSignal.Wait();
+            GameScheduler = new Scheduler();
 
-        GameScheduler = new Scheduler();
+            EngineDebugOverlay.Load();
+            RootComposite2d.Load();
+            RootComposite3d.Load();
 
-        EngineDebugOverlay.Load();
-        RootComposite2d.Load();
-        RootComposite3d.Load();
+            WindowsHost.WindowFocused.OnValueChange(_ => updateCursorState());
 
-        WindowsHost.WindowFocused.OnValueChange(_ => updateCursorState());
+            Logger.Debug($"Load Complete, took {GameRuntimeClock.Elapsed.Milliseconds}ms.", Logger.Runtime);
+            DeferredActionQueue.FlushAndSwitchToImmediate();
 
-        Logger.Debug($"Load Complete, took {GameRuntimeClock.Elapsed.Milliseconds}ms.", Logger.Runtime);
-        DeferredActionQueue.FlushAndSwitchToImmediate();
-
-        InputThread.Thread.Join();
-        RenderThread.Thread.Join();
-        AudioThread.Thread.Join();
-        UpdateThread.Thread.Join();
+            InputThread.Thread.Join();
+            RenderThread.Thread.Join();
+            AudioThread.Thread.Join();
+            UpdateThread.Thread.Join();
+        }
+        catch (Exception e)
+        {
+            Logger.Exception(e, Logger.Runtime);
+#if DEBUG
+            Environment.Exit(e.HResult);
+#endif
+        }
     }
 
     public void Dispose()

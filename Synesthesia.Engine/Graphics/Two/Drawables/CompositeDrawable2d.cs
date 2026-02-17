@@ -125,9 +125,12 @@ public class CompositeDrawable2d : Drawable2d
 
     protected internal void UpdatePointInputState(PointInput e, bool down)
     {
-        foreach (var child in InternalChildren.Filter(c => c.AcceptsInputs()).Reversed())
+        for (var i = InternalChildren.Count - 1; i >= 0; i--)
         {
-            if (down && !child.IsMouseDown && child.IsHovered && child.OnMouseDown(e))
+            var child = InternalChildren[i];
+            if(!child.AcceptsInputs()) continue;
+
+            if (down && child is { IsMouseDown: false, IsHovered: true } && child.OnMouseDown(e))
             {
                 child.IsMouseDown = true;
             }

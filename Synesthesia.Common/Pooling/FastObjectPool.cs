@@ -7,9 +7,9 @@ using Common.Statistics;
 namespace Common.Pooling;
 
 // ReSharper disable InvertIf
-public class FastObjectPool<T>(Func<T> activator) : IDisposable where T : class
+public class FastObjectPool<T>(Func<T> activator, int capacity = 32) : IDisposable where T : class
 {
-    private readonly T?[] sharedItems = new T?[32];
+    private readonly T?[] sharedItems = new T?[capacity];
 
     private bool isDisposed;
 

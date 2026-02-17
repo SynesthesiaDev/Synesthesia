@@ -17,12 +17,11 @@ public abstract class VisualTest : CompositeDrawable2d
 
     protected void AddWaitUntil(string name, Func<bool> condition, long? timeout = null)
     {
-        var button = new WaitUntilButton
-        {
-            Name = name,
-            Condition = condition,
-            Timeout = timeout,
-        };
+        var button = TestLibrary.AWAIT_BUTTON_POOL.Rent();
+
+        button.Condition = condition;
+        button.Name = name;
+        button.Timeout = timeout;
 
         StepsContainer.Add(button);
     }
@@ -68,7 +67,10 @@ public abstract class VisualTest : CompositeDrawable2d
         public void Add(StepButton stepButton)
         {
             testSteps.Add(stepButton);
-            OnLoadComplete.Subscribe(_ => StepsContainer.AddChild(stepButton));
+            OnLoadComplete.Subscribe(_ =>
+            {
+                StepsContainer.AddChild(stepButton);
+            });
         }
 
         protected override void OnLoading()

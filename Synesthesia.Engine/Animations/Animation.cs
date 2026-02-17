@@ -1,4 +1,5 @@
 using Synesthesia.Engine.Animations.Easings;
+using Synesthesia.Engine.Graphics.Two;
 using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Animations;
@@ -93,6 +94,7 @@ public partial class Animation<T> : IAnimation
 
     public Animation<T> Then(Action then)
     {
+        if (Loop) throw new InvalidOperationException("Cannot have looping and Then() on animation at the same time");
         OnComplete = then;
         return this;
     }
@@ -100,6 +102,12 @@ public partial class Animation<T> : IAnimation
     public Animation<T> MakeLooping()
     {
         Loop = true;
+        return this;
+    }
+
+    public Animation<T> ThenHide(Drawable2d drawable)
+    {
+        OnComplete = () => drawable.Visible = false;
         return this;
     }
 }

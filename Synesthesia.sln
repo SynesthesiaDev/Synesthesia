@@ -12,8 +12,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.NativeLibs", "S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.VisualTests", "Synesthesia.VisualTests\Synesthesia.VisualTests.csproj", "{9E524ABC-C4BF-4703-9E1D-2C0A999F9176}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SynesthesiaDev.Game", "SynesthesiaDev.Game\SynesthesiaDev.Game.csproj", "{26DBC019-ED93-46EA-BE0F-DB1DE02AA3AC}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.Tests", "Synesthesia.Tests\Synesthesia.Tests.csproj", "{66658B58-315F-4BE1-A129-A625D349F4E2}"
 EndProject
 Global
@@ -46,10 +44,6 @@ Global
 		{9E524ABC-C4BF-4703-9E1D-2C0A999F9176}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E524ABC-C4BF-4703-9E1D-2C0A999F9176}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E524ABC-C4BF-4703-9E1D-2C0A999F9176}.Release|Any CPU.Build.0 = Release|Any CPU
-		{26DBC019-ED93-46EA-BE0F-DB1DE02AA3AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{26DBC019-ED93-46EA-BE0F-DB1DE02AA3AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{26DBC019-ED93-46EA-BE0F-DB1DE02AA3AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{26DBC019-ED93-46EA-BE0F-DB1DE02AA3AC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{66658B58-315F-4BE1-A129-A625D349F4E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{66658B58-315F-4BE1-A129-A625D349F4E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66658B58-315F-4BE1-A129-A625D349F4E2}.Release|Any CPU.ActiveCfg = Release|Any CPU

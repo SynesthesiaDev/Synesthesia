@@ -1,4 +1,5 @@
 using Common.Bindable;
+using Common.Pooling;
 using Common.Statistics;
 
 namespace Common.Event;
@@ -6,6 +7,12 @@ namespace Common.Event;
 public class EventDispatcher<T> : IEventDispatcher
 {
     private readonly List<EventSubscriber<T>> eventSubscribers = [];
+
+    public bool IsPooled { get; set; }
+
+    public Action<IPooledObject>? ReturnAction { get; set; }
+
+    public bool IsDisposed { get; set; }
 
     public EventDispatcher()
     {
@@ -29,6 +36,7 @@ public class EventDispatcher<T> : IEventDispatcher
         eventSubscribers.Remove((subscriber as EventSubscriber<T>)!);
     }
 
+
     public void UnsubscribeAll()
     {
         eventSubscribers.Clear();
@@ -36,7 +44,15 @@ public class EventDispatcher<T> : IEventDispatcher
 
     public void Dispose()
     {
+        if(IsDisposed) return;
         EngineStatistics.DISPATCHERS.Decrement();
         UnsubscribeAll();
+        IsDisposed = true;
     }
+
+    public void Reset()
+    {
+        UnsubscribeAll();
+    }
+
 }

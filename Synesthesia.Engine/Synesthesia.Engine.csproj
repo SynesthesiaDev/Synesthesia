@@ -1,27 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <OutputType>Library</OutputType>
-        <TargetFramework>net8.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    </PropertyGroup>
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Synesthesia.Common\Synesthesia.Common.csproj"/>
-        <ProjectReference Include="..\Synesthesia.Resources\Synesthesia.Resources.csproj"/>
-        <ProjectReference Include="..\Synesthesia.NativeLibs\Synesthesia.NativeLibs.csproj"/>
-    </ItemGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>Synesthesia.Engine</PackageId>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
-      <PackageReference Include="ManagedBass" Version="4.0.2" />
-      <PackageReference Include="ManagedBass.Fx" Version="4.0.2" />
-      <PackageReference Include="ManagedBass.Mix" Version="4.0.2" />
-      <PackageReference Include="ManagedBass.Wasapi" Version="4.0.2" />
-      <PackageReference Include="Raylib-cs" Version="7.0.2" />
-      <PackageReference Include="SynesthesiaDev.Codon.IniTranscoder" Version="1.0.1" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Synesthesia.Common\Synesthesia.Common.csproj"/>
+    <ProjectReference Include="..\Synesthesia.Resources\Synesthesia.Resources.csproj"/>
+    <ProjectReference Include="..\Synesthesia.NativeLibs\Synesthesia.NativeLibs.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="2025.2.4"/>
+    <PackageReference Include="ManagedBass" Version="4.0.2"/>
+    <PackageReference Include="ManagedBass.Fx" Version="4.0.2"/>
+    <PackageReference Include="ManagedBass.Mix" Version="4.0.2"/>
+    <PackageReference Include="ManagedBass.Wasapi" Version="4.0.2"/>
+    <PackageReference Include="Raylib-cs" Version="7.0.2"/>
+    <PackageReference Include="SynesthesiaDev.Codon.IniTranscoder" Version="1.0.1"/>
+  </ItemGroup>
 
 </Project>

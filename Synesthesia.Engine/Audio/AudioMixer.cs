@@ -1,5 +1,4 @@
 using Common.Bindable;
-using Common.Event;
 using Common.Statistics;
 using Common.Util;
 using ManagedBass;
@@ -32,11 +31,12 @@ public class AudioMixer : BassDspAudioHandler, IHasAudioHandle
 
     public int GetAudioHandle() => MixdownHandle;
 
-    private readonly BindablePool bindablePool = new();
-
-    public EventDispatcher<AudioSampleInstance> OnSamplePlay;
-
-    public EventDispatcher<AudioSampleInstance> OnSampleDispose;
+    public readonly BindableFloat Panning = new()
+    {
+        Min = -1f,
+        Max = 1f,
+        Default = 0f
+    };
 
     public override float Volume
     {
@@ -56,7 +56,7 @@ public class AudioMixer : BassDspAudioHandler, IHasAudioHandle
 
     private object instanceListLock = new();
 
-    public void UpdateLifetimes()
+    public void UpdateSampleLifetimes()
     {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
         if(activeInstances.IsEmpty()) return;
@@ -113,11 +113,10 @@ public class AudioMixer : BassDspAudioHandler, IHasAudioHandle
         Identifier = identifier;
         OwningAudioChannel = owningAudioChannel;
 
+        Panning.OnValueChange(e => Bass.ChannelSetAttribute(MixdownHandle, ChannelAttribute.Pan, e.NewValue));
+
         MixdownHandle = BassMix.CreateMixerStream(AudioManager.PLAYBACK_SAMPLE_RATE, 2, BassFlags.MixerNonStop | BassFlags.Float | BassFlags.Decode);
         if (MixdownHandle == 0) throw new InvalidOperationException($"Failed to create mixer with identifier '{Identifier}': {Bass.LastError}");
-
-        OnSamplePlay = bindablePool.BorrowDispatcher<AudioSampleInstance>();
-        OnSampleDispose = bindablePool.BorrowDispatcher<AudioSampleInstance>();
 
         EngineStatistics.AUDIO_MIXERS.Increment();
 
@@ -218,7 +217,7 @@ public class AudioMixer : BassDspAudioHandler, IHasAudioHandle
     {
         if (IsDisposed) return;
 
-        bindablePool.Dispose();
+        Panning.Dispose();
 
         foreach (var fxHandle in activeEffects.Values)
             Bass.ChannelRemoveFX(MixdownHandle, fxHandle);

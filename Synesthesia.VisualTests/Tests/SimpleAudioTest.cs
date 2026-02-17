@@ -32,6 +32,7 @@ public class SimpleAudioTest : VisualTest
     private AudioMixer masterAudioMixer = null!;
 
     private readonly LowpassAudioEffect lowpassEffect = new(0f);
+    private readonly HighpassAudioEffect highpassAudioEffect = new(0f);
 
     private readonly BindableFloat audioVolume = new()
     {
@@ -57,6 +58,7 @@ public class SimpleAudioTest : VisualTest
         currentlyPlayingSample.Pause();
 
         masterAudioMixer.AddEffect(lowpassEffect);
+        masterAudioMixer.AddEffect(highpassAudioEffect);
 
         audioVolume.OnValueChange(e =>
         {
@@ -132,20 +134,53 @@ public class SimpleAudioTest : VisualTest
                     new DefaultCheckbox
                     {
                         Text = "Use WASAPI",
-                        Size = new Vector2(240, 40),
+                        Size = new Vector2(350, 40),
                         Checked = audioManager.UseWasapi
                     },
 
-                    new DefaultSliderBar
+                    new LabelledSliderBar
                     {
-                        Current = audioVolume,
-                        Size = new Vector2(240, 40),
+                        Size = new Vector2(350, 40),
+                        SliderBar = new DefaultSliderBar
+                        {
+                            Current = audioVolume,
+                            Size = new Vector2(240, 40),
+                        },
+                        Label = "Volume"
                     },
-                    new DefaultSliderBar
+
+                    new LabelledSliderBar
                     {
-                        Current = lowpassEffect.Cutoff,
-                        Size = new Vector2(240, 40),
+                        Size = new Vector2(350, 40),
+                        SliderBar = new DefaultSliderBar
+                        {
+                            Current = lowpassEffect.Cutoff,
+                            Size = new Vector2(240, 40),
+                        },
+                        Label = "Lowpass"
                     },
+
+                    new LabelledSliderBar
+                    {
+                        Size = new Vector2(350, 40),
+                        SliderBar = new DefaultSliderBar
+                        {
+                            Current = highpassAudioEffect.Cutoff,
+                            Size = new Vector2(240, 40),
+                        },
+                        Label = "Highpass"
+                    },
+
+                    new LabelledSliderBar
+                    {
+                        Size = new Vector2(350, 40),
+                        SliderBar = new DefaultSliderBar
+                        {
+                            Current = masterAudioMixer.Panning,
+                            Size = new Vector2(240, 40),
+                        },
+                        Label = "Panning"
+                    }
                 ]
             }
         ];
@@ -157,6 +192,7 @@ public class SimpleAudioTest : VisualTest
         samples.Clear();
         audioVolume.Dispose();
         masterAudioMixer.RemoveEffect(lowpassEffect);
+        masterAudioMixer.RemoveEffect(highpassAudioEffect);
         lowpassEffect.Dispose();
 
         base.Dispose(isDisposing);

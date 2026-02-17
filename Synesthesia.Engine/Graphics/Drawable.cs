@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Numerics;
-using Common.Bindable;
 using Common.Event;
 using Common.Logger;
 using Common.Statistics;
@@ -12,6 +11,7 @@ using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Timing.Scheduling;
+using Synesthesia.Engine.Utility;
 
 namespace Synesthesia.Engine.Graphics;
 
@@ -25,15 +25,15 @@ public abstract partial class Drawable : IDrawable, IDisposable
 
     public Thread LoadThread { get; private set; } = null!;
 
-    internal readonly BindablePool BindablePool = new();
-
-    public SingleOffEventDispatcher<Drawable> OnLoadComplete;
+    public readonly SingleOffEventDispatcher<Drawable> OnLoadComplete;
 
     public Vector3 Rotation { get; set; } = Vector3.Zero;
 
     public Vector3 Shear { get; set; } = Vector3.Zero;
 
     public bool Visible { get; set; } = true;
+
+    public bool CanBeDrawn => Visible && IsLoaded;
 
     public BlendMode BlendMode { get; set; } = BlendMode.Alpha;
 
@@ -43,19 +43,18 @@ public abstract partial class Drawable : IDrawable, IDisposable
 
     private static readonly StopwatchClock performance_watch = new(true);
 
-    public readonly Lazy<Scheduler> Scheduler;
+    protected readonly Lazy<Scheduler> Scheduler;
 
-    public readonly Lazy<Animator> Animator;
-
+    protected readonly Lazy<Animator> Animator;
 
     protected Drawable()
     {
         EngineStatistics.DRAWABLES.Increment();
 
-        OnLoadComplete = BindablePool.BorrowSingleOffDispatcher<Drawable>();
+        OnLoadComplete = Pooled.DRAWABLE_LOAD_DISPATCHER_POOL.Rent();
 
         Scheduler = new Lazy<Scheduler>(() => new Scheduler());
-        Animator = new Lazy<Animator>(() => new Animator(this.Scheduler.Value));
+        Animator = new Lazy<Animator>(() => new Animator(Scheduler.Value));
     }
 
     public enum DrawableLoadState
@@ -93,7 +92,7 @@ public abstract partial class Drawable : IDrawable, IDisposable
         LoadThread = Thread.CurrentThread;
         var timeBefore = performance_watch.CurrentTime;
 
-        DependencyInjector.Inject(this);
+        Reflection.ResolveDependencies(this);
 
         OnLoading();
         LoadAsyncComplete();
@@ -170,10 +169,13 @@ public abstract partial class Drawable : IDrawable, IDisposable
     {
         if (IsDisposed) return;
 
-        BindablePool.Dispose();
+        Pooled.DRAWABLE_LOAD_DISPATCHER_POOL.Return(OnLoadComplete);
         IsDisposed = true;
         Scheduler.Value.Dispose();
 
+#if DEBUG
+        Reflection.CheckForDisposing(this);
+#endif
         EngineStatistics.DRAWABLES.Decrement();
     }
 

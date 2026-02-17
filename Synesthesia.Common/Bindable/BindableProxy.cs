@@ -30,4 +30,6 @@ public class BindableProxy : IBindable
 
         eventDispatchers.Clear();
     }
+
+    public bool IsDisposed { get; set; }
 }

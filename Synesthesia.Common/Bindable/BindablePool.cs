@@ -5,9 +5,9 @@ namespace Common.Bindable;
 
 public class BindablePool : IDisposable
 {
-    private List<IBindable> bindables = [];
-    private List<IEventDispatcher> dispatchers = [];
-    private List<IEventDispatcher> singleOffDispatchers = [];
+    private readonly List<IBindable> bindables = [];
+    private readonly List<IEventDispatcher> dispatchers = [];
+    private readonly List<IEventDispatcher> singleOffDispatchers = [];
 
     public BindablePool()
     {

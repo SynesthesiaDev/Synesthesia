@@ -26,7 +26,7 @@ public class Scheduler : IDisposable
         timerRunning = false;
 
         EngineStatistics.SCHEDULERS.Increment();
-        DependencyInjector.Inject(this);
+        Reflection.ResolveDependencies(this);
     }
 
     public void CancelAllTasks()
