@@ -222,23 +222,24 @@ public static class InputManager
                 }
             }
 
-            action_bindings.ForEach(binding =>
+            for (int i = 0; i < action_bindings.Count; i++)
             {
+                var binding = action_bindings[i];
+
                 var lastState = held_action_bindings.Contains(binding);
                 var currentState = binding.IsDown;
 
-                if (lastState != currentState)
+                if (lastState == currentState) continue;
+
+                if (currentState)
                 {
-                    if (currentState)
-                    {
-                        game.EngineDebugOverlay.OnActionBindingDown(binding);
-                    }
-                    else
-                    {
-                        game.EngineDebugOverlay.OnActionBindingUp(binding);
-                    }
+                    game.EngineDebugOverlay.OnActionBindingDown(binding);
                 }
-            });
+                else
+                {
+                    game.EngineDebugOverlay.OnActionBindingUp(binding);
+                }
+            }
         }
     }
 }

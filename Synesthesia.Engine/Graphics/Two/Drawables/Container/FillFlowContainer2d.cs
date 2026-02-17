@@ -36,15 +36,18 @@ public class FillFlowContainer2d : BackgroundContainer2d
     {
         base.OnLayout(dirty);
 
-        if (dirty.HasFlagFast(Invalidation.Layout) | dirty.HasFlag(Invalidation.Size))
+        if (dirty.HasFlagFast(Invalidation.Layout) | dirty.HasFlagFast(Invalidation.Size))
         {
             float currentY = 0;
             float currentX = 0;
             float maxWidth = 0;
             float maxHeight = 0;
 
-            foreach (var child in InternalChildren.Filter(child => child.Visible))
+            for (int i = 0; i < InternalChildren.Count; i++)
             {
+                var child = InternalChildren[i];
+                if (!child.CanBeDrawn) return;
+
                 child.Position = new Vector2(currentX, currentY);
 
                 if (child.FillRemainingAxes.HasFlagFast(Axes.X))
@@ -127,9 +130,6 @@ public class FillFlowContainer2d : BackgroundContainer2d
     {
         DrawBackground();
 
-        foreach (var child in InternalChildren.Filter(child => child.Visible))
-        {
-            child.OnDraw();
-        }
+        base.OnDraw2d();
     }
 }

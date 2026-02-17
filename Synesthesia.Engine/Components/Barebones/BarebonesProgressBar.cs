@@ -87,4 +87,10 @@ public class BarebonesProgressBar : CompositeDrawable2d
     {
         return MathUtil.ValueOf(progress, Size.X);
     }
+
+    protected override void Dispose(bool isDisposing)
+    {
+        Progress.Dispose();
+        base.Dispose(isDisposing);
+    }
 }

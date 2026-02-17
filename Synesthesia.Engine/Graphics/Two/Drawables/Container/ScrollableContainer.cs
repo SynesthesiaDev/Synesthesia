@@ -11,6 +11,8 @@ namespace Synesthesia.Engine.Graphics.Two.Drawables.Container;
 
 public class ScrollableContainer : MaskingContainer2d
 {
+    private const int scrollbar_container_width = 10;
+
     public Direction ScrollDirection { get; set; } = Direction.Vertical;
 
     public readonly float ScrollDistance = 80;
@@ -29,6 +31,19 @@ public class ScrollableContainer : MaskingContainer2d
         set => scrollableContainer.Children = value.ToList();
     }
 
+    private bool contentExtendsContainer = false;
+
+    public bool ContentExtendsContainer
+    {
+        get => contentExtendsContainer;
+        set
+        {
+            if(contentExtendsContainer == value) return;
+            contentExtendsContainer = value;
+            updateScrollBarState();
+        }
+    }
+
     private Container2d viewport { get; } = new BackgroundContainer2d
     {
         RelativeSizeAxes = Axes.Both,
@@ -39,6 +54,21 @@ public class ScrollableContainer : MaskingContainer2d
     {
         RelativeSizeAxes = Axes.Both,
     };
+
+    private BackgroundContainer2d scrollbarContainer = null!;
+
+    private void updateScrollBarState()
+    {
+        if (!ContentExtendsContainer)
+        {
+            scrollbarContainer.ResizeWidthTo(0f, 200, Easing.InCubic).ThenHide(scrollbarContainer);
+        }
+        else
+        {
+            scrollbarContainer.Visible = true;
+            scrollbarContainer.ResizeWidthTo(scrollbar_container_width, 200, Easing.OutCubic);
+        }
+    }
 
     protected override void OnLoading()
     {
@@ -55,14 +85,15 @@ public class ScrollableContainer : MaskingContainer2d
                     viewport,
                 ]
             },
-            // new BackgroundContainer2d
-            // {
-            //     RelativeSizeAxes = Axes.Y,
-            //     Anchor = Anchor.CentreRight,
-            //     Origin = Anchor.CentreRight,
-            //     Width = 10,
-            //     BackgroundColor = Defaults.BACKGROUND3,
-            // }
+            scrollbarContainer = new BackgroundContainer2d
+            {
+                RelativeSizeAxes = Axes.Y,
+                Anchor = Anchor.CentreRight,
+                Origin = Anchor.CentreRight,
+                Width = 0,
+                Visible = false,
+                BackgroundColor = Defaults.BACKGROUND3,
+            }
         ];
     }
 
@@ -141,5 +172,11 @@ public class ScrollableContainer : MaskingContainer2d
         }
 
         return true;
+    }
+
+    protected override void Dispose(bool isDisposing)
+    {
+        currentScrollPosition.Dispose();
+        base.Dispose(isDisposing);
     }
 }

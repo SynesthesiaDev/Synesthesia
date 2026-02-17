@@ -1,12 +1,18 @@
 using Common.Bindable;
+using Common.Pooling;
 using Common.Statistics;
 
 namespace Common.Event;
 
 public class SingleOffEventDispatcher<T> : IEventDispatcher
 {
-    private List<EventSubscriber<T>> eventSubscribers = [];
+    private readonly List<EventSubscriber<T>> eventSubscribers = [];
+
     private T? dispatchedValue;
+
+    public bool IsPooled { get; set; }
+
+    public Action<IPooledObject>? ReturnAction { get; set; }
 
     public SingleOffEventDispatcher()
     {
@@ -30,6 +36,7 @@ public class SingleOffEventDispatcher<T> : IEventDispatcher
     {
         if (dispatchedValue != null) throw new InvalidOperationException("This event dispatcher has already value dispatched!");
         dispatchedValue = value;
+
         eventSubscribers.ForEach(eventSubscriber => eventSubscriber.Action.Invoke(value));
         eventSubscribers.Clear();
     }
@@ -44,10 +51,19 @@ public class SingleOffEventDispatcher<T> : IEventDispatcher
     {
         Clear();
         EngineStatistics.DISPATCHERS.Decrement();
+        IsDisposed = true;
     }
 
     public void Unsubscribe(IEventSubscriber subscriber)
     {
         throw new NotSupportedException();
+    }
+
+    public bool IsDisposed { get; set; }
+
+    public void Reset()
+    {
+        Clear();
+        dispatchedValue = default;
     }
 }

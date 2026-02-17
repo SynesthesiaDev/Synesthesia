@@ -36,6 +36,20 @@ public record AudioSampleInstance : IPlaybackAudioControl
 
     private float volume = 1f;
 
+    public float Panning
+    {
+        get
+        {
+            Bass.ChannelGetAttribute(StreamHandle, ChannelAttribute.Pan, out var pan);
+            return pan;
+        }
+        set
+        {
+            var sanitized = Math.Clamp(value, -1f, 1f);
+            Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.Pan, sanitized);
+        }
+    }
+
     public AudioSampleInstance(AudioSample Sample, AudioMixer OwningAudioMixer, int StreamHandle)
     {
         this.Sample = Sample;

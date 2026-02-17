@@ -133,7 +133,9 @@ public abstract class ThreadRunner(ThreadType type) : IDisposable
         catch (Exception ex)
         {
             Logger.Exception(ex, GetLoggerCategory());
-            Environment.Exit(-1);
+#if DEBUG
+            Environment.Exit(ex.HResult);
+#endif
         }
     }
 

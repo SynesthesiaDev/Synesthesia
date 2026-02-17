@@ -39,7 +39,29 @@ public class AudioChannel : BassDspAudioHandler, IHasAudioHandle
         OutputHandle = handle;
     }
 
-    public void UpdateSampleLifetimes() => mixers.ForEach(mixer => mixer.UpdateLifetimes());
+    public void UpdateSampleLifetimes()
+    {
+        for (int i = 0; i < mixers.Count; i++)
+        {
+            var mixer = mixers[i];
+            mixer.UpdateSampleLifetimes();
+        }
+    }
+
+    public float Panning
+    {
+        get
+        {
+            Bass.ChannelGetAttribute(MixdownHandle, ChannelAttribute.Pan, out var pan);
+            return pan;
+        }
+        set
+        {
+            var sanitized = Math.Clamp(value, -1f, 1f);
+            Bass.ChannelSetAttribute(MixdownHandle, ChannelAttribute.Pan, sanitized);
+        }
+    }
+
 
     public override float Volume
     {

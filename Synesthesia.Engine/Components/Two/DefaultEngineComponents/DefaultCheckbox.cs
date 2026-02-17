@@ -92,6 +92,7 @@ public class DefaultCheckbox : CompositeDrawable2d, IDisablable
                         Text = Text,
                         Anchor = Anchor.CentreLeft,
                         Origin = Anchor.CentreLeft,
+                        FontSize = fontSize
                     },
                 ]
             }

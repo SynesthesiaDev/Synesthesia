@@ -82,6 +82,10 @@ public class ScrollableContainerTest : VisualTest
 
         AddAssert("scroll position is 0", () => scrollableContainer.ScrollPosition == 0.0);
 
+        AddStep("ContentExtendsContainer true", () => scrollableContainer.ContentExtendsContainer = true);
+
+        AddStep("ContentExtendsContainer false", () => scrollableContainer.ContentExtendsContainer = false);
+
         base.OnLoading();
     }
 }

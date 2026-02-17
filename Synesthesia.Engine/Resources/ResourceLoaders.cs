@@ -76,8 +76,11 @@ public static class ResourceLoaders
 
     public static object LoadBinaryBuffer(Stream stream)
     {
-        var array = LoadByteArray(stream) as byte[];
-        return BinaryBuffer.FromArray(array!);
+        var array = getStreamBytes(stream, out var lenght);
+        var buffer = BinaryBuffer.FromArray(array!);
+        ArrayPool<byte>.Shared.Return(array);
+
+        return buffer;
     }
 
     public static object LoadAudioSample(Stream stream)

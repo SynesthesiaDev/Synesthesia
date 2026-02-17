@@ -1,13 +1,20 @@
+using Common.Pooling;
 using SynesthesiaUtil.Extensions;
 
 namespace Common.Bindable;
 
-public class Bindable<T>(T defaultInternalValue) : IBindable
+public class Bindable<T>(T defaultInternalValue) : IBindable, IPooledObject
 {
     private readonly T defaultInternal = defaultInternalValue;
     protected T InternalValue = defaultInternalValue;
 
+    public bool IsDisposed { get; set; }
+
     public BoundBindable? Bound;
+
+    public bool IsPooled { get; set; }
+
+    public Action<IPooledObject>? ReturnAction { get; set; }
 
     public T Value
     {
@@ -70,6 +77,7 @@ public class Bindable<T>(T defaultInternalValue) : IBindable
     {
         Unbind();
         Listeners.Clear();
+        IsDisposed = true;
     }
 
     public void TriggerChange()
@@ -78,6 +86,13 @@ public class Bindable<T>(T defaultInternalValue) : IBindable
     }
 
     public record BoundBindable(Bindable<T> Bindable, BindableListener<T> Listener);
+
+    public void Reset()
+    {
+        Unbind();
+        Listeners.Clear();
+    }
+
 }
 
 public record BindableListener<T>(Action<BindableEvent<T>> Func)

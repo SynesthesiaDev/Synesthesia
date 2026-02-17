@@ -99,7 +99,7 @@ public class AudioManager : BassDspAudioHandler, IHasAudioHandle
         Logger.Debug($"BASS Version:           {Bass.Version}", Logger.Audio);
         Logger.Debug($"BASS FX Version:        {BassFx.Version}", Logger.Audio);
         Logger.Debug($"BASS MIX Version:       {BassMix.Version}", Logger.Audio);
-        if (UseWasapi.Value)  Logger.Debug($"BASS WASAPI Version:    {BassWasapi.Version}", Logger.Audio);
+        if (UseWasapi.Value) Logger.Debug($"BASS WASAPI Version:    {BassWasapi.Version}", Logger.Audio);
 
         if (!alreadyInitialized) CurrentAudioDevice = AudioDevices[bass_default_device];
 
@@ -133,7 +133,29 @@ public class AudioManager : BassDspAudioHandler, IHasAudioHandle
         channels.Add(channel);
     }
 
-    public void UpdateSampleLifetimes() => channels.ForEach(channel => channel.UpdateSampleLifetimes());
+    public void UpdateSampleLifetimes()
+    {
+        for (int i = 0; i < channels.Count; i++)
+        {
+            var channel = channels[i];
+            channel.UpdateSampleLifetimes();
+        }
+    }
+
+    public float Panning
+    {
+        get
+        {
+            Bass.ChannelGetAttribute(MasterMixdownHandle, ChannelAttribute.Pan, out var pan);
+            return pan;
+        }
+        set
+        {
+            var sanitized = Math.Clamp(value, -1f, 1f);
+            Bass.ChannelSetAttribute(MasterMixdownHandle, ChannelAttribute.Pan, sanitized);
+        }
+    }
+
 
     private void ensureMaster()
     {
@@ -178,6 +200,9 @@ public class AudioManager : BassDspAudioHandler, IHasAudioHandle
             foreach (var mixer in channel.Mixers)
                 mixer.AttachTo(channel);
         }
+
+        Panning = Panning;
+        Volume = Volume;
     }
 
     public bool CheckForDeviceChanges()

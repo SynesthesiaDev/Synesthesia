@@ -21,7 +21,16 @@ public class StepButton : CompositeDrawable2d, IPooledObject
 {
     public Action? Action { get; set; }
 
-    public required string Name { get; set; }
+    private string name = string.Empty;
+    public required string Name
+    {
+        get => name;
+        set
+        {
+            name = value;
+            if (Text != null) Text.Text = value;
+        }
+    }
 
     protected Color RunningColor => Defaults.YELLOW;
 
@@ -31,7 +40,7 @@ public class StepButton : CompositeDrawable2d, IPooledObject
 
     protected DrawableBox2d Highlight = null!;
 
-    protected TextDrawable Text = null!;
+    protected TextDrawable? Text = null;
 
     public bool RunNextStepImmediately = false;
 
@@ -132,6 +141,7 @@ public class StepButton : CompositeDrawable2d, IPooledObject
 
     public virtual void Reset()
     {
+        Text.Text = string.Empty;
         Action = null;
         Future = new CompletableFuture<bool>();
         BackgroundContainer.BackgroundColor = Defaults.BACKGROUND2;

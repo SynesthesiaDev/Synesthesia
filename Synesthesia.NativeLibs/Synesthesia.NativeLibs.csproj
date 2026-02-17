@@ -1,22 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <LangVersion>9</LangVersion>
-        <Nullable>enable</Nullable>
-        <OutputType>Library</OutputType>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>9</LangVersion>
+    <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
 
-    <ItemGroup>
-        <None Include="runtimes\**\*"
-              CopyToOutputDirectory="PreserveNewest"
-              CopyToPublishDirectory="PreserveNewest">
-            <PackagePath>runtimes\</PackagePath>
-        </None>
-    </ItemGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>Synesthesia.NativeLibs</PackageId>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
-    </ItemGroup>
+  <ItemGroup>
+    <None Include="runtimes\**\*"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest">
+      <PackagePath>runtimes\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="2025.2.4"/>
+  </ItemGroup>
 
 </Project>
