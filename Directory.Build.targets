@@ -4,7 +4,7 @@
     <RepositoryUrl>https://github.com/SynesthesiaDev/Synesthesia</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <IsPackable>true</IsPackable>
-
+    <LangVersion>latestmajor</LangVersion>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
