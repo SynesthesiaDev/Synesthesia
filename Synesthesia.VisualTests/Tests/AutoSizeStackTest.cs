@@ -33,7 +33,7 @@ public class AutoSizeStackTest : VisualTest
                 Origin = Anchor.Centre,
                 Children =
                 [
-                    new DrawableBox2d
+                    new Box2d
                     {
                         RelativeSizeAxes = Axes.Both,
                         Color = new Color(20, 20, 20, 255),
@@ -123,7 +123,7 @@ public class AutoSizeStackTest : VisualTest
             Size = size,
             Children =
             [
-                new DrawableBox2d
+                new Box2d
                 {
                     RelativeSizeAxes = Axes.Both,
                     Color = c,

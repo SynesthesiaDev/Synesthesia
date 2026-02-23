@@ -11,7 +11,7 @@ public class AnchorOriginTest : VisualTest
 {
     private Container2d gridRoot = null!;
 
-    private readonly List<(Container2d Cell, DrawableBox2d Marker, Anchor Anchor, Anchor Origin)> cases = new();
+    private readonly List<(Container2d Cell, Box2d Marker, Anchor Anchor, Anchor Origin)> cases = new();
 
     private const float cell_w = 220f;
     private const float cell_h = 160f;
@@ -82,7 +82,7 @@ public class AnchorOriginTest : VisualTest
             Size = new Vector2(cell_w, cell_h),
         };
 
-        var background = new DrawableBox2d
+        var background = new Box2d
         {
             RelativeSizeAxes = Axes.Both,
             Color = new Color(35, 35, 35, 255),
@@ -90,7 +90,7 @@ public class AnchorOriginTest : VisualTest
             Origin = Anchor.TopLeft,
         };
 
-        var marker = new DrawableBox2d
+        var marker = new Box2d
         {
             Size = new Vector2(18, 18),
             Color = Color.Gold,
@@ -99,7 +99,7 @@ public class AnchorOriginTest : VisualTest
             Position = Vector2.Zero,
         };
 
-        var centerDot = new DrawableBox2d
+        var centerDot = new Box2d
         {
             Size = new Vector2(6, 6),
             Color = new Color(160, 160, 160, 255),

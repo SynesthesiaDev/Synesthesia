@@ -3,6 +3,7 @@ using Common.Statistics;
 using ManagedBass;
 using ManagedBass.Wasapi;
 using Synesthesia.Engine.Audio;
+using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics;
 using SynesthesiaUtil.Extensions;
 
@@ -18,6 +19,7 @@ public class AudioThreadRunner(ThreadType type) : ThreadRunner(type)
 
     protected override void OnThreadInit(Game game)
     {
+        DependencyContainer.Add(this);
         game.AudioManager.Initialize();
         this.game = game;
         audioManager = this.game.AudioManager;
@@ -34,8 +36,7 @@ public class AudioThreadRunner(ThreadType type) : ThreadRunner(type)
     {
         if (frameCount++ % 1000 == 0)
         {
-            EngineStatistics.BASS_CPU.Update(_ => Bass.CPUUsage.FloorToDecimalDigits(2));
-            EngineStatistics.BASS_WASAPI_CPU.Update(_ => BassWasapi.CPUUsage.FloorToDecimalDigits(2));
+            EngineStatistics.BASS_CPU.Update(_ => (audioManager.UseWasapi.Value ? BassWasapi.CPUUsage : Bass.CPUUsage).FloorToDecimalDigits(2));
         }
 
         if (game.AudioManager.CheckForDeviceChanges())

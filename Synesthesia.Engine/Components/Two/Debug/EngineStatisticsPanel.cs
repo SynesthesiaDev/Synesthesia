@@ -23,10 +23,12 @@ public class EngineStatisticsPanel : EngineDebugComponent
         new EngineLongStatisticAtomicLine("Drawables", EngineStatistics.DRAWABLES),
         new EngineLongStatisticAtomicLine("Layout Invalidations", EngineStatistics.LAYOUT_INVALIDATIONS),
         new Spacer(),
+        new EngineLongStatisticAtomicLine("Texture uploads", EngineStatistics.TEXTURE_UPLOADS),
+        new EngineLongStatisticAtomicLine("Shader binds", EngineStatistics.SHADER_BINDS),
+        new Spacer(),
         new EngineLongStatisticAtomicLine("BindablePools", EngineStatistics.BINDABLE_POOLS),
         new EngineLongStatisticAtomicLine("Bindables Borrowed", EngineStatistics.BINDABLES_BORROWED),
         new EngineLongStatisticAtomicLine("Dispatchers", EngineStatistics.DISPATCHERS),
-        new EngineLongStatisticAtomicLine("Dispatcher Borrowed", EngineStatistics.DISPATCHERS_BORROWED),
         new Spacer(),
         new EngineStatisticLongLine("GC Collections Gen0", () => GC.CollectionCount(0)),
         new EngineStatisticLongLine("GC Collections Gen1", () => GC.CollectionCount(1)),
@@ -34,25 +36,19 @@ public class EngineStatisticsPanel : EngineDebugComponent
         new EngineStatisticLongLine("GC Size Gen0", () => gcMemoryInfo.GenerationInfo[0].SizeAfterBytes),
         new EngineStatisticLongLine("GC Size Gen1", () => gcMemoryInfo.GenerationInfo[1].SizeAfterBytes),
         new EngineStatisticLongLine("GC Size Gen2", () => gcMemoryInfo.GenerationInfo[2].SizeAfterBytes),
-        new EngineStatisticLongLine("Finalization Queue", () => gcMemoryInfo.FinalizationPendingCount),
         new Spacer(),
-        new EngineLongStatisticAtomicLine("Schedulers (Lazy)", EngineStatistics.SCHEDULERS),
-        new EngineLongStatisticAtomicLine("Schedulers (Active)", EngineStatistics.ACTIVE_SCHEDULERS),
+        new EngineLongStatisticAtomicLine("Schedulers", EngineStatistics.SCHEDULERS),
         new EngineLongStatisticAtomicLine("Scheduler Tasks", EngineStatistics.SCHEDULER_TASKS),
         new Spacer(),
-        new EngineLongStatisticAtomicLine("Animators (Lazy)", EngineStatistics.ANIMATORS),
-        new EngineLongStatisticAtomicLine("Animators (Active)", EngineStatistics.ACTIVE_ANIMATORS),
+        new EngineLongStatisticAtomicLine("Animators", EngineStatistics.ANIMATORS),
         new EngineLongStatisticAtomicLine("Animations", EngineStatistics.ANIMATIONS),
         new Spacer(),
         new EngineLongStatisticAtomicLine("Audio Channels", EngineStatistics.AUDIO_CHANNELS),
         new EngineLongStatisticAtomicLine("Audio Mixers", EngineStatistics.AUDIO_MIXERS),
-        new EngineLongStatisticAtomicLine("Cached Audio Samples", EngineStatistics.CACHED_AUDIO_SAMPLES),
         new EngineLongStatisticAtomicLine("Audio Sample Instances", EngineStatistics.AUDIO_SAMPLE_INSTANCES),
         new EngineDoubleStatisticAtomicLine("BASS Cpu %", EngineStatistics.BASS_CPU),
-        new EngineDoubleStatisticAtomicLine("BASS Wasapi Cpu %", EngineStatistics.BASS_WASAPI_CPU),
         new Spacer(),
-        new EngineLongStatisticAtomicLine("Deps Resolved (total)", EngineStatistics.DEPENDENCIES_RESOLVED),
-        new EngineLongStatisticAtomicLine("Deps Resolved (reflection)", EngineStatistics.DEPENDENCIES_RESOLVED_REFLECTION),
+        new EngineLongStatisticAtomicLine("Dependencies Resolved", EngineStatistics.DEPENDENCIES_RESOLVED),
         new Spacer(),
         new EngineLongStatisticAtomicLine("Objects Rented", EngineStatistics.OBJECTS_RENTED),
         new EngineLongStatisticAtomicLine("Objects Returned", EngineStatistics.OBJECTS_RETURNED),
@@ -107,20 +103,20 @@ public class EngineStatisticsPanel : EngineDebugComponent
         private readonly StringBuilder formatBuffer = new(16);
 
         private long lastValue = long.MinValue;
-        private TextDrawable valueText = null!;
+        private Text2d valueText = null!;
 
         protected override void OnLoading()
         {
             Size = new Vector2(330, 24);
             Children =
             [
-                new TextDrawable
+                new Text2d
                 {
                     Anchor = Anchor.CentreLeft,
                     Origin = Anchor.CentreLeft,
                     Text = name
                 },
-                valueText = new TextDrawable
+                valueText = new Text2d
                 {
                     Anchor = Anchor.CentreRight,
                     Origin = Anchor.CentreRight,
@@ -161,7 +157,7 @@ public class EngineStatisticsPanel : EngineDebugComponent
         private readonly StringBuilder formatBuffer = new(16);
 
         private double lastValue = double.MinValue;
-        private TextDrawable valueText = null!;
+        private Text2d valueText = null!;
 
         private const double epsilon = 0.01;
 
@@ -170,13 +166,13 @@ public class EngineStatisticsPanel : EngineDebugComponent
             Size = new Vector2(330, 24);
             Children =
             [
-                new TextDrawable
+                new Text2d
                 {
                     Anchor = Anchor.CentreLeft,
                     Origin = Anchor.CentreLeft,
                     Text = name
                 },
-                valueText = new TextDrawable
+                valueText = new Text2d
                 {
                     Anchor = Anchor.CentreLeft,
                     Origin = Anchor.CentreLeft,

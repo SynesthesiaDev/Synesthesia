@@ -36,7 +36,7 @@ public class RelativeSizeMarginTest : VisualTest
                         Origin = Anchor.Centre,
                         Children =
                         [
-                            new DrawableBox2d
+                            new Box2d
                             {
                                 RelativeSizeAxes = Axes.Both,
                                 Color = new Color(30, 30, 30, 255),
@@ -52,7 +52,7 @@ public class RelativeSizeMarginTest : VisualTest
                                 Origin = Anchor.TopLeft,
                                 Children =
                                 [
-                                    new DrawableBox2d
+                                    new Box2d
                                     {
                                         RelativeSizeAxes = Axes.Both,
                                         Color = new Color(80, 140, 220, 255),
@@ -71,7 +71,7 @@ public class RelativeSizeMarginTest : VisualTest
                                 Origin = Anchor.BottomRight,
                                 Children =
                                 [
-                                    new DrawableBox2d
+                                    new Box2d
                                     {
                                         RelativeSizeAxes = Axes.Both,
                                         Color = new Color(220, 120, 90, 140), // translucent overlay

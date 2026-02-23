@@ -95,7 +95,6 @@ public abstract partial class Drawable : IDrawable, IDisposable
         Reflection.ResolveDependencies(this);
 
         OnLoading();
-        LoadAsyncComplete();
 
         if (this is Drawable2d drawable)
         {

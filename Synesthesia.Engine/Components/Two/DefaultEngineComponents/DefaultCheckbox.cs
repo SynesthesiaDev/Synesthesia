@@ -27,9 +27,9 @@ public class DefaultCheckbox : CompositeDrawable2d, IDisablable
             if (disabled != value)
             {
                 var newColor = value
-                    ? textDrawable.Color.ChangeBrightness(-0.5f)
-                    : textDrawable.Color.ChangeBrightness(0.5f);
-                textDrawable.Color = newColor;
+                    ? text2d.Color.ChangeBrightness(-0.5f)
+                    : text2d.Color.ChangeBrightness(0.5f);
+                text2d.Color = newColor;
             }
 
             disabled = value;
@@ -47,7 +47,7 @@ public class DefaultCheckbox : CompositeDrawable2d, IDisablable
             text = value;
             if (IsLoaded)
             {
-                textDrawable.Text = value;
+                text2d.Text = value;
             }
         }
     }
@@ -63,12 +63,12 @@ public class DefaultCheckbox : CompositeDrawable2d, IDisablable
             fontSize = value;
             if (IsLoaded)
             {
-                textDrawable.FontSize = value;
+                text2d.FontSize = value;
             }
         }
     }
 
-    private TextDrawable textDrawable = null!;
+    private Text2d text2d = null!;
     private Checkbox checkbox = null!;
 
     public DefaultEngineColorCombination ColorCombination { get; init; } = DefaultEngineColorCombination.SURFACE2;
@@ -87,7 +87,7 @@ public class DefaultCheckbox : CompositeDrawable2d, IDisablable
                         Anchor = Anchor.CentreRight,
                         Origin = Anchor.CentreRight,
                     },
-                    textDrawable = new TextDrawable
+                    text2d = new Text2d
                     {
                         Text = Text,
                         Anchor = Anchor.CentreLeft,
@@ -97,6 +97,7 @@ public class DefaultCheckbox : CompositeDrawable2d, IDisablable
                 ]
             }
         ];
+
         checkbox.Checked.BindTo(Checked);
         base.OnLoading();
     }
@@ -155,8 +156,8 @@ public class DefaultCheckbox : CompositeDrawable2d, IDisablable
 
         private Vector2 innerSize => new(Size.X - 10);
 
-        private DrawableBox2d box = null!;
-        private DrawableBox2d backgroundBox = null!;
+        private Box2d box = null!;
+        private Box2d backgroundBox = null!;
 
         protected internal override void OnUpdate(FrameInfo frameInfo)
         {
@@ -176,7 +177,7 @@ public class DefaultCheckbox : CompositeDrawable2d, IDisablable
                     Origin = Anchor.Centre,
                     Children =
                     [
-                        backgroundBox = new DrawableBox2d
+                        backgroundBox = new Box2d
                         {
                             RelativeSizeAxes = Axes.Both,
                             Color = Defaults.BACKGROUND1,
@@ -185,7 +186,7 @@ public class DefaultCheckbox : CompositeDrawable2d, IDisablable
                             Origin = Anchor.Centre,
                         },
 
-                        box = new DrawableBox2d
+                        box = new Box2d
                         {
                             Size = innerSize,
                             Anchor = Anchor.Centre,

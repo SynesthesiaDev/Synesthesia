@@ -26,7 +26,7 @@ public class LabelledSliderBar : CompositeDrawable2d
         }
     }
 
-    private TextDrawable? textDrawable;
+    private Text2d? textDrawable;
 
     protected override void OnLoading()
     {
@@ -37,7 +37,7 @@ public class LabelledSliderBar : CompositeDrawable2d
                 RelativeSizeAxes = Axes.Both,
                 Children =
                 [
-                    textDrawable = new TextDrawable
+                    textDrawable = new Text2d
                     {
                         Text = label,
                         Anchor = Anchor.CentreLeft,

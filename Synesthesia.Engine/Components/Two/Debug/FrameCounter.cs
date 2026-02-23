@@ -89,8 +89,8 @@ public class FrameCounter : EngineDebugComponent
 
         public int MaxFps { get; init; }
 
-        private TextDrawable fpsText = null!;
-        private TextDrawable frameTimeText = null!;
+        private Text2d fpsText = null!;
+        private Text2d frameTimeText = null!;
 
         protected override void OnLoading()
         {
@@ -102,7 +102,7 @@ public class FrameCounter : EngineDebugComponent
                     RelativeSizeAxes = Axes.Both,
                     Children =
                     [
-                        new TextDrawable
+                        new Text2d
                         {
                             Text = $"{Name}:",
                             Anchor = Anchor.CentreLeft,
@@ -115,13 +115,13 @@ public class FrameCounter : EngineDebugComponent
                             AutoSizeAxes = Axes.Both,
                             Children =
                             [
-                                fpsText = new TextDrawable
+                                fpsText = new Text2d
                                 {
                                     Text = string.Empty,
                                     Anchor = Anchor.Centre,
                                     Origin = Anchor.CentreRight
                                 },
-                                new TextDrawable
+                                new Text2d
                                 {
                                     Text = $" / {MaxFps} fps",
                                     Anchor = Anchor.Centre,
@@ -129,7 +129,7 @@ public class FrameCounter : EngineDebugComponent
                                 },
                             ]
                         },
-                        frameTimeText = new TextDrawable
+                        frameTimeText = new Text2d
                         {
                             Text = "(0.000 ms)",
                             Anchor = Anchor.CentreRight,

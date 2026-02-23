@@ -1,4 +1,5 @@
 using Common.Logger;
+using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Input;
 
@@ -12,6 +13,7 @@ public class InputThreadRunner(ThreadType type) : ThreadRunner(type)
 
     protected override void OnThreadInit(Game game)
     {
+        DependencyContainer.Add(this);
         this.game = game;
     }
 

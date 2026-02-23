@@ -1,5 +1,4 @@
 using Codon.Buffer;
-using Common.Statistics;
 using SynesthesiaUtil.Extensions;
 using SynesthesiaUtil.Types;
 
@@ -25,12 +24,10 @@ public record AudioSample : IDisposable
     {
         Data = data;
         Lenght = Data.Length / AudioManager.PLAYBACK_SAMPLE_RATE.ToDouble();
-        EngineStatistics.CACHED_AUDIO_SAMPLES.Increment();
     }
 
     public void Dispose()
     {
         Data.Dispose();
-        EngineStatistics.CACHED_AUDIO_SAMPLES.Decrement();
     }
 }

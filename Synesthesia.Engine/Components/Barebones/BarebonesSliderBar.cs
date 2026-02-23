@@ -4,12 +4,15 @@
 using System.Numerics;
 using Common.Bindable;
 using Synesthesia.Engine.Animations.Easings;
+using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 
 namespace Synesthesia.Engine.Components.Barebones;
 
 public abstract class BarebonesSliderBar : Container2d
 {
+
+    [field: ExternalOwnership]
     public required BindableFloat Current { get; init; }
 
     private readonly BindableEventSource selfEventSource = new();

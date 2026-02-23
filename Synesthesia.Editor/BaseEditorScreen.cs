@@ -22,7 +22,7 @@ public class BaseEditorScreen : Screen
                 Direction = Direction.Vertical,
                 Children =
                 [
-                    new TextDrawable
+                    new Text2d
                     {
                         Text = "Base Editor Screen",
                         Color = Color.White

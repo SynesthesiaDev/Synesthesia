@@ -4,10 +4,12 @@ using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Animations.Easings;
+using Synesthesia.Engine.Dependency;
+using Synesthesia.Engine.Graphics.Shader;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Input.Events;
-using Synesthesia.Engine.Threading.Runners;
+using Synesthesia.Engine.Resources;
 using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two;
@@ -26,6 +28,11 @@ public abstract class Drawable2d : Drawable
     private Drawable2d? parent;
     private float width;
     private float height;
+
+    [Resolved]
+    private IResourceStore<ShaderHandle> shaderStore = null!;
+
+    private ShaderHandle? alphaShader;
 
     public Vector2 Position
     {
@@ -178,8 +185,9 @@ public abstract class Drawable2d : Drawable
 
     public bool IsMouseDown { get; set; } = false;
 
-    protected internal virtual bool AcceptsInputs() => true;
+    protected virtual bool AcceptsInput { get; } = true;
 
+    public bool CanHandleInput => IsLoaded && AcceptsInput;
 
     public Vector2 InheritedScale => Parent == null ? Scale : Parent.InheritedScale * Scale;
 
@@ -363,12 +371,16 @@ public abstract class Drawable2d : Drawable
 
     protected internal sealed override void OnDraw()
     {
-        if (!Visible || InheritedAlpha <= 0.001f) return; // Skip if effectively invisible
-        if (alphaUniformLoc == -1)
-            alphaUniformLoc = Raylib.GetShaderLocation(RenderThreadRunner.AlphaShader, "alpha");
+        if (!Visible || InheritedAlpha <= 0.001f || !IsLoaded) return;
 
-        Raylib.SetShaderValue(RenderThreadRunner.AlphaShader, alphaUniformLoc, InheritedAlpha, ShaderUniformDataType.Float);
-        Raylib.BeginShaderMode(RenderThreadRunner.AlphaShader);
+        alphaShader ??= shaderStore.Get("Synesthesia.Resources.Shaders.alpha.fsh");
+
+        if (alphaUniformLoc == -1)
+            alphaUniformLoc = Raylib.GetShaderLocation(alphaShader.NativeShader, "alpha");
+
+        Raylib.SetShaderValue(alphaShader.NativeShader, alphaUniformLoc, InheritedAlpha, ShaderUniformDataType.Float);
+
+        Raylib.BeginShaderMode(alphaShader.NativeShader);
         Raylib.BeginBlendMode(BlendMode.Alpha);
 
         beginLocalSpace();

@@ -78,7 +78,6 @@ public class CompositeDrawable2d : Drawable2d
                 internalChild.Load();
             }
         }
-
         UpdateLayout();
     }
 
@@ -89,7 +88,7 @@ public class CompositeDrawable2d : Drawable2d
         for (var i = InternalChildren.Count - 1; i >= 0; i--)
         {
             var child = InternalChildren[i];
-            if(!child.AcceptsInputs()) continue;
+            if(!child.CanHandleInput) continue;
 
             var containsMouse = child.Contains(e.Position);
 
@@ -128,7 +127,7 @@ public class CompositeDrawable2d : Drawable2d
         for (var i = InternalChildren.Count - 1; i >= 0; i--)
         {
             var child = InternalChildren[i];
-            if(!child.AcceptsInputs()) continue;
+            if(!child.CanHandleInput) continue;
 
             if (down && child is { IsMouseDown: false, IsHovered: true } && child.OnMouseDown(e))
             {
@@ -150,7 +149,7 @@ public class CompositeDrawable2d : Drawable2d
 
     protected internal void UpdateActionBindingState(ActionBinding e, bool down)
     {
-        foreach (var child in InternalChildren.Filter(c => c.AcceptsInputs()).Reversed())
+        foreach (var child in InternalChildren.Filter(c => c.CanHandleInput).Reversed())
         {
             var handled = down && child.OnActionBindingDown(e);
 
@@ -167,7 +166,7 @@ public class CompositeDrawable2d : Drawable2d
 
     protected internal void UpdateScrollWheelState(MouseScrollWheelInputEvent e)
     {
-        foreach (var child in InternalChildren.Filter(c => c.AcceptsInputs() && c.Contains(InputManager.MousePosition)).Reversed())
+        foreach (var child in InternalChildren.Filter(c => c.CanHandleInput && c.Contains(InputManager.MousePosition)).Reversed())
         {
             var handled = child.OnMouseWheel(e.Delta);
 
@@ -186,7 +185,7 @@ public class CompositeDrawable2d : Drawable2d
         for (int i = InternalChildren.Count - 1; i >= 0; i--)
         {
             var child = InternalChildren[i];
-            if (!child.AcceptsInputs()) continue;
+            if (!child.CanHandleInput) continue;
 
             var handled = down && child.OnKeyDown(e);
             if (!down) child.OnKeyUp(e);

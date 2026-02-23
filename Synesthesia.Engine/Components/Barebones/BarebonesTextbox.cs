@@ -28,7 +28,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
 
     public Drawable2d GetOwningDrawable() => this;
 
-    public TextDrawable TextDrawable = null!;
+    public Text2d Text2d = null!;
 
     public AbstractTextboxCaret CaretDrawable = null!;
 
@@ -42,7 +42,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
                 Spacing = 1,
                 Children =
                 [
-                    TextDrawable = new TextDrawable { Text = string.Empty },
+                    Text2d = new Text2d { Text = string.Empty },
                     CaretDrawable = Caret.Invoke(),
                 ]
             }
@@ -53,7 +53,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
 
     protected override void LoadComplete()
     {
-        Text.OnValueChange(e => TextDrawable.Text = e.NewValue);
+        Text.OnValueChange(e => Text2d.Text = e.NewValue);
 
         Scheduler.Value.Repeating(repeat_rate, _ =>
         {
@@ -127,7 +127,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
 
         public Easing BlinkingEasing { get; set; } = Easing.OutCubic;
 
-        private DrawableBox2d caretBox = null!;
+        private Box2d caretBox = null!;
 
         protected override void OnLoading()
         {
@@ -138,7 +138,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
                     RelativeSizeAxes = Axes.Both,
                     Children =
                     [
-                        caretBox = new DrawableBox2d { RelativeSizeAxes = Axes.Both }
+                        caretBox = new Box2d { RelativeSizeAxes = Axes.Both }
                     ],
                 },
             ];

@@ -15,7 +15,7 @@ namespace Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 
 public class DefaultSliderBarBody(BarebonesSliderBar owningSliderBar) : SliderBarBody(owningSliderBar)
 {
-    private DrawableBox2d filledBox = null!;
+    private Box2d filledBox = null!;
     private BackgroundContainer2d container = null!;
 
     private float? afterLoadProgress;
@@ -37,7 +37,7 @@ public class DefaultSliderBarBody(BarebonesSliderBar owningSliderBar) : SliderBa
                 Origin = Anchor.Centre,
                 Children =
                 [
-                    filledBox = new DrawableBox2d
+                    filledBox = new Box2d
                     {
                         RelativeSizeAxes = Axes.Y,
                         Color = Defaults.ACCENT,

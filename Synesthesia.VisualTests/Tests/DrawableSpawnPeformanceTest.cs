@@ -52,7 +52,7 @@ public class DrawableSpawnPerformanceTest : VisualTest
     private void spawnGrid(int count)
     {
         // Rebuild list to avoid incremental layout overhead patterns.
-        var list = new List<DrawableBox2d>(count);
+        var list = new List<Box2d>(count);
 
         var cols = 60;
         var size = 10f;
@@ -63,7 +63,7 @@ public class DrawableSpawnPerformanceTest : VisualTest
             var x = i % cols;
             var y = i / cols;
 
-            list.Add(new DrawableBox2d
+            list.Add(new Box2d
             {
                 Size = new Vector2(size, size),
                 Position = new Vector2(x * (size + pad), y * (size + pad)),

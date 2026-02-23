@@ -23,16 +23,19 @@ public class SimpleAudioTest : VisualTest
 
     private List<AudioSample> samples = [];
 
+    private AudioMixer masterAudioMixer = null!;
+
+    private readonly LowpassAudioEffect lowpassEffect = new(0f);
+    private readonly HighpassAudioEffect highpassAudioEffect = new(0f);
+
     [Resolved]
     private AudioManager audioManager = null!;
 
     [Resolved]
     private Game game = null!;
 
-    private AudioMixer masterAudioMixer = null!;
-
-    private readonly LowpassAudioEffect lowpassEffect = new(0f);
-    private readonly HighpassAudioEffect highpassAudioEffect = new(0f);
+    [Resolved]
+    private IResourceStore<AudioSample> audioSampleStore = null!;
 
     private readonly BindableFloat audioVolume = new()
     {
@@ -47,10 +50,10 @@ public class SimpleAudioTest : VisualTest
 
         samples =
         [
-            ResourceManager.Get<AudioSample>("SynesthesiaResources.audio.mp3"),
-            ResourceManager.Get<AudioSample>("SynesthesiaResources.audio2.mp3"),
-            ResourceManager.Get<AudioSample>("SynesthesiaResources.audio3.mp3"),
-            ResourceManager.Get<AudioSample>("SynesthesiaResources.audio4.mp3"),
+            audioSampleStore.Get("Synesthesia.Resources.audio.mp3"),
+            audioSampleStore.Get("Synesthesia.Resources.audio2.mp3"),
+            audioSampleStore.Get("Synesthesia.Resources.audio3.mp3"),
+            audioSampleStore.Get("Synesthesia.Resources.audio4.mp3")
         ];
 
         currentSampleIndex = samples.CycleIndex(currentSampleIndex);
@@ -194,6 +197,7 @@ public class SimpleAudioTest : VisualTest
         masterAudioMixer.RemoveEffect(lowpassEffect);
         masterAudioMixer.RemoveEffect(highpassAudioEffect);
         lowpassEffect.Dispose();
+        highpassAudioEffect.Dispose();
 
         base.Dispose(isDisposing);
     }

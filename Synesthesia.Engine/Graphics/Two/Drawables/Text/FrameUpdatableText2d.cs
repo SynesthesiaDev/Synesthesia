@@ -2,7 +2,7 @@ namespace Synesthesia.Engine.Graphics.Two.Drawables.Text;
 
 
 [Obsolete("GC Hell, do not use")]
-public class FrameUpdatableTextDrawable : TextDrawable
+public class FrameUpdatableText2d : Text2d
 {
     public Func<string>? UpdateOnDraw { get; set; } = null;
 

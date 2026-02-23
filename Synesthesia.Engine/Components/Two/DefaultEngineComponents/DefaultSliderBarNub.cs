@@ -12,7 +12,7 @@ namespace Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 
 public class DefaultSliderBarNub(BarebonesSliderBar owningSliderBar) : SliderBarNub(owningSliderBar)
 {
-    private DrawableBox2d nub = null!;
+    private Box2d nub = null!;
 
     protected override void OnLoading()
     {
@@ -22,7 +22,7 @@ public class DefaultSliderBarNub(BarebonesSliderBar owningSliderBar) : SliderBar
         Width = 10;
         Children =
         [
-            nub = new DrawableBox2d
+            nub = new Box2d
             {
                 RelativeSizeAxes = Axes.Both,
                 Color = Defaults.BACKGROUND3,

@@ -42,7 +42,7 @@ public class ScrollableContainerTest : VisualTest
 
         for (int i = 1; i < 100; i++)
         {
-            contentFillFlow.AddChild(new TextDrawable
+            contentFillFlow.AddChild(new Text2d
             {
                 Text = $"Random Text {i}",
                 Color = Color.White,

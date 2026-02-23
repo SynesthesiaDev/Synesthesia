@@ -9,7 +9,7 @@ namespace Synesthesia.Engine.Audio.Effect;
 
 public class HighpassAudioEffect : AudioEffect<BQFParameters>, IDisposable
 {
-    public const int MIN_HIGHPASS_CUTOFF_HZ = 0;
+    public const int MIN_HIGHPASS_CUTOFF_HZ = 10;
     public const int MAX_HIGHPASS_CUTOFF_HZ = 18000;
 
     public readonly BindableFloat Cutoff;

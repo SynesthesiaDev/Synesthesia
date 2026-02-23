@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
-    <RootNamespace>SynesthesiaResources</RootNamespace>
+    <RootNamespace>Synesthesia.Resources</RootNamespace>
 
     <IsPackable>true</IsPackable>
     <PackageId>Synesthesia.Resources</PackageId>

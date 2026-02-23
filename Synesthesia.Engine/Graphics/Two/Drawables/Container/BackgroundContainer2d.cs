@@ -15,7 +15,7 @@ public class BackgroundContainer2d : Container2d
 
     public float BackgroundCornerRadius { get; set; }
 
-    private readonly DrawableBox2d background = new();
+    private readonly Box2d background = new();
 
     protected override void OnDraw2d()
     {

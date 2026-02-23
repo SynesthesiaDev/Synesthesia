@@ -1,9 +1,12 @@
 using System.Buffers;
 using System.Text;
 using Codon.Buffer;
-using Common.Logger;
 using Raylib_cs;
 using Synesthesia.Engine.Audio;
+using Synesthesia.Engine.Graphics.Font;
+using Synesthesia.Engine.Graphics.Shader;
+using Synesthesia.Engine.Graphics.Textures;
+using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Utility;
 
 namespace Synesthesia.Engine.Resources;
@@ -24,6 +27,7 @@ public static class ResourceLoaders
             if (read == 0) break;
             totalRead += read;
         }
+
         return buffer;
     }
 
@@ -40,29 +44,44 @@ public static class ResourceLoaders
         }
     }
 
-    public static object LoadVertexShader(Stream stream)
+    public static Texture LoadTexture(Stream stream, string ext)
     {
-        var text = LoadText(stream) as string;
-        return Raylib.LoadShaderFromMemory(text, null);
+        var bytes = getStreamBytes(stream, out int lenght);
+        Texture texture;
+        try
+        {
+            unsafe
+            {
+                fixed (byte* pData = bytes)
+                {
+                    var image = Raylib.LoadImageFromMemory(new Utf8Buffer(ext).AsPointer(), pData, lenght);
+
+                    image.Mipmaps = 1;
+                    texture = new Texture(image);
+                }
+            }
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(bytes);
+        }
+
+        return texture;
     }
 
-    public static object LoadFragmentShader(Stream stream)
+    public static ShaderHandle LoadShader(Stream stream, ShaderType type)
     {
         var text = LoadText(stream) as string;
-        var shader = Raylib.LoadShaderFromMemory(null, text);
-
-        if (shader.Id > 0) return shader;
-
-        var ex = new Exception("Fragment shader failed to load");
-        Logger.Exception(ex, Logger.Render);
-        throw ex;
-
+        return new ShaderHandle(text!, type);
     }
 
-    public static object LoadFont(Stream stream)
+    public static FontHandle LoadFont(Stream stream)
     {
+        ThreadSafety.AssertRunningOnRenderThread();
+
         var array = LoadByteArray(stream) as byte[];
-        return Unsafe.LoadFontFromMemory(array!);
+        var raylibFont = Unsafe.LoadFontFromMemory(array!);
+        return new FontHandle(raylibFont);
     }
 
     public static object LoadByteArray(Stream stream)
@@ -83,7 +102,7 @@ public static class ResourceLoaders
         return buffer;
     }
 
-    public static object LoadAudioSample(Stream stream)
+    public static AudioSample LoadAudioSample(Stream stream)
     {
         var buffer = LoadBinaryBuffer(stream) as BinaryBuffer;
         return new AudioSample(buffer!);

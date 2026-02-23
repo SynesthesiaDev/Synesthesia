@@ -12,7 +12,7 @@ namespace Synesthesia.VisualTests.Tests;
 
 public class AnimationTest : VisualTest
 {
-    private DrawableBox2d box = null!;
+    private Box2d box = null!;
 
     protected override void OnLoading()
     {
@@ -25,7 +25,7 @@ public class AnimationTest : VisualTest
                 Origin = Anchor.Centre,
                 Children =
                 [
-                    box = new DrawableBox2d
+                    box = new Box2d
                     {
                         Size = new Vector2(120, 120),
                         Color = Color.SkyBlue,

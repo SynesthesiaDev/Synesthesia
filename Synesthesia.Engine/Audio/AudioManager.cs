@@ -60,13 +60,13 @@ public class AudioManager : BassDspAudioHandler, IHasAudioHandle
 
     public readonly Bindable<bool> UseWasapi = new(EngineConfiguration.ExperimentalAudioWasapi);
 
-    private AudioThreadRunner? audioThread;
+    [Resolved]
+    private AudioThreadRunner audioThread = null!;
 
     public AudioManager()
     {
         UseWasapi.OnValueChange(_ =>
         {
-            audioThread ??= DependencyContainer.Get<AudioThreadRunner>();
             audioThread.Schedule(Initialize);
         });
     }

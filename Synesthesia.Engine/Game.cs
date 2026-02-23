@@ -10,15 +10,20 @@ using Synesthesia.Engine.Components.Two.Debug;
 using Synesthesia.Engine.Configuration;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics;
+using Synesthesia.Engine.Graphics.Font;
+using Synesthesia.Engine.Graphics.Shader;
+using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Host;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Resources;
+using Synesthesia.Engine.Resources.Stores;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Threading.Runners;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Timing.Scheduling;
 using Synesthesia.Engine.Utility;
+using Synesthesia.Resources;
 
 namespace Synesthesia.Engine;
 
@@ -44,12 +49,80 @@ public class Game : IDisposable
 
     public readonly BindableProxy BindableProxy = new();
 
+    public readonly IResourceStore<AudioSample> SampleResourceStore = new ResourceStoreBuilder<AudioSample>()
+        .AddLoaders(new Dictionary<string, Func<Stream, AudioSample>>
+        {
+            { "mp3", ResourceLoaders.LoadAudioSample },
+            { "ogg", ResourceLoaders.LoadAudioSample },
+            { "wav", ResourceLoaders.LoadAudioSample }
+        })
+        .AddFallback(fallback =>
+        {
+            fallback.AddFileSystemStore("Assets/Samples/");
+            fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);
+        })
+        .MakeCached()
+        .MakeAsync()
+        .Build();
+
+    public readonly IResourceStore<Texture> TextureResourceStore = new ResourceStoreBuilder<Texture>()
+        .AddLoaders(new Dictionary<string, Func<Stream, Texture>>
+        {
+            { "png", stream => ResourceLoaders.LoadTexture(stream, ".png") },
+            { "bmp", stream => ResourceLoaders.LoadTexture(stream, ".bmp") },
+        })
+        .AddFallback(fallback =>
+        {
+            fallback.AddFileSystemStore("Assets/Textures/");
+            fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);
+        })
+        .MakeCached()
+        .MakeAsync()
+        .MakeDeferred()
+        .Build();
+
+    public readonly IResourceStore<FontHandle> FontResourceStore = new ResourceStoreBuilder<FontHandle>()
+        .AddLoaders(new Dictionary<string, Func<Stream, FontHandle>>
+        {
+            { "ttf", ResourceLoaders.LoadFont },
+        })
+        .AddFallback(fallback =>
+        {
+            fallback.AddFileSystemStore("Assets/Fonts/");
+            fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);
+        })
+        .MakeCached()
+        .MakeAsync()
+        .MakeDeferred()
+        .Build();
+
+    public readonly IResourceStore<ShaderHandle> ShaderResourceStore = new ResourceStoreBuilder<ShaderHandle>()
+        .AddLoaders(new Dictionary<string, Func<Stream, ShaderHandle>>
+        {
+            { "vsh", stream => ResourceLoaders.LoadShader(stream, ShaderType.Vertex) },
+            { "fsh", stream => ResourceLoaders.LoadShader(stream, ShaderType.Fragment) },
+        })
+        .AddFallback(fallback =>
+        {
+            fallback.AddFileSystemStore("Assets/Shaders/");
+            fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);
+        })
+        .MakeCached()
+        .MakeAsync()
+        .MakeDeferred()
+        .Build();
+
     public bool IsRunningInTestEnvironment => EnvUtils.IsRunningInTestEnvironment() || WindowTitle.Value == "Synesthesia Engine | Visual Tests";
 
     public bool CursorConsumed { get; private set; } // nom nom
 
     public Game()
     {
+        DependencyContainer.Add(SampleResourceStore);
+        DependencyContainer.Add(TextureResourceStore);
+        DependencyContainer.Add(FontResourceStore);
+        DependencyContainer.Add(ShaderResourceStore);
+
         EngineConfiguration.Load();
         DependencyContainer.Add(this);
 
@@ -92,7 +165,7 @@ public class Game : IDisposable
 
     private void updateCursorState()
     {
-        var renderThread = (RenderThread as RenderThreadRunner)!;
+        var renderThread = (RenderThread as RenderThread)!;
         bool shouldConsume = ConsumesCursor.Value &&
                              !holdingLeftAltToEscapeCursorConsume() &&
                              WindowsHost.WindowFocused.Value;
@@ -130,23 +203,11 @@ public class Game : IDisposable
     {
         try
         {
-            ResourceManager.RegisterLoader("vsh", ResourceLoaders.LoadVertexShader, true); // Vertex Shader
-            ResourceManager.RegisterLoader("fsh", ResourceLoaders.LoadFragmentShader, true); // Fragment Shader
-
-            ResourceManager.RegisterLoader("ttf", ResourceLoaders.LoadFont, true); // Default Font (unresolved until gl initialized)
-
-            ResourceManager.RegisterLoader("mp3", ResourceLoaders.LoadAudioSample);
-            ResourceManager.RegisterLoader("ogg", ResourceLoaders.LoadAudioSample);
-            ResourceManager.RegisterLoader("wav", ResourceLoaders.LoadAudioSample);
-
-            ResourceManager.CacheAll(SynesthesiaResources.AssemblyInfo.ResourceAssembly);
-            Logger.Debug($"Cached {ResourceManager.CachedSize} built-in engine resources, {ResourceManager.UnresolvedSize} waiting to be resolved, {ResourceManager.Size} total", Logger.Io);
-
             var loadSignal = new CountdownEvent(4);
             Action<ThreadRunner> onThreadLoaded = _ => loadSignal.Signal();
 
             UpdateThread = ThreadSafety.CreateThread(new UpdateThreadRunner(ThreadType.Update), ThreadSafety.THREAD_UPDATE, Defaults.UPDATE_RATE, this);
-            RenderThread = ThreadSafety.CreateThread(new RenderThreadRunner(ThreadType.Draw), ThreadSafety.THREAD_RENDER, Defaults.RENDERER_RATE, this);
+            RenderThread = ThreadSafety.CreateThread(new RenderThread(ThreadType.Draw), ThreadSafety.THREAD_RENDER, Defaults.RENDERER_RATE, this);
             InputThread = ThreadSafety.CreateThread(new InputThreadRunner(ThreadType.Input), ThreadSafety.THREAD_INPUT, Defaults.INPUT_RATE, this);
             AudioThread = ThreadSafety.CreateThread(new AudioThreadRunner(ThreadType.Audio), ThreadSafety.THREAD_AUDIO, Defaults.AUDIO_RATE, this);
 
@@ -155,18 +216,15 @@ public class Game : IDisposable
             InputThread.ThreadLoadedDispatcher.Subscribe(onThreadLoaded);
             AudioThread.ThreadLoadedDispatcher.Subscribe(onThreadLoaded);
 
-            DependencyContainer.Add((RenderThread as RenderThreadRunner)!);
-            DependencyContainer.Add((InputThread as InputThreadRunner)!);
-            DependencyContainer.Add((UpdateThread as UpdateThreadRunner)!);
-            DependencyContainer.Add((AudioThread as AudioThreadRunner)!);
-
             loadSignal.Wait();
 
             GameScheduler = new Scheduler();
-
-            EngineDebugOverlay.Load();
-            RootComposite2d.Load();
-            RootComposite3d.Load();
+            UpdateThread.Schedule(() =>
+            {
+                EngineDebugOverlay.Load();
+                RootComposite2d.Load();
+                RootComposite3d.Load();
+            });
 
             WindowsHost.WindowFocused.OnValueChange(_ => updateCursorState());
 
@@ -197,7 +255,6 @@ public class Game : IDisposable
         RenderThread.Dispose();
         UpdateThread.Dispose();
         AudioThread.Dispose();
-        ResourceManager.ClearCache();
         Logger.Debug("Game Disposed", Logger.Runtime);
         Environment.Exit(0);
     }

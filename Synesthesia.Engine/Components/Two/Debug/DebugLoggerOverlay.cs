@@ -42,7 +42,7 @@ public class DebugLoggerOverlay : CompositeDrawable2d
             }
         ];
 
-        loggerSubscriber = Logger.MESSAGE_LOGGED.Subscribe(Push);
+        // loggerSubscriber = Logger.MESSAGE_LOGGED.Subscribe(Push);
     }
 
     protected internal override void OnUpdate(FrameInfo frameInfo)
@@ -139,7 +139,7 @@ public class DebugLoggerOverlay : CompositeDrawable2d
                                     Prefix = $"{logEvent.Severity.Name} / {logEvent.Category.Name}",
                                     Color = ColorUtil.GetOrCacheColor(logEvent.Severity.DebugOverlayColor)
                                 },
-                                new TextDrawable
+                                new Text2d
                                 {
                                     AutoSizeAxes = Axes.Both,
                                     Anchor = Anchor.CentreLeft,
@@ -173,7 +173,7 @@ public class DebugLoggerOverlay : CompositeDrawable2d
                     BackgroundCornerRadius = 10,
                     Children =
                     [
-                        new TextDrawable
+                        new Text2d
                         {
                             Text = $" {Prefix} ",
                             Color = Color.White,

@@ -45,7 +45,7 @@ public class BarebonesProgressBar : CompositeDrawable2d
     public readonly Bindable<float> Progress = new(0.0f);
 
     private BackgroundContainer2d backgroundContainer = null!;
-    private DrawableBox2d box = null!;
+    private Box2d box = null!;
 
     private float lastProgressValue;
 
@@ -68,7 +68,7 @@ public class BarebonesProgressBar : CompositeDrawable2d
                 RelativeSizeAxes = Axes.Both,
                 Children =
                 [
-                    box = new DrawableBox2d
+                    box = new Box2d
                     {
                         RelativeSizeAxes = Axes.Y,
                         Color = Color.Red,

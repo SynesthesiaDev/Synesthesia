@@ -35,8 +35,8 @@ public class VisualTestsState(Optional<string> currentTest, bool autoRun)
 
     public static readonly StructCodec<VisualTestsState> CODEC = StructCodec.Of
     (
-        "currentlySelectedTest", Codecs.String.Optional(), v => v.CurrentlySelectedTest,
-        "runAutomatically", Codecs.Boolean, v => v.RunAutomatically,
+        "currentlySelectedTest", Codecs.STRING.Optional(), v => v.CurrentlySelectedTest,
+        "runAutomatically", Codecs.BOOLEAN, v => v.RunAutomatically,
         (currentlySelectedTest, runAutomatically) => new VisualTestsState(currentlySelectedTest, runAutomatically)
     );
 }
