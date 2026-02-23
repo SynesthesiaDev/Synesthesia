@@ -15,13 +15,13 @@ internal static class VisualTestRunner
 
     public static readonly List<VisualTestCategory> Tests =
     [
-        new("Containers", [typeof(ScrollableContainerTest)]),
+        new("Containers", [typeof(ScrollableContainerTest), typeof(ParallaxContainerTest)]),
         new("Audio", [typeof(SimpleAudioTest)]),
         new("Controls", [typeof(SliderTest), typeof(TextboxTest)]),
         new("Animations", [typeof(AnimationTest), typeof(ComplexContainerAnimationTest)]),
         new("Layout", [typeof(AnchorOriginTest), typeof(AutoSizeStackTest), typeof(RelativeSizeMarginTest), typeof(ShowcaseTest)]),
         new("Performance", [typeof(DrawableSpawnPerformanceTest), typeof(AnimationStormPerformanceTest)]),
-        new("Texture", [typeof(TextureFillModeTest)]),
+        new("Texture", [typeof(TextureFillModeTest), typeof(TextureBigTest)]),
         new("Platform", [typeof(WindowActiveStateTest)])
     ];
 

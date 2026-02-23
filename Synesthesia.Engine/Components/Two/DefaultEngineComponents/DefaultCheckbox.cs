@@ -203,13 +203,14 @@ public class DefaultCheckbox : CompositeDrawable2d, IDisablable
             {
                 if (e.NewValue)
                 {
+                    box.Visible = true;
                     box.ScaleTo(1f, 150, Easing.OutBack);
                 }
                 else
                 {
-                    box.ScaleTo(0f, 100, Easing.InBack);
+                    box.ScaleTo(0f, 100, Easing.InBack).ThenHide(box);
                 }
-            });
+            }, true);
 
             Hovered.OnValueChange(e =>
             {

@@ -61,6 +61,7 @@ public class Texture : IDisposable
         renderThread = DependencyContainer.Get<RenderThread>();
         this.pendingImage = pendingImage;
 
+        Rect = new Rectangle(0, 0, pendingImage.Width, pendingImage.Height);
         Filter = TextureFilter.Bilinear;
         Wrap = TextureWrap.Clamp;
     }

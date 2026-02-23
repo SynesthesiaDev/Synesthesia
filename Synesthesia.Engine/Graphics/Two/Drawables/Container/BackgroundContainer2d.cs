@@ -1,6 +1,7 @@
 using Raylib_cs;
 using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Animations.Easings;
+using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Graphics.Two.Drawables.Shapes;
 
 namespace Synesthesia.Engine.Graphics.Two.Drawables.Container;
@@ -10,6 +11,8 @@ public class BackgroundContainer2d : Container2d
     private static readonly Color empty_color = new(0, 0, 0, 0);
 
     public Color BackgroundColor { get; set; } = empty_color;
+
+    public Texture? BackgroundTexture { get; set; }
 
     public float BackgroundAlpha { get; set; } = 1f;
 

@@ -7,36 +7,56 @@ using Common.Util;
 using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Input;
-using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Utility;
 
 namespace Synesthesia.Engine.Graphics.Two.Drawables.Container;
 
-public class ParallaxContainer : Container2d
+public class ParallaxContainer : MaskingContainer2d
 {
     private const int parallax_duration = 500;
 
     public float Strength { get; set; } = 0.05f;
 
-    private Container2d content = null!;
+    private readonly Container2d content = new Container2d
+    {
+        RelativeSizeAxes = Axes.Both,
+        Anchor = Anchor.Centre,
+        Origin = Anchor.Centre
+    };
 
     public readonly Bindable<bool> Enabled = new(true);
 
-    private readonly StopwatchClock stopwatchClock = new(false);
+    public readonly Bindable<bool> HoverOnly = new(false);
+
+    private Vector2 lastPosition = Vector2.Zero;
+
+    public IEnumerable<Drawable2d> Content
+    {
+        get => content.Children;
+        set => content.Children = value.ToList();
+    }
 
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {
         base.OnUpdate(frameInfo);
 
         if (!Enabled.Value) return;
+        if (HoverOnly.Value && !Contains(InputManager.LastMousePosition))
+        {
+            lastPosition = Vector2.Zero;
+        }
+        else
+        {
+            lastPosition = InputManager.LastMousePosition;
+        }
 
         var half = Size / 2;
-        var relative = ToLocalSpace(InputManager.LastMousePosition) - half;
+        var relative = ToLocalSpace(lastPosition) - half;
 
         relative.X = (float)(Math.Sign(relative.X) * MathUtil.Damp(0, 1, .999f, Math.Abs(relative.X)));
         relative.Y = (float)(Math.Sign(relative.Y) * MathUtil.Damp(0, 1, .999f, Math.Abs(relative.Y)));
 
-        var elapsed = Math.Clamp(stopwatchClock.ElapsedMilliseconds, 0, parallax_duration);
+        var elapsed = Math.Clamp((int)frameInfo.Delta, 0, parallax_duration);
         content.Position = Transforms.VECTOR2.GetValueAt(elapsed, content.Position, relative * half * Strength, 0, parallax_duration, Easing.Out);
         content.Scale = Transforms.VECTOR2.GetValueAt(elapsed, content.Scale, new Vector2(1 + Math.Abs(Strength)), 0, parallax_duration, Easing.Out);
     }
@@ -45,9 +65,9 @@ public class ParallaxContainer : Container2d
     {
         Enabled.OnValueChange(e =>
         {
-            if (!e.NewValue) return;
+            if (e.NewValue) return;
             content.MoveTo(Vector2.Zero, parallax_duration, Easing.OutQuint);
-            content.ScaleTo(Vector2.Zero, parallax_duration, Easing.OutQuint);
+            content.ScaleTo(Vector2.One, parallax_duration, Easing.OutQuint);
         });
 
         base.LoadComplete();
@@ -57,14 +77,16 @@ public class ParallaxContainer : Container2d
     {
         Children =
         [
-            content = new Container2d
-            {
-                RelativeSizeAxes = Axes.Both,
-                Anchor = Anchor.Centre,
-                Origin = Anchor.Centre
-            }
+            content
         ];
 
         base.OnLoading();
+    }
+
+    protected override void Dispose(bool isDisposing)
+    {
+        HoverOnly.Dispose();
+        Enabled.Dispose();
+        base.Dispose(isDisposing);
     }
 }

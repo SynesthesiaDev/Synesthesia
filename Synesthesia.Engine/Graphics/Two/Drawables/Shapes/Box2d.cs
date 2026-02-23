@@ -35,7 +35,7 @@ public class Box2d : ColoredDrawable2d
         if (!(dirty.HasFlagFast(Invalidation.Geometry) | dirty.HasFlagFast(Invalidation.DrawNode))) return;
 
         boxRect = new Rectangle(Vector2.Zero, Size);
-        if (Texture == null || !Texture.IsUploaded)
+        if (Texture is not { IsUploaded: true })
         {
             textureRect = new Rectangle(Vector2.Zero, Vector2.Zero);
         }
