@@ -4,7 +4,6 @@
 using System.Numerics;
 using Common.Bindable;
 using Common.Util;
-using Raylib_cs;
 using Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Textures;
@@ -21,14 +20,14 @@ public class ParallaxContainerTest : VisualTest
 
     private ParallaxContainer parallaxContainer = null!;
 
-    private BindableFloat parallaxStrength = new()
+    private readonly BindableFloat parallaxStrength = new()
     {
         Min = 0.01f,
         Max = 1f,
         Default = 0.05f
     };
 
-    private Bindable<bool> parallaxMasking = new(true);
+    private readonly Bindable<bool> parallaxMasking = new(true);
 
     protected override void OnLoading()
     {
@@ -71,8 +70,6 @@ public class ParallaxContainerTest : VisualTest
                         Spacing = 10f,
                         Children =
                         [
-                            // new ParallaxSettingButton("Enabled", () => parallaxContainer.Enabled.Value = !parallaxContainer.Enabled.Value),
-                            // new ParallaxSettingButton("HoverOnly", () => parallaxContainer.HoverOnly = !parallaxContainer.HoverOnly),
                             new DefaultCheckbox
                             {
                                 Text = "Enabled",
@@ -124,26 +121,10 @@ public class ParallaxContainerTest : VisualTest
         base.OnLoading();
     }
 
-    private class ParallaxSettingButton : DefaultButton
-    {
-        public ParallaxSettingButton(string text, Action onClick)
-        {
-            ColorCombination = DefaultEngineColorCombination.ACCENT;
-
-            Anchor = Anchor.CentreLeft;
-            Origin = Anchor.CentreLeft;
-            Size = new Vector2(120, 40);
-
-            TextColor = Color.Black;
-
-            Text = text;
-            OnClick = onClick;
-        }
-    }
-
     protected override void Dispose(bool isDisposing)
     {
         parallaxStrength.Dispose();
+        parallaxMasking.Dispose();
         base.Dispose(isDisposing);
     }
 }

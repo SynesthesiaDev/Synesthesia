@@ -1,14 +1,18 @@
+using System.Numerics;
 using Common.Bindable;
 using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Animations.Easings;
+using Synesthesia.Engine.Graphics.Font;
 using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
 using Synesthesia.Engine.Graphics.Two.Drawables.Shapes;
 using Synesthesia.Engine.Graphics.Two.Drawables.Text;
 using Synesthesia.Engine.Input;
+using Synesthesia.Engine.Utility;
+using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Components.Barebones;
 
@@ -16,13 +20,27 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
 {
     public required Func<AbstractTextboxCaret> Caret { get; init; }
 
+    private static readonly Color selection_color = Color.Blue;
+    private const float selection_alpha = 0.5f;
+
     public readonly Bindable<string> Text = new(string.Empty);
 
     private const long initial_repeat_delay = 500;
     private const long repeat_rate = 50;
 
-    private bool backspaceHeld;
-    private long backspacePressTime = -1L;
+    private int caretPosition;
+
+    private int selectionStart;
+
+    public bool HasSelection => selectionStart != caretPosition;
+
+    private int selectionLow => Math.Min(selectionStart, caretPosition);
+
+    private int selectionHigh => Math.Max(selectionStart, caretPosition);
+
+    private KeyboardKey? heldKey;
+
+    private long heldKeyPressTime = -1L;
 
     public bool IsFocused { get; set; }
 
@@ -32,20 +50,22 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
 
     public AbstractTextboxCaret CaretDrawable = null!;
 
+    private Box2d selectionBox = null!;
+
     protected override void OnLoading()
     {
         Children =
         [
-            new FillFlowContainer2d
+            selectionBox = new Box2d
             {
-                RelativeSizeAxes = Axes.Both,
-                Spacing = 1,
-                Children =
-                [
-                    Text2d = new Text2d { Text = string.Empty },
-                    CaretDrawable = Caret.Invoke(),
-                ]
-            }
+                RelativeSizeAxes = Axes.Y,
+                Color = selection_color,
+                Alpha = 0,
+                Width = 0,
+                Position = new Vector2(0, 0)
+            },
+            Text2d = new Text2d { Text = string.Empty },
+            CaretDrawable = Caret.Invoke()
         ];
 
         CaretDrawable.Alpha = 0;
@@ -53,34 +73,200 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
 
     protected override void LoadComplete()
     {
-        Text.OnValueChange(e => Text2d.Text = e.NewValue);
+        Text.OnValueChange(e =>
+        {
+            Text2d.Text = e.NewValue;
+            updateVisualState();
+        });
 
         Scheduler.Value.Repeating(repeat_rate, _ =>
         {
             var now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            if (backspaceHeld && now - backspacePressTime >= initial_repeat_delay)
+
+            if (heldKey.HasValue && now - heldKeyPressTime >= initial_repeat_delay)
             {
-                Text.Value = Text.Value.RemoveLastN(1);
+                var shift = KeyboardKey.LeftShift.IsDown() || KeyboardKey.RightShift.IsDown();
+                handleNavigationKey(heldKey.Value, shift);
             }
         });
     }
 
+
+    private void moveCaret(int newPosition, bool extendSelection)
+    {
+        newPosition = Math.Clamp(newPosition, 0, Text.Value.Length);
+        if (!extendSelection) selectionStart = newPosition;
+
+        caretPosition = newPosition;
+        updateVisualState();
+    }
+
+    private void setCaret(int position)
+    {
+        position = Math.Clamp(position, 0, Text.Value.Length);
+        caretPosition = position;
+        selectionStart = position;
+        updateVisualState();
+    }
+
+    private void insertAtCaret(string text)
+    {
+        if (HasSelection) deleteSelection();
+
+        var pos = caretPosition;
+        Text.Value = Text.Value[..caretPosition] + text;
+        setCaret(pos + text.Length);
+        updateVisualState();
+    }
+
+    private void deleteSelection()
+    {
+        var startPos = selectionLow;
+        var endPos = selectionHigh;
+        setCaret(startPos);
+        Text.Value = Text.Value[..startPos] + Text.Value[endPos..];
+    }
+
+    private void deleteForward()
+    {
+        if (HasSelection)
+        {
+            deleteSelection();
+            return;
+        }
+
+        if (caretPosition == Text.Value.Length) return;
+        Text.Value = Text.Value[..caretPosition] + Text.Value[(caretPosition + 1)..];
+    }
+
+    private void deleteBackwards()
+    {
+        if (HasSelection)
+        {
+            deleteSelection();
+            return;
+        }
+
+        if (caretPosition == 0) return;
+        var pos = caretPosition - 1;
+        setCaret(pos);
+        Text.Value = Text.Value[..pos] + Text.Value[(pos + 1)..];
+    }
+
+    private void handleNavigationKey(KeyboardKey key, bool shift)
+    {
+        switch (key)
+        {
+            case KeyboardKey.Left:
+            {
+                if (HasSelection && !shift)
+                {
+                    setCaret(selectionLow);
+                }
+                else
+                {
+                    moveCaret(caretPosition - 1, shift);
+                }
+
+                break;
+            }
+            case KeyboardKey.Right:
+            {
+                if (HasSelection && !shift)
+                {
+                    setCaret(selectionHigh);
+                }
+                else
+                {
+                    moveCaret(caretPosition + 1, shift);
+                }
+
+                break;
+            }
+            case KeyboardKey.Backspace:
+            {
+                deleteBackwards();
+                break;
+            }
+            case KeyboardKey.Delete:
+            {
+                deleteForward();
+                break;
+            }
+        }
+
+        updateVisualState();
+    }
+
     public void OnCharacterTyped(char character)
     {
-        Text.Value += character;
+        insertAtCaret(character.ToString());
+    }
+
+    private void updateVisualState()
+    {
+        if (Text2d?.Font is null) return;
+
+        float fontSize = Text2d.FontSize;
+        float spacing = Text2d.Spacing;
+        var font = Text2d.Font;
+        var text = Text.Value;
+
+        float caretX = measurePartialText(font, text, caretPosition, fontSize, spacing);
+        var newCaretPos = CaretDrawable.Position with { X = caretX };
+        CaretDrawable.MoveTo(newCaretPos, 50, Easing.OutCirc);
+
+        if (HasSelection && !text.IsEmpty())
+        {
+            float selLowX = measurePartialText(font, text, selectionLow, fontSize, spacing);
+            float selHighX = measurePartialText(font, text, selectionHigh, fontSize, spacing);
+
+            var newSelectionPos = selectionBox.Position with { X = selLowX };
+            selectionBox.MoveTo(newSelectionPos, 100, Easing.OutCirc);
+
+            selectionBox.ResizeWidthTo(selHighX - selLowX, 100, Easing.OutCirc);
+            selectionBox.FadeTo(selection_alpha, 100, Easing.OutCirc);
+        }
+        else
+        {
+            selectionBox.Alpha = 0f;
+        }
+    }
+
+    private static float measurePartialText(FontHandle font, string text, int charCount, float fontSize, float spacing)
+    {
+        if (charCount <= 0) return 0f;
+        var partial = text[..charCount];
+        return Raylib.MeasureTextEx(font.NativeFont, partial, fontSize, spacing).X;
     }
 
     protected internal override bool OnKeyDown(KeyboardKey e)
     {
+        var shift = KeyboardKey.LeftShift.IsDown() || KeyboardKey.RightShift.IsDown();
+        var ctrl = KeyboardKey.LeftControl.IsDown() || KeyboardKey.RightControl.IsDown();
+
         switch (e)
         {
+            case KeyboardKey.Left:
+            case KeyboardKey.Right:
             case KeyboardKey.Backspace:
+            case KeyboardKey.Delete:
             {
-                backspaceHeld = true;
-                backspacePressTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                Text.Value = Text.Value.RemoveLastN(1);
+                heldKey = e;
+                heldKeyPressTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                handleNavigationKey(e, shift);
                 return true;
             }
+
+            case KeyboardKey.A when ctrl:
+            {
+                selectionBox.Width = 0;
+                selectionStart = Text.Value.Length;
+                caretPosition = 0;
+                updateVisualState();
+                return true;
+            }
+
             case KeyboardKey.Enter:
             {
                 InputManager.FocusedDrawable = null;
@@ -93,7 +279,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
 
     protected internal override void OnKeyUp(KeyboardKey e)
     {
-        if (e == KeyboardKey.Backspace) backspaceHeld = false;
+        if (heldKey == e) heldKey = null;
         base.OnKeyUp(e);
     }
 
@@ -125,7 +311,8 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
     {
         public const long BLINKING_SPEED = 500; //half a second is the standard
 
-        public Easing BlinkingEasing { get; set; } = Easing.OutCubic;
+        public Easing BlinkingEasingIn { get; set; } = Easing.InCubic;
+        public Easing BlinkingEasingOut { get; set; } = Easing.OutCubic;
 
         private Box2d caretBox = null!;
 
@@ -147,8 +334,8 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
         protected override void LoadComplete()
         {
             var animationSequence = new AnimationSequence.Builder()
-                .Add(caretBox.FadeFromTo(1f, 0f, BLINKING_SPEED, BlinkingEasing))
-                .Add(caretBox.FadeFromTo(0f, 1f, BLINKING_SPEED, BlinkingEasing))
+                .Add(caretBox.FadeFromTo(1f, 0f, BLINKING_SPEED, BlinkingEasingIn))
+                .Add(caretBox.FadeFromTo(0f, 1f, BLINKING_SPEED, BlinkingEasingOut))
                 .IsLooping(true)
                 .Build();
 
