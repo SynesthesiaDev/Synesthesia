@@ -26,6 +26,9 @@ public static class Transforms
     public static readonly Transform<float> FLOAT =
         new FloatTransform((start, end, progress) => start + (end - start) * progress);
 
+    public static readonly Transform<double> DOUBLE =
+        new DoubleTransform((start, end, progress) => start + (end - start) * progress);
+
     public static readonly Transform<int> INT =
         new IntTransform((start, end, progress) => (int)(start + (end - start) * progress));
 
@@ -56,6 +59,11 @@ public static class Transforms
     public class FloatTransform(Func<float, float, float, float> transform) : Transform<float>
     {
         public override float Apply(float startValue, float endValue, float progress) => transform(startValue, endValue, progress);
+    }
+
+    public class DoubleTransform(Func<double, double, double, double> transform) : Transform<double>
+    {
+        public override double Apply(double startValue, double endValue, float progress) => transform(startValue, endValue, progress);
     }
 
     public class IntTransform(Func<int, int, float, int> transform) : Transform<int>

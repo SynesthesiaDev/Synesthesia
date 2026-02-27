@@ -4,14 +4,17 @@
 using System.Numerics;
 using Common.Bindable;
 using Common.Util;
+using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Configuration;
+using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two.Drawables.Container;
 
 public class ScrollableContainer : MaskingContainer2d
 {
     private const int scrollbar_container_width = 10;
+    private const float layout_buffer = 10f;
 
     public Direction ScrollDirection { get; set; } = Direction.Vertical;
 
@@ -38,7 +41,7 @@ public class ScrollableContainer : MaskingContainer2d
         get => contentExtendsContainer;
         set
         {
-            if(contentExtendsContainer == value) return;
+            if (contentExtendsContainer == value) return;
             contentExtendsContainer = value;
             updateScrollBarState();
         }
@@ -47,7 +50,6 @@ public class ScrollableContainer : MaskingContainer2d
     private Container2d viewport { get; } = new BackgroundContainer2d
     {
         RelativeSizeAxes = Axes.Both,
-        BackgroundColor = Defaults.BACKGROUND0
     };
 
     private Container2d scrollableContainer { get; } = new()
@@ -97,22 +99,26 @@ public class ScrollableContainer : MaskingContainer2d
         ];
     }
 
+    private double extent
+    {
+        get
+        {
+            var contentSize = scrollableContainer.GetChildrenSize();
+            return ScrollDirection == Direction.Vertical
+                ? Math.Max(0.0, contentSize.Y - Size.Y)
+                : Math.Max(0.0, (contentSize.X + layout_buffer) - Size.X);
+        }
+    }
+
     protected override void LoadComplete()
     {
         currentScrollPosition.OnValueChange(e =>
         {
-            var contentSize = scrollableContainer.GetChildrenSize();
-            var extent = ScrollDirection == Direction.Vertical
-                ? Math.Max(0.0, contentSize.Y - Size.Y)
-                : Math.Max(0.0, contentSize.X - Size.X);
-
             var scrollValue = extent <= 0.0 ? 0.0 : Math.Clamp(e.NewValue, 0.0, extent);
 
             var newPosition = ScrollDirection == Direction.Vertical
                 ? new Vector2(0f, -(float)scrollValue)
                 : new Vector2(-(float)scrollValue, 0f);
-
-            scrollableContainer.MoveTo(newPosition, 350, Easing.OutQuart);
         });
     }
 
@@ -120,13 +126,32 @@ public class ScrollableContainer : MaskingContainer2d
 
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {
-        if (lastChildrenSize != scrollableContainer.GetChildrenSize())
+        var currentSize = scrollableContainer.GetChildrenSize();
+        if (lastChildrenSize != currentSize)
         {
-            lastChildrenSize = scrollableContainer.GetChildrenSize();
-            if (ScrollPosition > MaxScrollPosition)
-            {
-                ScrollTo(MaxScrollPosition);
-            }
+            lastChildrenSize = currentSize;
+            if (currentScrollPosition.Value > MaxScrollPosition)
+                currentScrollPosition.Value = MaxScrollPosition;
+        }
+
+        var targetPos = ScrollDirection == Direction.Vertical
+            ? new Vector2(0f, -(float)currentScrollPosition.Value)
+            : new Vector2(-(float)currentScrollPosition.Value, 0f);
+
+        if (Vector2.Distance(scrollableContainer.Position, targetPos) > 0.1f)
+        {
+            scrollableContainer.Position = Transforms.VECTOR2.GetValueAt(
+                frameInfo.Delta.ToFloat(),
+                scrollableContainer.Position,
+                targetPos,
+                0,
+                currentAnimationLength,
+                Easing.OutCubic
+            );
+        }
+        else
+        {
+            scrollableContainer.Position = targetPos;
         }
 
         base.OnUpdate(frameInfo);
@@ -134,33 +159,20 @@ public class ScrollableContainer : MaskingContainer2d
 
     public void ResetScrollPosition() => ScrollTo(0.0);
 
-    public void ScrollBy(double amount) => ScrollTo(currentScrollPosition.Value + amount);
+    public void ScrollBy(double amount, int animationLenght = 350) => ScrollTo(currentScrollPosition.Value + amount, animationLenght);
 
-    public double MaxScrollPosition
-    {
-        get
-        {
-            var contentSize = scrollableContainer.GetChildrenSize();
-            var extent = ScrollDirection == Direction.Vertical
-                ? Math.Max(0.0, contentSize.Y - Size.Y)
-                : Math.Max(0.0, contentSize.X - Size.X);
+    public double MaxScrollPosition => extent;
 
-            return extent;
-        }
-    }
+    private int currentAnimationLength = 350;
 
     public void RemoveScrollChild(Drawable2d child)
     {
         scrollableContainer.RemoveChild(child);
     }
 
-    public void ScrollTo(double amount)
+    public void ScrollTo(double amount, int animationLength = 350)
     {
-        var contentSize = scrollableContainer.GetChildrenSize();
-        var extent = ScrollDirection == Direction.Vertical
-            ? Math.Max(0.0, contentSize.Y - Size.Y)
-            : Math.Max(0.0, contentSize.X - Size.X);
-
+        currentAnimationLength = animationLength;
         currentScrollPosition.Value = Math.Clamp(amount, 0.0, extent);
     }
 

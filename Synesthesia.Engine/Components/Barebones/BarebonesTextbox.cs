@@ -1,5 +1,6 @@
 using System.Numerics;
 using Common.Bindable;
+using Common.Event;
 using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Animations;
@@ -25,6 +26,8 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
 
     public readonly Bindable<string> Text = new(string.Empty);
 
+    public readonly EventDispatcher<string> OnCommit = Pooled.STRING_DISPATCHER_POOL.Rent();
+
     private const long initial_repeat_delay = 500;
     private const long repeat_rate = 50;
 
@@ -33,6 +36,8 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
     private int selectionStart;
 
     public bool HasSelection => selectionStart != caretPosition;
+
+    public string SelectedText => HasSelection ? Text.Value[selectionLow..selectionHigh] : string.Empty;
 
     private int selectionLow => Math.Min(selectionStart, caretPosition);
 
@@ -52,20 +57,30 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
 
     private Box2d selectionBox = null!;
 
+    private ScrollableContainer scrollableContainer = null!;
+
     protected override void OnLoading()
     {
         Children =
         [
-            selectionBox = new Box2d
+            scrollableContainer = new ScrollableContainer
             {
-                RelativeSizeAxes = Axes.Y,
-                Color = selection_color,
-                Alpha = 0,
-                Width = 0,
-                Position = new Vector2(0, 0)
+                RelativeSizeAxes = Axes.Both,
+                ScrollDirection = Direction.Horizontal,
+                ScrollContent =
+                [
+                    selectionBox = new Box2d
+                    {
+                        RelativeSizeAxes = Axes.Y,
+                        Color = selection_color,
+                        Alpha = 0,
+                        Width = 0,
+                        Position = new Vector2(0, 0)
+                    },
+                    Text2d = new Text2d { Text = string.Empty },
+                    CaretDrawable = Caret.Invoke()
+                ]
             },
-            Text2d = new Text2d { Text = string.Empty },
-            CaretDrawable = Caret.Invoke()
         ];
 
         CaretDrawable.Alpha = 0;
@@ -205,7 +220,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
 
     private void updateVisualState()
     {
-        if (Text2d?.Font is null) return;
+        if (Text2d.Font is null) return;
 
         float fontSize = Text2d.FontSize;
         float spacing = Text2d.Spacing;
@@ -215,6 +230,8 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
         float caretX = measurePartialText(font, text, caretPosition, fontSize, spacing);
         var newCaretPos = CaretDrawable.Position with { X = caretX };
         CaretDrawable.MoveTo(newCaretPos, 50, Easing.OutCirc);
+
+        scrollToCaret(caretX);
 
         if (HasSelection && !text.IsEmpty())
         {
@@ -230,6 +247,24 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
         else
         {
             selectionBox.Alpha = 0f;
+
+        }
+    }
+
+    private void scrollToCaret(float caretX)
+    {
+        var viewportWidth = scrollableContainer.Width;
+
+        var currentScroll = scrollableContainer.ScrollPosition;
+        var padding = 20f;
+
+        if (caretX > currentScroll + viewportWidth - padding)
+        {
+            scrollableContainer.ScrollTo(caretX - viewportWidth + padding, 100);
+        }
+        else if (caretX < currentScroll + padding)
+        {
+            scrollableContainer.ScrollTo(Math.Max(0, caretX - padding), 100);
         }
     }
 
@@ -261,8 +296,8 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
             case KeyboardKey.A when ctrl:
             {
                 selectionBox.Width = 0;
-                selectionStart = Text.Value.Length;
-                caretPosition = 0;
+                selectionStart = 0;
+                caretPosition = Text.Value.Length;
                 updateVisualState();
                 return true;
             }
@@ -293,11 +328,15 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
     {
         IsFocused = false;
         CaretDrawable.Hide();
+        selectionStart = caretPosition;
+        updateVisualState();
+        OnCommit.Dispatch(Text.Value);
     }
 
     protected override void Dispose(bool isDisposing)
     {
         Text.Dispose();
+        if(OnCommit.IsPooled) Pooled.STRING_DISPATCHER_POOL.Return(OnCommit);
         base.Dispose(isDisposing);
     }
 

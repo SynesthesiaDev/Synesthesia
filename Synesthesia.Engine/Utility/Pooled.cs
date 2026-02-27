@@ -10,4 +10,5 @@ namespace Synesthesia.Engine.Utility;
 public static class Pooled
 {
     public static readonly FastObjectPool<SingleOffEventDispatcher<Drawable>> DRAWABLE_LOAD_DISPATCHER_POOL = new FastObjectPool<SingleOffEventDispatcher<Drawable>>(() => new SingleOffEventDispatcher<Drawable>(), 500);
+    public static readonly FastObjectPool<EventDispatcher<string>> STRING_DISPATCHER_POOL = new FastObjectPool<EventDispatcher<string>>(() => new EventDispatcher<string>(), 1);
 }

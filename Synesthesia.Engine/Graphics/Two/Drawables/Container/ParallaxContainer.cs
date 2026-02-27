@@ -13,9 +13,9 @@ namespace Synesthesia.Engine.Graphics.Two.Drawables.Container;
 
 public class ParallaxContainer : MaskingContainer2d
 {
-    private const int parallax_duration = 500;
-
     public float Strength { get; set; } = 0.05f;
+
+    public long Duration { get; set; } = 500;
 
     private readonly Container2d content = new Container2d
     {
@@ -56,9 +56,9 @@ public class ParallaxContainer : MaskingContainer2d
         relative.X = (float)(Math.Sign(relative.X) * MathUtil.Damp(0, 1, .999f, Math.Abs(relative.X)));
         relative.Y = (float)(Math.Sign(relative.Y) * MathUtil.Damp(0, 1, .999f, Math.Abs(relative.Y)));
 
-        var elapsed = Math.Clamp((int)frameInfo.Delta, 0, parallax_duration);
-        content.Position = Transforms.VECTOR2.GetValueAt(elapsed, content.Position, relative * half * Strength, 0, parallax_duration, Easing.Out);
-        content.Scale = Transforms.VECTOR2.GetValueAt(elapsed, content.Scale, new Vector2(1 + Math.Abs(Strength)), 0, parallax_duration, Easing.Out);
+        var elapsed = Math.Clamp((int)frameInfo.Delta, 0, Duration);
+        content.Position = Transforms.VECTOR2.GetValueAt(elapsed, content.Position, relative * half * Strength, 0, Duration, Easing.Out);
+        content.Scale = Transforms.VECTOR2.GetValueAt(elapsed, content.Scale, new Vector2(1 + Math.Abs(Strength)), 0, Duration, Easing.Out);
     }
 
     protected override void LoadComplete()
@@ -66,8 +66,8 @@ public class ParallaxContainer : MaskingContainer2d
         Enabled.OnValueChange(e =>
         {
             if (e.NewValue) return;
-            content.MoveTo(Vector2.Zero, parallax_duration, Easing.OutQuint);
-            content.ScaleTo(Vector2.One, parallax_duration, Easing.OutQuint);
+            content.MoveTo(Vector2.Zero, Duration, Easing.OutQuint);
+            content.ScaleTo(Vector2.One, Duration, Easing.OutQuint);
         });
 
         base.LoadComplete();

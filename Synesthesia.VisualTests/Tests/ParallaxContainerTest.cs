@@ -27,6 +27,13 @@ public class ParallaxContainerTest : VisualTest
         Default = 0.05f
     };
 
+    private readonly BindableFloat parallaxDuration = new()
+    {
+        Min = 1f,
+        Max = 1000f,
+        Default = 500f
+    };
+
     private readonly Bindable<bool> parallaxMasking = new(true);
 
     protected override void OnLoading()
@@ -108,6 +115,19 @@ public class ParallaxContainerTest : VisualTest
                                     Size = new Vector2(240, 40),
                                 },
                                 Label = "Strength"
+                            },
+                            new LabelledSliderBar
+                            {
+                                Size = new Vector2(350, 40),
+                                Anchor = Anchor.TopCentre,
+                                Origin = Anchor.TopCentre,
+                                SliderBar = new DefaultSliderBar
+                                {
+                                    Current = parallaxDuration,
+                                    Size = new Vector2(240, 40),
+                                    Precision = 1
+                                },
+                                Label = "Duration",
                             }
                         ]
                     }
@@ -116,6 +136,7 @@ public class ParallaxContainerTest : VisualTest
         ];
 
         parallaxStrength.OnValueChange(e => parallaxContainer.Strength = e.NewValue);
+        parallaxDuration.OnValueChange(e => parallaxContainer.Duration = (long)e.NewValue);
         parallaxMasking.OnValueChange(e => parallaxContainer.Masking = e.NewValue);
 
         base.OnLoading();
@@ -125,6 +146,7 @@ public class ParallaxContainerTest : VisualTest
     {
         parallaxStrength.Dispose();
         parallaxMasking.Dispose();
+        parallaxDuration.Dispose();
         base.Dispose(isDisposing);
     }
 }

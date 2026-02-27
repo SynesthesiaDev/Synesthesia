@@ -7,6 +7,19 @@ namespace Synesthesia.Engine.Utility;
 
 public static class MathUtil
 {
+    public static string LerpString(string text, float time)
+    {
+        var charsToShow = (int)MathF.Floor(text.Length * Math.Clamp(time, 0f, 1f));
+        return text[..charsToShow];
+    }
+
+    public static char GetCharAtTime(string text, float time)
+    {
+        if (string.IsNullOrEmpty(text)) return ' ';
+        var index = (int)MathF.Floor((text.Length - 1f) * Math.Clamp(time, 0f, 1f));
+        return text[index];
+    }
+
     public static double Lerp(double start, double final, double amount) => start + (final - start) * amount;
 
     public static double Damp(double start, double final, double @base, double exponent)
