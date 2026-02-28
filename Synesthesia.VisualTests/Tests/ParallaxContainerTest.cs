@@ -4,7 +4,6 @@
 using System.Numerics;
 using Common.Bindable;
 using Common.Util;
-using Raylib_cs;
 using Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Textures;
@@ -21,14 +20,21 @@ public class ParallaxContainerTest : VisualTest
 
     private ParallaxContainer parallaxContainer = null!;
 
-    private BindableFloat parallaxStrength = new()
+    private readonly BindableFloat parallaxStrength = new()
     {
         Min = 0.01f,
         Max = 1f,
         Default = 0.05f
     };
 
-    private Bindable<bool> parallaxMasking = new(true);
+    private readonly BindableFloat parallaxDuration = new()
+    {
+        Min = 1f,
+        Max = 1000f,
+        Default = 500f
+    };
+
+    private readonly Bindable<bool> parallaxMasking = new(true);
 
     protected override void OnLoading()
     {
@@ -71,8 +77,6 @@ public class ParallaxContainerTest : VisualTest
                         Spacing = 10f,
                         Children =
                         [
-                            // new ParallaxSettingButton("Enabled", () => parallaxContainer.Enabled.Value = !parallaxContainer.Enabled.Value),
-                            // new ParallaxSettingButton("HoverOnly", () => parallaxContainer.HoverOnly = !parallaxContainer.HoverOnly),
                             new DefaultCheckbox
                             {
                                 Text = "Enabled",
@@ -111,6 +115,19 @@ public class ParallaxContainerTest : VisualTest
                                     Size = new Vector2(240, 40),
                                 },
                                 Label = "Strength"
+                            },
+                            new LabelledSliderBar
+                            {
+                                Size = new Vector2(350, 40),
+                                Anchor = Anchor.TopCentre,
+                                Origin = Anchor.TopCentre,
+                                SliderBar = new DefaultSliderBar
+                                {
+                                    Current = parallaxDuration,
+                                    Size = new Vector2(240, 40),
+                                    Precision = 1
+                                },
+                                Label = "Duration",
                             }
                         ]
                     }
@@ -119,31 +136,17 @@ public class ParallaxContainerTest : VisualTest
         ];
 
         parallaxStrength.OnValueChange(e => parallaxContainer.Strength = e.NewValue);
+        parallaxDuration.OnValueChange(e => parallaxContainer.Duration = (long)e.NewValue);
         parallaxMasking.OnValueChange(e => parallaxContainer.Masking = e.NewValue);
 
         base.OnLoading();
     }
 
-    private class ParallaxSettingButton : DefaultButton
-    {
-        public ParallaxSettingButton(string text, Action onClick)
-        {
-            ColorCombination = DefaultEngineColorCombination.ACCENT;
-
-            Anchor = Anchor.CentreLeft;
-            Origin = Anchor.CentreLeft;
-            Size = new Vector2(120, 40);
-
-            TextColor = Color.Black;
-
-            Text = text;
-            OnClick = onClick;
-        }
-    }
-
     protected override void Dispose(bool isDisposing)
     {
         parallaxStrength.Dispose();
+        parallaxMasking.Dispose();
+        parallaxDuration.Dispose();
         base.Dispose(isDisposing);
     }
 }

@@ -209,7 +209,7 @@ public class Game : IDisposable
             UpdateThread = ThreadSafety.CreateThread(new UpdateThreadRunner(ThreadType.Update), ThreadSafety.THREAD_UPDATE, Defaults.UPDATE_RATE, this);
             RenderThread = ThreadSafety.CreateThread(new RenderThread(ThreadType.Draw), ThreadSafety.THREAD_RENDER, Defaults.RENDERER_RATE, this);
             InputThread = ThreadSafety.CreateThread(new InputThreadRunner(ThreadType.Input), ThreadSafety.THREAD_INPUT, Defaults.INPUT_RATE, this);
-            AudioThread = ThreadSafety.CreateThread(new AudioThreadRunner(ThreadType.Audio), ThreadSafety.THREAD_AUDIO, Defaults.AUDIO_RATE, this);
+            AudioThread = ThreadSafety.CreateThread(new AudioThread(ThreadType.Audio), ThreadSafety.THREAD_AUDIO, Defaults.AUDIO_RATE, this);
 
             UpdateThread.ThreadLoadedDispatcher.Subscribe(onThreadLoaded);
             RenderThread.ThreadLoadedDispatcher.Subscribe(onThreadLoaded);

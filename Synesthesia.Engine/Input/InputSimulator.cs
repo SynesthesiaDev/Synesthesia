@@ -12,13 +12,31 @@ public static class InputSimulator
 {
     private static DragSimulation? currentDragSimulation;
 
+    private static TypingSimulation? currentTypingSimulation;
+
     public static bool SimulatingInput => currentDragSimulation != null;
+
+    public static void SimulateKeyboard(KeyboardKey key, bool isDown)
+    {
+        InputManager.EnqueueEvent(new KeyInputEvent
+        {
+            Key = key,
+            IsDown = isDown,
+            Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+        });
+    }
+
+    public static void SimulateKeyboardPress(KeyboardKey key)
+    {
+        SimulateKeyboard(key, true);
+        SimulateKeyboard(key, false);
+    }
 
     public static void SimulateMove(Vector2 position)
     {
         var mouseEvent = new MouseMoveInputEvent
         {
-            Timestamp = DateTimeOffset.Now.Millisecond,
+            Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
             Position = position,
             PositionDelta = Vector2.Zero
         };
@@ -26,13 +44,37 @@ public static class InputSimulator
         InputManager.EnqueueEvent(mouseEvent);
     }
 
+    public static void SimulateTextInput(char character)
+    {
+        InputManager.EnqueueEvent(new TextInputEvent
+        {
+            Character = character,
+            Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+        });
+    }
+
+    public static void SimulateTyping(string text, double time)
+    {
+        if (time < 0) throw new ArgumentException("Time must be non-negative", nameof(time));
+
+        currentTypingSimulation = new TypingSimulation(text, time);
+    }
+
     public static void SimulateClickState(MouseButton mouseButton, bool down)
     {
         InputManager.EnqueueEvent(new MouseButtonInputEvent
         {
             Button = mouseButton,
-            IsDown = down
+            IsDown = down,
+            Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
         });
+    }
+
+    public static void SimulateClick(MouseButton mouseButton, Vector2 position)
+    {
+        SimulateMove(position);
+        SimulateClickState(mouseButton, true);
+        SimulateClickState(mouseButton, false);
     }
 
     public static void SimulateClick(MouseButton mouseButton = MouseButton.Left)
@@ -52,30 +94,78 @@ public static class InputSimulator
     {
         var delta = frameInfo.Delta;
 
-        if (currentDragSimulation == null) return;
-
-        if (!currentDragSimulation.Started)
+        if (currentTypingSimulation != null)
         {
-            // Start the drag
-            SimulateMove(currentDragSimulation.Start);
-            SimulateClickState(currentDragSimulation.Button, true);
-            currentDragSimulation.Started = true;
+            if (!currentTypingSimulation.Started)
+            {
+                currentTypingSimulation.Started = true;
+            }
+
+            currentTypingSimulation.Elapsed += delta;
+
+            if (currentTypingSimulation.IsComplete())
+            {
+                currentTypingSimulation = null;
+            }
+            else
+            {
+                var next = currentTypingSimulation.GetNextCharIfChanged();
+                if(next != null) SimulateTextInput(next.Value);
+            }
         }
 
-        currentDragSimulation.Elapsed += delta;
+        if (currentDragSimulation != null)
+        {
+            if (!currentDragSimulation.Started)
+            {
+                SimulateMove(currentDragSimulation.Start);
+                SimulateClickState(currentDragSimulation.Button, true);
+                currentDragSimulation.Started = true;
+            }
 
-        if (currentDragSimulation.IsComplete())
-        {
-            // Complete the drag
-            SimulateMove(currentDragSimulation.End);
-            SimulateClickState(currentDragSimulation.Button, false);
-            currentDragSimulation = null;
+            currentDragSimulation.Elapsed += delta;
+
+            if (currentDragSimulation.IsComplete())
+            {
+                SimulateMove(currentDragSimulation.End);
+                SimulateClickState(currentDragSimulation.Button, false);
+                currentDragSimulation = null;
+            }
+            else
+            {
+                var currentPosition = currentDragSimulation.GetCurrentPosition();
+                SimulateMove(currentPosition);
+            }
         }
-        else
+    }
+
+    private class TypingSimulation(string text, double duration)
+    {
+        public string Target { get; set; } = text;
+
+        public double Elapsed { get; set; }
+
+        public bool Started { get; set; }
+
+        private int lastIndex = -1;
+        public double Duration { get; } = duration;
+
+        public bool IsComplete() => Elapsed >= Duration;
+
+        public char? GetNextCharIfChanged()
         {
-            // Update position during drag
-            var currentPosition = currentDragSimulation.GetCurrentPosition();
-            SimulateMove(currentPosition);
+            if (string.IsNullOrEmpty(Target)) return null;
+
+            float time = (float)(Elapsed / Duration);
+            int currentIndex = Math.Clamp((int)(Target.Length * time), 0, Target.Length - 1);
+
+            if (currentIndex > lastIndex)
+            {
+                lastIndex = currentIndex;
+                return Target[currentIndex];
+            }
+
+            return null;
         }
     }
 
