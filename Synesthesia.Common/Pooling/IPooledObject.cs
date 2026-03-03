@@ -10,5 +10,4 @@ public interface IPooledObject
     bool IsPooled { get; set; }
 
     Action<IPooledObject>? ReturnAction { get; set; }
-
 }

@@ -16,8 +16,8 @@ namespace Synesthesia.VisualTests.Tests;
 
 public class WindowActiveStateTest : VisualTest
 {
-    private DrawableBox2d activeBox = null!;
-    private DrawableBox2d hoveredBox = null!;
+    private Box2d activeBox = null!;
+    private Box2d hoveredBox = null!;
 
     [Resolved]
     private Game game = null!;
@@ -43,12 +43,12 @@ public class WindowActiveStateTest : VisualTest
                         Origin = Anchor.CentreLeft,
                         Children =
                         [
-                            activeBox = new DrawableBox2d
+                            activeBox = new Box2d
                             {
                                 RelativeSizeAxes = Axes.Both,
                                 Color = Color.DarkGray
                             },
-                            new TextDrawable
+                            new Text2d
                             {
                                 Anchor = Anchor.Centre,
                                 Origin = Anchor.Centre,

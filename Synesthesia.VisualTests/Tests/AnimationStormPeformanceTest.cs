@@ -10,7 +10,7 @@ namespace Synesthesia.VisualTests.Tests;
 public class AnimationStormPerformanceTest : VisualTest
 {
     private Container2d content = null!;
-    private readonly List<DrawableBox2d> boxes = [];
+    private readonly List<Box2d> boxes = [];
 
     private static bool near(float a, float b, float eps = 1.25f) => MathF.Abs(a - b) <= eps;
 
@@ -83,10 +83,10 @@ public class AnimationStormPerformanceTest : VisualTest
     {
         boxes.Clear();
 
-        var list = new List<DrawableBox2d>(count);
+        var list = new List<Box2d>(count);
         for (int i = 0; i < count; i++)
         {
-            var b = new DrawableBox2d
+            var b = new Box2d
             {
                 Size = new Vector2(10, 10),
                 Position = Vector2.Zero,

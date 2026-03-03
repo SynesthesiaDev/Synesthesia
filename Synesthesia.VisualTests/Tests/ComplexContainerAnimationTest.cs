@@ -14,7 +14,7 @@ public class ComplexContainerAnimationTest : VisualTest
     private FillFlowContainer2d flow = null!;
 
     private Container2d itemWrapper = null!;
-    private DrawableBox2d itemBox = null!;
+    private Box2d itemBox = null!;
 
     // We’ll animate the *scroll container itself* too.
     private Container2d scrollHost = null!;
@@ -151,7 +151,7 @@ public class ComplexContainerAnimationTest : VisualTest
             Height = 70,
             Children =
             [
-                new DrawableBox2d
+                new Box2d
                 {
                     Size = new Vector2(480, 70),
                     Color = c,
@@ -170,14 +170,14 @@ public class ComplexContainerAnimationTest : VisualTest
             Height = 90,
             Children =
             [
-                new DrawableBox2d
+                new Box2d
                 {
                     Size = new Vector2(240, 70),
                     Color = Color.SkyBlue,
                     Anchor = Anchor.CentreLeft,
                     Origin = Anchor.CentreLeft,
                 },
-                itemBox = new DrawableBox2d
+                itemBox = new Box2d
                 {
                     Size = new Vector2(70, 70),
                     Color = Color.Gold,

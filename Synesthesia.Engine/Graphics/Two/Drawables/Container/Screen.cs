@@ -9,7 +9,7 @@ public abstract class Screen : Container2d
 
     public bool IsTransitioning { get; set; } = false;
 
-    protected internal override bool AcceptsInputs() => !IsSuspended && !IsTransitioning;
+    protected override bool AcceptsInput => false;
 
     public int? MaximumScreenInstances { get; set; } = null;
 

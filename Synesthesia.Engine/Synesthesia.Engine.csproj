@@ -2,13 +2,15 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework></TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <IsPackable>true</IsPackable>
     <PackageId>Synesthesia.Engine</PackageId>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <LangVersion>12</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,8 +25,8 @@
     <PackageReference Include="ManagedBass.Fx" Version="4.0.2"/>
     <PackageReference Include="ManagedBass.Mix" Version="4.0.2"/>
     <PackageReference Include="ManagedBass.Wasapi" Version="4.0.2"/>
-    <PackageReference Include="Raylib-cs" Version="7.0.2"/>
-    <PackageReference Include="SynesthesiaDev.Codon.IniTranscoder" Version="1.0.1"/>
+    <PackageReference Include="SynesthesiaDev.Codon.IniTranscoder" Version="2026.220.5" />
+    <PackageReference Include="SynesthesiaDev.Raylib-cs" Version="2026.303.0" />
   </ItemGroup>
 
 </Project>

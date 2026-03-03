@@ -1,5 +1,6 @@
 using System.Numerics;
 using Common.Bindable;
+using Common.Event;
 using Common.Util;
 using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Components.Barebones;
@@ -21,6 +22,10 @@ public class DefaultTextbox : DisableableContainer, IAcceptsFocus
 
     public readonly Bindable<bool> Focused = new(false);
     public readonly Bindable<string> Text = new(string.Empty);
+
+    public BarebonesTextbox UnderlyingTextBox => textbox;
+
+    public EventDispatcher<string> OnCommit => UnderlyingTextBox.OnCommit;
 
     protected override void OnLoading()
     {

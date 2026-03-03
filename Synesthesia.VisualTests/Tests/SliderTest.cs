@@ -19,7 +19,7 @@ public class SliderTest : VisualTest
         Min = 0f,
     };
 
-    private TextDrawable text = null!;
+    private Text2d text = null!;
     private DefaultSliderBar sliderBar = null!;
 
     protected override void OnLoading()
@@ -35,7 +35,7 @@ public class SliderTest : VisualTest
                 Spacing = 10f,
                 Children =
                 [
-                    text = new TextDrawable
+                    text = new Text2d
                     {
                         Text = $"{currentValue.Value}"
                     },

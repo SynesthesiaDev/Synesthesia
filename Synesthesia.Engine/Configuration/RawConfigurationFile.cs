@@ -28,12 +28,12 @@ public record RawConfigurationFile(
 
     private static readonly StructCodec<RawConfigurationFile> codec = StructCodec.Of
     (
-        "showDebugOverlay", Codecs.Boolean, r => r.ShowDebugOverlay,
+        "showDebugOverlay", Codecs.BOOLEAN, r => r.ShowDebugOverlay,
         "garbageCollectionMode", Codecs.Enum<GarbageCollectionMode>(), r => r.GarbageCollectionMode,
         "executionMode", Codecs.Enum<ExecutionMode>(), r => r.ExecutionMode,
-        "experimentalAudioWasapi", Codecs.Boolean, r => r.ExperimentalAudioWasapi,
-        "leftAltEscapesCursorConsume", Codecs.Boolean, r => r.LeftAltEscapesCursorConsume,
-        "rawInput", Codecs.Boolean, r => r.RawInput,
+        "experimentalAudioWasapi", Codecs.BOOLEAN, r => r.ExperimentalAudioWasapi,
+        "leftAltEscapesCursorConsume", Codecs.BOOLEAN, r => r.LeftAltEscapesCursorConsume,
+        "rawInput", Codecs.BOOLEAN, r => r.RawInput,
         (showDebugOverlay, garbage, execution, wasapi, leftAltToEscapeCursorConsume, rawInput) => new RawConfigurationFile(showDebugOverlay, garbage, execution, wasapi, leftAltToEscapeCursorConsume, rawInput)
     );
 

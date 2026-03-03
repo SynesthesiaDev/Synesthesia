@@ -60,13 +60,13 @@ public class AudioManager : BassDspAudioHandler, IHasAudioHandle
 
     public readonly Bindable<bool> UseWasapi = new(EngineConfiguration.ExperimentalAudioWasapi);
 
-    private AudioThreadRunner? audioThread;
+    private AudioThread? audioThread = null;
 
     public AudioManager()
     {
         UseWasapi.OnValueChange(_ =>
         {
-            audioThread ??= DependencyContainer.Get<AudioThreadRunner>();
+            audioThread ??= DependencyContainer.Get<AudioThread>();
             audioThread.Schedule(Initialize);
         });
     }
@@ -149,13 +149,8 @@ public class AudioManager : BassDspAudioHandler, IHasAudioHandle
             Bass.ChannelGetAttribute(MasterMixdownHandle, ChannelAttribute.Pan, out var pan);
             return pan;
         }
-        set
-        {
-            var sanitized = Math.Clamp(value, -1f, 1f);
-            Bass.ChannelSetAttribute(MasterMixdownHandle, ChannelAttribute.Pan, sanitized);
-        }
+        set => Bass.ChannelSetAttribute(MasterMixdownHandle, ChannelAttribute.Pan, Math.Clamp(value, -1f, 1f));
     }
-
 
     private void ensureMaster()
     {

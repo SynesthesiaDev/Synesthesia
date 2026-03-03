@@ -11,20 +11,20 @@ public class DefaultButton : DisableableContainer
 {
     public string Text
     {
-        get => textDrawable.Text;
-        set => textDrawable.Text = value;
+        get => text2d.Text;
+        set => text2d.Text = value;
     }
 
     public float FontSize
     {
-        get => textDrawable.FontSize;
-        set => textDrawable.FontSize = value;
+        get => text2d.FontSize;
+        set => text2d.FontSize = value;
     }
 
     public Color TextColor
     {
-        get => textDrawable.Color;
-        set => textDrawable.Color = value;
+        get => text2d.Color;
+        set => text2d.Color = value;
     }
 
     public DefaultEngineColorCombination ColorCombination { get; init; } = DefaultEngineColorCombination.SURFACE2;
@@ -32,7 +32,7 @@ public class DefaultButton : DisableableContainer
     public Action? OnClick { get; set; }
 
     private BackgroundContainer2d backgroundContainer;
-    private TextDrawable textDrawable;
+    private Text2d text2d;
 
     protected override void OnLoading()
     {
@@ -65,7 +65,7 @@ public class DefaultButton : DisableableContainer
                 Origin = Anchor.Centre,
                 Children =
                 [
-                    textDrawable = new TextDrawable
+                    text2d = new Text2d
                     {
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,

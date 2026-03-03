@@ -107,7 +107,7 @@ public class DebugAudioMeter(BassDspAudioHandler? audioHandler = null) : Composi
         AutoSizeAxes = Axes.Both;
     }
 
-    private class AudioLevelText : TextDrawable
+    private class AudioLevelText : Text2d
     {
         public BassDspAudioHandler? Source { get; set; }
 

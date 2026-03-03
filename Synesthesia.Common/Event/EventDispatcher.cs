@@ -54,5 +54,4 @@ public class EventDispatcher<T> : IEventDispatcher
     {
         UnsubscribeAll();
     }
-
 }

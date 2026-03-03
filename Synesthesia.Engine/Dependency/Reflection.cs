@@ -19,36 +19,52 @@ public static class Reflection
     public static void ResolveDependencies(object target)
     {
         var type = target.GetType();
+        var currentType = type;
 
-        var fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-            .Where(f => f.GetCustomAttribute<ResolvedAttribute>() != null);
-
-        foreach (var field in fields)
+        while (currentType != null && currentType != typeof(object))
         {
-            var service = DependencyContainer.Get(field.FieldType);
-            EngineStatistics.DEPENDENCIES_RESOLVED_REFLECTION.Increment();
-            field.SetValue(target, service);
+            var fields = currentType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+            foreach (var field in fields)
+            {
+                if (field.GetCustomAttribute<ResolvedAttribute>() == null)
+                    continue;
+
+                var service = DependencyContainer.Get(field.FieldType);
+                field.SetValue(target, service);
+
+                EngineStatistics.DEPENDENCIES_RESOLVED_REFLECTION.Increment();
+            }
+
+            currentType = currentType.BaseType;
         }
     }
 
     public static void CheckForDisposing(object target)
     {
-        var type = target.GetType();
+        var currentType = target.GetType();
 
-        var fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-            .Where(f => disposing_warning_targets.Any(interfaceType => interfaceType.IsAssignableFrom(f.FieldType)));
-
-        foreach (var field in fields)
+        while (currentType != null && currentType != typeof(object))
         {
-            if (field.GetValue(target) is IBindable { IsDisposed: false })
-            {
-                Logger.Warning($"Bindable {field.Name} in {type.Name} has not been disposed before disposing base drawable", Logger.Runtime);
-            }
+            var fields = currentType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                .Where(f => !Attribute.IsDefined(f, typeof(ExternalOwnershipAttribute)))
+                .Where(f => disposing_warning_targets.Any(interfaceType => interfaceType.IsAssignableFrom(f.FieldType)));
 
-            if (field.GetValue(target) is IEventDispatcher { IsPooled: false, IsDisposed: false })
+            foreach (var field in fields)
             {
-                Logger.Warning($"EventDispatcher {field.Name} in {type.Name} (not poolable) has not been disposed before disposing base drawable", Logger.Runtime);
+                var value = field.GetValue(target);
+
+                if (value is IBindable { IsDisposed: false })
+                {
+                    Logger.Warning($"Bindable {field.Name} (declared in {currentType.Name}) has not been disposed!", Logger.Runtime);
+                }
+
+                if (value is IEventDispatcher { IsPooled: false, IsDisposed: false })
+                {
+                    Logger.Warning($"EventDispatcher {field.Name} (declared in {currentType.Name}) has not been disposed!", Logger.Runtime);
+                }
             }
+            currentType = currentType.BaseType;
         }
     }
 }

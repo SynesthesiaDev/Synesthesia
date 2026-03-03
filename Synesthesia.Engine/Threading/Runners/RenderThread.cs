@@ -1,18 +1,30 @@
 using Common.Logger;
 using Raylib_cs;
+using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics;
+using Synesthesia.Engine.Graphics.Fonts;
+using Synesthesia.Engine.Graphics.Shaders;
+using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Resources;
+using Synesthesia.Engine.Resources.Stores;
 
 // ReSharper disable ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
 
 namespace Synesthesia.Engine.Threading.Runners;
 
-public class RenderThreadRunner(ThreadType type) : ThreadRunner(type)
+public class RenderThread(ThreadType type) : ThreadRunner(type)
 {
     private Game game = null!;
-    public static Shader SignedDistanceFieldShader;
-    public static Shader AlphaShader;
+
+    [Resolved]
+    private IResourceStore<Texture> textureStore = null!;
+
+    [Resolved]
+    private IResourceStore<Font> fontStore = null!;
+
+    [Resolved]
+    private IResourceStore<Shader> shaderStore = null!;
 
     public Camera3d FallbackCamera { get; private set; } = null!;
 
@@ -22,17 +34,17 @@ public class RenderThreadRunner(ThreadType type) : ThreadRunner(type)
 
     protected override void OnThreadInit(Game game)
     {
+        DependencyContainer.Add(this);
+        Reflection.ResolveDependencies(this);
+
         this.game = game;
+
         Logger.Debug("Loading window host..");
         this.game.WindowsHost.Initialize(this.game);
 
-        // Load resources dependent on gl
-        ResourceManager.ResolveAll("ttf");
-        ResourceManager.ResolveAll("vsh");
-        ResourceManager.ResolveAll("fsh");
-
-        SignedDistanceFieldShader = ResourceManager.Get<Shader>("SynesthesiaResources.Shaders.sdf_font.fsh");
-        AlphaShader = ResourceManager.Get<Shader>("SynesthesiaResources.Shaders.alpha.fsh");
+        (fontStore as DeferredStore<Font>)!.Unlock();
+        (textureStore as DeferredStore<Texture>)!.Unlock();
+        (shaderStore as DeferredStore<Shader>)!.Unlock();
 
         FallbackCamera = new Camera3d();
     }

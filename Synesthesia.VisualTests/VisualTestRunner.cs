@@ -15,12 +15,13 @@ internal static class VisualTestRunner
 
     public static readonly List<VisualTestCategory> Tests =
     [
-        new("Containers", [typeof(ScrollableContainerTest)]),
+        new("Containers", [typeof(ScrollableContainerTest), typeof(ParallaxContainerTest), typeof(MaskingTest)]),
         new("Audio", [typeof(SimpleAudioTest)]),
         new("Controls", [typeof(SliderTest), typeof(TextboxTest)]),
         new("Animations", [typeof(AnimationTest), typeof(ComplexContainerAnimationTest)]),
         new("Layout", [typeof(AnchorOriginTest), typeof(AutoSizeStackTest), typeof(RelativeSizeMarginTest), typeof(ShowcaseTest)]),
         new("Performance", [typeof(DrawableSpawnPerformanceTest), typeof(AnimationStormPerformanceTest)]),
+        new("Texture", [typeof(TextureFillModeTest), typeof(TextureBigTest)]),
         new("Platform", [typeof(WindowActiveStateTest)])
     ];
 
@@ -29,12 +30,12 @@ internal static class VisualTestRunner
         if (!File.Exists(path))
         {
             File .Create(path) .Close();
-            File.WriteAllText(path, VisualTestsState.CODEC.Encode(IniTranscoder.Instance, VisualTestsState.DEFAULT).ToString());
+            File.WriteAllText(path, VisualTestsState.CODEC.Encode(IniTranscoder.INSTANCE, VisualTestsState.DEFAULT).ToString());
         }
         else
         {
             var text = File.ReadAllText(path);
-            var decoded = VisualTestsState.CODEC.Decode(IniTranscoder.Instance, IniSection.Parse(text));
+            var decoded = VisualTestsState.CODEC.Decode(IniTranscoder.INSTANCE, IniSection.Parse(text));
             TestConfiguration = decoded;
         }
 
@@ -44,7 +45,7 @@ internal static class VisualTestRunner
     public static void Save()
     {
         File.WriteAllText(path, VisualTestsState
-            .CODEC.Encode(IniTranscoder.Instance, TestConfiguration)
+            .CODEC.Encode(IniTranscoder.INSTANCE, TestConfiguration)
             .ToString());
     }
 

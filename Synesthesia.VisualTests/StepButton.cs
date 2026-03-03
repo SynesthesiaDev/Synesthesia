@@ -38,9 +38,9 @@ public class StepButton : CompositeDrawable2d, IPooledObject
 
     protected FillFlowContainer2d BackgroundContainer = null!;
 
-    protected DrawableBox2d Highlight = null!;
+    protected Box2d Highlight = null!;
 
-    protected TextDrawable? Text = null;
+    protected Text2d? Text = null;
 
     public bool RunNextStepImmediately = false;
 
@@ -88,13 +88,13 @@ public class StepButton : CompositeDrawable2d, IPooledObject
                 Spacing = 4,
                 Children =
                 [
-                    Highlight = new DrawableBox2d
+                    Highlight = new Box2d
                     {
                         Color = IdleColor,
                         RelativeSizeAxes = Axes.Y,
                         Width = 5,
                     },
-                    Text = new TextDrawable
+                    Text = new Text2d
                     {
                         Anchor = Anchor.CentreLeft,
                         Origin = Anchor.CentreLeft,

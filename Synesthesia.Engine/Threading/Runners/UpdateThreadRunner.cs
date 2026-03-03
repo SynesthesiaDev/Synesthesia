@@ -1,5 +1,6 @@
 using Common.Logger;
 using Common.Statistics;
+using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Input;
 
@@ -13,6 +14,7 @@ public class UpdateThreadRunner(ThreadType type) : ThreadRunner(type)
 
     protected override void OnThreadInit(Game game)
     {
+        DependencyContainer.Add(this);
         this.game = game;
     }
 

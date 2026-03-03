@@ -21,7 +21,7 @@ public class ShowcaseTest : VisualTest
     private Container2d insetParent = null!;
     private Container2d insetChild = null!;
 
-    private DrawableBox2d anchorMarker = null!;
+    private Box2d anchorMarker = null!;
 
     private const float spacing = 12f;
 
@@ -39,7 +39,7 @@ public class ShowcaseTest : VisualTest
                 Children =
                 [
                     // Big background
-                    new DrawableBox2d
+                    new Box2d
                     {
                         RelativeSizeAxes = Axes.Both,
                         Color = new Color(18, 18, 18, 255),
@@ -55,7 +55,7 @@ public class ShowcaseTest : VisualTest
                         Origin = Anchor.Centre,
                         Children =
                         [
-                            new DrawableBox2d
+                            new Box2d
                             {
                                 RelativeSizeAxes = Axes.Both,
                                 Color = new Color(28, 28, 28, 255),
@@ -79,7 +79,7 @@ public class ShowcaseTest : VisualTest
                                         Origin = Anchor.TopLeft,
                                         Children =
                                         [
-                                            new DrawableBox2d
+                                            new Box2d
                                             {
                                                 RelativeSizeAxes = Axes.Both,
                                                 Color = new Color(45, 45, 45, 255),
@@ -113,7 +113,7 @@ public class ShowcaseTest : VisualTest
                                         Origin = Anchor.TopLeft,
                                         Children =
                                         [
-                                            new DrawableBox2d
+                                            new Box2d
                                             {
                                                 RelativeSizeAxes = Axes.Both,
                                                 Color = new Color(32, 32, 32, 255),
@@ -130,7 +130,7 @@ public class ShowcaseTest : VisualTest
                                                 Margin = new Vector4(18, 18, 0, 0),
                                                 Children =
                                                 [
-                                                    new DrawableBox2d
+                                                    new Box2d
                                                     {
                                                         RelativeSizeAxes = Axes.Both,
                                                         Color = new Color(40, 40, 40, 255),
@@ -146,7 +146,7 @@ public class ShowcaseTest : VisualTest
                                                         Origin = Anchor.TopLeft,
                                                         Children =
                                                         [
-                                                            new DrawableBox2d
+                                                            new Box2d
                                                             {
                                                                 RelativeSizeAxes = Axes.Both,
                                                                 Color = new Color(80, 140, 220, 110),
@@ -167,21 +167,21 @@ public class ShowcaseTest : VisualTest
                                                 Margin = new Vector4(0, 18, 18, 0),
                                                 Children =
                                                 [
-                                                    new DrawableBox2d
+                                                    new Box2d
                                                     {
                                                         RelativeSizeAxes = Axes.Both,
                                                         Color = new Color(40, 40, 40, 255),
                                                         Anchor = Anchor.TopLeft,
                                                         Origin = Anchor.TopLeft
                                                     },
-                                                    new DrawableBox2d
+                                                    new Box2d
                                                     {
                                                         Size = new Vector2(8, 8),
                                                         Color = new Color(160, 160, 160, 255),
                                                         Anchor = Anchor.Centre,
                                                         Origin = Anchor.Centre
                                                     },
-                                                    anchorMarker = new DrawableBox2d
+                                                    anchorMarker = new Box2d
                                                     {
                                                         Size = new Vector2(18, 18),
                                                         Color = Color.Gold,
@@ -273,7 +273,7 @@ public class ShowcaseTest : VisualTest
             Size = new Vector2(w, h),
             Children =
             [
-                new DrawableBox2d
+                new Box2d
                 {
                     RelativeSizeAxes = Axes.Both,
                     Color = c,

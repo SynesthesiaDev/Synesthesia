@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace SynesthesiaResources
+namespace Synesthesia.Resources
 {
     public static class AssemblyInfo
     {

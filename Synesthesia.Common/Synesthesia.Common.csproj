@@ -14,7 +14,7 @@
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" Version="2025.2.4"/>
     <PackageReference Include="Pastel" Version="7.0.1"/>
-    <PackageReference Include="SynesthesiaDev.Codon.Codon" Version="1.1.1"/>
+    <PackageReference Include="SynesthesiaDev.Codon.Codon" Version="2026.220.5" />
     <PackageReference Include="SynesthesiaUtils" Version="1.2.0"/>
   </ItemGroup>
 

@@ -1,6 +1,7 @@
 using Raylib_cs;
 using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Animations.Easings;
+using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Graphics.Two.Drawables.Shapes;
 
 namespace Synesthesia.Engine.Graphics.Two.Drawables.Container;
@@ -11,11 +12,13 @@ public class BackgroundContainer2d : Container2d
 
     public Color BackgroundColor { get; set; } = empty_color;
 
+    public Texture? BackgroundTexture { get; set; }
+
     public float BackgroundAlpha { get; set; } = 1f;
 
     public float BackgroundCornerRadius { get; set; }
 
-    private readonly DrawableBox2d background = new();
+    private readonly Box2d background = new();
 
     protected override void OnDraw2d()
     {

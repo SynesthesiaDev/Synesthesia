@@ -103,8 +103,9 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
                     BackgroundColor = Defaults.BACKGROUND0,
                 },
 
-                visualTestScene = new MaskingContainer2d
+                visualTestScene = new Container2d
                 {
+                    Masking = true,
                     FillRemainingAxes = Axes.Both,
                     Children =
                     [
@@ -202,7 +203,7 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
 
             if (e.NewValue == null)
             {
-                visualTestScene.AddChild(new TextDrawable
+                visualTestScene.AddChild(new Text2d
                 {
                     Text = "No Test Selected",
                     Color = Color.White,

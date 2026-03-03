@@ -7,7 +7,7 @@ namespace Synesthesia.Engine.Components.Two;
 
 public class DisableableContainer : BackgroundContainer2d, IDisablable
 {
-    private readonly DrawableBox2d disabledOverlay = new();
+    private readonly Box2d disabledOverlay = new();
 
     private bool disabled;
 

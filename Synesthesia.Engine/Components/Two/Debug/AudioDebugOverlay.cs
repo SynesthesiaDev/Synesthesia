@@ -100,7 +100,7 @@ public class AudioDebugOverlay : EngineDebugComponent
                                     RelativeSizeAxes = Axes.Y,
                                     Width = levelsDeep * 24f,
                                 },
-                                new TextDrawable
+                                new Text2d
                                 {
                                     Text = $"{name}:",
                                     Anchor = Anchor.CentreLeft,

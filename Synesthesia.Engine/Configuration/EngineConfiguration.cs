@@ -53,12 +53,12 @@ public static class EngineConfiguration
         if (!File.Exists(path))
         {
             File.Create(path).Close();
-            File.WriteAllText(path, RawConfigurationFile.VERSIONED_STRUCT_CODEC.Encode(IniTranscoder.Instance, RawConfigurationFile.DEFAULT).ToString());
+            File.WriteAllText(path, RawConfigurationFile.VERSIONED_STRUCT_CODEC.Encode(IniTranscoder.INSTANCE, RawConfigurationFile.DEFAULT).ToString());
         }
         else
         {
             var text = File.ReadAllText(path);
-            var decoded = RawConfigurationFile.VERSIONED_STRUCT_CODEC.Decode(IniTranscoder.Instance, IniSection.Parse(text));
+            var decoded = RawConfigurationFile.VERSIONED_STRUCT_CODEC.Decode(IniTranscoder.INSTANCE, IniSection.Parse(text));
             current = decoded;
         }
 
@@ -71,11 +71,11 @@ public static class EngineConfiguration
         if (!File.Exists(path))
         {
             File.Create(path).Close();
-            File.WriteAllText(path, RawConfigurationFile.VERSIONED_STRUCT_CODEC.Encode(IniTranscoder.Instance, current).ToString());
+            File.WriteAllText(path, RawConfigurationFile.VERSIONED_STRUCT_CODEC.Encode(IniTranscoder.INSTANCE, current).ToString());
         }
         else
         {
-            File.WriteAllText(path, RawConfigurationFile.VERSIONED_STRUCT_CODEC.Encode(IniTranscoder.Instance, current).ToString());
+            File.WriteAllText(path, RawConfigurationFile.VERSIONED_STRUCT_CODEC.Encode(IniTranscoder.INSTANCE, current).ToString());
         }
 
         Logger.Verbose("Updated engine configuration file", Logger.Io);

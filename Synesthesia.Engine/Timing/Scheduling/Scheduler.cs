@@ -52,7 +52,6 @@ public class Scheduler : IDisposable
             if (timerRunning) return;
             timer.Change(0, 1);
             timerRunning = true;
-            EngineStatistics.ACTIVE_SCHEDULERS.Increment();
         }
     }
 
@@ -66,7 +65,6 @@ public class Scheduler : IDisposable
 
             timer.Change(Timeout.Infinite, Timeout.Infinite);
             timerRunning = false;
-            EngineStatistics.ACTIVE_SCHEDULERS.Decrement();
         }
     }
 
@@ -205,10 +203,6 @@ public class Scheduler : IDisposable
     {
         lock (timerLock)
         {
-            if (timerRunning)
-            {
-                EngineStatistics.ACTIVE_SCHEDULERS.Decrement();
-            }
             timer.Change(Timeout.Infinite, Timeout.Infinite);
             timerRunning = false;
         }
