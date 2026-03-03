@@ -4,13 +4,13 @@
 using Common.Statistics;
 using Raylib_cs;
 
-namespace Synesthesia.Engine.Graphics.Shader;
+namespace Synesthesia.Engine.Graphics.Shaders;
 
-public class ShaderHandle(string shaderCode, ShaderType shaderType)
+public class Shader(string shaderCode, ShaderType shaderType)
 {
-    private Raylib_cs.Shader? nativeShader;
+    private NativeShader? nativeShader;
 
-    public Raylib_cs.Shader NativeShader
+    public NativeShader NativeShader
     {
         get
         {

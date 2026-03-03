@@ -11,7 +11,7 @@ using Synesthesia.Engine.Utility;
 
 namespace Synesthesia.Engine.Graphics.Two.Drawables.Container;
 
-public class ParallaxContainer : MaskingContainer2d
+public class ParallaxContainer : Container2d
 {
     public float Strength { get; set; } = 0.05f;
 
@@ -75,10 +75,8 @@ public class ParallaxContainer : MaskingContainer2d
 
     protected override void OnLoading()
     {
-        Children =
-        [
-            content
-        ];
+        Masking = true;
+        Children = [content];
 
         base.OnLoading();
     }

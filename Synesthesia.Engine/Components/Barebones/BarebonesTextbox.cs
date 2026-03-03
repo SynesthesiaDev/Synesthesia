@@ -5,7 +5,7 @@ using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Animations.Easings;
-using Synesthesia.Engine.Graphics.Font;
+using Synesthesia.Engine.Graphics.Fonts;
 using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
@@ -268,7 +268,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
         }
     }
 
-    private static float measurePartialText(FontHandle font, string text, int charCount, float fontSize, float spacing)
+    private static float measurePartialText(Font font, string text, int charCount, float fontSize, float spacing)
     {
         if (charCount <= 0) return 0f;
         var partial = text[..charCount];

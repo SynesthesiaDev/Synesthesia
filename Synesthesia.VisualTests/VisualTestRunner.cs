@@ -15,7 +15,7 @@ internal static class VisualTestRunner
 
     public static readonly List<VisualTestCategory> Tests =
     [
-        new("Containers", [typeof(ScrollableContainerTest), typeof(ParallaxContainerTest)]),
+        new("Containers", [typeof(ScrollableContainerTest), typeof(ParallaxContainerTest), typeof(MaskingTest)]),
         new("Audio", [typeof(SimpleAudioTest)]),
         new("Controls", [typeof(SliderTest), typeof(TextboxTest)]),
         new("Animations", [typeof(AnimationTest), typeof(ComplexContainerAnimationTest)]),

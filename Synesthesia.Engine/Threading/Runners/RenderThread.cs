@@ -2,8 +2,8 @@ using Common.Logger;
 using Raylib_cs;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics;
-using Synesthesia.Engine.Graphics.Font;
-using Synesthesia.Engine.Graphics.Shader;
+using Synesthesia.Engine.Graphics.Fonts;
+using Synesthesia.Engine.Graphics.Shaders;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Resources;
@@ -21,10 +21,10 @@ public class RenderThread(ThreadType type) : ThreadRunner(type)
     private IResourceStore<Texture> textureStore = null!;
 
     [Resolved]
-    private IResourceStore<FontHandle> fontStore = null!;
+    private IResourceStore<Font> fontStore = null!;
 
     [Resolved]
-    private IResourceStore<ShaderHandle> shaderStore = null!;
+    private IResourceStore<Shader> shaderStore = null!;
 
     public Camera3d FallbackCamera { get; private set; } = null!;
 
@@ -42,9 +42,9 @@ public class RenderThread(ThreadType type) : ThreadRunner(type)
         Logger.Debug("Loading window host..");
         this.game.WindowsHost.Initialize(this.game);
 
-        (fontStore as DeferredStore<FontHandle>)!.Unlock();
+        (fontStore as DeferredStore<Font>)!.Unlock();
         (textureStore as DeferredStore<Texture>)!.Unlock();
-        (shaderStore as DeferredStore<ShaderHandle>)!.Unlock();
+        (shaderStore as DeferredStore<Shader>)!.Unlock();
 
         FallbackCamera = new Camera3d();
     }

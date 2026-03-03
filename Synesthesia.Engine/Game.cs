@@ -10,8 +10,9 @@ using Synesthesia.Engine.Components.Two.Debug;
 using Synesthesia.Engine.Configuration;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics;
-using Synesthesia.Engine.Graphics.Font;
-using Synesthesia.Engine.Graphics.Shader;
+using Synesthesia.Engine.Graphics.Fonts;
+using Synesthesia.Engine.Graphics.Renderer;
+using Synesthesia.Engine.Graphics.Shaders;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Host;
@@ -34,6 +35,8 @@ public class Game : IDisposable
     public readonly Bindable<string> WindowTitle;
 
     public readonly WindowsHost WindowsHost = new();
+
+    public readonly IRenderer Renderer = new OpenGlRenderer();
 
     public Scheduler GameScheduler = null!;
 
@@ -81,8 +84,8 @@ public class Game : IDisposable
         .MakeDeferred()
         .Build();
 
-    public readonly IResourceStore<FontHandle> FontResourceStore = new ResourceStoreBuilder<FontHandle>()
-        .AddLoaders(new Dictionary<string, Func<Stream, FontHandle>>
+    public readonly IResourceStore<Font> FontResourceStore = new ResourceStoreBuilder<Font>()
+        .AddLoaders(new Dictionary<string, Func<Stream, Font>>
         {
             { "ttf", ResourceLoaders.LoadFont },
         })
@@ -96,8 +99,8 @@ public class Game : IDisposable
         .MakeDeferred()
         .Build();
 
-    public readonly IResourceStore<ShaderHandle> ShaderResourceStore = new ResourceStoreBuilder<ShaderHandle>()
-        .AddLoaders(new Dictionary<string, Func<Stream, ShaderHandle>>
+    public readonly IResourceStore<Shader> ShaderResourceStore = new ResourceStoreBuilder<Shader>()
+        .AddLoaders(new Dictionary<string, Func<Stream, Shader>>
         {
             { "vsh", stream => ResourceLoaders.LoadShader(stream, ShaderType.Vertex) },
             { "fsh", stream => ResourceLoaders.LoadShader(stream, ShaderType.Fragment) },
@@ -118,6 +121,7 @@ public class Game : IDisposable
 
     public Game()
     {
+        DependencyContainer.Add(Renderer);
         DependencyContainer.Add(SampleResourceStore);
         DependencyContainer.Add(TextureResourceStore);
         DependencyContainer.Add(FontResourceStore);

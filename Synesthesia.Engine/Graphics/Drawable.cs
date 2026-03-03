@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Numerics;
 using Common.Event;
 using Common.Logger;
@@ -12,6 +11,7 @@ using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Timing.Scheduling;
 using Synesthesia.Engine.Utility;
+using Trace = System.Diagnostics.Trace;
 
 namespace Synesthesia.Engine.Graphics;
 

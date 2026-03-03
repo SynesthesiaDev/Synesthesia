@@ -3,8 +3,8 @@ using System.Text;
 using Codon.Buffer;
 using Raylib_cs;
 using Synesthesia.Engine.Audio;
-using Synesthesia.Engine.Graphics.Font;
-using Synesthesia.Engine.Graphics.Shader;
+using Synesthesia.Engine.Graphics.Fonts;
+using Synesthesia.Engine.Graphics.Shaders;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Utility;
@@ -69,19 +69,19 @@ public static class ResourceLoaders
         return texture;
     }
 
-    public static ShaderHandle LoadShader(Stream stream, ShaderType type)
+    public static Shader LoadShader(Stream stream, ShaderType type)
     {
         var text = LoadText(stream) as string;
-        return new ShaderHandle(text!, type);
+        return new Shader(text!, type);
     }
 
-    public static FontHandle LoadFont(Stream stream)
+    public static Font LoadFont(Stream stream)
     {
         ThreadSafety.AssertRunningOnRenderThread();
 
         var array = LoadByteArray(stream) as byte[];
         var raylibFont = Unsafe.LoadFontFromMemory(array!);
-        return new FontHandle(raylibFont);
+        return new Font(raylibFont);
     }
 
     public static object LoadByteArray(Stream stream)
