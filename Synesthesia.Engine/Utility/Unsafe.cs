@@ -4,14 +4,14 @@ namespace Synesthesia.Engine.Utility;
 
 public static unsafe class Unsafe
 {
-    public static unsafe Font LoadFontFromMemory(byte[] fontData)
+    public static unsafe NativeFont LoadFontFromMemory(byte[] fontData)
     {
         return loadSdfFont(fontData);
     }
 
-    private static unsafe Font loadSdfFont(byte[] fontData)
+    private static unsafe NativeFont loadSdfFont(byte[] fontData)
     {
-        var sdfFont = new Font
+        var sdfFont = new NativeFont
         {
             BaseSize = 64,
             GlyphCount = 95

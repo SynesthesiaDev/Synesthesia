@@ -5,7 +5,7 @@ using Raylib_cs;
 using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Dependency;
-using Synesthesia.Engine.Graphics.Shader;
+using Synesthesia.Engine.Graphics.Shaders;
 using Synesthesia.Engine.Graphics.Two.Drawables;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Input.Events;
@@ -30,9 +30,9 @@ public abstract class Drawable2d : Drawable
     private float height;
 
     [Resolved]
-    private IResourceStore<ShaderHandle> shaderStore = null!;
+    private IResourceStore<Shader> shaderStore = null!;
 
-    private ShaderHandle? alphaShader;
+    private Shader? alphaShader;
 
     public Vector2 Position
     {

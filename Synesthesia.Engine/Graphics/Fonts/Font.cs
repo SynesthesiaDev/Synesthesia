@@ -1,9 +1,11 @@
 // Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-namespace Synesthesia.Engine.Graphics.Font;
+using Raylib_cs;
 
-public class FontHandle(Raylib_cs.Font font)
+namespace Synesthesia.Engine.Graphics.Fonts;
+
+public class Font(NativeFont font)
 {
-    public Raylib_cs.Font NativeFont => font;
+    public NativeFont NativeFont => font;
 }

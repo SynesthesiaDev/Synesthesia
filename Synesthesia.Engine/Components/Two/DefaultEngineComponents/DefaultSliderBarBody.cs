@@ -16,7 +16,8 @@ namespace Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 public class DefaultSliderBarBody(BarebonesSliderBar owningSliderBar) : SliderBarBody(owningSliderBar)
 {
     private Box2d filledBox = null!;
-    private BackgroundContainer2d container = null!;
+    private Box2d backgroundBox = null!;
+    private Container2d container = null!;
 
     private float? afterLoadProgress;
 
@@ -28,15 +29,21 @@ public class DefaultSliderBarBody(BarebonesSliderBar owningSliderBar) : SliderBa
 
         Children =
         [
-            container = new BackgroundContainer2d
+            container = new Container2d
             {
                 Height = 10,
                 RelativeSizeAxes = Axes.X,
-                BackgroundColor = Defaults.BACKGROUND2,
+                Masking = true,
+                CornerRadius = 10,
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
                 Children =
                 [
+                    backgroundBox = new Box2d
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Color = Defaults.BACKGROUND2,
+                    },
                     filledBox = new Box2d
                     {
                         RelativeSizeAxes = Axes.Y,
@@ -52,7 +59,7 @@ public class DefaultSliderBarBody(BarebonesSliderBar owningSliderBar) : SliderBa
     protected internal override bool OnHover(MouseMoveInputEvent e)
     {
         filledBox.FadeColorTo(Defaults.ACCENT.ChangeBrightness(0.4f), 100, Easing.InCubic);
-        container.FadeBackgroundTo(Defaults.BACKGROUND2.ChangeBrightness(0.06f), 100, Easing.OutCubic);
+        backgroundBox.FadeColorTo(Defaults.BACKGROUND2.ChangeBrightness(0.06f), 100, Easing.OutCubic);
 
         return true;
     }
@@ -60,7 +67,7 @@ public class DefaultSliderBarBody(BarebonesSliderBar owningSliderBar) : SliderBa
     protected internal override void OnHoverLost(MouseMoveInputEvent e)
     {
         filledBox.FadeColorTo(Defaults.ACCENT, 100, Easing.OutCubic);
-        container.FadeBackgroundTo(Defaults.BACKGROUND2, 100, Easing.OutCubic);
+        backgroundBox.FadeColorTo(Defaults.BACKGROUND2, 100, Easing.OutCubic);
     }
 
     protected internal override void OnUpdate(FrameInfo frameInfo)

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Numerics;
 using Raylib_cs;
 using SynesthesiaUtil.Extensions;
 
@@ -8,34 +9,49 @@ public static class ColorUtil
 {
     private static readonly Dictionary<string, Color> cached_colors = new();
 
-    public static Color ChangeBrightness(this Color color, float correctionFactor)
+    public static Color FromVector(Vector4 vector) => new(vector.X, vector.Y, vector.Y, vector.Z);
+
+    extension(Color color)
     {
-        var factor = Math.Clamp(correctionFactor, -1f, 1f);
+        public Vector4 ToVector() => new(color.R, color.G, color.B, color.A);
 
-        var red = (float)color.R;
-        var green = (float)color.G;
-        var blue = (float)color.B;
-
-        if (factor < 0)
+        public bool IsSameAs(Color other)
         {
-            factor = 1 + factor;
-            red *= factor;
-            green *= factor;
-            blue *= factor;
-        }
-        else
-        {
-            red = (255 - red) * factor + red;
-            green = (255 - green) * factor + green;
-            blue = (255 - blue) * factor + blue;
+            return color.R == other.R &&
+                   color.G == other.G &&
+                   color.B == other.B &&
+                   color.A == other.A;
         }
 
-        return new Color(
-            (byte)Math.Clamp(red, 0, 255), 
-            (byte)Math.Clamp(green, 0, 255), 
-            (byte)Math.Clamp(blue, 0, 255), 
-            color.A
-        );
+        public Color ChangeBrightness(float correctionFactor)
+        {
+            var factor = Math.Clamp(correctionFactor, -1f, 1f);
+
+            var red = (float)color.R;
+            var green = (float)color.G;
+            var blue = (float)color.B;
+
+            if (factor < 0)
+            {
+                factor = 1 + factor;
+                red *= factor;
+                green *= factor;
+                blue *= factor;
+            }
+            else
+            {
+                red = (255 - red) * factor + red;
+                green = (255 - green) * factor + green;
+                blue = (255 - blue) * factor + blue;
+            }
+
+            return new Color(
+                (byte)Math.Clamp(red, 0, 255),
+                (byte)Math.Clamp(green, 0, 255),
+                (byte)Math.Clamp(blue, 0, 255),
+                color.A
+            );
+        }
     }
 
     public static Color GetOrCacheColor(string hex)

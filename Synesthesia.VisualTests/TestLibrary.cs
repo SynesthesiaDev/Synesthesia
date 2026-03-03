@@ -103,8 +103,9 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
                     BackgroundColor = Defaults.BACKGROUND0,
                 },
 
-                visualTestScene = new MaskingContainer2d
+                visualTestScene = new Container2d
                 {
+                    Masking = true,
                     FillRemainingAxes = Axes.Both,
                     Children =
                     [

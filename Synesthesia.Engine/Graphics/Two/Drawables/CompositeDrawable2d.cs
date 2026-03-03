@@ -2,6 +2,8 @@ using System.Numerics;
 using Common.Pooling;
 using Common.Util;
 using Raylib_cs;
+using Synesthesia.Engine.Dependency;
+using Synesthesia.Engine.Graphics.Renderer;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Input.Events;
 using SynesthesiaUtil.Extensions;
@@ -12,12 +14,61 @@ public class CompositeDrawable2d : Drawable2d
 {
     protected internal List<Drawable2d> InternalChildren = [];
 
+    [Resolved]
+    private IRenderer renderer = null!;
+
+    public ComplexColor BorderColor
+    {
+        get;
+        set
+        {
+            if (field.Equals(value)) return;
+
+            field = value;
+            Invalidate(Invalidation.DrawNode);
+        }
+    } = ComplexColor.BLACK;
+
+    public int BorderThickness
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            Invalidate(Invalidation.DrawNode);
+        }
+    } = 0;
+
+    public float CornerRadius
+    {
+        get;
+        set
+        {
+            if (Precision.IsSame(field, value)) return;
+            field = value;
+            Invalidate(Invalidation.DrawNode | Invalidation.Geometry);
+        }
+    } = 0f;
+
+    public bool Masking
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+
+            Invalidate(Invalidation.All);
+        }
+    } = false;
+
     public Vector4 AutoSizePadding
     {
         get => autoSizePadding;
         set
         {
-            if(autoSizePadding == value) return;
+            if (autoSizePadding == value) return;
             autoSizePadding = value;
             Invalidate(Invalidation.Size | Invalidation.Geometry | Invalidation.Layout);
         }
@@ -69,8 +120,6 @@ public class CompositeDrawable2d : Drawable2d
 
     protected override void InternalLoadComplete()
     {
-        base.InternalLoadComplete();
-
         lock (childrenLock)
         {
             foreach (var internalChild in InternalChildren)
@@ -78,7 +127,10 @@ public class CompositeDrawable2d : Drawable2d
                 internalChild.Load();
             }
         }
+
         UpdateLayout();
+
+        base.InternalLoadComplete();
     }
 
     protected internal void UpdateHoverState(MouseMoveInputEvent e)
@@ -88,7 +140,7 @@ public class CompositeDrawable2d : Drawable2d
         for (var i = InternalChildren.Count - 1; i >= 0; i--)
         {
             var child = InternalChildren[i];
-            if(!child.CanHandleInput) continue;
+            if (!child.CanHandleInput) continue;
 
             var containsMouse = child.Contains(e.Position);
 
@@ -115,6 +167,7 @@ public class CompositeDrawable2d : Drawable2d
                     handled = true;
                 }
             }
+
             if (child is CompositeDrawable2d composite)
             {
                 composite.UpdateHoverState(e);
@@ -127,7 +180,7 @@ public class CompositeDrawable2d : Drawable2d
         for (var i = InternalChildren.Count - 1; i >= 0; i--)
         {
             var child = InternalChildren[i];
-            if(!child.CanHandleInput) continue;
+            if (!child.CanHandleInput) continue;
 
             if (down && child is { IsMouseDown: false, IsHovered: true } && child.OnMouseDown(e))
             {
@@ -181,7 +234,6 @@ public class CompositeDrawable2d : Drawable2d
 
     protected internal void UpdateKeyState(KeyboardKey e, bool down)
     {
-        // Iterate backwards manually to respect draw order/depth without allocating
         for (int i = InternalChildren.Count - 1; i >= 0; i--)
         {
             var child = InternalChildren[i];
@@ -190,7 +242,7 @@ public class CompositeDrawable2d : Drawable2d
             var handled = down && child.OnKeyDown(e);
             if (!down) child.OnKeyUp(e);
 
-            if (handled) break; // Use break instead of continue if the event is "consumed"
+            if (handled) break;
 
             if (child is CompositeDrawable2d composite)
                 composite.UpdateKeyState(e, down);
@@ -263,6 +315,29 @@ public class CompositeDrawable2d : Drawable2d
     {
         var snapshot = Snapshot.Rent(InternalChildren);
 
+        var doMasking = Masking;
+
+        if (doMasking)
+        {
+            OpenGl.glClear(OpenGl.GL_STENCIL_BUFFER_BIT);
+            Rlgl.BeginStencil();
+            Rlgl.BeginStencilMask();
+            OpenGl.glAlphaFunc(OpenGl.GL_GREATER, 0.05f);
+
+            var maskRect = new Rectangle(0, 0, Size.X, Size.Y);
+
+            if (CornerRadius > 0)
+            {
+                var roundness = Math.Clamp(CornerRadius * 2 / Math.Min(Size.X, Size.Y), 0f, 1f);
+                Raylib.DrawRectangleRounded(maskRect, roundness, 32, Color.White);
+            }
+            else
+            {
+                Raylib.DrawRectangleRec(maskRect, Color.White);
+            }
+
+            Rlgl.EndStencilMask();
+        }
         try
         {
             for (int i = 0; i < snapshot.Count; i++)
@@ -272,6 +347,11 @@ public class CompositeDrawable2d : Drawable2d
         }
         finally
         {
+            if (doMasking)
+            {
+                Rlgl.EndStencil();
+            }
+
             snapshot.Return();
         }
     }
@@ -300,7 +380,6 @@ public class CompositeDrawable2d : Drawable2d
 
         base.Dispose(isDisposing);
     }
-
 
     public Vector2 GetChildrenSize()
     {

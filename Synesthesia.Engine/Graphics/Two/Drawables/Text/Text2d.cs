@@ -1,8 +1,8 @@
 using System.Numerics;
 using Raylib_cs;
 using Synesthesia.Engine.Dependency;
-using Synesthesia.Engine.Graphics.Font;
-using Synesthesia.Engine.Graphics.Shader;
+using Synesthesia.Engine.Graphics.Fonts;
+using Synesthesia.Engine.Graphics.Shaders;
 using Synesthesia.Engine.Resources;
 using Synesthesia.Engine.Threading.Runners;
 
@@ -11,19 +11,19 @@ namespace Synesthesia.Engine.Graphics.Two.Drawables.Text;
 public class Text2d : ColoredDrawable2d
 {
     [Resolved]
-    private IResourceStore<FontHandle> fontResourceStore = null!;
+    private IResourceStore<Font> fontResourceStore = null!;
 
     [Resolved]
-    private IResourceStore<ShaderHandle> shaderResourceStore = null!;
+    private IResourceStore<Shader> shaderResourceStore = null!;
 
-    private ShaderHandle? sdfShader;
+    private Shader? sdfShader;
 
     [Resolved]
     private RenderThread renderThread = null!;
 
-    private FontHandle? defaultFont;
+    private Font? defaultFont;
 
-    public FontHandle? Font
+    public Font? Font
     {
         get;
         set

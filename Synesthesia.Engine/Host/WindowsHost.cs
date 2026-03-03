@@ -33,7 +33,10 @@ public class WindowsHost : IDisposable
         Raylib.SetTraceLogCallback(&RaylibLoggerProxy.HandleRaylibLog);
         Raylib.SetConfigFlags(ConfigFlags.ResizableWindow);
         Raylib.SetConfigFlags(ConfigFlags.Msaa4xHint);
+        Raylib.SetConfigFlags(ConfigFlags.StencilBuffer8Bit);
+
         Raylib.InitWindow(400, 800, game.WindowTitle.Value);
+
         Raylib.SetExitKey(KeyboardKey.Null);
 
         WindowState = bindablePool.Borrow(Host.WindowState.Normal);

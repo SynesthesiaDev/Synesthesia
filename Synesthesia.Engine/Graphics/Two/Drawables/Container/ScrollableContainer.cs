@@ -11,7 +11,7 @@ using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two.Drawables.Container;
 
-public class ScrollableContainer : MaskingContainer2d
+public class ScrollableContainer : Container2d
 {
     private const int scrollbar_container_width = 10;
     private const float layout_buffer = 10f;
@@ -74,6 +74,7 @@ public class ScrollableContainer : MaskingContainer2d
 
     protected override void OnLoading()
     {
+        Masking = true;
         viewport.Children = [scrollableContainer];
 
         Children =

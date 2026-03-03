@@ -122,7 +122,7 @@ public class DefaultCheckbox : CompositeDrawable2d, IDisablable
 
     protected internal override void OnMouseUp(PointInput e)
     {
-        if (Disabled) return;
+        if (Disabled || !Contains(e.MousePosition)) return;
         Checked.Value = !Checked.Value;
 
         base.OnMouseUp(e);
