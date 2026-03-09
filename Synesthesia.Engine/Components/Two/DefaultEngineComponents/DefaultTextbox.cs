@@ -5,8 +5,10 @@ using Common.Util;
 using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Components.Barebones;
 using Synesthesia.Engine.Configuration;
+using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Graphics.Two.Drawables.Container;
+using Synesthesia.Engine.Graphics.Two.Drawables.Shapes;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Input.Events;
 
@@ -14,8 +16,8 @@ namespace Synesthesia.Engine.Components.Two.DefaultEngineComponents;
 
 public class DefaultTextbox : DisableableContainer, IAcceptsFocus
 {
-    private BackgroundContainer2d outline = null!;
-    private BackgroundContainer2d backgroundContainer2d = null!;
+    private Container2d mainContainer = null!;
+    private Box2d background = null!;
     private BarebonesTextbox textbox = null!;
 
     public string Hint { get; set; } = string.Empty;
@@ -31,48 +33,47 @@ public class DefaultTextbox : DisableableContainer, IAcceptsFocus
     {
         Children =
         [
-            outline = new BackgroundContainer2d
+            mainContainer = new Container2d
             {
                 RelativeSizeAxes = Axes.Both,
-                BackgroundColor = Defaults.BACKGROUND3,
-                BackgroundCornerRadius = 10,
+                Margin = new Vector4(1),
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
+                Masking = true,
+                BorderThickness = 1,
+                BorderColor = ComplexColor.Single(Defaults.BACKGROUND3),
+                CornerRadius = 10,
                 Children =
                 [
-                    backgroundContainer2d = new BackgroundContainer2d
+                    background = new Box2d
                     {
                         RelativeSizeAxes = Axes.Both,
-                        BackgroundColor = Defaults.BACKGROUND1,
-                        BackgroundCornerRadius = 10,
-                        Margin = new Vector4(1),
+                        Color = Defaults.BACKGROUND1,
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
+                    },
+
+                    new Container2d
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        Margin = new Vector4(5),
                         Children =
                         [
-                            new BackgroundContainer2d
+                            textbox = new BarebonesTextbox
                             {
                                 RelativeSizeAxes = Axes.Both,
-                                Anchor = Anchor.Centre,
-                                Origin = Anchor.Centre,
-                                Margin = new Vector4(5),
-                                Children =
-                                [
-                                    textbox = new BarebonesTextbox
-                                    {
-                                        RelativeSizeAxes = Axes.Both,
-                                        Caret = () => new BarebonesTextbox.BarebonesTextboxCaret
-                                        {
-                                            RelativeSizeAxes = Axes.Y,
-                                            Size = new Vector2(1, 0)
-                                        }
-                                    }
-                                ]
-                            },
-                        ],
-                    }
-                ]
-            }
+                                Caret = () => new BarebonesTextbox.BarebonesTextboxCaret
+                                {
+                                    RelativeSizeAxes = Axes.Y,
+                                    Size = new Vector2(1, 0)
+                                }
+                            }
+                        ]
+                    },
+                ],
+            },
         ];
 
         base.OnLoading();
@@ -122,9 +123,10 @@ public class DefaultTextbox : DisableableContainer, IAcceptsFocus
         };
 
 
-        outline.FadeBackgroundTo(borderColor, 150, Easing.OutCubic);
+        // mainContainer.FadeBackgroundTo(borderColor, 150, Easing.OutCubic);
+        mainContainer.FadeBorderColorTo(ComplexColor.Single(borderColor), 150, Easing.OutCubic);
 
-        backgroundContainer2d.FadeBackgroundTo(IsHovered ? DefaultEngineColorCombination.SURFACE1.Hovered : DefaultEngineColorCombination.SURFACE1.Normal, 100, Easing.OutCubic);
+        background.FadeColorTo(IsHovered ? DefaultEngineColorCombination.SURFACE1.Hovered : DefaultEngineColorCombination.SURFACE1.Normal, 100, Easing.OutCubic);
     }
 
     public void OnFocusGained()

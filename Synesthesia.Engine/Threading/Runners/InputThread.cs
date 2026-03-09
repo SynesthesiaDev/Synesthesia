@@ -1,16 +1,15 @@
 using Common.Logger;
-using Common.Statistics;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Input;
 
 namespace Synesthesia.Engine.Threading.Runners;
 
-public class UpdateThreadRunner(ThreadType type) : ThreadRunner(type)
+public class InputThread(ThreadType type, long activeUpdateRate, long inactiveUpdateRate = 60) : ThreadRunner(type, activeUpdateRate, inactiveUpdateRate)
 {
     private Game game = null!;
 
-    protected override Logger.LogCategory GetLoggerCategory() => Logger.Runtime;
+    protected override Logger.LogCategory GetLoggerCategory() => Logger.Input;
 
     protected override void OnThreadInit(Game game)
     {
@@ -26,14 +25,11 @@ public class UpdateThreadRunner(ThreadType type) : ThreadRunner(type)
     {
         try
         {
-            game.RootComposite3d.OnUpdate(frameInfo);
-            game.RootComposite2d.OnUpdate(frameInfo);
-            game.EngineDebugOverlay.OnUpdate(frameInfo);
-            InputSimulator.Update(frameInfo);
+            InputManager.ProcessQueue(game);
         }
-        finally
+        catch (Exception ex)
         {
-            EngineStatistics.LAYOUT_INVALIDATIONS.Update(_ => 0);
+            Logger.Exception(ex, Logger.Input);
         }
 
     }

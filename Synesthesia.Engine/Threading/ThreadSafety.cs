@@ -6,7 +6,7 @@ public static class ThreadSafety
 {
     public const string THREAD_INPUT = "Input";
     public const string THREAD_AUDIO = "Audio";
-    public const string THREAD_RENDER = "Render";
+    public const string THREAD_RENDER = "Draw";
     public const string THREAD_UPDATE = "Update";
 
     public static void AssertRunningOnInputThread() => assertRunningOnThread(THREAD_INPUT);
@@ -19,11 +19,9 @@ public static class ThreadSafety
     public static bool IsAudioThread => Thread.CurrentThread.Name == THREAD_AUDIO;
     public static bool IsInputThread => Thread.CurrentThread.Name == THREAD_INPUT;
 
-    public static ThreadRunner CreateThread(ThreadRunner threadRunner, string name, long updateTime, Game game)
+    public static ThreadRunner CreateThread(ThreadRunner threadRunner, Game game)
     {
-        var thread = new Thread(threadRunner.InternalLoop) { Name = name, IsBackground = false };
-        threadRunner.Start(thread, game);
-        threadRunner.TargetUpdateRate.Value = TimeSpan.FromSeconds(1.0 / updateTime);
+        threadRunner.Start(game);
         return threadRunner;
     }
 

@@ -13,7 +13,7 @@ using Synesthesia.Engine.Resources.Stores;
 
 namespace Synesthesia.Engine.Threading.Runners;
 
-public class RenderThread(ThreadType type) : ThreadRunner(type)
+public class RenderThread(ThreadType type, long activeUpdateRate, long inactiveUpdateRate = 60) : ThreadRunner(type, activeUpdateRate, inactiveUpdateRate)
 {
     private Game game = null!;
 
@@ -200,15 +200,19 @@ public class RenderThread(ThreadType type) : ThreadRunner(type)
         int charCode;
         while ((charCode = Raylib.GetCharPressed()) != 0)
         {
-            if (InputManager.FocusedDrawable == null) return;
+            var code = charCode;
+            game.InputThread.Schedule(() =>
+            {
+                if (InputManager.FocusedDrawable == null) return;
 
-            var character = (char)charCode;
-            var textEvent = InputManager.TEXT_INPUT_EVENT_POOL.Rent();
+                var character = (char)code;
+                var textEvent = InputManager.TEXT_INPUT_EVENT_POOL.Rent();
 
-            textEvent.Timestamp = timestamp;
-            textEvent.Character = character;
+                textEvent.Timestamp = timestamp;
+                textEvent.Character = character;
 
-            InputManager.EnqueueEvent(textEvent);
+                InputManager.EnqueueEvent(textEvent);
+            });
         }
 
         #endregion

@@ -38,13 +38,13 @@ public class Animator : IDisposable
 
                     if (anim.State == AnimationState.Ready)
                     {
-                        holder.Animation.Start(frameInfo.Time);
+                        holder.Animation.Start(frameInfo.TimeLong);
                         holder.Animation.State = AnimationState.Playing;
-                        holder.Animation.Update(frameInfo.Time);
+                        holder.Animation.Update(frameInfo.TimeLong);
                     }
                     else if (anim.State == AnimationState.Playing)
                     {
-                        anim.Update(frameInfo.Time);
+                        anim.Update(frameInfo.TimeLong);
                     }
                     else if (anim.State == AnimationState.Paused)
                     {
@@ -56,7 +56,7 @@ public class Animator : IDisposable
                         if (anim.Loop)
                         {
                             Restart(anim);
-                            anim.Update(frameInfo.Time);
+                            anim.Update(frameInfo.TimeLong);
                         }
                         else
                         {

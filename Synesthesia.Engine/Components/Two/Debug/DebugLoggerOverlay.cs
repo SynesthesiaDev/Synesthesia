@@ -42,7 +42,7 @@ public class DebugLoggerOverlay : CompositeDrawable2d
             }
         ];
 
-        // loggerSubscriber = Logger.MESSAGE_LOGGED.Subscribe(Push);
+        loggerSubscriber = Logger.MESSAGE_LOGGED.Subscribe(Push);
     }
 
     protected internal override void OnUpdate(FrameInfo frameInfo)
@@ -60,7 +60,7 @@ public class DebugLoggerOverlay : CompositeDrawable2d
     public void Push(Logger.LogEvent logEvent)
     {
         DependencyContainer
-            .Get<UpdateThreadRunner>()
+            .Get<UpdateThread>()
             .Schedule(() =>
             {
                 while (messageOrder.Count is >= MAX_MESSAGES and > 0)

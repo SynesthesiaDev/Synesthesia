@@ -10,9 +10,13 @@ public readonly struct FrameInfo
 {
     public double Delta { get; init; }
 
-    public long Time { get; init; }
+    public double Time { get; init; }
 
     public ThreadType Type { get; init; }
+
+    public ulong FrameIndex { get; init; }
+
+    public long TimeLong => (long)Time;
 
     public float DeltaSeconds
     {

@@ -13,9 +13,6 @@ public class FastObjectPool<T>(Func<T> activator, int capacity = 32) : IDisposab
 
     private bool isDisposed;
 
-    // [ThreadStatic]
-    // private static T? localItem;
-
     [ThreadStatic]
     private static (T item, FastObjectPool<T> owner)? localItem;
 

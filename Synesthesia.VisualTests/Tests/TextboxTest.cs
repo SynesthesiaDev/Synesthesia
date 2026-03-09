@@ -55,11 +55,28 @@ public class TextboxTest : VisualTest
 
         AddAssert("Selection is 4", () => textBox.UnderlyingTextBox.SelectedText.Length == 4);
 
+        AddStep("Change selection color", () => textBox.UnderlyingTextBox.SelectionColor.Value = Color.Pink);
+
         AddStep("Delete selection", () => InputSimulator.SimulateKeyboardPress(KeyboardKey.Backspace));
 
         AddAssert("Textbox doesn't have selection", () => !textBox.UnderlyingTextBox.HasSelection);
 
         AddAssert("Selection is 0", () => textBox.UnderlyingTextBox.SelectedText.Length == 0);
+
+        AddStep("Click outside", () => InputSimulator.SimulateClick(MouseButton.Left, new Vector2(0, 0)));
+
+        AddStep("Select all", () =>
+        {
+            InputSimulator.SimulateKeyboard(KeyboardKey.LeftControl, true);
+            InputSimulator.SimulateKeyboardPress(KeyboardKey.A);
+            InputSimulator.SimulateKeyboard(KeyboardKey.LeftControl, false);
+        });
+
+        AddAssert("Textbox doesn't have selection", () => !textBox.UnderlyingTextBox.HasSelection);
+
+        AddAssert("Selection is 0", () => textBox.UnderlyingTextBox.SelectedText.Length == 0);
+
+        AddStep("Click on textbox", () => InputSimulator.SimulateClick(MouseButton.Left, textBox.GetScreenSpaceCenter()));
 
         AddStep("Select all", () =>
         {

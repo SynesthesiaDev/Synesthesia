@@ -46,29 +46,29 @@ public class FrameCounter : EngineDebugComponent
                             {
                                 Name = "Draw",
                                 Fps = () => Raylib.GetFPS(),
-                                MaxFps = game.RenderThread.FpsTarget,
+                                MaxFps = Defaults.RENDERER_RATE,
                                 FrameTime = () => Raylib.GetFrameTime()
                             },
                             new PerformanceMonitorElement
                             {
                                 Name = "Update",
                                 Fps = () => game.UpdateThread.Fps,
-                                MaxFps = game.UpdateThread.FpsTarget,
-                                FrameTime = () => game.UpdateThread.FrameTime.Milliseconds
+                                MaxFps = game.UpdateThread.ActiveUpdateRate.Value,
+                                FrameTime = () => game.UpdateThread.FrameTime
                             },
                             new PerformanceMonitorElement
                             {
                                 Name = "Input",
                                 Fps = () => game.InputThread.Fps,
-                                MaxFps = game.InputThread.FpsTarget,
-                                FrameTime = () => game.InputThread.FrameTime.Milliseconds
+                                MaxFps = game.InputThread.ActiveUpdateRate.Value,
+                                FrameTime = () => game.InputThread.FrameTime
                             },
                             new PerformanceMonitorElement
                             {
                                 Name = "Audio",
                                 Fps = () => game.AudioThread.Fps,
-                                MaxFps = game.AudioThread.FpsTarget,
-                                FrameTime = () => game.AudioThread.FrameTime.Milliseconds
+                                MaxFps = game.AudioThread.ActiveUpdateRate.Value,
+                                FrameTime = () => game.AudioThread.FrameTime
                             },
                         ],
                         Direction = Direction.Vertical
@@ -81,13 +81,13 @@ public class FrameCounter : EngineDebugComponent
     private class PerformanceMonitorElement : CompositeDrawable2d
     {
         public string Name { get; init; } = "Element";
-        public Func<long> Fps { get; init; } = () => 0;
-        public Func<double> FrameTime { get; init; } = () => 0;
+        public Func<double> Fps { get; init; } = () => 0d;
+        public Func<double> FrameTime { get; init; } = () => 0d;
 
-        private long lastFps = 0;
-        private double lastFrameTime = 0;
+        private double lastFps;
+        private double lastFrameTime;
 
-        public int MaxFps { get; init; }
+        public long MaxFps { get; init; }
 
         private Text2d fpsText = null!;
         private Text2d frameTimeText = null!;
@@ -146,13 +146,14 @@ public class FrameCounter : EngineDebugComponent
         {
             if (throttledUpdater.TryUpdate(frameInfo.Delta))
             {
-                var currentFps = Math.Clamp(Fps(), 0, MaxFps);
+                // var currentFps = Math.Clamp(Fps(), 0, MaxFps);
+                var currentFps = Fps();
                 var currentFrameTime = FrameTime();
 
-                if (currentFps != lastFps)
+                if (!Precision.IsSame(currentFps, lastFps))
                 {
                     lastFps = currentFps;
-                    fpsText.Text = currentFps.ToString();
+                    fpsText.Text = $"{currentFps:0}";
                 }
 
                 if (!Precision.IsSame(currentFrameTime, lastFrameTime, 0.001))

@@ -210,10 +210,10 @@ public class Game : IDisposable
             var loadSignal = new CountdownEvent(4);
             Action<ThreadRunner> onThreadLoaded = _ => loadSignal.Signal();
 
-            UpdateThread = ThreadSafety.CreateThread(new UpdateThreadRunner(ThreadType.Update), ThreadSafety.THREAD_UPDATE, Defaults.UPDATE_RATE, this);
-            RenderThread = ThreadSafety.CreateThread(new RenderThread(ThreadType.Draw), ThreadSafety.THREAD_RENDER, Defaults.RENDERER_RATE, this);
-            InputThread = ThreadSafety.CreateThread(new InputThreadRunner(ThreadType.Input), ThreadSafety.THREAD_INPUT, Defaults.INPUT_RATE, this);
-            AudioThread = ThreadSafety.CreateThread(new AudioThread(ThreadType.Audio), ThreadSafety.THREAD_AUDIO, Defaults.AUDIO_RATE, this);
+            UpdateThread = ThreadSafety.CreateThread(new UpdateThread(ThreadType.Update, Defaults.UPDATE_RATE), this);
+            RenderThread = ThreadSafety.CreateThread(new RenderThread(ThreadType.Draw, 0, 0), this);
+            InputThread = ThreadSafety.CreateThread(new InputThread(ThreadType.Input, Defaults.INPUT_RATE), this);
+            AudioThread = ThreadSafety.CreateThread(new AudioThread(ThreadType.Audio, Defaults.AUDIO_RATE), this);
 
             UpdateThread.ThreadLoadedDispatcher.Subscribe(onThreadLoaded);
             RenderThread.ThreadLoadedDispatcher.Subscribe(onThreadLoaded);
@@ -230,7 +230,18 @@ public class Game : IDisposable
                 RootComposite3d.Load();
             });
 
-            WindowsHost.WindowFocused.OnValueChange(_ => updateCursorState());
+            if (EngineConfiguration.ReduceFpsWhenInactive)
+            {
+                InputThread.IsActive.BindTo(WindowsHost.WindowFocused);
+                AudioThread.IsActive.BindTo(WindowsHost.WindowFocused);
+                UpdateThread.IsActive.BindTo(WindowsHost.WindowFocused);
+            }
+
+            WindowsHost.WindowFocused.OnValueChange(e =>
+            {
+                if (EngineConfiguration.ReduceFpsWhenInactive) Raylib.SetTargetFPS(e.NewValue ? Defaults.RENDERER_RATE : 60);
+                updateCursorState();
+            });
 
             Logger.Debug($"Load Complete, took {GameRuntimeClock.Elapsed.Milliseconds}ms.", Logger.Runtime);
             DeferredActionQueue.FlushAndSwitchToImmediate();

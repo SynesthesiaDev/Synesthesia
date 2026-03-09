@@ -17,7 +17,7 @@ public class Scheduler : IDisposable
     private bool timerRunning;
 
     [Resolved]
-    private UpdateThreadRunner updateThreadRunner = null!;
+    private UpdateThread updateThread = null!;
 
     public Scheduler()
     {
@@ -79,7 +79,7 @@ public class Scheduler : IDisposable
             return;
         }
 
-        updateThreadRunner.Schedule(() =>
+        updateThread.Schedule(() =>
         {
             handleScheduledTasks();
             handleRepeatingTasks();

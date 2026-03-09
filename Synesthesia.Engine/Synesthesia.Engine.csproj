@@ -26,7 +26,7 @@
     <PackageReference Include="ManagedBass.Mix" Version="4.0.2"/>
     <PackageReference Include="ManagedBass.Wasapi" Version="4.0.2"/>
     <PackageReference Include="SynesthesiaDev.Codon.IniTranscoder" Version="2026.220.5" />
-    <PackageReference Include="SynesthesiaDev.Raylib-cs" Version="2026.303.0" />
+    <PackageReference Include="SynesthesiaDev.Raylib-cs" Version="2026.307.0" />
   </ItemGroup>
 
 </Project>

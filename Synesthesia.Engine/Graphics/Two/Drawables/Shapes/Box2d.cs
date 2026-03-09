@@ -93,7 +93,7 @@ public class Box2d : ColoredDrawable2d
             else
             {
                 var roundness = Math.Clamp(CornerRadius * 2 / Math.Min(Size.X, Size.Y), 0f, 1f);
-                Raylib.DrawRectangleRounded(new Rectangle(0, 0, Size.X, Size.Y), roundness, 32, ApplyAlpha(Color));
+                Raylib.DrawRectangleRounded(new Rectangle(0, 0, Size.X, Size.Y), roundness, 8, ApplyAlpha(Color));
             }
         }
     }

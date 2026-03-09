@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using Common.Bindable;
 using Common.Event;
 using Common.Logger;
@@ -8,39 +7,38 @@ using Synesthesia.Engine.Timing;
 
 namespace Synesthesia.Engine.Threading.Runners;
 
-public abstract class ThreadRunner(ThreadType type) : IDisposable
+public abstract class ThreadRunner(ThreadType type, long activeUpdateRate, long inactiveUpdateRate = 60) : IDisposable
 {
     public Thread Thread { get; private set; } = null!;
 
-    protected readonly BindablePool BindablePool = new();
+    public readonly Bindable<long> ActiveUpdateRate = new(activeUpdateRate);
 
-    public Bindable<TimeSpan> TargetUpdateRate = null!;
+    public readonly Bindable<long> InactiveUpdateRate = new(inactiveUpdateRate);
+
+    public readonly  Bindable<bool> IsActive = new(true);
+
+    private readonly FrameStatistics frameStatistics = new();
 
     private readonly ConcurrentQueue<Action> workQueue = new();
 
-    private readonly StopwatchClock stopwatchClock = new(true);
+    private readonly ThreadRunningClock clock = new();
 
     private Game game = null!;
 
-    public ThreadType ThreadType { get; init; } = type;
+    private volatile bool isRunning;
+    public ulong FrameIndex { get; private set; }
 
-    private bool isRunning;
+    public ThreadType ThreadType => type;
 
     public readonly SingleOffEventDispatcher<ThreadRunner> ThreadLoadedDispatcher = new();
 
-    private long fpsBits;
-    private long frameTimeTicks;
+    public double Fps => frameStatistics.FramesPerSecond;
 
-    public long Fps => Interlocked.Read(ref fpsBits);
-
-    public TimeSpan FrameTime => new(Interlocked.Read(ref frameTimeTicks));
-
-    public int FpsTarget;
+    public double FrameTime => frameStatistics.AverageFrameTime;
 
     protected void MarkLoaded()
     {
-        FpsTarget = (int)Math.Floor(1.0 / TargetUpdateRate.Value.TotalSeconds);
-        Logger.Debug($"{Thread.Name} thread running at {FpsTarget}hz", Logger.Io);
+        Logger.Debug($"{Thread.Name} thread running at {ActiveUpdateRate.Value}hz", Logger.Runtime);
         ThreadLoadedDispatcher.Dispatch(this);
         OnLoadComplete(game);
     }
@@ -63,12 +61,31 @@ public abstract class ThreadRunner(ThreadType type) : IDisposable
         }
     }
 
-    public void Start(Thread thread, Game game)
+    public void Start(Game gameHost)
     {
-        this.game = game;
-        Thread = thread;
+        game = gameHost;
+        Thread = new Thread(InternalLoop)
+        {
+            Name = type.ToString(),
+            IsBackground = true,
+        };
 
-        TargetUpdateRate = BindablePool.Borrow(TimeSpan.FromSeconds(1.0 / 60));
+        ActiveUpdateRate.OnValueChange(e =>
+        {
+            if (IsActive.Value)
+                clock.MaximumUpdateHz = e.NewValue;
+        }, true);
+
+        InactiveUpdateRate.OnValueChange(e =>
+        {
+            if (!IsActive.Value)
+                clock.MaximumUpdateHz = e.NewValue;
+        });
+
+        IsActive.OnValueChange(e =>
+        {
+            clock.MaximumUpdateHz = e.NewValue ? ActiveUpdateRate.Value : InactiveUpdateRate.Value;
+        });
 
         isRunning = true;
         Thread.Start();
@@ -81,57 +98,29 @@ public abstract class ThreadRunner(ThreadType type) : IDisposable
             OnThreadInit(game);
             MarkLoaded();
 
-            var lastFrameStart = Stopwatch.GetTimestamp();
-
             while (isRunning)
             {
-                var frameStart = Stopwatch.GetTimestamp();
-                var deltaTime = Stopwatch.GetElapsedTime(lastFrameStart, frameStart).TotalMilliseconds;
+                frameStatistics.Add(clock.ElapsedFrameTime);
+                clock.ProcessFrame();
+
+                FrameIndex++;
 
                 var frameInfo = new FrameInfo
                 {
-                    Delta = deltaTime,
+                    Delta = clock.ElapsedFrameTime,
                     Type = ThreadType,
-                    Time = stopwatchClock.ElapsedMilliseconds
+                    Time = clock.CurrentTime,
+                    FrameIndex = FrameIndex
                 };
 
                 OnLoop(frameInfo);
                 executeScheduledActions();
-
-                var frameTime = Stopwatch.GetElapsedTime(frameStart);
-                Interlocked.Exchange(ref frameTimeTicks, frameTime.Ticks);
-
-                var target = TargetUpdateRate.Value;
-                if (target > TimeSpan.Zero)
-                {
-                    while (true)
-                    {
-                        var elapsed = Stopwatch.GetElapsedTime(frameStart);
-                        var remaining = target - elapsed;
-
-                        if (remaining <= TimeSpan.Zero)
-                            break;
-
-                        if (remaining > TimeSpan.FromMilliseconds(2))
-                        {
-                            Thread.Sleep(remaining - TimeSpan.FromMilliseconds(1));
-                        }
-                        else
-                        {
-                            Thread.SpinWait(50);
-                        }
-                    }
-                }
-
-                var current = Stopwatch.GetElapsedTime(frameStart);
-                var fps = current.TotalSeconds > 0 ? 1.0 / current.TotalSeconds : 0.0;
-                Interlocked.Exchange(ref fpsBits, BitConverter.DoubleToInt64Bits(fps));
-
-                lastFrameStart = frameStart;
             }
         }
+
         catch (Exception ex)
         {
+            Logger.Error($"Exception on {type.ToString()} thread:", GetLoggerCategory());
             Logger.Exception(ex, GetLoggerCategory());
 #if DEBUG
             Environment.Exit(ex.HResult);
@@ -141,10 +130,18 @@ public abstract class ThreadRunner(ThreadType type) : IDisposable
 
     public void Dispose()
     {
-        BindablePool.Dispose();
+        isRunning = false;
+        clock.Dispose();
+        ActiveUpdateRate.Dispose();
+        InactiveUpdateRate.Dispose();
+        IsActive.Dispose();
         isRunning = false;
         workQueue.Clear();
         ThreadLoadedDispatcher.Dispose();
-        Thread.Interrupt();
+
+        if (Thread.IsAlive)
+        {
+            Thread.Join(TimeSpan.FromSeconds(5));
+        }
     }
 }

@@ -2,10 +2,15 @@ using System.Numerics;
 using Common.Pooling;
 using Common.Util;
 using Raylib_cs;
+using Synesthesia.Engine.Animations;
+using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Renderer;
+using Synesthesia.Engine.Graphics.Shaders;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Input.Events;
+using Synesthesia.Engine.Resources;
+using Synesthesia.Engine.Utility;
 using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two.Drawables;
@@ -16,6 +21,13 @@ public class CompositeDrawable2d : Drawable2d
 
     [Resolved]
     private IRenderer renderer = null!;
+
+    [Resolved]
+    private IResourceStore<Shader> shaderStore = null!;
+
+    private Shader? borderShader;
+
+    private Texture2D? borderTexture;
 
     public ComplexColor BorderColor
     {
@@ -39,6 +51,18 @@ public class CompositeDrawable2d : Drawable2d
             Invalidate(Invalidation.DrawNode);
         }
     } = 0;
+
+
+    public BorderType BorderType
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            Invalidate(Invalidation.DrawNode);
+        }
+    } = BorderType.Outset;
 
     public float CornerRadius
     {
@@ -317,6 +341,11 @@ public class CompositeDrawable2d : Drawable2d
 
         var doMasking = Masking;
 
+        if (BorderThickness > 0 && BorderType == BorderType.Inset)
+        {
+            drawBorder();
+        }
+
         if (doMasking)
         {
             OpenGl.glClear(OpenGl.GL_STENCIL_BUFFER_BIT);
@@ -338,6 +367,7 @@ public class CompositeDrawable2d : Drawable2d
 
             Rlgl.EndStencilMask();
         }
+
         try
         {
             for (int i = 0; i < snapshot.Count; i++)
@@ -354,6 +384,65 @@ public class CompositeDrawable2d : Drawable2d
 
             snapshot.Return();
         }
+
+        if (BorderThickness > 0 && BorderType == BorderType.Outset)
+        {
+            drawBorder();
+        }
+    }
+
+    private void drawBorder()
+    {
+        borderShader ??= shaderStore.Get("Synesthesia.Resources.Shaders.border.fsh");
+        borderTexture ??= new Texture2D
+        {
+            Id = Rlgl.GetTextureIdDefault(),
+            Width = 1,
+            Height = 1,
+            Mipmaps = 1,
+            Format = PixelFormat.UncompressedR8G8B8A8
+        };
+
+        var shader = borderShader.NativeShader;
+
+        Raylib.SetShaderValue(shader,
+            Raylib.GetShaderLocation(shader, "topLeftColor"),
+            BorderColor.TopLeft.ToNormalizedVector(),
+            ShaderUniformDataType.Vec4);
+
+        Raylib.SetShaderValue(shader,
+            Raylib.GetShaderLocation(shader, "topRightColor"),
+            BorderColor.TopRight.ToNormalizedVector(),
+            ShaderUniformDataType.Vec4);
+
+        Raylib.SetShaderValue(shader,
+            Raylib.GetShaderLocation(shader, "bottomLeftColor"),
+            BorderColor.BottomLeft.ToNormalizedVector(),
+            ShaderUniformDataType.Vec4);
+
+        Raylib.SetShaderValue(shader,
+            Raylib.GetShaderLocation(shader, "bottomRightColor"),
+            BorderColor.BottomRight.ToNormalizedVector(),
+            ShaderUniformDataType.Vec4);
+
+        Raylib.SetShaderValue(shader,
+            Raylib.GetShaderLocation(shader, "size"),
+            Size,
+            ShaderUniformDataType.Vec2);
+
+        Raylib.SetShaderValue(shader,
+            Raylib.GetShaderLocation(shader, "borderThickness"),
+            BorderThickness,
+            ShaderUniformDataType.Int);
+
+        Raylib.SetShaderValue(shader,
+            Raylib.GetShaderLocation(shader, "cornerRadius"),
+            CornerRadius,
+            ShaderUniformDataType.Float);
+
+        Raylib.BeginShaderMode(shader);
+        Raylib.DrawTexturePro(borderTexture.Value, new Rectangle(0, 0, 1, 1), new Rectangle(0, 0, Size.X, Size.Y), Vector2.Zero, 0.0f, Color.White);
+        Raylib.EndShaderMode();
     }
 
     protected override void Dispose(bool isDisposing)
@@ -419,5 +508,15 @@ public class CompositeDrawable2d : Drawable2d
                 getChildrenRecursive(compositeChild, outList);
             }
         }
+    }
+
+    public Animation<int> ResizeBorder(int newSize, long duration, Easing easing)
+    {
+        return TransformTo(nameof(BorderThickness), BorderThickness, newSize, duration, easing, Transforms.INT, thickness => { BorderThickness = thickness; });
+    }
+
+    public Animation<ComplexColor> FadeBorderColorTo(ComplexColor newColor, long duration, Easing easing)
+    {
+        return TransformTo(nameof(BorderColor), BorderColor, newColor, duration, easing, Transforms.COMPLEX_COLOR, borderColor => { BorderColor = borderColor; });
     }
 }

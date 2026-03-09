@@ -9,7 +9,7 @@ using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Threading.Runners;
 
-public class AudioThread(ThreadType type) : ThreadRunner(type)
+public class AudioThread(ThreadType type, long activeUpdateRate, long inactiveUpdateRate = 60) : ThreadRunner(type, activeUpdateRate, inactiveUpdateRate)
 {
     protected override Logger.LogCategory GetLoggerCategory() => Logger.Audio;
 

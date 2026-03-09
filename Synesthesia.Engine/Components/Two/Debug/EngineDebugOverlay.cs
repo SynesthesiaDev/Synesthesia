@@ -1,4 +1,5 @@
 using System.Numerics;
+using Common.Logger;
 using Common.Util;
 using Raylib_cs;
 using Synesthesia.Engine.Animations;
@@ -30,6 +31,8 @@ public class EngineDebugOverlay : CompositeDrawable2d
     }
 
     private Container2d mainContainer = null!;
+
+    private bool petah = false;
 
     protected override void OnLoading()
     {
@@ -93,6 +96,16 @@ public class EngineDebugOverlay : CompositeDrawable2d
         base.OnLoading();
     }
 
+    protected override void LoadComplete()
+    {
+        if (Visible && !petah)
+        {
+            Logger.Debug("petah", Logger.Runtime);
+            petah = true;
+        }
+        base.LoadComplete();
+    }
+
     protected internal override bool OnActionBindingDown(ActionBinding e)
     {
         if (e != ENGINE_DEBUG_OVERLAY_TOGGLE) return base.OnActionBindingDown(e);
@@ -101,6 +114,11 @@ public class EngineDebugOverlay : CompositeDrawable2d
         if (!Visible)
         {
             Visible = true;
+            if (!petah)
+            {
+                Logger.Debug("petah", Logger.Runtime);
+                petah = true;
+            }
             sequence = new AnimationSequence.Builder()
                 .Add(mainContainer.FadeFromTo(0f, 1f, 250, Easing.Out))
                 .Add(mainContainer.ScaleFromTo(0.95f, 1f, 250, Easing.Out))

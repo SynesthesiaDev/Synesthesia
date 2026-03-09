@@ -136,6 +136,7 @@ public class ParallaxContainerTest : VisualTest
         ];
 
         parallaxStrength.OnValueChange(e => parallaxContainer.Strength = e.NewValue);
+
         parallaxDuration.OnValueChange(e => parallaxContainer.Duration = (long)e.NewValue);
         parallaxMasking.OnValueChange(e => parallaxContainer.Masking = e.NewValue);
 

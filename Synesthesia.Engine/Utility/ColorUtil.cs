@@ -15,6 +15,8 @@ public static class ColorUtil
     {
         public Vector4 ToVector() => new(color.R, color.G, color.B, color.A);
 
+        public Vector4 ToNormalizedVector() => new(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
+
         public bool IsSameAs(Color other)
         {
             return color.R == other.R &&

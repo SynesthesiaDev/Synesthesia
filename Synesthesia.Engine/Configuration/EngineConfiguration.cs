@@ -8,7 +8,7 @@ public static class EngineConfiguration
 {
     private const string path = "./engine.ini";
 
-    private static RawConfigurationFile current = RawConfigurationFile.DEFAULT;
+    private static ConfigurationFile current = ConfigurationFile.DEFAULT;
 
     public static bool DidMigrate = false;
 
@@ -42,7 +42,13 @@ public static class EngineConfiguration
         set => current = current with { ExperimentalAudioWasapi = value };
     }
 
-    private static void update(RawConfigurationFile newConfiguration)
+    public static bool ReduceFpsWhenInactive
+    {
+        get => current.ReduceFpsWhenInactive;
+        set => current = current with { ReduceFpsWhenInactive = value };
+    }
+
+    private static void update(ConfigurationFile newConfiguration)
     {
         current = newConfiguration;
         Save();
@@ -53,12 +59,12 @@ public static class EngineConfiguration
         if (!File.Exists(path))
         {
             File.Create(path).Close();
-            File.WriteAllText(path, RawConfigurationFile.VERSIONED_STRUCT_CODEC.Encode(IniTranscoder.INSTANCE, RawConfigurationFile.DEFAULT).ToString());
+            File.WriteAllText(path, ConfigurationFile.VERSIONED_STRUCT_CODEC.Encode(IniTranscoder.INSTANCE, ConfigurationFile.DEFAULT).ToString());
         }
         else
         {
             var text = File.ReadAllText(path);
-            var decoded = RawConfigurationFile.VERSIONED_STRUCT_CODEC.Decode(IniTranscoder.INSTANCE, IniSection.Parse(text));
+            var decoded = ConfigurationFile.VERSIONED_STRUCT_CODEC.Decode(IniTranscoder.INSTANCE, IniSection.Parse(text));
             current = decoded;
         }
 
@@ -71,11 +77,11 @@ public static class EngineConfiguration
         if (!File.Exists(path))
         {
             File.Create(path).Close();
-            File.WriteAllText(path, RawConfigurationFile.VERSIONED_STRUCT_CODEC.Encode(IniTranscoder.INSTANCE, current).ToString());
+            File.WriteAllText(path, ConfigurationFile.VERSIONED_STRUCT_CODEC.Encode(IniTranscoder.INSTANCE, current).ToString());
         }
         else
         {
-            File.WriteAllText(path, RawConfigurationFile.VERSIONED_STRUCT_CODEC.Encode(IniTranscoder.INSTANCE, current).ToString());
+            File.WriteAllText(path, ConfigurationFile.VERSIONED_STRUCT_CODEC.Encode(IniTranscoder.INSTANCE, current).ToString());
         }
 
         Logger.Verbose("Updated engine configuration file", Logger.Io);

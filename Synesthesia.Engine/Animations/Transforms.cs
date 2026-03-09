@@ -1,6 +1,7 @@
 using System.Numerics;
 using Raylib_cs;
 using Synesthesia.Engine.Animations.Easings;
+using Synesthesia.Engine.Graphics;
 using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Animations;
@@ -51,10 +52,41 @@ public static class Transforms
         start.A / 255f + (end.A / 255f - start.A / 255f) * progress
     ));
 
+    public static readonly Transform<ComplexColor> COMPLEX_COLOR = new ComplexColorTransform((start, end, progress) =>
+    {
+        //If single color, interpolate only the top left
+        if (start.HasSingleColor && end.HasSingleColor)
+        {
+            return ComplexColor.Single(COLOR.Apply(start.TopLeft, end.TopLeft, progress));
+        }
+
+        var complexColor = new ComplexColor
+        {
+            TopLeft = COLOR.Apply(start.TopLeft, end.TopLeft, progress),
+            TopRight = COLOR.Apply(start.TopRight, end.TopRight, progress),
+            BottomLeft = COLOR.Apply(start.BottomLeft, end.BottomLeft, progress),
+            BottomRight = COLOR.Apply(start.BottomRight, end.BottomRight, progress)
+        };
+
+        if (complexColor.TopLeft == complexColor.BottomLeft && complexColor.TopRight == complexColor.BottomRight)
+        {
+            complexColor.HasSingleColor = true;
+        }
+
+        return complexColor;
+    });
+
+
     public class ColorTransform(Func<Color, Color, float, Color> transform) : Transform<Color>
     {
         public override Color Apply(Color startValue, Color endValue, float progress) => transform(startValue, endValue, progress);
     }
+
+    public class ComplexColorTransform(Func<ComplexColor, ComplexColor, float, ComplexColor> transform) : Transform<ComplexColor>
+    {
+        public override ComplexColor Apply(ComplexColor startValue, ComplexColor endValue, float progress) => transform(startValue, endValue, progress);
+    }
+
 
     public class FloatTransform(Func<float, float, float, float> transform) : Transform<float>
     {

@@ -21,8 +21,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
 {
     public required Func<AbstractTextboxCaret> Caret { get; init; }
 
-    private static readonly Color selection_color = Color.Blue;
-    private const float selection_alpha = 0.5f;
+    public readonly Bindable<Color> SelectionColor = new(Color.Blue with { A = 127 });
 
     public readonly Bindable<string> Text = new(string.Empty);
 
@@ -72,9 +71,9 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
                     selectionBox = new Box2d
                     {
                         RelativeSizeAxes = Axes.Y,
-                        Color = selection_color,
-                        Alpha = 0,
+                        Color = SelectionColor.Value,
                         Width = 0,
+                        Alpha = 0,
                         Position = new Vector2(0, 0)
                     },
                     Text2d = new Text2d { Text = string.Empty },
@@ -92,6 +91,11 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
         {
             Text2d.Text = e.NewValue;
             updateVisualState();
+        });
+
+        SelectionColor.OnValueChange(e =>
+        {
+            selectionBox.FadeColorTo(e.NewValue, 150, Easing.OutCubic);
         });
 
         Scheduler.Value.Repeating(repeat_rate, _ =>
@@ -215,6 +219,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
 
     public void OnCharacterTyped(char character)
     {
+        if (!IsFocused) return;
         insertAtCaret(character.ToString());
     }
 
@@ -242,12 +247,11 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
             selectionBox.MoveTo(newSelectionPos, 100, Easing.OutCirc);
 
             selectionBox.ResizeWidthTo(selHighX - selLowX, 100, Easing.OutCirc);
-            selectionBox.FadeTo(selection_alpha, 100, Easing.OutCirc);
+            selectionBox.FadeTo(0.5f, 100, Easing.OutCirc);
         }
         else
         {
-            selectionBox.Alpha = 0f;
-
+            selectionBox.FadeTo(0.0f, 100, Easing.OutCirc);
         }
     }
 
@@ -277,6 +281,8 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
 
     protected internal override bool OnKeyDown(KeyboardKey e)
     {
+        if (!IsFocused) return false;
+
         var shift = KeyboardKey.LeftShift.IsDown() || KeyboardKey.RightShift.IsDown();
         var ctrl = KeyboardKey.LeftControl.IsDown() || KeyboardKey.RightControl.IsDown();
 
@@ -336,7 +342,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
     protected override void Dispose(bool isDisposing)
     {
         Text.Dispose();
-        if(OnCommit.IsPooled) Pooled.STRING_DISPATCHER_POOL.Return(OnCommit);
+        if (OnCommit.IsPooled) Pooled.STRING_DISPATCHER_POOL.Return(OnCommit);
         base.Dispose(isDisposing);
     }
 

@@ -8,25 +8,27 @@ using Common.Logger;
 
 namespace Synesthesia.Engine.Configuration;
 
-public record RawConfigurationFile(
+public record ConfigurationFile(
     bool ShowDebugOverlay,
     GarbageCollectionMode GarbageCollectionMode,
     ExecutionMode ExecutionMode,
     bool ExperimentalAudioWasapi,
     bool LeftAltEscapesCursorConsume,
-    bool RawInput
+    bool RawInput,
+    bool ReduceFpsWhenInactive
 )
 {
-    public static readonly RawConfigurationFile DEFAULT = new(
+    public static readonly ConfigurationFile DEFAULT = new(
         ShowDebugOverlay: false,
         GarbageCollectionMode: GarbageCollectionMode.Default,
         ExecutionMode: ExecutionMode.MultiThreaded,
         ExperimentalAudioWasapi: true,
         LeftAltEscapesCursorConsume: true,
-        RawInput: false
+        RawInput: false,
+        ReduceFpsWhenInactive: true
     );
 
-    private static readonly StructCodec<RawConfigurationFile> codec = StructCodec.Of
+    private static readonly StructCodec<ConfigurationFile> codec = StructCodec.Of
     (
         "showDebugOverlay", Codecs.BOOLEAN, r => r.ShowDebugOverlay,
         "garbageCollectionMode", Codecs.Enum<GarbageCollectionMode>(), r => r.GarbageCollectionMode,
@@ -34,12 +36,13 @@ public record RawConfigurationFile(
         "experimentalAudioWasapi", Codecs.BOOLEAN, r => r.ExperimentalAudioWasapi,
         "leftAltEscapesCursorConsume", Codecs.BOOLEAN, r => r.LeftAltEscapesCursorConsume,
         "rawInput", Codecs.BOOLEAN, r => r.RawInput,
-        (showDebugOverlay, garbage, execution, wasapi, leftAltToEscapeCursorConsume, rawInput) => new RawConfigurationFile(showDebugOverlay, garbage, execution, wasapi, leftAltToEscapeCursorConsume, rawInput)
+        "reduceFpsWhenInactive", Codecs.BOOLEAN, r => r.ReduceFpsWhenInactive,
+        (showDebugOverlay, garbage, execution, wasapi, leftAltToEscapeCursorConsume, rawInput, reduceFps) => new ConfigurationFile(showDebugOverlay, garbage, execution, wasapi, leftAltToEscapeCursorConsume, rawInput, reduceFps)
     );
 
-    public static readonly VersionedStructCodec<RawConfigurationFile> VERSIONED_STRUCT_CODEC = new()
+    public static readonly VersionedStructCodec<ConfigurationFile> VERSIONED_STRUCT_CODEC = new()
     {
-        CurrentSchemaVersion = 1,
+        CurrentSchemaVersion = 2,
         InnerCodec = codec,
         SchemaMigrationRegistry = SchemaMigrationRegistry.Builder()
             .For<IIniElement>(migrations =>
@@ -49,6 +52,13 @@ public record RawConfigurationFile(
                     Logger.Verbose("Migrating config to schema 1");
                     EngineConfiguration.DidMigrate = true;
                     output.Put("rawInput", transcoder.EncodeBool(DEFAULT.RawInput));
+                });
+
+                migrations.Add(2, (transcoder, _, output) =>
+                {
+                    Logger.Verbose("Migrating config to schema 2");
+                    EngineConfiguration.DidMigrate = true;
+                    output.Put("reduceFpsWhenInactive", transcoder.EncodeBool(DEFAULT.ReduceFpsWhenInactive));
                 });
             })
     };
