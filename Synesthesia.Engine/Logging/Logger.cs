@@ -12,6 +12,7 @@ public static class Logger
     private static LogSeverity verbose { get; } = new("Verbose", ConsoleColor.Gray, "#004c75");
 
     public static LogCategory Runtime { get; } = new("Runtime");
+    public static LogCategory Platform { get; } = new("Platform");
     public static LogCategory Input { get; } = new("Input");
     public static LogCategory Audio { get; } = new("Audio");
     public static LogCategory Network { get; } = new("Network");

@@ -31,6 +31,32 @@ public static class SDL3Extensions
             Logger.Error($"at {expression}");
     }
 
+    public static MouseButton ToMouseButton(this SDL.MouseButtonEvent mouseButtonEvent)
+    {
+        var button = mouseButtonEvent.Button;
+        switch (button)
+        {
+            case SDL.ButtonLeft:
+                return MouseButton.Left;
+
+            case SDL.ButtonRight:
+                return MouseButton.Right;
+
+            case SDL.ButtonMiddle:
+                return MouseButton.Middle;
+
+            case SDL.ButtonX1:
+                return MouseButton.Button1;
+
+            case SDL.ButtonX2:
+                return MouseButton.Button2;
+
+            default:
+                Logger.Warning($"Unknown SDL3 mouse button: {button}, defaulting to left button");
+                return MouseButton.Left;
+        }
+    }
+
     public static Key ToKey(this SDL.KeyboardEvent sdlKeyboardEvent)
     {
         // Apple devices don't have the notion of NumLock (they have a Clear key instead).

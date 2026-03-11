@@ -1,4 +1,5 @@
-﻿using Silk.NET.OpenGL;
+﻿using Synesthesia.Engine.Events;
+using Synesthesia.Engine.Platform.Render;
 
 namespace Synesthesia.Engine.Platform;
 
@@ -7,15 +8,15 @@ public interface IWindowHost
     const int DEFAULT_WIDTH = 1366;
     const int DEFAULT_HEIGHT = 768;
 
-    bool ExitRequested { get; }
+    EventDispatcher<bool> ExitRequested { get; }
 
-    IntPtr WindowHandle { get; }
+    void Flash(bool flashUntilFocused);
+
+    void CancelFlash();
+
+    OpenGLSurface Surface { get; }
 
     bool WindowExists { get; }
-
-    IntPtr GlContext { get; }
-
-    GL OpenGL { get; }
 
     void Initialize();
 
