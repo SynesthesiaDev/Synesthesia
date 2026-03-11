@@ -1,13 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <LangVersion>9</LangVersion>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>14</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <OutputType>Library</OutputType>
-
     <IsPackable>true</IsPackable>
-    <PackageId>Synesthesia.NativeLibs</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,10 +14,6 @@
           CopyToPublishDirectory="PreserveNewest">
       <PackagePath>runtimes\</PackagePath>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations" Version="2025.2.4"/>
   </ItemGroup>
 
 </Project>

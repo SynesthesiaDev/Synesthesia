@@ -1,32 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Library</OutputType>
-    <TargetFramework></TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <LangVersion>14</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>true</IsPackable>
+        <PackageId>Synesthesia.Engine</PackageId>
+    </PropertyGroup>
 
-    <IsPackable>true</IsPackable>
-    <PackageId>Synesthesia.Engine</PackageId>
-    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
-    <LangVersion>12</LangVersion>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Synesthesia.Common\Synesthesia.Common.csproj"/>
-    <ProjectReference Include="..\Synesthesia.Resources\Synesthesia.Resources.csproj"/>
-    <ProjectReference Include="..\Synesthesia.NativeLibs\Synesthesia.NativeLibs.csproj"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations" Version="2025.2.4"/>
-    <PackageReference Include="ManagedBass" Version="4.0.2"/>
-    <PackageReference Include="ManagedBass.Fx" Version="4.0.2"/>
-    <PackageReference Include="ManagedBass.Mix" Version="4.0.2"/>
-    <PackageReference Include="ManagedBass.Wasapi" Version="4.0.2"/>
-    <PackageReference Include="SynesthesiaDev.Codon.IniTranscoder" Version="2026.220.5" />
-    <PackageReference Include="SynesthesiaDev.Raylib-cs" Version="2026.307.0" />
-  </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="Pastel" Version="7.0.1" />
+      <PackageReference Include="SDL3-CS" Version="3.5.0-preview.20260213-150035" />
+      <PackageReference Include="SDL3-CS.Native" Version="3.5.0-preview.20260205-174353" />
+      <PackageReference Include="Silk.NET.OpenGL" Version="2.23.0" />
+      <PackageReference Include="SynesthesiaUtils" Version="1.2.0" />
+    </ItemGroup>
 
 </Project>
