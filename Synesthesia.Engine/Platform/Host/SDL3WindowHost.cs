@@ -4,6 +4,7 @@
 using System.Collections.Concurrent;
 using System.Drawing;
 using System.Numerics;
+using OpenTabletDriver.Plugin.Tablet;
 using Synesthesia.Engine.Events;
 using Synesthesia.Engine.Extensions;
 using Synesthesia.Engine.Input;
@@ -13,16 +14,16 @@ using SynesthesiaUtil;
 using SynesthesiaUtil.Extensions;
 using static SDL3.SDL;
 
-namespace Synesthesia.Engine.Platform;
+namespace Synesthesia.Engine.Platform.Host;
 
 public class SDL3WindowHost : IWindowHost
 {
     private const int events_per_peep = 64;
 
     private const WindowFlags window_creation_flags = WindowFlags.Resizable |
-                                              WindowFlags.HighPixelDensity |
-                                              WindowFlags.OpenGL |
-                                              WindowFlags.Hidden; // prevent white flash. Unhide after the first swap
+                                                      WindowFlags.HighPixelDensity |
+                                                      WindowFlags.OpenGL |
+                                                      WindowFlags.Hidden; // prevent white flash. Unhide after the first swap
 
     private readonly ConcurrentQueue<Action> commandQueue = new();
 
@@ -63,62 +64,73 @@ public class SDL3WindowHost : IWindowHost
 
     public void Initialize()
     {
-        SetHint(Hints.AppName, "Synesthesia Engine").LogErrorIfFailed();
-
-        if (!Init(InitFlags.Video | InitFlags.Gamepad))
+        try
         {
-            throw new InvalidOperationException($"Failed to initialise SDL: {GetError()}");
+            SetHint(Hints.AppName, "Synesthesia Engine").LogErrorIfFailed();
+
+            if (!Init(InitFlags.Video | InitFlags.Gamepad))
+            {
+                throw new InvalidOperationException($"Failed to initialise SDL: {GetError()}");
+            }
+
+            var version = GetVersion();
+            var major = VersionNumMajor(version);
+            var minor = VersionNumMinor(version);
+            var micro = VersionNumMicro(version);
+            var revision = GetRevision();
+            var videoDriver = GetCurrentVideoDriver();
+
+            Logger.Debug("SDL 3 Initialized", Logger.Platform);
+            Logger.Debug($"- Version:         {major}.{minor}.{micro}", Logger.Platform);
+            Logger.Debug($"- Revision:        {revision}", Logger.Platform);
+            Logger.Debug($"- Video Driver:    {videoDriver}", Logger.Platform);
+
+            SetLogOutputFunction(sdlLog, IntPtr.Zero);
+
+            SetHint(Hints.WindowsCloseOnAltF4, "0").LogErrorIfFailed();
+            SetHint(Hints.MouseRelativeModeCenter, "0").LogErrorIfFailed();
+            SetHint(Hints.IMEImplementedUI, "composition").LogErrorIfFailed();
+
+            IntPtr? windowHandle = CreateWindow("test", IWindowHost.DEFAULT_WIDTH, IWindowHost.DEFAULT_HEIGHT, window_creation_flags);
+            if (windowHandle == null) throw new InvalidOperationException($"Failed to create SDL window. SDL Error: {GetError()}");
+
+            StopTextInput(windowHandle.Value).LogErrorIfFailed();
+
+            GLSetAttribute(GLAttr.ContextMajorVersion, 3).LogErrorIfFailed();
+            GLSetAttribute(GLAttr.ContextMinorVersion, 3).LogErrorIfFailed();
+            GLSetAttribute(GLAttr.ContextProfileMask, (int)GLProfile.Core).LogErrorIfFailed();
+            GLSetAttribute(GLAttr.StencilSize, 8).LogErrorIfFailed();
+
+            IntPtr? glContext = GLCreateContext(windowHandle.Value);
+
+            if (glContext == null) throw new InvalidOperationException($"Failed to create GL Context. SDL Error: {GetError()}");
+
+            Surface = new OpenGLSurface
+            {
+                WindowHandle = windowHandle.Value,
+                ContextHandle = glContext.Value
+            };
+
+            Surface.MakeCurrent();
+
+            Renderer = new OpenGlRenderer
+            {
+                Surface = Surface
+            };
+
+            Renderer.Initialize();
+
+            var driver = TabletDriver.Create();
+            driver.DeviceReported += handleTabletDeviceReport;
+
+            WindowExists = true;
+            Loop();
         }
-
-        var version = GetVersion();
-        var major = VersionNumMajor(version);
-        var minor = VersionNumMinor(version);
-        var micro = VersionNumMicro(version);
-        var revision = GetRevision();
-        var videoDriver = GetCurrentVideoDriver();
-
-        Logger.Debug("SDL 3 Initialized", Logger.Platform);
-        Logger.Debug($"- Version:         {major}.{minor}.{micro}", Logger.Platform);
-        Logger.Debug($"- Revision:        {revision}", Logger.Platform);
-        Logger.Debug($"- Video Driver:    {videoDriver}", Logger.Platform);
-
-        SetLogOutputFunction(sdlLog, IntPtr.Zero);
-
-        SetHint(Hints.WindowsCloseOnAltF4, "0").LogErrorIfFailed();
-        SetHint(Hints.MouseRelativeModeCenter, "0").LogErrorIfFailed();
-        SetHint(Hints.IMEImplementedUI, "composition").LogErrorIfFailed();
-
-        IntPtr? windowHandle = CreateWindow("test", IWindowHost.DEFAULT_WIDTH, IWindowHost.DEFAULT_HEIGHT, window_creation_flags);
-        if (windowHandle == null) throw new InvalidOperationException($"Failed to create SDL window. SDL Error: {GetError()}");
-
-        StopTextInput(windowHandle.Value).LogErrorIfFailed();
-
-        GLSetAttribute(GLAttr.ContextMajorVersion, 3).LogErrorIfFailed();
-        GLSetAttribute(GLAttr.ContextMinorVersion, 3).LogErrorIfFailed();
-        GLSetAttribute(GLAttr.ContextProfileMask, (int)GLProfile.Core).LogErrorIfFailed();
-        GLSetAttribute(GLAttr.StencilSize, 8).LogErrorIfFailed();
-
-        IntPtr? glContext = GLCreateContext(windowHandle.Value);
-
-        if (glContext == null) throw new InvalidOperationException($"Failed to create GL Context. SDL Error: {GetError()}");
-
-        Surface = new OpenGLSurface
+        catch (Exception exception)
         {
-            WindowHandle = windowHandle.Value,
-            ContextHandle = glContext.Value
-        };
-
-        Surface.MakeCurrent();
-
-        Renderer = new OpenGlRenderer
-        {
-            Surface = Surface
-        };
-
-        Renderer.Initialize();
-
-        WindowExists = true;
-        Loop();
+            Logger.Exception(exception, Logger.Platform);
+            Environment.Exit(exception.HResult);
+        }
     }
 
     private static void sdlLog(IntPtr userData, LogCategory category, LogPriority priority, string message)
@@ -189,6 +201,18 @@ public class SDL3WindowHost : IWindowHost
         } while (eventsRead == events_per_peep);
     }
 
+    private const MouseButtonFlags valid_buttons_mask =
+        MouseButtonFlags.Left | MouseButtonFlags.Right | MouseButtonFlags.Middle |
+        MouseButtonFlags.X1 | MouseButtonFlags.X2;
+
+    private void handleTabletDeviceReport(object? _, IDeviceReport deviceReport)
+    {
+        if (deviceReport is IAbsolutePositionReport positionReport)
+        {
+            GlobalInputHandler.HandlePenMotion(positionReport.Position);
+        }
+    }
+
     private void pollMouse()
     {
         var pressed = (MouseButtonFlags)pressedMouseButtons;
@@ -205,10 +229,15 @@ public class SDL3WindowHost : IWindowHost
             GlobalInputHandler.HandleMouseMove(vector);
         }
 
-        MouseButtonFlags buttonsToRelease = pressed & (globalButtons ^ pressed);
+
+        // MouseButtonFlags buttonsToRelease = pressed & (globalButtons ^ pressed);
+        // MouseButtonFlags buttonsToRelease = pressed & ~globalButtons;
+        MouseButtonFlags buttonsToRelease = (pressed & ~globalButtons) & valid_buttons_mask;
         if (buttonsToRelease != 0)
         {
             Interlocked.And(ref pressedMouseButtons, (uint)~buttonsToRelease);
+
+            Logger.Verbose($"Releasing via mouse poll (buttonsToRelease: {buttonsToRelease})");
 
             if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Left)) GlobalInputHandler.HandleMouseButton(MouseButton.Left, false);
             if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Middle)) GlobalInputHandler.HandleMouseButton(MouseButton.Middle, false);
@@ -272,7 +301,7 @@ public class SDL3WindowHost : IWindowHost
                 break;
 
             case EventType.PenMotion:
-                GlobalInputHandler.HandlePenMotion(sdlEvent.PMotion);
+                GlobalInputHandler.HandlePenMotion(new Vector2(sdlEvent.PMotion.X, sdlEvent.PMotion.Y));
                 break;
 
             case EventType.PenButtonUp:
@@ -300,11 +329,11 @@ public class SDL3WindowHost : IWindowHost
         {
             case EventType.MouseButtonDown:
                 GlobalInputHandler.HandleMouseButton(mouseButton, true);
-                Interlocked.Or(ref pressedMouseButtons, mask);
+                Interlocked.And(ref pressedMouseButtons, mask);
                 break;
             case EventType.MouseButtonUp:
                 GlobalInputHandler.HandleMouseButton(mouseButton, false);
-                Interlocked.Or(ref pressedMouseButtons, ~mask);
+                Interlocked.And(ref pressedMouseButtons, ~mask);
                 break;
         }
     }

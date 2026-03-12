@@ -27,6 +27,8 @@ public static class EngineStatistics
     public static readonly AtomicInt OBJECTS_RETURNED = new(0);
     public static readonly AtomicInt OBJECTS_ALIVE = new(0);
 
+    public static readonly AtomicInt TOTAL_TABLET_EVENTS = new(0);
+
     public static readonly Atomic<double> BASS_CPU = new(0.0);
 
 }

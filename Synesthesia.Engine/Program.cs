@@ -1,4 +1,5 @@
 ﻿using Synesthesia.Engine.Platform;
+using Synesthesia.Engine.Platform.Host;
 
 namespace Synesthesia.Engine;
 

@@ -66,9 +66,9 @@ public static class GlobalInputHandler
         Logger.Verbose($"Pen button - {penButtonEvent.Button}");
     }
 
-    public static void HandlePenMotion(SDL.PenMotionEvent penMotionEvent)
+    public static void HandlePenMotion(Vector2 position)
     {
-        Logger.Verbose($"Pen motion - {penMotionEvent.X} {penMotionEvent.Y}");
+        Logger.Verbose($"Pen motion - {position.X} {position.Y}");
     }
     public static void HandleKeymapChange()
     {

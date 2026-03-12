@@ -1,7 +1,7 @@
 ﻿using Synesthesia.Engine.Events;
 using Synesthesia.Engine.Platform.Render;
 
-namespace Synesthesia.Engine.Platform;
+namespace Synesthesia.Engine.Platform.Host;
 
 public interface IWindowHost
 {
