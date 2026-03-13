@@ -20,7 +20,7 @@ public sealed class TabletDriver : Driver
     [
         "Changes: ",
         "Searching for tablet",
-        "Invoking DevicesChanged"
+        "Invoking DevicesChanged",
     ];
 
     public event EventHandler<IDeviceReport>? DeviceReported;
@@ -48,7 +48,7 @@ public sealed class TabletDriver : Driver
 
     private void driverLog(object? _, LogMessage logMessage)
     {
-        if (ignored_logs.Any(ignoredLog => logMessage.Message.StartsWith(ignoredLog))) return;
+        if (ignored_logs.Any(ignoredLog => logMessage.Message.StartsWith(ignoredLog, StringComparison.Ordinal))) return;
 
         switch (logMessage.Level)
         {
@@ -70,26 +70,25 @@ public sealed class TabletDriver : Driver
         }
     }
 
-    private CompletableFuture<Nothing> detectDevicesAsync()
+    private void detectDevicesAsync()
     {
-        return CompletableFuture.RunAsync(() =>
+        CompletableFuture.RunAsync(() =>
         {
             Thread.Sleep(50);
             int vendor = CompositeDeviceHub.GetDevices().Select(d => d.VendorID).Intersect(knownVendors).FirstOrDefault();
-            if (vendor > 0)
-            {
-                Logger.Verbose($"Tablet detected (vid{vendor}), searching for usable configuration...", Logger.Input);
-                Detect();
+            if (vendor <= 0) return;
 
-                foreach (var endpoint in InputDevices.SelectMany(device => device.InputDevices))
+            Logger.Verbose($"Tablet detected (vid{vendor}), searching for usable configuration...", Logger.Input);
+            Detect();
+
+            foreach (var endpoint in InputDevices.SelectMany(device => device.InputDevices))
+            {
+                endpoint.Report += DeviceReported;
+                endpoint.ConnectionStateChanged += (_, connected) =>
                 {
-                    endpoint.Report += DeviceReported;
-                    endpoint.ConnectionStateChanged += (_, connected) =>
-                    {
-                        if (!connected)
-                            endpoint.Report -= DeviceReported;
-                    };
-                }
+                    if (!connected)
+                        endpoint.Report -= DeviceReported;
+                };
             }
         });
     }

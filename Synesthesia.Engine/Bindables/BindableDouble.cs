@@ -3,7 +3,7 @@
 
 using SynesthesiaUtil.Extensions;
 
-namespace Synesthesia.Engine.Bindable;
+namespace Synesthesia.Engine.Bindables;
 
 public class BindableDouble() : Bindable<double>(0.0)
 {

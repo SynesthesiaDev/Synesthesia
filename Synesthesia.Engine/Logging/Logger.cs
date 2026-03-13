@@ -1,4 +1,5 @@
-﻿using Pastel;
+﻿using System.Globalization;
+using Pastel;
 
 namespace Synesthesia.Engine.Logging;
 
@@ -13,6 +14,8 @@ public static class Logger
 
     public static LogCategory Runtime { get; } = new("Runtime");
     public static LogCategory Platform { get; } = new("Platform");
+
+    public static LogCategory Dependency { get; } = new("Dependency");
     public static LogCategory Input { get; } = new("Input");
     public static LogCategory Audio { get; } = new("Audio");
     public static LogCategory Network { get; } = new("Network");
@@ -34,7 +37,7 @@ public static class Logger
 
         if (displayTimestamp)
         {
-            var formattedTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            var formattedTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
             logString += $"({formattedTime}) ";
         }
 

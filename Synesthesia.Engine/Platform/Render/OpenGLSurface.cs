@@ -29,7 +29,7 @@ public sealed class OpenGLSurface : IDisposable
         }
     }
 
-    public nint GetProcAddress(string name) => GLGetProcAddress(name);
+    public static nint GetProcAddress(string name) => GLGetProcAddress(name);
     public void MakeCurrent() => GLMakeCurrent(WindowHandle, ContextHandle).LogErrorIfFailed();
     public void SwapBuffers() => GLSwapWindow(WindowHandle).LogErrorIfFailed();
 

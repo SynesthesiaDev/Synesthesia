@@ -2,12 +2,15 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Numerics;
 using OpenTabletDriver.Plugin.Tablet;
+using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Events;
 using Synesthesia.Engine.Extensions;
 using Synesthesia.Engine.Input;
+using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform.Render;
 using SynesthesiaUtil;
@@ -43,6 +46,10 @@ public class SDL3WindowHost : IWindowHost
 
     private PointF previousMousePolledPoint = PointF.Empty;
 
+    [Resolved]
+    private InputHandler inputHandler = null!;
+
+
     public void Schedule(Action action)
     {
         commandQueue.Enqueue(action);
@@ -66,6 +73,8 @@ public class SDL3WindowHost : IWindowHost
     {
         try
         {
+            Reflection.ResolveDependencies(this);
+
             SetHint(Hints.AppName, "Synesthesia Engine").LogErrorIfFailed();
 
             if (!Init(InitFlags.Video | InitFlags.Gamepad))
@@ -122,15 +131,18 @@ public class SDL3WindowHost : IWindowHost
 
             var driver = TabletDriver.Create();
             driver.DeviceReported += handleTabletDeviceReport;
-
-            WindowExists = true;
-            Loop();
         }
         catch (Exception exception)
         {
             Logger.Exception(exception, Logger.Platform);
             Environment.Exit(exception.HResult);
         }
+    }
+
+    public void RunWindow()
+    {
+        WindowExists = true;
+        Loop();
     }
 
     private static void sdlLog(IntPtr userData, LogCategory category, LogPriority priority, string message)
@@ -164,20 +176,15 @@ public class SDL3WindowHost : IWindowHost
     protected void ProcessFrame()
     {
         if (!WindowExists) return;
-
-        if (commandQueue.TryDequeue(out var action))
+        while (!commandQueue.IsEmpty)
         {
-            action.Invoke();
+            if (commandQueue.TryDequeue(out var action))
+            {
+                action.Invoke();
+            }
         }
 
         pollEvents();
-        if (Renderer.CanDraw)
-        {
-            Renderer.BeginDrawing();
-            Renderer.OpenGL.ClearColor(0.39f, 0.58f, 0.93f, 1.0f);
-            Renderer.EndDrawing();
-        }
-
         if (waitingForFirstSwap)
         {
             ShowWindow(Surface.WindowHandle).LogErrorIfFailed();
@@ -186,6 +193,8 @@ public class SDL3WindowHost : IWindowHost
 
         pollMouse();
     }
+
+    public void ReleaseGLContext() => GLMakeCurrent(Surface.WindowHandle, IntPtr.Zero).LogErrorIfFailed();
 
     private void pollEvents()
     {
@@ -196,8 +205,7 @@ public class SDL3WindowHost : IWindowHost
         do
         {
             eventsRead = PeepEvents(events, events_per_peep, EventAction.GetEvent, (uint)EventType.First, (uint)EventType.Last).LogErrorIfFailed();
-            for (int i = 0; i < eventsRead; i++)
-                HandleEvent(events[i]);
+            foreach (var sdlEvent in events) HandleEvent(sdlEvent);
         } while (eventsRead == events_per_peep);
     }
 
@@ -207,12 +215,18 @@ public class SDL3WindowHost : IWindowHost
 
     private void handleTabletDeviceReport(object? _, IDeviceReport deviceReport)
     {
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         if (deviceReport is IAbsolutePositionReport positionReport)
         {
-            GlobalInputHandler.HandlePenMotion(positionReport.Position);
+            var tabletEvent = TabletInputEvent.Rent();
+            tabletEvent.Position = positionReport.Position;
+            tabletEvent.Timestamp = timestamp;
+
+            inputHandler.Enqueue(tabletEvent);
         }
     }
 
+    [SuppressMessage("Usage", "MA0099:Use Explicit enum value instead of 0")]
     private void pollMouse()
     {
         var pressed = (MouseButtonFlags)pressedMouseButtons;
@@ -220,35 +234,45 @@ public class SDL3WindowHost : IWindowHost
 
         if (previousMousePolledPoint.X != x || previousMousePolledPoint.Y != y)
         {
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             previousMousePolledPoint = new PointF(x, y);
             GetWindowPosition(Surface.WindowHandle, out var posX, out var posY).LogErrorIfFailed();
 
-            float rx = x - posX;
-            float ry = y - posY;
-            var vector = new Vector2(rx, ry);
-            GlobalInputHandler.HandleMouseMove(vector);
+            var mouseEvent = MouseMoveInputEvent.Rent();
+            mouseEvent.Position = new Vector2(x - posX, y - posY);
+            mouseEvent.Timestamp = timestamp;
+
+            inputHandler.Enqueue(mouseEvent);
         }
 
+        var buttonsToRelease = (pressed & ~globalButtons) & valid_buttons_mask;
 
-        // MouseButtonFlags buttonsToRelease = pressed & (globalButtons ^ pressed);
-        // MouseButtonFlags buttonsToRelease = pressed & ~globalButtons;
-        MouseButtonFlags buttonsToRelease = (pressed & ~globalButtons) & valid_buttons_mask;
         if (buttonsToRelease != 0)
         {
             Interlocked.And(ref pressedMouseButtons, (uint)~buttonsToRelease);
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-            Logger.Verbose($"Releasing via mouse poll (buttonsToRelease: {buttonsToRelease})");
-
-            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Left)) GlobalInputHandler.HandleMouseButton(MouseButton.Left, false);
-            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Middle)) GlobalInputHandler.HandleMouseButton(MouseButton.Middle, false);
-            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Right)) GlobalInputHandler.HandleMouseButton(MouseButton.Right, false);
-            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.X1)) GlobalInputHandler.HandleMouseButton(MouseButton.Button1, false);
-            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.X2)) GlobalInputHandler.HandleMouseButton(MouseButton.Button2, false);
+            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Left)) handleMouseButton(MouseButton.Left, false, timestamp);
+            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Middle)) handleMouseButton(MouseButton.Middle, false, timestamp);
+            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Right)) handleMouseButton(MouseButton.Right, false, timestamp);
+            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.X1)) handleMouseButton(MouseButton.Button1, false, timestamp);
+            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.X2)) handleMouseButton(MouseButton.Button2, false, timestamp);
         }
+    }
+
+    private void handleMouseButton(MouseButton mouseButton, bool down, long timestamp)
+    {
+        var mouseButtonInputEvent = MouseButtonInputEvent.Rent();
+        mouseButtonInputEvent.Button = mouseButton;
+        mouseButtonInputEvent.IsDown = down;
+        mouseButtonInputEvent.Timestamp = timestamp;
+
+        inputHandler.Enqueue(mouseButtonInputEvent);
     }
 
     protected void HandleEvent(Event sdlEvent)
     {
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         switch ((EventType)sdlEvent.Type)
         {
             case EventType.Quit:
@@ -260,26 +284,33 @@ public class SDL3WindowHost : IWindowHost
 
             case EventType.KeyDown:
             case EventType.KeyUp:
-                GlobalInputHandler.HandleKeyboardInput(sdlEvent.Key);
+                var keyEvent = KeyboardInputEvent.Rent();
+                keyEvent.IsDown = sdlEvent.Key.Down;
+                keyEvent.Key = sdlEvent.Key.ToKey();
+                keyEvent.Timestamp = timestamp;
                 break;
 
-            case EventType.TextEditing:
-                GlobalInputHandler.HandleTextEditing(sdlEvent.Edit);
-                break;
+            // case EventType.TextEditing:
+                // GlobalInputHandler.HandleTextEditing(sdlEvent.Edit);
+                // break;
 
-            case EventType.TextInput:
-                GlobalInputHandler.HandleTextInput(sdlEvent.Text);
-                break;
+            // case EventType.TextInput:
+                // GlobalInputHandler.HandleTextInput(sdlEvent.Text);
+                // break;
 
-            case EventType.KeymapChanged:
-                GlobalInputHandler.HandleKeymapChange();
-                break;
+            // case EventType.KeymapChanged:
+                // GlobalInputHandler.HandleKeymapChange();
+                // break;
 
             case EventType.FingerDown:
             case EventType.FingerUp:
             case EventType.FingerMotion:
             case EventType.FingerCanceled:
-                GlobalInputHandler.HandleTouchInput(sdlEvent.TFinger);
+                var touchEvent = TouchInputEvent.Rent();
+                touchEvent.Timestamp = timestamp;
+                touchEvent.IsDown = sdlEvent.TFinger.Type == EventType.FingerDown;
+                touchEvent.Pressure = sdlEvent.TFinger.Pressure;
+                touchEvent.FingerId = sdlEvent.TFinger.FingerID;
                 break;
 
             case EventType.DropBegin:
@@ -287,26 +318,7 @@ public class SDL3WindowHost : IWindowHost
             case EventType.DropFile:
             case EventType.DropPosition:
             case EventType.DropText:
-                GlobalInputHandler.HandleDrop(sdlEvent.Drop);
-                break;
-
-            case EventType.PenProximityIn:
-            case EventType.PenProximityOut:
-                GlobalInputHandler.HandlePenProximity(sdlEvent.PProximity);
-                break;
-
-            case EventType.PenDown:
-            case EventType.PenUp:
-                GlobalInputHandler.HandlePenTouch(sdlEvent.PTouch);
-                break;
-
-            case EventType.PenMotion:
-                GlobalInputHandler.HandlePenMotion(new Vector2(sdlEvent.PMotion.X, sdlEvent.PMotion.Y));
-                break;
-
-            case EventType.PenButtonUp:
-            case EventType.PenButtonDown:
-                GlobalInputHandler.HandlePenButton(sdlEvent.PButton);
+                // InputHandler.HandleDrop(sdlEvent.Drop);
                 break;
 
             case EventType.MouseButtonDown:
@@ -322,31 +334,53 @@ public class SDL3WindowHost : IWindowHost
 
     private void handleInternalMouseButtonEvent(MouseButtonEvent mouseButtonEvent)
     {
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         var mouseButton = mouseButtonEvent.ToMouseButton();
         var mask = ButtonMask(mouseButtonEvent.Button);
 
+        var mousePressEvent = MouseButtonInputEvent.Rent();
         switch (mouseButtonEvent.Type)
         {
             case EventType.MouseButtonDown:
-                GlobalInputHandler.HandleMouseButton(mouseButton, true);
+                mousePressEvent.Timestamp = timestamp;
+                mousePressEvent.Button = mouseButton;
+                mousePressEvent.IsDown = true;
+                inputHandler.Enqueue(mousePressEvent);
+
                 Interlocked.And(ref pressedMouseButtons, mask);
                 break;
             case EventType.MouseButtonUp:
-                GlobalInputHandler.HandleMouseButton(mouseButton, false);
+                mousePressEvent.Timestamp = timestamp;
+                mousePressEvent.Button = mouseButton;
+                mousePressEvent.IsDown = false;
+                inputHandler.Enqueue(mousePressEvent);
+
                 Interlocked.And(ref pressedMouseButtons, ~mask);
+                break;
+            default:
+                mousePressEvent.ReturnToPool();
                 break;
         }
     }
 
     private void handleInternalMouseMotionEvent(MouseMotionEvent mouseMotionEvent)
     {
-        if (GetWindowRelativeMouseMode(Surface.WindowHandle))
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        if (!GetWindowRelativeMouseMode(Surface.WindowHandle))
         {
-            GlobalInputHandler.HandleMouseMove(new Vector2(mouseMotionEvent.X, mouseMotionEvent.Y));
+            var mouseEvent = MouseMoveInputEvent.Rent();
+            mouseEvent.Timestamp = timestamp;
+            mouseEvent.Position = new Vector2(mouseMotionEvent.X, mouseMotionEvent.Y);
+
+            inputHandler.Enqueue(mouseEvent);
         }
         else
         {
-            GlobalInputHandler.HandleMouseMoveRelative(new Vector2(mouseMotionEvent.XRel, mouseMotionEvent.YRel));
+            var mouseEvent = MouseMoveInputEvent.Rent();
+            mouseEvent.Timestamp = timestamp;
+            mouseEvent.PositionDelta = new Vector2(mouseMotionEvent.X, mouseMotionEvent.Y);
+
+            inputHandler.Enqueue(mouseEvent);
         }
     }
 

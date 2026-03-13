@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Runtime.CompilerServices;
+using Synesthesia.Engine.Extensions;
 
 namespace Synesthesia.Engine.Pooling;
 
@@ -19,14 +20,14 @@ public class FastObjectPool<T>(Func<T> activator, int capacity = 32) : IDisposab
     {
         lock (sharedItems)
         {
-            int allocated = 0;
-            for (int i = 0; i < sharedItems.Length && allocated < count; i++)
+            var index = 0;
+            foreach (var sharedItem in sharedItems)
             {
-                if (sharedItems[i] == null)
+                if (sharedItem == null)
                 {
-                    sharedItems[i] = activator.Invoke();
-                    allocated++;
+                    sharedItems[index] = activator.Invoke();
                 }
+                index++;
             }
         }
     }
@@ -80,12 +81,11 @@ public class FastObjectPool<T>(Func<T> activator, int capacity = 32) : IDisposab
     {
         lock (sharedItems)
         {
-            for (var i = 0; i < sharedItems.Length; i++)
+            foreach (var (index, instance) in sharedItems.WithIndex())
             {
-                var instance = sharedItems[i];
                 if (instance != null)
                 {
-                    sharedItems[i] = null;
+                    sharedItems[index] = null;
                     return instance;
                 }
             }
@@ -98,11 +98,11 @@ public class FastObjectPool<T>(Func<T> activator, int capacity = 32) : IDisposab
     {
         lock (sharedItems)
         {
-            for (int i = 0; i < sharedItems.Length; i++)
+            foreach (var (index, instance) in sharedItems.WithIndex())
             {
-                if (sharedItems[i] == null)
+                if (instance == null)
                 {
-                    sharedItems[i] = item;
+                    sharedItems[index] = item;
                     return;
                 }
             }
@@ -118,15 +118,14 @@ public class FastObjectPool<T>(Func<T> activator, int capacity = 32) : IDisposab
 
         lock (sharedItems)
         {
-            for (int i = 0; i < sharedItems.Length; i++)
+            foreach (var (index, instance) in sharedItems.WithIndex())
             {
-                var item = sharedItems[i];
-                if (item is IDisposable disposable)
+                if (instance is IDisposable disposable)
                 {
                     disposable.Dispose();
                 }
 
-                sharedItems[i] = null;
+                sharedItems[index] = null;
             }
         }
     }

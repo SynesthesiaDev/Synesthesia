@@ -1,7 +1,7 @@
 using Synesthesia.Engine.Pooling;
 using SynesthesiaUtil.Extensions;
 
-namespace Synesthesia.Engine.Bindable;
+namespace Synesthesia.Engine.Bindables;
 
 public class Bindable<T>(T defaultInternalValue) : IBindable, IPooledObject
 {

@@ -1,14 +1,11 @@
 // Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using Synesthesia.Engine.Events;
-using Synesthesia.Engine.Pooling;
+namespace Synesthesia.Engine.Bindables;
 
-namespace Synesthesia.Engine.Bindable;
-
-public interface IEventDispatcher : IDisposable, IPooledObject
+public interface IBindable : IDisposable
 {
-    void Unsubscribe(IEventSubscriber subscriber);
+    static readonly BindableEventSource GLOBAL_EVENT_SOURCE = new();
 
     public bool IsDisposed { get; internal set; }
 

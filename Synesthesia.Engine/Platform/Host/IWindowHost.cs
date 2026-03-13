@@ -16,9 +16,15 @@ public interface IWindowHost
 
     OpenGLSurface Surface { get; }
 
+    OpenGlRenderer Renderer { get; }
+
     bool WindowExists { get; }
 
     void Initialize();
+
+    void RunWindow();
+
+    void ReleaseGLContext();
 
     bool CapsLockPressed { get; }
 

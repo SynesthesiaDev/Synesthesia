@@ -4,7 +4,7 @@
 using Synesthesia.Engine.Events;
 using SynesthesiaUtil.Types;
 
-namespace Synesthesia.Engine.Bindable;
+namespace Synesthesia.Engine.Bindables;
 
 public class BindableProxy : IBindable
 {

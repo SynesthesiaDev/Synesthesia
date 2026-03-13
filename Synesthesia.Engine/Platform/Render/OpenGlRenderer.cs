@@ -43,7 +43,7 @@ public sealed class OpenGlRenderer : IDisposable
 
         var gl = GL.GetApi(name =>
         {
-            var ptr = Surface.GetProcAddress(name);
+            var ptr = OpenGLSurface.GetProcAddress(name);
             return ptr;
         });
 

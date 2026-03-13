@@ -11,6 +11,25 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="ErrorProne.NET.CoreAnalyzers" Version="0.8.2-beta.1">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="ErrorProne.NET.Structs" Version="0.6.1-beta.1">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Faster.Map" Version="8.1.1" />
+      <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
+      <PackageReference Include="Meziantou.Analyzer" Version="3.0.22">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="NetFabric.Hyperlinq" Version="3.0.0-beta48" />
+      <PackageReference Include="NetFabric.Hyperlinq.Analyzer" Version="2.3.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
       <PackageReference Include="OpenTabletDriver" Version="0.6.6.2" />
       <PackageReference Include="Pastel" Version="7.0.1" />
       <PackageReference Include="SDL3-CS" Version="3.5.0-preview.20260213-150035" />
