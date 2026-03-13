@@ -4,9 +4,9 @@
 
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/SynesthesiaDev/Synesthesia/build.yml?branch=main&style=for-the-badge&label=Build&color=33cc33)
 ![NuGet Version](https://img.shields.io/nuget/v/Synesthesia.Engine?style=for-the-badge&color=blue&label=Release)
+
 ![Static License Badge](https://img.shields.io/badge/License-MIT-mint?style=for-the-badge)
 ![Target .NET](https://img.shields.io/badge/.NET-10.0-512bd4?style=for-the-badge&logo=dotnet)
-![C#](https://img.shields.io/badge/C%23-14-blue?style=for-the-badge)
 ![SDL Version](https://img.shields.io/badge/SDL-3.5.0_preview-bf1931?style=for-the-badge)
 
 Synesthesia is a C# game engine written with SDL3 and OpenGL. It is mainly a learning project but still aims to actually deliver a usable "code-first" game engine.
