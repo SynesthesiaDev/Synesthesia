@@ -1,11 +1,12 @@
 ﻿// Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using SDL3;
-using Synesthesia.Engine.Exceptions;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Logging;
+using Synesthesia.Engine.Util.Exceptions;
 using SynesthesiaUtil;
 using SynesthesiaUtil.Extensions;
 
@@ -27,6 +28,7 @@ public static class SDL3Extensions
         }
     }
 
+    public static Vector4 ToVector(this SDL.Rect rect) => new(rect.X, rect.Y, rect.H, rect.Y);
 
     public static int LogErrorIfFailed(this int returnValue, [CallerArgumentExpression("returnValue")] string? expression = null)
     {

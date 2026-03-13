@@ -38,4 +38,8 @@
       <PackageReference Include="SynesthesiaUtils" Version="1.2.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Util\" />
+    </ItemGroup>
+
 </Project>

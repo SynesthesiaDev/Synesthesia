@@ -9,7 +9,7 @@ using Synesthesia.Engine.Extensions;
 using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform;
-using Synesthesia.Engine.Pooling;
+using Synesthesia.Engine.Util.Pooling;
 
 namespace Synesthesia.Engine.Input;
 

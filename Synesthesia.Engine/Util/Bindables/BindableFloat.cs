@@ -3,7 +3,7 @@
 
 using SynesthesiaUtil.Extensions;
 
-namespace Synesthesia.Engine.Bindables;
+namespace Synesthesia.Engine.Util.Bindables;
 
 public class BindableFloat() : Bindable<float>(0.0f)
 {

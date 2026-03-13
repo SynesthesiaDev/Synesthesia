@@ -11,7 +11,7 @@ Synesthesia is a C# game engine written with SDL3 and OpenGL. It is mainly a lea
 
 ### ⚡ Features
 - 🧵 **Multithreaded Architecture**
-    - Engine is split into `Rende`, `Update`, `Input` and `Audio` threads. The update thread always runs at double the frequency of the render thread, and the input and audio threads run at **1000hz**
+    - Engine is split into `Render`, `Update`, `Input` and `Audio` threads. The update thread always runs at double the frequency of the render thread, and the input and audio threads run at **1000hz**
 - 💻 **Code First Philosophy**
     - The engine is designed for developers who prefer the IDE over fighting a property inspector or trying to find hidden dropdowns. This allows for **rapid iteration** and **increased productivity** but is less beginner-friendly.
 - 📱 **Natively multi-platform**

@@ -1,8 +1,8 @@
 ﻿// Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using Synesthesia.Engine.Exceptions;
 using Synesthesia.Engine.Extensions;
+using Synesthesia.Engine.Util.Exceptions;
 using static SDL3.SDL;
 
 namespace Synesthesia.Engine.Platform.Render;

@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using Pastel;
+using SDL3;
 
 namespace Synesthesia.Engine.Logging;
 
@@ -63,10 +64,21 @@ public static class Logger
 
     public static void Exception(Exception exception, LogCategory category)
     {
-        log(exception.ToString(), error, category, true);
-        if (exception.InnerException != null)
+        while (true)
         {
-            Exception(exception.InnerException, category);
+            log(exception.ToString(), error, category, true);
+            if (exception.InnerException != null)
+            {
+                exception = exception.InnerException;
+                continue;
+            }
+
+            break;
         }
+    }
+
+    public static void SDLLog(IntPtr userData, SDL.LogCategory logCategory, SDL.LogPriority priority, string message)
+    {
+        Verbose(message, Platform);
     }
 }

@@ -1,6 +1,6 @@
 using Synesthesia.Engine.Events;
 
-namespace Synesthesia.Engine.Bindables;
+namespace Synesthesia.Engine.Util.Bindables;
 
 public class BindableScope : IDisposable
 {

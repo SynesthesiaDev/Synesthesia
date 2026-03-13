@@ -1,4 +1,4 @@
-namespace Synesthesia.Engine.Future;
+namespace Synesthesia.Engine.Util.Future;
 
 public interface IFuture
 {

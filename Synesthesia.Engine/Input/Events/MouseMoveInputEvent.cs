@@ -2,7 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Numerics;
-using Synesthesia.Engine.Pooling;
+using Synesthesia.Engine.Util.Pooling;
 
 namespace Synesthesia.Engine.Input.Events;
 

@@ -7,8 +7,8 @@ using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Components;
 using OpenTabletDriver.Plugin.Logging;
 using OpenTabletDriver.Plugin.Tablet;
-using Synesthesia.Engine.Future;
 using Synesthesia.Engine.Logging;
+using Synesthesia.Engine.Util.Future;
 
 namespace Synesthesia.Engine.Input;
 

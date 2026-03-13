@@ -4,7 +4,7 @@
 using System.Runtime.CompilerServices;
 using Synesthesia.Engine.Extensions;
 
-namespace Synesthesia.Engine.Pooling;
+namespace Synesthesia.Engine.Util.Pooling;
 
 // ReSharper disable InvertIf
 public class FastObjectPool<T>(Func<T> activator, int capacity = 32) : IDisposable where T : class

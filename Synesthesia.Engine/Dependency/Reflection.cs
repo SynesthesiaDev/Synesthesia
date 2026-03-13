@@ -2,8 +2,8 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Reflection;
-using Synesthesia.Engine.Bindables;
 using Synesthesia.Engine.Logging;
+using Synesthesia.Engine.Util.Bindables;
 
 namespace Synesthesia.Engine.Dependency;
 

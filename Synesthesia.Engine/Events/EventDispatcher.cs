@@ -1,5 +1,6 @@
-using Synesthesia.Engine.Bindables;
-using Synesthesia.Engine.Pooling;
+using Synesthesia.Engine.Util.Bindables;
+using Synesthesia.Engine.Util.Pooling;
+using System.Runtime.InteropServices;
 
 namespace Synesthesia.Engine.Events;
 
@@ -13,10 +14,7 @@ public class EventDispatcher<T> : IEventDispatcher
 
     public bool IsDisposed { get; set; }
 
-    public EventDispatcher()
-    {
-        EngineStatistics.DISPATCHERS.Increment();
-    }
+    public EventDispatcher() => EngineStatistics.DISPATCHERS.Increment();
 
     public EventSubscriber<T> Subscribe(Action<T> action)
     {
@@ -27,14 +25,16 @@ public class EventDispatcher<T> : IEventDispatcher
 
     public void Dispatch(T value)
     {
-        eventSubscribers.ForEach(eventSubscriber => eventSubscriber.Action.Invoke(value));
+        foreach (ref EventSubscriber<T> subscriber in CollectionsMarshal.AsSpan(eventSubscribers))
+        {
+            subscriber.Action.Invoke(value);
+        }
     }
 
     public void Unsubscribe(IEventSubscriber subscriber)
     {
         eventSubscribers.Remove((subscriber as EventSubscriber<T>)!);
     }
-
 
     public void UnsubscribeAll()
     {

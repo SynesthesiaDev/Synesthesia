@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Numerics;
+using System.Reflection;
 using OpenTabletDriver.Plugin.Tablet;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Events;
@@ -13,6 +14,8 @@ using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform.Render;
+using Synesthesia.Engine.Util.Bindables;
+using Synesthesia.Engine.Util.Future;
 using SynesthesiaUtil;
 using SynesthesiaUtil.Extensions;
 using static SDL3.SDL;
@@ -28,12 +31,36 @@ public class SDL3WindowHost : IWindowHost
                                                       WindowFlags.OpenGL |
                                                       WindowFlags.Hidden; // prevent white flash. Unhide after the first swap
 
+    private const MouseButtonFlags valid_buttons_mask =
+        MouseButtonFlags.Left | MouseButtonFlags.Right | MouseButtonFlags.Middle |
+        MouseButtonFlags.X1 | MouseButtonFlags.X2;
+
     private readonly ConcurrentQueue<Action> commandQueue = new();
 
-    /// <summary>
-    /// Subscribable event dispatcher to notify if exit is requested by os (X Button pressed, WM Kill command, etc.)
-    /// </summary>
+    private readonly BindableEventSource windowStateEventSource = new BindableEventSource();
+
+    #region Events
+
     public EventDispatcher<bool> ExitRequested { get; } = new();
+
+    public EventDispatcher<Vector2> OnWindowResized { get; } = new EventDispatcher<Vector2>();
+
+    public EventDispatcher<Nothing> OnDeviceLowMemory { get; } = new EventDispatcher<Nothing>();
+
+    public EventDispatcher<SystemTheme> OnSystemThemeChanged { get; } = new EventDispatcher<SystemTheme>();
+
+    public EventDispatcher<Vector4> OnSafeAreaChanged { get; } = new EventDispatcher<Vector4>();
+
+    public Bindable<bool> CursorInWindow { get; } = new Bindable<bool>(false);
+
+    public Bindable<WindowState> WindowState { get; } = new Bindable<WindowState>(Platform.WindowState.Normal);
+
+    #endregion
+
+    public Vector2 Size { get; private set; } = Vector2.Zero;
+
+    public bool Resizable { get; set; } = true;
+
 
     /// <summary>
     /// OpenGL Surface containing <see cref="OpenGLSurface.WindowHandle"/>, <see cref="OpenGLSurface.ContextHandle"/> and responsible
@@ -55,6 +82,40 @@ public class SDL3WindowHost : IWindowHost
     private volatile uint pressedMouseButtons;
 
     private PointF previousMousePolledPoint = PointF.Empty;
+
+    public bool IsWayland => string.Equals(GetCurrentVideoDriver(), "wayland", StringComparison.Ordinal);
+
+    /// <summary>
+    /// Title of the window
+    /// </summary>
+    public string Title
+    {
+        get;
+        set
+        {
+            field = value;
+            Schedule(() => SetWindowTitle(Surface.WindowHandle, value).LogErrorIfFailed());
+        }
+    } = Assembly.GetAssembly(typeof(Game))?.FullName ?? "Unknown Assembly";
+
+    /// <summary>
+    /// Window Size (in pixels)
+    /// </summary>
+    public Vector2 WindowSize
+    {
+        get
+        {
+            GetWindowSizeInPixels(Surface.WindowHandle, out var x, out var y).ThrowIfFailed();
+            return new Vector2(x, y);
+        }
+    }
+
+    public bool CapsLockPressed => GetModState().HasFlagFast(Keymod.Caps);
+
+    public bool AltPressed => GetModState().HasFlagFast(Keymod.Alt);
+
+    public bool HasKeyboard => HasKeyboard();
+
 
     [Resolved]
     private InputHandler inputHandler = null!;
@@ -89,6 +150,8 @@ public class SDL3WindowHost : IWindowHost
             FlashWindow(Surface.WindowHandle, FlashOperation.Cancel);
         });
 
+    #region Initialization
+
     /// <summary>
     /// Initializes SDL3 and creates <see cref="OpenGLSurface"/>, <see cref="OpenGlRenderer"/> and <see cref="TabletDriver"/>
     /// </summary>
@@ -100,7 +163,7 @@ public class SDL3WindowHost : IWindowHost
         {
             Reflection.ResolveDependencies(this);
 
-            SetHint(Hints.AppName, "Synesthesia Engine").LogErrorIfFailed();
+            SetHint(Hints.AppName, Title).LogErrorIfFailed();
 
             if (!Init(InitFlags.Video | InitFlags.Gamepad))
             {
@@ -119,13 +182,13 @@ public class SDL3WindowHost : IWindowHost
             Logger.Debug($"- Revision:        {revision}", Logger.Platform);
             Logger.Debug($"- Video Driver:    {videoDriver}", Logger.Platform);
 
-            SetLogOutputFunction(sdlLog, IntPtr.Zero);
+            SetLogOutputFunction(Logger.SDLLog, IntPtr.Zero);
 
             SetHint(Hints.WindowsCloseOnAltF4, "0").LogErrorIfFailed();
             SetHint(Hints.MouseRelativeModeCenter, "0").LogErrorIfFailed();
             SetHint(Hints.IMEImplementedUI, "composition").LogErrorIfFailed();
 
-            IntPtr? windowHandle = CreateWindow("test", IWindowHost.DEFAULT_WIDTH, IWindowHost.DEFAULT_HEIGHT, window_creation_flags);
+            IntPtr? windowHandle = CreateWindow(Title, IWindowHost.DEFAULT_WIDTH, IWindowHost.DEFAULT_HEIGHT, window_creation_flags);
             if (windowHandle == null) throw new InvalidOperationException($"Failed to create SDL window. SDL Error: {GetError()}");
 
             StopTextInput(windowHandle.Value).LogErrorIfFailed();
@@ -152,6 +215,8 @@ public class SDL3WindowHost : IWindowHost
                 Surface = Surface
             };
 
+            WindowState.OnValueChange(e => updateWindowState(e.NewValue));
+
             Renderer.Initialize();
 
             var driver = TabletDriver.Create();
@@ -174,19 +239,9 @@ public class SDL3WindowHost : IWindowHost
         Loop();
     }
 
-    private static void sdlLog(IntPtr userData, LogCategory category, LogPriority priority, string message)
-    {
-        Logger.Verbose(message, Logger.Platform);
-    }
+    #endregion
 
-    protected void Exit()
-    {
-        Logger.Debug("Exiting..", Logger.Platform);
-        ExitRequested.Dispose();
-        Surface.Dispose();
-        DestroyWindow(Surface.WindowHandle);
-        Quit();
-    }
+    #region Event Loop
 
     protected void Loop()
     {
@@ -199,7 +254,7 @@ public class SDL3WindowHost : IWindowHost
             Logger.Exception(exception, Logger.Platform);
         }
 
-        Exit();
+        Dispose();
     }
 
     protected void ProcessFrame()
@@ -223,6 +278,10 @@ public class SDL3WindowHost : IWindowHost
         pollMouse();
     }
 
+    #endregion
+
+    #region Polling
+
     private void pollEvents()
     {
         PumpEvents();
@@ -234,23 +293,6 @@ public class SDL3WindowHost : IWindowHost
             eventsRead = PeepEvents(events, events_per_peep, EventAction.GetEvent, (uint)EventType.First, (uint)EventType.Last).LogErrorIfFailed();
             foreach (var sdlEvent in events) HandleEvent(sdlEvent);
         } while (eventsRead == events_per_peep);
-    }
-
-    private const MouseButtonFlags valid_buttons_mask =
-        MouseButtonFlags.Left | MouseButtonFlags.Right | MouseButtonFlags.Middle |
-        MouseButtonFlags.X1 | MouseButtonFlags.X2;
-
-    private void handleTabletDeviceReport(object? _, IDeviceReport deviceReport)
-    {
-        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-        if (deviceReport is IAbsolutePositionReport positionReport)
-        {
-            var tabletEvent = TabletInputEvent.Rent();
-            tabletEvent.Position = positionReport.Position;
-            tabletEvent.Timestamp = timestamp;
-
-            inputHandler.Enqueue(tabletEvent);
-        }
     }
 
     [SuppressMessage("Usage", "MA0099:Use Explicit enum value instead of 0")]
@@ -287,15 +329,84 @@ public class SDL3WindowHost : IWindowHost
         }
     }
 
-    private void handleMouseButton(MouseButton mouseButton, bool down, long timestamp)
-    {
-        var mouseButtonInputEvent = MouseButtonInputEvent.Rent();
-        mouseButtonInputEvent.Button = mouseButton;
-        mouseButtonInputEvent.IsDown = down;
-        mouseButtonInputEvent.Timestamp = timestamp;
+    #endregion
 
-        inputHandler.Enqueue(mouseButtonInputEvent);
+    #region Window State
+
+    public void Raise() =>
+        Schedule(() =>
+        {
+            var flags = GetWindowFlags(Surface.WindowHandle);
+
+            if (flags.HasFlagFast(WindowFlags.Minimized))
+                RestoreWindow(Surface.WindowHandle).LogErrorIfFailed();
+
+            RaiseWindow(Surface.WindowHandle).LogErrorIfFailed();
+        });
+
+    public void Hide() => Schedule(() => HideWindow(Surface.WindowHandle).LogErrorIfFailed());
+
+    public void Show() => Schedule(() => ShowWindow(Surface.WindowHandle).LogErrorIfFailed());
+
+    public void EnableScreenSuspension() => Schedule(() => EnableScreenSaver().LogErrorIfFailed());
+
+    public void DisableScreenSuspension() => Schedule(() => DisableScreenSaver().LogErrorIfFailed());
+
+    private void fetchCurrentWindowState()
+    {
+        var handle = Surface.WindowHandle;
+        var flags = GetWindowFlags(handle);
+
+        if (flags.HasFlagFast(WindowFlags.Fullscreen))
+        {
+            WindowState.Set(Platform.WindowState.Fullscreen, windowStateEventSource);
+        }
+        else if (flags.HasFlagFast(WindowFlags.Maximized))
+        {
+            WindowState.Set(Platform.WindowState.Maximised, windowStateEventSource);
+        }
+        else if (flags.HasFlagFast(WindowFlags.Minimized))
+        {
+            WindowState.Set(Platform.WindowState.Minimised, windowStateEventSource);
+        }
+        else
+        {
+            WindowState.Set(Platform.WindowState.Normal, windowStateEventSource);
+        }
     }
+
+    private void updateWindowState(WindowState windowState)
+    {
+        var handle = Surface.WindowHandle;
+        switch (windowState)
+        {
+            case Platform.WindowState.Normal:
+                RestoreWindow(handle).LogErrorIfFailed();
+                SetWindowSize(handle, (int)Size.X, (int)Size.Y).LogErrorIfFailed();
+                SetWindowResizable(handle, Resizable).LogErrorIfFailed();
+                break;
+
+            case Platform.WindowState.Fullscreen:
+                throw new NotSupportedException();
+
+            case Platform.WindowState.FullscreenBorderless:
+                throw new NotSupportedException();
+
+            case Platform.WindowState.Maximised:
+                RestoreWindow(handle).LogErrorIfFailed();
+                MaximizeWindow(handle).LogErrorIfFailed();
+                break;
+            case Platform.WindowState.Minimised:
+                MinimizeWindow(handle).LogErrorIfFailed();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(windowState), windowState, null);
+        }
+    }
+
+    #endregion
+
+    #region Event Handling
 
     protected void HandleEvent(Event sdlEvent)
     {
@@ -319,16 +430,16 @@ public class SDL3WindowHost : IWindowHost
                 break;
 
             // case EventType.TextEditing:
-                // GlobalInputHandler.HandleTextEditing(sdlEvent.Edit);
-                // break;
+            // GlobalInputHandler.HandleTextEditing(sdlEvent.Edit);
+            // break;
 
             // case EventType.TextInput:
-                // GlobalInputHandler.HandleTextInput(sdlEvent.Text);
-                // break;
+            // GlobalInputHandler.HandleTextInput(sdlEvent.Text);
+            // break;
 
             // case EventType.KeymapChanged:
-                // GlobalInputHandler.HandleKeymapChange();
-                // break;
+            // GlobalInputHandler.HandleKeymapChange();
+            // break;
 
             case EventType.FingerDown:
             case EventType.FingerUp:
@@ -356,6 +467,21 @@ public class SDL3WindowHost : IWindowHost
 
             case EventType.MouseMotion:
                 handleInternalMouseMotionEvent(sdlEvent.Motion);
+                break;
+            case EventType.WindowResized:
+                OnWindowResized.Dispatch(WindowSize);
+                break;
+            case EventType.LowMemory:
+                OnDeviceLowMemory.Dispatch(Nothing.INSTANCE);
+                break;
+            case EventType.WindowSafeAreaChanged:
+                GetWindowSafeArea(Surface.WindowHandle, out var rect);
+                OnSafeAreaChanged.Dispatch(rect.ToVector());
+                break;
+            case EventType.WindowMinimized:
+            case EventType.WindowMaximized:
+            case EventType.WindowRestored:
+                fetchCurrentWindowState();
                 break;
         }
     }
@@ -412,9 +538,37 @@ public class SDL3WindowHost : IWindowHost
         }
     }
 
-    public bool CapsLockPressed => GetModState().HasFlagFast(Keymod.Caps);
+    private void handleTabletDeviceReport(object? _, IDeviceReport deviceReport)
+    {
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        if (deviceReport is IAbsolutePositionReport positionReport)
+        {
+            var tabletEvent = TabletInputEvent.Rent();
+            tabletEvent.Position = positionReport.Position;
+            tabletEvent.Timestamp = timestamp;
 
-    public bool AltPressed => GetModState().HasFlagFast(Keymod.Alt);
+            inputHandler.Enqueue(tabletEvent);
+        }
+    }
 
-    public bool HasKeyboard => HasKeyboard();
+    private void handleMouseButton(MouseButton mouseButton, bool down, long timestamp)
+    {
+        var mouseButtonInputEvent = MouseButtonInputEvent.Rent();
+        mouseButtonInputEvent.Button = mouseButton;
+        mouseButtonInputEvent.IsDown = down;
+        mouseButtonInputEvent.Timestamp = timestamp;
+
+        inputHandler.Enqueue(mouseButtonInputEvent);
+    }
+
+    #endregion
+
+    public void Dispose()
+    {
+        Logger.Debug("Exiting..", Logger.Platform);
+        ExitRequested.Dispose();
+        Surface.Dispose();
+        DestroyWindow(Surface.WindowHandle);
+        Quit();
+    }
 }

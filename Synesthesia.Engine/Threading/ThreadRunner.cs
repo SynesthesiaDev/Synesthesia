@@ -2,10 +2,10 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Concurrent;
-using Synesthesia.Engine.Bindables;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Timing;
+using Synesthesia.Engine.Util.Bindables;
 
 namespace Synesthesia.Engine.Threading;
 

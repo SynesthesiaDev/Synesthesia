@@ -1,5 +1,5 @@
-using Synesthesia.Engine.Bindables;
-using Synesthesia.Engine.Pooling;
+using Synesthesia.Engine.Util.Bindables;
+using Synesthesia.Engine.Util.Pooling;
 
 namespace Synesthesia.Engine.Events;
 
