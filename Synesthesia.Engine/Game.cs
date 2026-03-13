@@ -24,8 +24,13 @@ public class Game
 
     private bool initialized;
 
+    /// <summary>
+    /// Primary game class
+    /// </summary>
+    /// <param name="gameWindowHost">Window Host that the game uses to create window and handle os events</param>
     public Game(IWindowHost gameWindowHost)
     {
+
         WindowHost = gameWindowHost;
         InputHandler = new InputHandler();
         InputThread = new InputThread();
@@ -38,6 +43,11 @@ public class Game
         //Note: RenderThread is registered as a dependency after initialization of IWindowHost
     }
 
+    /// <summary>
+    /// Initializes Render, Update, Audio, and Input threads and creates the game window
+    /// </summary>
+    /// <threadsafety>Function should be called on the main STA thread</threadsafety>
+    /// <exception cref="InvalidOperationException"></exception>
     public void Run()
     {
         try
@@ -49,7 +59,7 @@ public class Game
 
             DependencyContainer.Add(renderThread);
 
-            WindowHost.ReleaseGLContext();
+            WindowHost.Surface.ReleaseOwnership();
 
             RenderThread.ActiveUpdateRate.Value = Defaults.RENDER_THREAD_HZ;
             UpdateThread.ActiveUpdateRate.Value = Defaults.UPDATE_THREAD_HZ;

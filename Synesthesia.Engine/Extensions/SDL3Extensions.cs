@@ -3,6 +3,7 @@
 
 using System.Runtime.CompilerServices;
 using SDL3;
+using Synesthesia.Engine.Exceptions;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Logging;
 using SynesthesiaUtil;
@@ -12,11 +13,20 @@ namespace Synesthesia.Engine.Extensions;
 
 public static class SDL3Extensions
 {
-    public static bool LogErrorIfFailed(this bool returnValue, [CallerArgumentExpression("returnValue")] string? expression = null)
+    extension(bool returnValue)
     {
-        if (!returnValue) logError(expression);
-        return returnValue;
+        public bool LogErrorIfFailed([CallerArgumentExpression("returnValue")] string? expression = null)
+        {
+            if (!returnValue) logError(expression);
+            return returnValue;
+        }
+
+        public void ThrowIfFailed([CallerArgumentExpression("returnValue")] string? expression = null)
+        {
+            if (!returnValue) throwError(expression);
+        }
     }
+
 
     public static int LogErrorIfFailed(this int returnValue, [CallerArgumentExpression("returnValue")] string? expression = null)
     {
@@ -30,6 +40,12 @@ public static class SDL3Extensions
         if (!string.IsNullOrEmpty(expression))
             Logger.Error($"at {expression}");
     }
+
+    private static void throwError(string? expression)
+    {
+        throw new SDLPlatformException("SDL Error", expression);
+    }
+
 
     public static MouseButton ToMouseButton(this SDL.MouseButtonEvent mouseButtonEvent)
     {

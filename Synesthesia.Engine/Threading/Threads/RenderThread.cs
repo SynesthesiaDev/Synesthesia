@@ -19,7 +19,7 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
 
     protected override void OnThreadInit()
     {
-        Renderer.Surface.MakeCurrent();
+        Renderer.Surface.ClaimOwnership();
         Logger.Verbose("Transferred renderer context ownership to Render Thread", Logger.Platform);
         hasContextOwnership = true;
     }

@@ -24,8 +24,6 @@ public interface IWindowHost
 
     void RunWindow();
 
-    void ReleaseGLContext();
-
     bool CapsLockPressed { get; }
 
     bool AltPressed { get; }

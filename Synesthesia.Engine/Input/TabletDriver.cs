@@ -38,7 +38,7 @@ public sealed class TabletDriver : Driver
 
         deviceHub.DevicesChanged += (_, args) =>
         {
-            // it's worth noting that this event fires on *any* device change system-wide, including non-tablet devices.
+            // fires on ANY device change, not just tablet-related
             if (!Tablets.Any() && args.Additions.Any())
                 detectDevicesAsync();
         };
@@ -46,7 +46,7 @@ public sealed class TabletDriver : Driver
         detectDevicesAsync();
     }
 
-    private void driverLog(object? _, LogMessage logMessage)
+    private static void driverLog(object? _, LogMessage logMessage)
     {
         if (ignored_logs.Any(ignoredLog => logMessage.Message.StartsWith(ignoredLog, StringComparison.Ordinal))) return;
 
@@ -105,7 +105,7 @@ public sealed class TabletDriver : Driver
 
     public new void Dispose()
     {
-        base.Dispose();
         Log.Output -= driverLog;
+        base.Dispose();
     }
 }

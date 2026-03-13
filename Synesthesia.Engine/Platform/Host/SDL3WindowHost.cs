@@ -30,10 +30,20 @@ public class SDL3WindowHost : IWindowHost
 
     private readonly ConcurrentQueue<Action> commandQueue = new();
 
+    /// <summary>
+    /// Subscribable event dispatcher to notify if exit is requested by os (X Button pressed, WM Kill command, etc.)
+    /// </summary>
     public EventDispatcher<bool> ExitRequested { get; } = new();
 
+    /// <summary>
+    /// OpenGL Surface containing <see cref="OpenGLSurface.WindowHandle"/>, <see cref="OpenGLSurface.ContextHandle"/> and responsible
+    /// for swapping buffers and managing ownership of OpenGL Context
+    /// </summary>
     public OpenGLSurface Surface { get; private set; } = null!;
 
+    /// <summary>
+    /// Manages everything related to rendering/drawing
+    /// </summary>
     public OpenGlRenderer Renderer { get; private set; } = null!;
 
     public bool WindowExists { get; private set; }
@@ -49,12 +59,19 @@ public class SDL3WindowHost : IWindowHost
     [Resolved]
     private InputHandler inputHandler = null!;
 
-
+    /// <summary>
+    /// Schedule an action to be run on the next SDL frame
+    /// </summary>
+    /// <param name="action">Action to be run</param>
     public void Schedule(Action action)
     {
         commandQueue.Enqueue(action);
     }
 
+    /// <summary>
+    /// Makes the window flash in the taskbar (if supported on os)
+    /// </summary>
+    /// <param name="flashUntilFocused">Flash until the window is focused</param>
     public void Flash(bool flashUntilFocused) =>
         Schedule(() =>
         {
@@ -62,6 +79,9 @@ public class SDL3WindowHost : IWindowHost
             FlashWindow(Surface.WindowHandle, flashUntilFocused ? FlashOperation.UntilFocused : FlashOperation.Briefly).LogErrorIfFailed();
         });
 
+    /// <summary>
+    /// Cancels flashing animation in taskbar if <see cref="Flash"/> was previously called with parameter <c>flashUntilFocused</c>
+    /// </summary>
     public void CancelFlash() =>
         Schedule(() =>
         {
@@ -69,6 +89,11 @@ public class SDL3WindowHost : IWindowHost
             FlashWindow(Surface.WindowHandle, FlashOperation.Cancel);
         });
 
+    /// <summary>
+    /// Initializes SDL3 and creates <see cref="OpenGLSurface"/>, <see cref="OpenGlRenderer"/> and <see cref="TabletDriver"/>
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Failed to create SDL window</exception>
+    /// <exception cref="InvalidOperationException">Failed to create GL Context</exception>
     public void Initialize()
     {
         try
@@ -120,7 +145,7 @@ public class SDL3WindowHost : IWindowHost
                 ContextHandle = glContext.Value
             };
 
-            Surface.MakeCurrent();
+            Surface.ClaimOwnership();
 
             Renderer = new OpenGlRenderer
             {
@@ -139,6 +164,10 @@ public class SDL3WindowHost : IWindowHost
         }
     }
 
+    /// <summary>
+    /// Marks the window as ready and starts pumping window events
+    /// Do mind that the window starts as hidden until the first swap to prevent flashing the user with a white empty window
+    /// </summary>
     public void RunWindow()
     {
         WindowExists = true;
@@ -193,8 +222,6 @@ public class SDL3WindowHost : IWindowHost
 
         pollMouse();
     }
-
-    public void ReleaseGLContext() => GLMakeCurrent(Surface.WindowHandle, IntPtr.Zero).LogErrorIfFailed();
 
     private void pollEvents()
     {
@@ -288,6 +315,7 @@ public class SDL3WindowHost : IWindowHost
                 keyEvent.IsDown = sdlEvent.Key.Down;
                 keyEvent.Key = sdlEvent.Key.ToKey();
                 keyEvent.Timestamp = timestamp;
+                inputHandler.Enqueue(keyEvent);
                 break;
 
             // case EventType.TextEditing:
