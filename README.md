@@ -1,7 +1,5 @@
 # 🧪 Synesthesia
 
-# 🎨 Synesthesia
-
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/SynesthesiaDev/Synesthesia/build.yml?branch=main&style=for-the-badge&label=Build&color=33cc33)
 ![NuGet Version](https://img.shields.io/nuget/v/Synesthesia.Engine?style=for-the-badge&color=blue&label=Release)
 
