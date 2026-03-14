@@ -116,7 +116,6 @@ public class SDL3WindowHost : IWindowHost
 
     public bool HasKeyboard => HasKeyboard();
 
-
     [Resolved]
     private InputHandler inputHandler = null!;
 
@@ -212,10 +211,10 @@ public class SDL3WindowHost : IWindowHost
 
             Renderer = new OpenGlRenderer
             {
-                Surface = Surface
+                Surface = Surface,
             };
 
-            WindowState.OnValueChange(e => updateWindowState(e.NewValue));
+            WindowState.OnValueChange(e => updateWindowState(e.NewValue), ignoresSource: windowStateEventSource);
 
             Renderer.Initialize();
 
@@ -482,6 +481,10 @@ public class SDL3WindowHost : IWindowHost
             case EventType.WindowMaximized:
             case EventType.WindowRestored:
                 fetchCurrentWindowState();
+                break;
+
+            case EventType.SystemThemeChanged:
+                OnSystemThemeChanged.Dispatch(GetSystemTheme().ToSystemTheme());
                 break;
         }
     }

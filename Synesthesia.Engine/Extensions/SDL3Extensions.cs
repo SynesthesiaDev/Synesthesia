@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using SDL3;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Logging;
+using Synesthesia.Engine.Platform;
 using Synesthesia.Engine.Util.Exceptions;
 using SynesthesiaUtil;
 using SynesthesiaUtil.Extensions;
@@ -26,6 +27,17 @@ public static class SDL3Extensions
         {
             if (!returnValue) throwError(expression);
         }
+    }
+
+    public static SystemTheme ToSystemTheme(this SDL.SystemTheme sdlTheme)
+    {
+        return sdlTheme switch
+        {
+            SDL.SystemTheme.Unknown => SystemTheme.Unknown,
+            SDL.SystemTheme.Light => SystemTheme.Light,
+            SDL.SystemTheme.Dark => SystemTheme.Dark,
+            _ => throw new ArgumentOutOfRangeException(nameof(sdlTheme), sdlTheme, null),
+        };
     }
 
     public static Vector4 ToVector(this SDL.Rect rect) => new(rect.X, rect.Y, rect.H, rect.Y);
