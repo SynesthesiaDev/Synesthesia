@@ -2,32 +2,36 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Synesthesia.Engine.Util.Pooling;
 
+public readonly struct Snapshot<T>(T[] array, int count) : IDisposable
+{
+    public readonly int Count = count;
+
+    public Span<T> Span => array.AsSpan(0, Count);
+
+    public void Dispose()
+    {
+        ArrayPool<T>.Shared.Return(array, clearArray: RuntimeHelpers.IsReferenceOrContainsReferences<T>());
+    }
+}
+
 public static class Snapshot
 {
-    public static Snapshot<T> Rent<T>(IList<T> list)
+    [SuppressMessage("Design", "MA0016:Prefer using collection abstraction instead of implementation")]
+    public static Snapshot<T> Rent<T>(List<T> list)
     {
-        int count = 0;
+        int count = list.Count;
+        if (count == 0) return new Snapshot<T>([], 0);
 
-        var arraySnapshot = ArrayPool<T>.Shared.Rent(list.Count);
-        foreach (var child in list)
-        {
-            arraySnapshot[count++] = child;
-        }
+        T[] arraySnapshot = ArrayPool<T>.Shared.Rent(count);
+
+        CollectionsMarshal.AsSpan(list).CopyTo(arraySnapshot);
+
         return new Snapshot<T>(arraySnapshot, count);
     }
 }
-
-public readonly struct Snapshot<T>(T[] array, int count)
-{
-    public readonly T[] Array = array;
-    public readonly int Count = count;
-
-    public void Return()
-    {
-        ArrayPool<T>.Shared.Return(Array, clearArray: true);
-    }
-}
-

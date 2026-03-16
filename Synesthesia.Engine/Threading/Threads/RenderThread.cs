@@ -22,6 +22,8 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
         Renderer.Surface.ClaimOwnership();
         Logger.Verbose("Transferred renderer context ownership to Render Thread", Logger.Platform);
         hasContextOwnership = true;
+
+        Renderer.CompileDefaultShaders();
     }
 
     protected override void ProcessFrame(FrameInfo frameInfo)

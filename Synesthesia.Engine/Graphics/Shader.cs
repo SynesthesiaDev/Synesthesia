@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using Faster.Map.Core;
 using Silk.NET.OpenGL;
+using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Util.Exceptions;
 
@@ -12,7 +13,7 @@ namespace Synesthesia.Engine.Graphics;
 
 public class Shader : IDisposable
 {
-    public const string TRANSFORM_UNIFORM_NAME = "u_transform;";
+    public const string TRANSFORM_UNIFORM_NAME = "u_transform";
 
     private readonly GL gl;
     private readonly uint program;
@@ -31,7 +32,7 @@ public class Shader : IDisposable
         uint? fragmentShader = null;
 
         if (vertexCode != null) vertexShader = compileShader(ShaderType.VertexShader, vertexCode);
-        if (fragmentCode != null) fragmentShader = compileShader(ShaderType.VertexShader, fragmentCode);
+        if (fragmentCode != null) fragmentShader = compileShader(ShaderType.FragmentShader, fragmentCode);
 
         program = gl.CreateProgram();
 
@@ -66,7 +67,9 @@ public class Shader : IDisposable
 
         gl.GetShader(shader, ShaderParameterName.CompileStatus, out int success);
 
-        return success == 0 ? throw new OpenGLException($"Shader compilation failed: ({shaderType}): {gl.GetShaderInfoLog(shader)}") : shader;
+        var shaderId = success == 0 ? throw new OpenGLException($"Shader compilation failed: ({shaderType}): {gl.GetShaderInfoLog(shader)}") : shader;
+        Logger.Verbose($"Compiled {shaderType.ToString().Replace("Shader", string.Empty)} shader with id {shaderId}", Logger.Render);
+        return shaderId;
     }
 
     public void SetMatrix4(string name, Matrix4x4 matrix)

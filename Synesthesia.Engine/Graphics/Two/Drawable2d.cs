@@ -48,7 +48,7 @@ public abstract class Drawable2d : Drawable
             field = value;
             Invalidate(Invalidation.Geometry | Invalidation.Layout | Invalidation.Size);
             Parent?.Invalidate(Invalidation.Layout);
-            // invalidateChildrenIfComposite(Invalidation.Size | Invalidation.Geometry); //TODO
+            invalidateChildrenIfComposite(Invalidation.Size | Invalidation.Geometry);
         }
     } = 0f;
 
@@ -61,7 +61,7 @@ public abstract class Drawable2d : Drawable
             field = value;
             Invalidate(Invalidation.Geometry | Invalidation.Layout | Invalidation.Size);
             Parent?.Invalidate(Invalidation.Layout);
-            // invalidateChildrenIfComposite(Invalidation.Size | Invalidation.Geometry); //TODO
+            invalidateChildrenIfComposite(Invalidation.Size | Invalidation.Geometry);
         }
     } = 0f;
 
@@ -361,5 +361,10 @@ public abstract class Drawable2d : Drawable
             y = (Margin.Y - Margin.W) / 2f;
 
         return new Vector2(x, y);
+    }
+
+    private void invalidateChildrenIfComposite(Invalidation invalidation)
+    {
+        if(this is CompositeDrawable2d composite) composite.InvalidateChildren(invalidation);
     }
 }

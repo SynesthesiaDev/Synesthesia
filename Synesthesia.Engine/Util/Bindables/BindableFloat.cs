@@ -25,7 +25,7 @@ public class BindableFloat() : Bindable<float>(0.0f)
     public override void Set(float newValue, BindableEventSource source)
     {
         var oldValue = InternalValue;
-        var clamped = MathUtil.Clamp(newValue, Min, Max);
+        var clamped = Math.Clamp(newValue, Min, Max);
 
         InternalValue = clamped;
         Listeners.Filter(p => p.Value != source).Keys.ToList().ForEach(listener => listener.Invoke(oldValue, clamped));

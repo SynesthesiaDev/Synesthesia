@@ -4,6 +4,8 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Silk.NET.OpenGL;
+using Synesthesia.Engine.Graphics;
+using Synesthesia.Engine.Graphics.Shaders;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Util;
@@ -27,6 +29,7 @@ public sealed class OpenGlRenderer : IDisposable
     public ClearFlags ClearFlags = default_clear_flags;
 
     private Shader defaultShader = null!;
+    private Shader stencilShader = null!;
 
     public GL OpenGL
     {
@@ -51,6 +54,8 @@ public sealed class OpenGlRenderer : IDisposable
 
     public Matrix4x4 InverseMatrix { get; private set; } = Matrix4x4.Identity;
 
+    public QuadRenderer QuadRenderer { get; private set; } = null!;
+
     public void Initialize()
     {
         if (openGlInitialized) throw new InvalidOperationException("OpenGL is already initialized");
@@ -62,14 +67,13 @@ public sealed class OpenGlRenderer : IDisposable
         });
 
         OpenGL = gl ?? throw new InvalidOperationException("Silk.NET could not bind to OpenGL");
+        QuadRenderer = new QuadRenderer(gl);
 
         BackBufferHeight = Surface.BackBufferHeight;
         BackBufferWidth = Surface.BackBufferWidth;
 
-        defaultShader = new Shader(OpenGL, Defaults.DEFAULT_VERTEX_SHADER, Defaults.DEFAULT_FRAGMENT_SHADER);
-        BeginShader(defaultShader);
-
         openGlInitialized = true;
+
         var version = OpenGL.GetStringS(GLEnum.Version);
         var shadingLanguageVersion = OpenGL.GetStringS(GLEnum.ShadingLanguageVersion);
         var vendor = OpenGL.GetStringS(GLEnum.Vendor);
@@ -81,6 +85,13 @@ public sealed class OpenGlRenderer : IDisposable
         Logger.Debug($"- Vendor:    {vendor}", Logger.Platform);
         Logger.Debug($"- Renderer   {renderer}", Logger.Platform);
         Logger.Debug($"- GLSL:      {shadingLanguageVersion}", Logger.Platform);
+    }
+
+    public void CompileDefaultShaders()
+    {
+        defaultShader = new Shader(OpenGL, ShaderSources.DefaultVertex, ShaderSources.DefaultFragment);
+        stencilShader = new Shader(OpenGL, ShaderSources.DefaultVertex, ShaderSources.StencilFragment);
+        BeginShader(defaultShader);
     }
 
     public void BeginShader(Shader shader)
@@ -238,6 +249,36 @@ public sealed class OpenGlRenderer : IDisposable
         Translate(-pivot.X, -pivot.Y, 0);
         Rotate(degrees, 0, 0, 1);
         Translate(pivot.X, pivot.Y, 0);
+    }
+
+    public void BeginStencil()
+    {
+        OpenGL.Clear(ClearBufferMask.StencilBufferBit);
+        OpenGL.Enable(GLEnum.StencilTest);
+    }
+
+    public void BeginStencilMask()
+    {
+        OpenGL.Enable(EnableCap.Multisample);
+        OpenGL.ColorMask(false, false, false, false);
+        OpenGL.StencilFunc(StencilFunction.Always, 1, 0x0FF);
+        OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
+
+        BeginShader(stencilShader);
+    }
+
+    public void EndStencilMask()
+    {
+        OpenGL.StencilFunc(StencilFunction.Equal, 1, 0x0FF);
+        OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
+        OpenGL.ColorMask(true, true, true, true);
+
+        EndShader();
+    }
+
+    public void EndStencil()
+    {
+        OpenGL.Disable(EnableCap.StencilTest);
     }
 
     public void Dispose()

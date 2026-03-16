@@ -23,7 +23,7 @@ public class BindableDouble() : Bindable<double>(0.0)
     public override void Set(double newValue, BindableEventSource source)
     {
         var oldValue = InternalValue;
-        var clamped = MathUtil.Clamp(newValue, Min, Max);
+        var clamped = Math.Clamp(newValue, Min, Max);
 
         InternalValue = clamped;
         Listeners.Filter(p => p.Value != source).Keys.ToList().ForEach(listener => listener.Invoke(oldValue, clamped));
