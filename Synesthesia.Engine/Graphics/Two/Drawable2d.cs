@@ -211,11 +211,11 @@ public abstract class Drawable2d : Drawable
             var anchorPos = Vector2.Zero;
             if (Parent != null)
             {
-                anchorPos = Parent.ScreenSpacePosition + getAnchorOffset(Parent.Size, Anchor) * parentScale;
+                anchorPos = Parent.ScreenSpacePosition + GetAnchorOffset(Parent.Size, Anchor) * parentScale;
             }
 
             var posOffset = (Position + getMarginOffset()) * parentScale;
-            var originOffset = getAnchorOffset(Size, Origin) * InheritedScale;
+            var originOffset = GetAnchorOffset(Size, Origin) * InheritedScale;
 
             return anchorPos + posOffset + getMarginOffset() - originOffset;
         }
@@ -230,14 +230,14 @@ public abstract class Drawable2d : Drawable
 
         if ((flags & Invalidation.Geometry) != Invalidation.None)
         {
-            // if (this is CompositeDrawable2d composite)
-            // {
-            // for (int i = 0; i < composite.InternalChildren.Count; i++)
-            // composite.InternalChildren[i].Invalidate(Invalidation.Geometry);
-            // }
+            if (this is CompositeDrawable2d composite)
+            {
+                for (int i = 0; i < composite.InternalChildren.Count; i++)
+                    composite.InternalChildren[i].Invalidate(Invalidation.Geometry);
+            }
         }
 
-        if ((flags & Invalidation.Size) != 0)
+        if ((flags & Invalidation.Size) != Invalidation.None)
         {
             Parent?.Invalidate(Invalidation.Size);
         }
@@ -300,23 +300,28 @@ public abstract class Drawable2d : Drawable
         }
     }
 
-    private void beginLocalSpace()
-    {
-        renderer.PushMatrix();
+private void beginLocalSpace()
+{
+    renderer.PushMatrix();
 
-        var anchorPos = Vector2.Zero;
-        if (Parent != null) anchorPos = getAnchorOffset(Parent.Size, Anchor);
+    var anchorPos = Vector2.Zero;
+    if (Parent != null)
+        anchorPos = GetAnchorOffset(Parent.Size, Anchor);
 
-        var originOffset = getAnchorOffset(Size, Origin);
+    var originOffset = GetAnchorOffset(Size, Origin);
 
-        renderer.Translate(anchorPos.X + Position.X + Margin.X, anchorPos.Y + Position.Y + Margin.Y, 0);
+    // Just translate to the anchor position
+    // renderer.Translate(anchorPos.X + Position.X, anchorPos.Y + Position.Y, 0);
 
-        if (Rotation != 0f) renderer.RotateAround(new Vector2(Width / 2, Height / 2), Rotation);
+    // if (Rotation != 0f)
+    //     renderer.Rotate(Rotation, 0, 0, 1);
 
-        renderer.Scale(Scale.X, Scale.Y, 1);
-        renderer.Translate(-originOffset.X, -originOffset.Y, 0);
-        renderer.Translate(-Margin.X, -Margin.Y, 0);
-    }
+    renderer.Scale(Scale.X, Scale.Y, 1);
+
+    // No origin offset needed - quad is already centered!
+    // No margin for now
+}
+
 
     public Vector2 GetScreenSpaceCenter()
     {
@@ -330,7 +335,7 @@ public abstract class Drawable2d : Drawable
         renderer.PopMatrix();
     }
 
-    private static Vector2 getAnchorOffset(Vector2 size, Anchor anchor)
+    public static Vector2 GetAnchorOffset(Vector2 size, Anchor anchor)
     {
         return anchor switch
         {
@@ -365,6 +370,6 @@ public abstract class Drawable2d : Drawable
 
     private void invalidateChildrenIfComposite(Invalidation invalidation)
     {
-        if(this is CompositeDrawable2d composite) composite.InvalidateChildren(invalidation);
+        if (this is CompositeDrawable2d composite) composite.InvalidateChildren(invalidation);
     }
 }

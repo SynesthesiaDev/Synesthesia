@@ -20,7 +20,7 @@
   <ItemGroup>
     <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="ErrorProne.NET.CoreAnalyzers" Version="0.8.2-beta.1">
       <PrivateAssets>all</PrivateAssets>
@@ -59,7 +59,11 @@
   <PropertyGroup>
     <GeneratorControl>EnableIncrementalControl</GeneratorControl>
   </PropertyGroup>
-  
+
+  <ItemGroup>
+    <UpToDateCheckInput Include="Shaders/**/*" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Synesthesia.SourceGenerators\Synesthesia.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>

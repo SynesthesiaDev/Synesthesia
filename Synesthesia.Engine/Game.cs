@@ -57,6 +57,7 @@ public class Game
             WindowHost.Initialize();
             renderThread = new RenderThread(WindowHost.Renderer);
 
+            DependencyContainer.Add(renderThread.Renderer);
             DependencyContainer.Add(renderThread);
 
             WindowHost.Surface.ReleaseOwnership();

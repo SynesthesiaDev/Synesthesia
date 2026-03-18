@@ -193,6 +193,11 @@ public readonly struct Color : IEquatable<Color>
         return hex;
     }
 
+    public System.Drawing.Color ToMicroslopColor()
+    {
+        return System.Drawing.Color.FromArgb(ToArgb());
+    }
+
     // ReSharper disable CompareOfFloatsByEqualityOperator
     public bool Equals(Color other)
     {

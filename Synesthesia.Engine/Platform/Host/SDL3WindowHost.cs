@@ -372,6 +372,9 @@ public class SDL3WindowHost : IWindowHost
         {
             WindowState.Set(Platform.WindowState.Normal, windowStateEventSource);
         }
+
+        GetWindowSizeInPixels(handle, out int w, out int h);
+        Renderer.Resize(w, h);
     }
 
     private void updateWindowState(WindowState windowState)
@@ -469,6 +472,7 @@ public class SDL3WindowHost : IWindowHost
                 break;
             case EventType.WindowResized:
                 OnWindowResized.Dispatch(WindowSize);
+                fetchCurrentWindowState();
                 break;
             case EventType.LowMemory:
                 OnDeviceLowMemory.Dispatch(Nothing.INSTANCE);

@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using Silk.NET.OpenGL;
+using Synesthesia.Engine.Extensions;
 
 namespace Synesthesia.Engine.Graphics;
 
@@ -20,20 +21,31 @@ public class QuadRenderer : IDisposable
     private void initializeBuffers()
     {
         float[] vertices =
-        [
-            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+        {
+            // X,   Y,   Z
+            0f, 0f, 0f, // Top-Left
+            0f, 1f, 0f, // Bottom-Left
+            1f, 1f, 0f, // Bottom-Right
 
-            1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-            0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-        ];
+            1f, 1f, 0f, // Bottom-Right
+            1f, 0f, 0f, // Top-Right
+            0f, 0f, 0f  // Top-Left
+        };
 
-        vao = gl.GenVertexArray();
-        vbo = gl.GenBuffer();
+        gl.GenVertexArrays(1, out vao);
+        gl.CheckError("Generate vao array");
 
         gl.BindVertexArray(vao);
+        gl.CheckError("Bind vao array");
+
+        gl.GenBuffers(1, out vbo);
+        gl.CheckError("Generate vbo buffer");
+
+        gl.BindBuffer(BufferTargetARB.ArrayBuffer, vbo);
+        gl.CheckError("Bind vbo buffer");
+
+
+
         gl.BindBuffer(BufferTargetARB.ArrayBuffer, vbo);
 
         unsafe
@@ -43,28 +55,27 @@ public class QuadRenderer : IDisposable
                 gl.BufferData(BufferTargetARB.ArrayBuffer, (nuint)(vertices.Length * sizeof(float)), v, BufferUsageARB.StaticDraw);
             }
 
-            const uint stride = 9 * sizeof(float);
+            gl.CheckError("Set buffer data");
 
-            gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, (void*)0);
             gl.EnableVertexAttribArray(0);
+            gl.CheckError("Enable vertex attrib array");
 
-            // TexCoord (location = 1)
-            gl.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, stride, (void*)(3 * sizeof(float)));
-            gl.EnableVertexAttribArray(1);
-
-            // Color (location = 2)
-            gl.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, false, stride, (void*)(5 * sizeof(float)));
-            gl.EnableVertexAttribArray(2);
+            gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), (void*)0);
+            gl.CheckError("Vertex attrib pointer");
 
             gl.BindVertexArray(0);
+            gl.CheckError("unbind vao");
         }
     }
 
     public void Draw()
     {
         gl.BindVertexArray(vao);
+        gl.CheckError("Bind vao");
         gl.DrawArrays(PrimitiveType.Triangles, 0, 6);
+        gl.CheckError("Draw arrays");
         gl.BindVertexArray(0);
+        gl.CheckError("Unbind vao");
     }
 
     public void Dispose()

@@ -3,6 +3,7 @@
 
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using SDL3;
 using Silk.NET.OpenGL;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Shaders;
@@ -28,8 +29,8 @@ public sealed class OpenGlRenderer : IDisposable
 
     public ClearFlags ClearFlags = default_clear_flags;
 
-    private Shader defaultShader = null!;
-    private Shader stencilShader = null!;
+    public Shader DefaultShader = null!;
+    public Shader StencilShader = null!;
 
     public GL OpenGL
     {
@@ -48,6 +49,8 @@ public sealed class OpenGlRenderer : IDisposable
 
     private readonly Stack<Matrix4x4> inverseMatrixStack = new();
 
+    public int StackDepth => matrixStack.Count;
+
     public Shader CurrentShader { get; private set; } = null!;
 
     public Matrix4x4 Matrix { get; private set; } = Matrix4x4.Identity;
@@ -55,6 +58,8 @@ public sealed class OpenGlRenderer : IDisposable
     public Matrix4x4 InverseMatrix { get; private set; } = Matrix4x4.Identity;
 
     public QuadRenderer QuadRenderer { get; private set; } = null!;
+
+    private Matrix4x4 projectionMatrix;
 
     public void Initialize()
     {
@@ -73,6 +78,7 @@ public sealed class OpenGlRenderer : IDisposable
         BackBufferWidth = Surface.BackBufferWidth;
 
         openGlInitialized = true;
+        Resize(BackBufferWidth, BackBufferHeight);
 
         var version = OpenGL.GetStringS(GLEnum.Version);
         var shadingLanguageVersion = OpenGL.GetStringS(GLEnum.ShadingLanguageVersion);
@@ -87,11 +93,12 @@ public sealed class OpenGlRenderer : IDisposable
         Logger.Debug($"- GLSL:      {shadingLanguageVersion}", Logger.Platform);
     }
 
+
     public void CompileDefaultShaders()
     {
-        defaultShader = new Shader(OpenGL, ShaderSources.DefaultVertex, ShaderSources.DefaultFragment);
-        stencilShader = new Shader(OpenGL, ShaderSources.DefaultVertex, ShaderSources.StencilFragment);
-        BeginShader(defaultShader);
+        DefaultShader = new Shader(OpenGL, ShaderSources.DefaultVertex, ShaderSources.DefaultFragment);
+        StencilShader = new Shader(OpenGL, ShaderSources.DefaultVertex, ShaderSources.StencilFragment);
+        BeginShader(DefaultShader);
     }
 
     public void BeginShader(Shader shader)
@@ -108,16 +115,24 @@ public sealed class OpenGlRenderer : IDisposable
     public void EndShader()
     {
         ThreadSafety.AssertRunningOnRenderThread();
-        CurrentShader = defaultShader;
+        CurrentShader = DefaultShader;
     }
 
     public void Resize(int width, int height)
     {
         EnsureInitialized();
+        pushViewport();
+    }
 
-        BackBufferWidth = width;
-        BackBufferHeight = height;
-        OpenGL.Viewport(0, 0, (uint)width, (uint)height);
+    private void pushViewport()
+    {
+        SDL.GetWindowSizeInPixels(Surface.WindowHandle, out int w, out int h);
+        BackBufferWidth = w;
+        BackBufferWidth = h;
+
+        projectionMatrix = Matrix4x4.CreateOrthographicOffCenter(0, w, h, 0, -1, 1);
+
+        OpenGL.Viewport(0, 0, (uint)w, (uint)h);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -139,6 +154,14 @@ public sealed class OpenGlRenderer : IDisposable
             mask |= ClearBufferMask.StencilBufferBit;
 
         if (mask != ClearBufferMask.None) OpenGL.Clear(mask);
+
+        OpenGL.Disable(EnableCap.CullFace);
+        OpenGL.Disable(EnableCap.DepthTest);
+
+        pushViewport();
+
+        LoadIdentity();
+        updateShaderMatrix();
     }
 
     public void EndDrawing()
@@ -239,7 +262,7 @@ public sealed class OpenGlRenderer : IDisposable
 
     private void updateShaderMatrix()
     {
-        CurrentShader.SetMatrix4(Shader.TRANSFORM_UNIFORM_NAME, Matrix);
+        CurrentShader.SetMatrix4(Shader.TRANSFORM_UNIFORM_NAME, Matrix * projectionMatrix);
     }
 
     public void RotateAround(Vector2 pivot, float degrees)
@@ -264,7 +287,7 @@ public sealed class OpenGlRenderer : IDisposable
         OpenGL.StencilFunc(StencilFunction.Always, 1, 0x0FF);
         OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
 
-        BeginShader(stencilShader);
+        BeginShader(StencilShader);
     }
 
     public void EndStencilMask()
@@ -286,4 +309,6 @@ public sealed class OpenGlRenderer : IDisposable
         openGlInitialized = false;
         OpenGL.Dispose();
     }
+
+
 }

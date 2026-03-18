@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Synesthesia.SourceGenerators")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+de3f2c5a681ec5bf9f59559836e2278f432e769e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+727b063e9999f20b64b585048c41feb6ffaba85e")]
 [assembly: System.Reflection.AssemblyProductAttribute("Synesthesia.SourceGenerators")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Synesthesia.SourceGenerators")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

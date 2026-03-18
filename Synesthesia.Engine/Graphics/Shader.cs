@@ -2,7 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Numerics;
-using System.Runtime.CompilerServices;
 using Faster.Map.Core;
 using Silk.NET.OpenGL;
 using Synesthesia.Engine.Logging;
@@ -16,7 +15,7 @@ public class Shader : IDisposable
     public const string TRANSFORM_UNIFORM_NAME = "u_transform";
 
     private readonly GL gl;
-    private readonly uint program;
+    public readonly uint Program;
 
     private readonly DenseMap<string, int> uniformCache = new();
 
@@ -34,15 +33,15 @@ public class Shader : IDisposable
         if (vertexCode != null) vertexShader = compileShader(ShaderType.VertexShader, vertexCode);
         if (fragmentCode != null) fragmentShader = compileShader(ShaderType.FragmentShader, fragmentCode);
 
-        program = gl.CreateProgram();
+        Program = gl.CreateProgram();
 
-        if (vertexShader != null) gl.AttachShader(program, vertexShader.Value);
-        if (fragmentShader != null) gl.AttachShader(program, fragmentShader.Value);
-        gl.LinkProgram(program);
+        if (vertexShader != null) gl.AttachShader(Program, vertexShader.Value);
+        if (fragmentShader != null) gl.AttachShader(Program, fragmentShader.Value);
+        gl.LinkProgram(Program);
 
-        gl.GetProgram(program, ProgramPropertyARB.LinkStatus, out int success);
+        gl.GetProgram(Program, ProgramPropertyARB.LinkStatus, out int success);
 
-        if (success == 0) throw new OpenGLException($"Shader linking failed: {gl.GetProgramInfoLog(program)}");
+        if (success == 0) throw new OpenGLException($"Shader linking failed: {gl.GetProgramInfoLog(Program)}");
 
         if (vertexShader != null) gl.DeleteShader(vertexShader.Value);
         if (fragmentShader != null) gl.DeleteShader(fragmentShader.Value);
@@ -55,7 +54,7 @@ public class Shader : IDisposable
         if (uniformCache.Get(uniform, out int cached))
             return cached;
 
-        var location = gl.GetUniformLocation(program, uniform);
+        var location = gl.GetUniformLocation(Program, uniform);
         return location != -1 ? location : throw new OpenGLException($"Failed to get shader uniform '{uniform}'");
     }
 
@@ -79,7 +78,7 @@ public class Shader : IDisposable
         int location = GetUniformLocation(name);
         unsafe
         {
-            gl.UniformMatrix4(location, 1, false, (float*)Unsafe.AsPointer(ref matrix));
+            gl.UniformMatrix4(location, 1, false, (float*)&matrix);
         }
     }
 
@@ -134,11 +133,16 @@ public class Shader : IDisposable
     public void Use()
     {
         ThreadSafety.AssertRunningOnRenderThread();
-        gl.UseProgram(program);
+        gl.UseProgram(Program);
     }
 
     public void Dispose()
     {
-        gl.DeleteProgram(program);
+        gl.DeleteProgram(Program);
+    }
+
+    public override string ToString()
+    {
+        return $"Shader(program={Program},cacheSize={uniformCache.Size})";
     }
 }
