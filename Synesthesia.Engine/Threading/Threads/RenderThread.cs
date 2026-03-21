@@ -52,16 +52,9 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
     {
         if (!Renderer.CanDraw || !hasContextOwnership) return;
 
-         // mainComposite.Size = new Vector2(Renderer.BackBufferWidth, Renderer.BackBufferHeight);
-
          Renderer.BeginDrawing();
 
-         Renderer.PushMatrix();
-
-         Renderer.Scale(100f, 100f, 1f);
-         Renderer.QuadRenderer.Draw();
-
-         Renderer.PopMatrix();
+         mainComposite.OnDraw();
 
          Renderer.EndDrawing();
     }

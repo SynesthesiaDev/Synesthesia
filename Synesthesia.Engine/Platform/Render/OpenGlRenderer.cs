@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using SDL3;
@@ -32,6 +33,8 @@ public sealed class OpenGlRenderer : IDisposable
     public Shader DefaultShader = null!;
     public Shader StencilShader = null!;
 
+    public VertexBatch<Vertex2d> VertexBatch2d = null!;
+
     public GL OpenGL
     {
         get
@@ -57,8 +60,6 @@ public sealed class OpenGlRenderer : IDisposable
 
     public Matrix4x4 InverseMatrix { get; private set; } = Matrix4x4.Identity;
 
-    public QuadRenderer QuadRenderer { get; private set; } = null!;
-
     private Matrix4x4 projectionMatrix;
 
     public void Initialize()
@@ -72,7 +73,6 @@ public sealed class OpenGlRenderer : IDisposable
         });
 
         OpenGL = gl ?? throw new InvalidOperationException("Silk.NET could not bind to OpenGL");
-        QuadRenderer = new QuadRenderer(gl);
 
         BackBufferHeight = Surface.BackBufferHeight;
         BackBufferWidth = Surface.BackBufferWidth;
@@ -85,6 +85,8 @@ public sealed class OpenGlRenderer : IDisposable
         var vendor = OpenGL.GetStringS(GLEnum.Vendor);
         var renderer = OpenGL.GetStringS(GLEnum.Renderer);
 
+        VertexBatch2d = new VertexBatch<Vertex2d>(gl);
+
         Console.WriteLine(string.Empty);
         Logger.Debug("OpenGL Initialized", Logger.Platform);
         Logger.Debug($"- Version:   {version}", Logger.Platform);
@@ -93,6 +95,35 @@ public sealed class OpenGlRenderer : IDisposable
         Logger.Debug($"- GLSL:      {shadingLanguageVersion}", Logger.Platform);
     }
 
+    // private Texture? currentTexture = null;
+
+    // public void BindTexture(Texture? texture)
+    // {
+    //     VertexBatch2d.Flush();
+    //
+    //     currentTexture = texture;
+    //     //TODO actually bind
+    // }
+
+    public void DrawQuad(Vector2 position, Vector2 size, uint packedColor, RectangleF? textureCoord = null)
+    {
+        var v0 = position;
+        var v1 = position with { Y = position.Y + size.Y };
+        var v2 = position + size;
+        var v3 = position with { X = position.X + size.X };
+
+        v0 = Vector2.Transform(v0, Matrix);
+        v1 = Vector2.Transform(v1, Matrix);
+        v2 = Vector2.Transform(v2, Matrix);
+        v3 = Vector2.Transform(v3, Matrix);
+
+        var tex = textureCoord ?? new Rectangle(0, 0, 1, 1);
+
+        VertexBatch2d.PushVertex(new Vertex2d(v0, new Vector2(tex.Left, tex.Top), packedColor));
+        VertexBatch2d.PushVertex(new Vertex2d(v1, new Vector2(tex.Left, tex.Bottom), packedColor));
+        VertexBatch2d.PushVertex(new Vertex2d(v2, new Vector2(tex.Right, tex.Bottom), packedColor));
+        VertexBatch2d.PushVertex(new Vertex2d(v3, new Vector2(tex.Right, tex.Top), packedColor));
+    }
 
     public void CompileDefaultShaders()
     {
@@ -128,7 +159,7 @@ public sealed class OpenGlRenderer : IDisposable
     {
         SDL.GetWindowSizeInPixels(Surface.WindowHandle, out int w, out int h);
         BackBufferWidth = w;
-        BackBufferWidth = h;
+        BackBufferHeight = h;
 
         projectionMatrix = Matrix4x4.CreateOrthographicOffCenter(0, w, h, 0, -1, 1);
 
@@ -166,9 +197,12 @@ public sealed class OpenGlRenderer : IDisposable
 
     public void EndDrawing()
     {
+        VertexBatch2d.Flush();
+
         EnsureInitialized();
 
         Surface.SwapBuffers();
+        //TODO unbind texture
 
         ClearFlags = default_clear_flags;
     }

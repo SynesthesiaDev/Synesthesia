@@ -3,15 +3,19 @@
 
 using System.Numerics;
 using System.Runtime.InteropServices;
+using Silk.NET.OpenGL;
 
 namespace Synesthesia.Engine.Graphics;
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
-public readonly struct Vertex2d(Vector2 position, Vector2 texCoord, Color color) : IEquatable<Vertex2d>
+public readonly struct Vertex2d(Vector2 position, Vector2 texCoord, uint color)
 {
+    [VertexInfo(0, 2, VertexAttribPointerType.Float)]
     public readonly Vector2 Position = position;
-    public readonly Vector2 TextureCoord = texCoord;
-    public readonly Color Color = color;
 
-    public readonly bool Equals(Vertex2d other) => Position.Equals(other.Position) && Color.Equals(other.Color);
+    [VertexInfo(1, 2, VertexAttribPointerType.Float)]
+    public readonly Vector2 TextureCoord = texCoord;
+
+    [VertexInfo(2, 4, VertexAttribPointerType.UnsignedByte, true)]
+    public readonly uint Color = color;
 }

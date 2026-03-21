@@ -41,6 +41,17 @@ public readonly struct Color : IEquatable<Color>
         return (int)(uint)(A * (double)byte.MaxValue) << 24 | (int)(uint)(R * (double)byte.MaxValue) << 16 /*0x10*/ | (int)(uint)((double)G * byte.MaxValue) << 8 | (int)(uint)((double)B * byte.MaxValue);
     }
 
+    //abgr in memory (Little Endian) for shaders
+    public uint ToRgba32()
+    {
+        uint r = (uint)(Math.Clamp(R, 0, 1) * 255);
+        uint g = (uint)(Math.Clamp(G, 0, 1) * 255);
+        uint b = (uint)(Math.Clamp(B, 0, 1) * 255);
+        uint a = (uint)(Math.Clamp(A, 0, 1) * 255);
+
+        return r | (g << 8) | (b << 16) | (a << 24);
+    }
+
     public static bool operator ==(Color? left, Color? right) => left.Equals(right);
 
     public static bool operator !=(Color? left, Color? right) => !left.Equals(right);

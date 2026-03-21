@@ -2,6 +2,9 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Reflection;
+using System.Runtime.InteropServices;
+using Silk.NET.OpenGL;
+using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Util.Bindables;
 
@@ -64,6 +67,25 @@ public static class Reflection
                 }
             }
             currentType = currentType.BaseType;
+        }
+    }
+
+    public static unsafe void SetupVertexAttributes<T>(GL gl) where T : unmanaged
+    {
+        var type = typeof(T);
+        var stride = (uint)sizeof(T);
+
+        var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
+
+        foreach (var fieldInfo in fields)
+        {
+            var vertexInfoAttribute = fieldInfo.GetCustomAttribute<VertexInfoAttribute>();
+            if(vertexInfoAttribute == null) continue;
+
+            var offset = Marshal.OffsetOf<T>(fieldInfo.Name);
+
+            gl.EnableVertexAttribArray((uint)vertexInfoAttribute.Index);
+            gl.VertexAttribPointer((uint)vertexInfoAttribute.Index, vertexInfoAttribute.Count, vertexInfoAttribute.Type, vertexInfoAttribute.Normalized, stride, (void*)offset);
         }
     }
 }

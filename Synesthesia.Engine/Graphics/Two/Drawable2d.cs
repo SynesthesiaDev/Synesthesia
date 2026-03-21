@@ -12,6 +12,8 @@ namespace Synesthesia.Engine.Graphics.Two;
 
 public abstract class Drawable2d : Drawable
 {
+    public const string SHADER_COLOR_UNIFORM = "v_color";
+
     private Invalidation invalidatedFlags = Invalidation.All;
 
     [Resolved]
