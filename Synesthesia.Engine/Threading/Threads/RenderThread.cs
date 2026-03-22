@@ -52,10 +52,12 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
     {
         if (!Renderer.CanDraw || !hasContextOwnership) return;
 
-         Renderer.BeginDrawing();
+        Renderer.BeginDrawing();
 
-         mainComposite.OnDraw();
+        mainComposite.Size = new Vector2(Renderer.BackBufferWidth, Renderer.BackBufferHeight);
 
-         Renderer.EndDrawing();
+        mainComposite.OnDraw();
+
+        Renderer.EndDrawing();
     }
 }

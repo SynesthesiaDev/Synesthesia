@@ -104,7 +104,7 @@ public abstract class ThreadRunner : IDisposable
                     Type = Type,
                     Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                     Time = clock.CurrentTime,
-                    FrameIndex = FrameIndex
+                    FrameIndex = FrameIndex,
                 };
 
                 ProcessFrame(frameInfo);

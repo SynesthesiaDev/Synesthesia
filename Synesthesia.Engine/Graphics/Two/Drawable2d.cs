@@ -312,27 +312,25 @@ public abstract class Drawable2d : Drawable
         }
     }
 
-private void beginLocalSpace()
-{
-    renderer.PushMatrix();
+    private void beginLocalSpace()
+    {
+        renderer.PushMatrix();
 
-    var anchorPos = Vector2.Zero;
-    if (Parent != null)
-        anchorPos = GetAnchorOffset(Parent.Size, Anchor);
+        var anchorPos = Vector2.Zero;
+        if (Parent != null)
+        {
+            anchorPos = GetAnchorOffset(Parent.Size, Anchor);
+        }
 
-    var originOffset = GetAnchorOffset(Size, Origin);
+        var originOffset = GetAnchorOffset(Size, Origin);
 
-    // Just translate to the anchor position
-    // renderer.Translate(anchorPos.X + Position.X, anchorPos.Y + Position.Y, 0);
+        renderer.Translate(anchorPos.X + Position.X + Margin.X, anchorPos.Y + Position.Y + Margin.Y, 0);
 
-    // if (Rotation != 0f)
-    //     renderer.Rotate(Rotation, 0, 0, 1);
+        renderer.Translate(-originOffset.X, -originOffset.Y, 0);
+        renderer.Translate(-Margin.X, -Margin.Y, 0);
 
-    renderer.Scale(Scale.X, Scale.Y, 1);
-
-    // No origin offset needed - quad is already centered!
-    // No margin for now
-}
+        renderer.Scale(Scale.X, Scale.Y, 1f);
+    }
 
     public Vector2 GetScreenSpaceCenter()
     {

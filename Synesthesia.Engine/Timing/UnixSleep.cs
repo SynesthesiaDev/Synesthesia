@@ -66,7 +66,7 @@ public class UnixSleep : INativeSleep
             while ((ret = nanosleep(in timeSpec, out var remaining)) == -1 && Marshal.GetLastPInvokeError() == interrupt_error)
             {
                 // The pause can be interrupted by a signal that was delivered to the thread.
-                // Sleep again with remaining time if it happened.
+                // Sleep again with the remaining time if it happened.
                 timeSpec = remaining;
             }
 

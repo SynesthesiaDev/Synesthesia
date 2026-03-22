@@ -91,6 +91,10 @@ public class VertexBatch<T> : IDisposable where T : unmanaged
 
         DrawStatistics.Increment(DrawStatistics.Type.VertexBatchFlushes);
         gl.BindBuffer(BufferTargetARB.ArrayBuffer, vbo);
+
+        gl.Enable(EnableCap.Blend);
+        gl.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
         unsafe
         {
             fixed (T* pointer = vertexArray)
@@ -104,6 +108,8 @@ public class VertexBatch<T> : IDisposable where T : unmanaged
 
             vertexIndex = 0;
         }
+
+        gl.Disable(EnableCap.Blend);
     }
 
     public void Dispose()

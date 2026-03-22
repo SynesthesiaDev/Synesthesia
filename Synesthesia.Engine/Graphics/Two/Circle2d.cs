@@ -8,12 +8,10 @@ using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two;
 
-public class Box2d : Drawable2d
+public class Circle2d : Drawable2d
 {
     [Resolved]
     private OpenGlRenderer renderer = null!;
-
-    public float CornerRadius { get; set; }
 
     public Color Color
     {
@@ -40,6 +38,6 @@ public class Box2d : Drawable2d
 
     protected override void OnDraw2d()
     {
-        renderer.DrawQuad(Position, Size, packedColor, radius: CornerRadius);
+        renderer.DrawQuad(Position, Size, packedColor, radius: Size.X / 2f);
     }
 }

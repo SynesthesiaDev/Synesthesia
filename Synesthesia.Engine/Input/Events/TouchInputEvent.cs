@@ -11,6 +11,9 @@ public class TouchInputEvent : IInputEvent
     public void Reset()
     {
         Timestamp = 0;
+        Position = Vector2.Zero;
+        FingerId = 0;
+        Pressure = 0f;
     }
 
     public bool IsPooled { get; set; }

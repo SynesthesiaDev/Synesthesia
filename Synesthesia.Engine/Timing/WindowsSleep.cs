@@ -45,13 +45,12 @@ public class WindowsSleep : INativeSleep
 
         WaitForSingleObject(waitableTimer, INFINITE);
         return true;
-
     }
 
     public void Dispose()
     {
         if (waitableTimer == IntPtr.Zero) return;
-        
+
         CloseHandle(waitableTimer);
         waitableTimer = IntPtr.Zero;
     }

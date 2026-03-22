@@ -18,7 +18,7 @@ public interface IInputEvent : IPooledObject
         {
             KeyboardInputEvent keyInputEvent => keyInputEvent.Key == Key.Enter,
             MouseButtonInputEvent mouseInputEvent => mouseInputEvent.Button == MouseButton.Left,
-            _ => false
+            _ => false,
         };
     }
 

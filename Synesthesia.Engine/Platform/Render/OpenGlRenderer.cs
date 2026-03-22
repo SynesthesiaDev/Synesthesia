@@ -95,7 +95,7 @@ public sealed class OpenGlRenderer : IDisposable
         Logger.Debug($"- GLSL:      {shadingLanguageVersion}", Logger.Platform);
     }
 
-    public void DrawQuad(Vector2 position, Vector2 size, uint packedColor, RectangleF? textureCoord = null)
+    public void DrawQuad(Vector2 position, Vector2 size, uint packedColor, float radius = 0, RectangleF? textureCoord = null)
     {
         var v0 = position;
         var v1 = position with { Y = position.Y + size.Y };
@@ -109,10 +109,10 @@ public sealed class OpenGlRenderer : IDisposable
 
         var tex = textureCoord ?? new Rectangle(0, 0, 1, 1);
 
-        VertexBatch2d.PushVertex(new Vertex2d(v0, new Vector2(tex.Left, tex.Top), packedColor));
-        VertexBatch2d.PushVertex(new Vertex2d(v1, new Vector2(tex.Left, tex.Bottom), packedColor));
-        VertexBatch2d.PushVertex(new Vertex2d(v2, new Vector2(tex.Right, tex.Bottom), packedColor));
-        VertexBatch2d.PushVertex(new Vertex2d(v3, new Vector2(tex.Right, tex.Top), packedColor));
+        VertexBatch2d.PushVertex(new Vertex2d(v0, new Vector2(tex.Left, tex.Top), size, packedColor, radius, new Vector2(0, 0)));
+        VertexBatch2d.PushVertex(new Vertex2d(v1, new Vector2(tex.Left, tex.Bottom), size, packedColor, radius, new Vector2(0, 1)));
+        VertexBatch2d.PushVertex(new Vertex2d(v2, new Vector2(tex.Right, tex.Bottom), size, packedColor, radius, new Vector2(1, 1)));
+        VertexBatch2d.PushVertex(new Vertex2d(v3, new Vector2(tex.Right, tex.Top), size, packedColor, radius, new Vector2(1, 0)));
     }
 
     public void CompileDefaultShaders()
@@ -176,9 +176,6 @@ public sealed class OpenGlRenderer : IDisposable
             mask |= ClearBufferMask.StencilBufferBit;
 
         if (mask != ClearBufferMask.None) OpenGL.Clear(mask);
-
-        OpenGL.Disable(EnableCap.CullFace);
-        OpenGL.Disable(EnableCap.DepthTest);
 
         pushViewport();
 
