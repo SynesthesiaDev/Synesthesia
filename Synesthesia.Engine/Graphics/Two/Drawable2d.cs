@@ -5,6 +5,7 @@ using System.Numerics;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Platform.Render;
+using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util;
 using SynesthesiaUtil.Extensions;
 
@@ -12,8 +13,6 @@ namespace Synesthesia.Engine.Graphics.Two;
 
 public abstract class Drawable2d : Drawable
 {
-    public const string SHADER_COLOR_UNIFORM = "v_color";
-
     private Invalidation invalidatedFlags = Invalidation.All;
 
     [Resolved]
@@ -228,7 +227,7 @@ public abstract class Drawable2d : Drawable
         if ((invalidatedFlags & flags) == flags) return;
 
         invalidatedFlags |= flags;
-        EngineStatistics.LAYOUT_INVALIDATIONS.Increment();
+        DrawStatistics.Increment(DrawStatistics.Type.Invalidations);
 
         if ((flags & Invalidation.Geometry) != Invalidation.None)
         {
@@ -245,7 +244,7 @@ public abstract class Drawable2d : Drawable
         }
     }
 
-    protected internal void UpdateLayout()
+    protected void UpdateLayout()
     {
         var dirty = invalidatedFlags;
         invalidatedFlags = Invalidation.None;
@@ -253,6 +252,11 @@ public abstract class Drawable2d : Drawable
         if (dirty == Invalidation.None) return;
 
         OnLayout(dirty);
+    }
+
+    protected internal override void OnUpdate(FrameInfo frameInfo)
+    {
+        UpdateLayout();
     }
 
     protected virtual void OnLayout(Invalidation dirty)
@@ -285,6 +289,12 @@ public abstract class Drawable2d : Drawable
 
     protected abstract void OnDraw2d();
 
+    protected override void InternalLoadComplete()
+    {
+        Invalidate(Invalidation.All);
+        UpdateLayout();
+    }
+
     protected internal override void OnDraw()
     {
         if (!Visible || InheritedAlpha <= 0.001f || !IsLoaded) return;
@@ -298,7 +308,7 @@ public abstract class Drawable2d : Drawable
         finally
         {
             endLocalSpace();
-            renderer.EndShader();
+            renderer.UnbindShader();
         }
     }
 
@@ -323,7 +333,6 @@ private void beginLocalSpace()
     // No origin offset needed - quad is already centered!
     // No margin for now
 }
-
 
     public Vector2 GetScreenSpaceCenter()
     {

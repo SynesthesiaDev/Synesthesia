@@ -20,19 +20,13 @@ public class Box2d : Drawable2d
 
     protected override void OnLayout(Invalidation dirty)
     {
-        base.OnLayout(dirty);
-
         if (dirty.HasFlagFast(Invalidation.DrawNode))
         {
             packedColor = Color.ToRgba32();
             Logger.Verbose("Invalidated color vector", Logger.Render);
         }
-    }
 
-    protected override void InternalLoadComplete()
-    {
-        Invalidate(Invalidation.DrawNode);
-        base.InternalLoadComplete();
+        base.OnLayout(dirty);
     }
 
     protected override void OnDraw2d()

@@ -80,6 +80,7 @@ public class Shader : IDisposable
         {
             gl.UniformMatrix4(location, 1, false, (float*)&matrix);
         }
+        DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }
 
     public void SetFloat(string name, float value)
@@ -88,6 +89,7 @@ public class Shader : IDisposable
 
         var location = GetUniformLocation(name);
         gl.Uniform1(location, value);
+        DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }
 
     public void SetDouble(string name, double value)
@@ -96,6 +98,7 @@ public class Shader : IDisposable
 
         var location = GetUniformLocation(name);
         gl.Uniform1(location, value);
+        DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }
 
     public void SetInt(string name, int value)
@@ -104,6 +107,7 @@ public class Shader : IDisposable
 
         var location = GetUniformLocation(name);
         gl.Uniform1(location, value);
+        DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }
 
     public void SetVector2(string name, Vector2 value)
@@ -112,6 +116,7 @@ public class Shader : IDisposable
 
         var location = GetUniformLocation(name);
         gl.Uniform2(location, value);
+        DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }
 
     public void SetVector3(string name, Vector3 value)
@@ -120,6 +125,7 @@ public class Shader : IDisposable
 
         var location = GetUniformLocation(name);
         gl.Uniform3(location, value);
+        DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }
 
     public void SetVector4(string name, Vector4 value)
@@ -128,12 +134,14 @@ public class Shader : IDisposable
 
         var location = GetUniformLocation(name);
         gl.Uniform4(location, value);
+        DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }
 
     public void Use()
     {
         ThreadSafety.AssertRunningOnRenderThread();
         gl.UseProgram(Program);
+        DrawStatistics.Increment(DrawStatistics.Type.ShaderBinds);
     }
 
     public void Dispose()

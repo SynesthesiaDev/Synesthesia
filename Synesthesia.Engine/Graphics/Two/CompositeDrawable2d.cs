@@ -133,7 +133,6 @@ public class CompositeDrawable2d : Drawable2d
                 internalChild.Load();
             }
         }
-
         UpdateLayout();
 
         base.InternalLoadComplete();

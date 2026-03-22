@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.Globalization;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Events;
+using Synesthesia.Engine.Graphics.Layout;
+using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Timing;
@@ -74,6 +76,7 @@ public abstract class Drawable : IDisposable
             LoadState = DrawableLoadState.Ready;
 
             loadComplete();
+
         }
     }
 
@@ -90,13 +93,11 @@ public abstract class Drawable : IDisposable
 
         OnLoading();
 
-        //TODO
-
-        // if (this is Drawable2d drawable)
-        // {
-            // drawable.Invalidate(Invalidation.All);
-            // drawable.Parent?.Invalidate(Invalidation.All);
-        // }
+        if (this is Drawable2d drawable)
+        {
+            drawable.Invalidate(Invalidation.All);
+            drawable.Parent?.Invalidate(Invalidation.All);
+        }
 
         if (!(timeBefore > 1000)) return;
 
@@ -128,10 +129,10 @@ public abstract class Drawable : IDisposable
 
         InternalLoadComplete();
 
-        // if (this is Drawable2d drawable2d)
-        // {
-            // drawable2d.Invalidate(Invalidation.All);
-        // }
+        if (this is Drawable2d drawable2d)
+        {
+            drawable2d.Invalidate(Invalidation.All);
+        }
 
         LoadComplete();
 

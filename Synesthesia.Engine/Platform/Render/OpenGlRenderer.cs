@@ -95,16 +95,6 @@ public sealed class OpenGlRenderer : IDisposable
         Logger.Debug($"- GLSL:      {shadingLanguageVersion}", Logger.Platform);
     }
 
-    // private Texture? currentTexture = null;
-
-    // public void BindTexture(Texture? texture)
-    // {
-    //     VertexBatch2d.Flush();
-    //
-    //     currentTexture = texture;
-    //     //TODO actually bind
-    // }
-
     public void DrawQuad(Vector2 position, Vector2 size, uint packedColor, RectangleF? textureCoord = null)
     {
         var v0 = position;
@@ -129,10 +119,10 @@ public sealed class OpenGlRenderer : IDisposable
     {
         DefaultShader = new Shader(OpenGL, ShaderSources.DefaultVertex, ShaderSources.DefaultFragment);
         StencilShader = new Shader(OpenGL, ShaderSources.DefaultVertex, ShaderSources.StencilFragment);
-        BeginShader(DefaultShader);
+        BindShader(DefaultShader);
     }
 
-    public void BeginShader(Shader shader)
+    public void BindShader(Shader shader)
     {
         ThreadSafety.AssertRunningOnRenderThread();
 
@@ -143,10 +133,11 @@ public sealed class OpenGlRenderer : IDisposable
         updateShaderMatrix();
     }
 
-    public void EndShader()
+    public void UnbindShader()
     {
         ThreadSafety.AssertRunningOnRenderThread();
-        CurrentShader = DefaultShader;
+        BindShader(DefaultShader);
+        updateShaderMatrix();
     }
 
     public void Resize(int width, int height)
@@ -197,12 +188,13 @@ public sealed class OpenGlRenderer : IDisposable
 
     public void EndDrawing()
     {
-        VertexBatch2d.Flush();
-
         EnsureInitialized();
+
+        VertexBatch2d.Flush();
 
         Surface.SwapBuffers();
         //TODO unbind texture
+        DrawStatistics.Reset();
 
         ClearFlags = default_clear_flags;
     }
@@ -321,7 +313,7 @@ public sealed class OpenGlRenderer : IDisposable
         OpenGL.StencilFunc(StencilFunction.Always, 1, 0x0FF);
         OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
 
-        BeginShader(StencilShader);
+        BindShader(StencilShader);
     }
 
     public void EndStencilMask()
@@ -330,7 +322,7 @@ public sealed class OpenGlRenderer : IDisposable
         OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
         OpenGL.ColorMask(true, true, true, true);
 
-        EndShader();
+        UnbindShader();
     }
 
     public void EndStencil()

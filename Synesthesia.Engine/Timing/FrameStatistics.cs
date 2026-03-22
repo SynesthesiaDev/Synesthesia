@@ -21,3 +21,5 @@ public class FrameStatistics
         AverageFrameTime = frameTimes.Average();
     }
 }
+
+

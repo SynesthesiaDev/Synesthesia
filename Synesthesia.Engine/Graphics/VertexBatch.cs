@@ -7,7 +7,7 @@ using Synesthesia.Engine.Extensions;
 
 namespace Synesthesia.Engine.Graphics;
 
-public class VertexBatch<T> where T : unmanaged
+public class VertexBatch<T> : IDisposable where T : unmanaged
 {
     private readonly GL gl;
     private readonly uint vao, vbo, ebo;
@@ -79,6 +79,7 @@ public class VertexBatch<T> where T : unmanaged
         if (vertexIndex >= maxVertices)
         {
             Flush();
+            DrawStatistics.Increment(DrawStatistics.Type.VertexBatchOverflows);
         }
 
         vertexArray[vertexIndex++] = vertex;
@@ -88,6 +89,7 @@ public class VertexBatch<T> where T : unmanaged
     {
         if (vertexIndex == 0) return;
 
+        DrawStatistics.Increment(DrawStatistics.Type.VertexBatchFlushes);
         gl.BindBuffer(BufferTargetARB.ArrayBuffer, vbo);
         unsafe
         {
@@ -98,8 +100,16 @@ public class VertexBatch<T> where T : unmanaged
 
             gl.BindVertexArray(vao);
             gl.DrawElements(PrimitiveType.Triangles, (uint)(vertexIndex / 4 * 6), DrawElementsType.UnsignedInt, (void*)0);
+            DrawStatistics.Increment(DrawStatistics.Type.DrawCalls);
 
             vertexIndex = 0;
         }
+    }
+
+    public void Dispose()
+    {
+        gl.DeleteVertexArray(vao);
+        gl.DeleteBuffer(vbo);
+        gl.DeleteBuffer(ebo);
     }
 }
