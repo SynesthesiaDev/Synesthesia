@@ -14,7 +14,7 @@ public class InputThread : ThreadRunner
 
     protected override Logger.LogCategory LoggerCategory => Logger.Input;
 
-    [Resolved]
+    [Singleton]
     private InputHandler inputHandler = null!;
 
     protected override void ProcessFrame(FrameInfo frameInfo)

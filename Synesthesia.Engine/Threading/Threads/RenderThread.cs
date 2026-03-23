@@ -2,8 +2,10 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Numerics;
+using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Two;
+using Synesthesia.Engine.Graphics.Two.Container;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Timing;
@@ -36,12 +38,43 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
             Parent = null,
             Children =
             [
-                new Box2d
+                new FillFlowContainer
                 {
-                    Size = new Vector2(200, 200),
+                    AutoSizeAxes = Axes.Both,
+                    Direction = Direction.Horizontal,
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
+                    Children =
+                    [
+                        new Box2d
+                        {
+                            Size = new Vector2(50, 50),
+                            Anchor = Anchor.TopLeft,
+                            Origin = Anchor.TopLeft,
+                        },
+                        new Circle2d
+                        {
+                            Size = new Vector2(50, 50),
+                            Anchor = Anchor.TopLeft,
+                            Origin = Anchor.TopLeft,
+                        },
+                        new Box2d
+                        {
+                            Size = new Vector2(50, 50),
+                            Anchor = Anchor.TopLeft,
+                            Origin = Anchor.TopLeft,
+                            Color = Color.ForestGreen,
+                        },
+                        new Circle2d
+                        {
+                            Size = new Vector2(50, 50),
+                            Anchor = Anchor.TopLeft,
+                            Origin = Anchor.TopLeft,
+                            Color = Color.Crimson,
+                        },
+                    ],
                 },
+
             ],
         };
 

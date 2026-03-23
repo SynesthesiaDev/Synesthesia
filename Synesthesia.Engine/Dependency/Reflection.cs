@@ -29,7 +29,7 @@ public static class Reflection
 
             foreach (var field in fields)
             {
-                if (field.GetCustomAttribute<ResolvedAttribute>() == null)
+                if (field.GetCustomAttribute<SingletonAttribute>() == null)
                     continue;
 
                 var service = DependencyContainer.Get(field.FieldType);

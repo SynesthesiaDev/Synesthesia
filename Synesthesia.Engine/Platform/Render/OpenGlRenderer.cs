@@ -95,17 +95,17 @@ public sealed class OpenGlRenderer : IDisposable
         Logger.Debug($"- GLSL:      {shadingLanguageVersion}", Logger.Platform);
     }
 
-    public void DrawQuad(Vector2 position, Vector2 size, uint packedColor, float radius = 0, RectangleF? textureCoord = null)
+    public void DrawQuad(DrawMatrix drawMatrix, Vector2 position, Vector2 size, uint packedColor, float radius = 0, RectangleF? textureCoord = null)
     {
         var v0 = position;
         var v1 = position with { Y = position.Y + size.Y };
         var v2 = position + size;
         var v3 = position with { X = position.X + size.X };
 
-        v0 = Vector2.Transform(v0, Matrix);
-        v1 = Vector2.Transform(v1, Matrix);
-        v2 = Vector2.Transform(v2, Matrix);
-        v3 = Vector2.Transform(v3, Matrix);
+        v0 = Vector2.Transform(v0, drawMatrix.Matrix);
+        v1 = Vector2.Transform(v1, drawMatrix.Matrix);
+        v2 = Vector2.Transform(v2, drawMatrix.Matrix);
+        v3 = Vector2.Transform(v3, drawMatrix.Matrix);
 
         var tex = textureCoord ?? new Rectangle(0, 0, 1, 1);
 

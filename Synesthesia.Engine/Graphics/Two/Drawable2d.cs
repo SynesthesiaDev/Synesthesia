@@ -2,9 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Numerics;
-using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Layout;
-using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util;
 using SynesthesiaUtil.Extensions;
@@ -14,9 +12,6 @@ namespace Synesthesia.Engine.Graphics.Two;
 public abstract class Drawable2d : Drawable
 {
     private Invalidation invalidatedFlags = Invalidation.All;
-
-    [Resolved]
-    private OpenGlRenderer renderer = null!;
 
     public float X
     {
@@ -195,6 +190,8 @@ public abstract class Drawable2d : Drawable
 
     public bool IsLoaded => LoadState >= DrawableLoadState.Loaded;
 
+    public bool ShouldBeDrawn => Visible && IsLoaded && Alpha > 0;
+
     protected virtual bool AcceptsInput { get; } = true;
 
     public bool CanHandleInput => IsLoaded && AcceptsInput;
@@ -299,37 +296,28 @@ public abstract class Drawable2d : Drawable
     {
         if (!Visible || InheritedAlpha <= 0.001f || !IsLoaded) return;
 
-        beginLocalSpace();
-
-        try
-        {
-            OnDraw2d();
-        }
-        finally
-        {
-            endLocalSpace();
-            renderer.UnbindShader();
-        }
+        updateDrawMatrix();
+        OnDraw2d();
     }
 
-    private void beginLocalSpace()
+    private void updateDrawMatrix()
     {
-        renderer.PushMatrix();
+        DrawMatrix.Reset();
 
-        var anchorPos = Vector2.Zero;
         if (Parent != null)
         {
-            anchorPos = GetAnchorOffset(Parent.Size, Anchor);
+            DrawMatrix.Matrix = Parent.DrawMatrix.Matrix;
+            DrawMatrix.InverseMatrix = Parent.DrawMatrix.InverseMatrix;
         }
 
+        var anchorPos = Parent != null ? GetAnchorOffset(Parent.Size, Anchor) : Vector2.Zero;
+        DrawMatrix.Translate(anchorPos.X + Position.X + Margin.X, anchorPos.Y + Position.Y + Margin.Y, 0);
+
+        DrawMatrix.Scale(Scale.X, Scale.Y, 1f);
+        if (Rotation != 0) DrawMatrix.Rotate(Rotation, 0, 0, 1);
+
         var originOffset = GetAnchorOffset(Size, Origin);
-
-        renderer.Translate(anchorPos.X + Position.X + Margin.X, anchorPos.Y + Position.Y + Margin.Y, 0);
-
-        renderer.Translate(-originOffset.X, -originOffset.Y, 0);
-        renderer.Translate(-Margin.X, -Margin.Y, 0);
-
-        renderer.Scale(Scale.X, Scale.Y, 1f);
+        DrawMatrix.Translate(-originOffset.X - Margin.X, -originOffset.Y - Margin.Y, 0);
     }
 
     public Vector2 GetScreenSpaceCenter()
@@ -337,11 +325,6 @@ public abstract class Drawable2d : Drawable
         var screenPos = ScreenSpacePosition;
         var scaledSize = Size * InheritedScale;
         return screenPos + scaledSize / 2f;
-    }
-
-    private void endLocalSpace()
-    {
-        renderer.PopMatrix();
     }
 
     public static Vector2 GetAnchorOffset(Vector2 size, Anchor anchor)

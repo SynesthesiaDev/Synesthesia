@@ -116,7 +116,7 @@ public class SDL3WindowHost : IWindowHost
 
     public bool HasKeyboard => HasKeyboard();
 
-    [Resolved]
+    [Singleton]
     private InputHandler inputHandler = null!;
 
     /// <summary>

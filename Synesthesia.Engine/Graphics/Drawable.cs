@@ -34,6 +34,8 @@ public abstract class Drawable : IDisposable
 
     public BlendMode BlendMode { get; set; } = BlendMode.Alpha;
 
+    public readonly DrawMatrix DrawMatrix = Pooled.DRAW_MATRIX_POOL.Rent();
+
     protected internal abstract void OnDraw();
 
     protected internal virtual void OnUpdate(FrameInfo frameInfo)
@@ -76,7 +78,6 @@ public abstract class Drawable : IDisposable
             LoadState = DrawableLoadState.Ready;
 
             loadComplete();
-
         }
     }
 
@@ -158,6 +159,7 @@ public abstract class Drawable : IDisposable
         if (IsDisposed) return;
 
         Pooled.DRAWABLE_LOAD_DISPATCHER_POOL.Return(OnLoadComplete);
+        Pooled.DRAW_MATRIX_POOL.Return(DrawMatrix);
         IsDisposed = true;
         // Scheduler.Value.Dispose(); //TODO
 

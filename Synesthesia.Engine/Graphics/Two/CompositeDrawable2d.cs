@@ -21,7 +21,7 @@ public class CompositeDrawable2d : Drawable2d
     [SuppressMessage("Design", "MA0016:Prefer using collection abstraction instead of implementation")]
     protected internal List<Drawable2d> InternalChildren = [];
 
-    [Resolved]
+    [Singleton]
     private OpenGlRenderer renderer = null!;
 
     public float CornerRadius

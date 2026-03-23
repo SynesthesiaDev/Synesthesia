@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Numerics;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Platform.Render;
@@ -10,7 +11,7 @@ namespace Synesthesia.Engine.Graphics.Two;
 
 public class Box2d : Drawable2d
 {
-    [Resolved]
+    [Singleton]
     private OpenGlRenderer renderer = null!;
 
     public float CornerRadius { get; set; }
@@ -40,6 +41,6 @@ public class Box2d : Drawable2d
 
     protected override void OnDraw2d()
     {
-        renderer.DrawQuad(Position, Size, packedColor, radius: CornerRadius);
+        renderer.DrawQuad(DrawMatrix, Vector2.Zero, Size, packedColor, radius: CornerRadius);
     }
 }
