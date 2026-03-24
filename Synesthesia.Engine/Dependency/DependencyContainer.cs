@@ -12,7 +12,7 @@ public static class DependencyContainer
     /// </summary>
     /// <param name="instance">Instance to add to the cache</param>
     /// <typeparam name="T">Type of the instance</typeparam>
-    public static void Add<T>(T instance)
+    public static void AddSingleton<T>(T instance)
     {
         var type = typeof(T);
         cache[type] = instance!;

@@ -13,6 +13,9 @@ public static class DrawStatistics
     public static void Increment(Type type) => Interlocked.Increment(ref statistics[(int)type]);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Set(Type type, int amount) => Interlocked.Exchange(ref statistics[(int)type], amount);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Decrement(Type type) => Interlocked.Decrement(ref statistics[(int)type]);
 
     public static void Reset() => Array.Clear(statistics, 0, statistics.Length);
@@ -28,5 +31,6 @@ public static class DrawStatistics
         TextureBinds,
         ShaderBinds,
         UniformUploads,
+        TextureUploadQueue,
     }
 }

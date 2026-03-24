@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Collections.Concurrent;
 using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -13,6 +14,7 @@ using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Util;
 using SynesthesiaUtil.Extensions;
 using Shader = Synesthesia.Engine.Graphics.Shader;
+using Texture = Synesthesia.Engine.Graphics.Texture;
 
 namespace Synesthesia.Engine.Platform.Render;
 
@@ -56,11 +58,15 @@ public sealed class OpenGlRenderer : IDisposable
 
     public Shader CurrentShader { get; private set; } = null!;
 
+    public Texture? CurrentTexture { get; private set; }
+
     public Matrix4x4 Matrix { get; private set; } = Matrix4x4.Identity;
 
     public Matrix4x4 InverseMatrix { get; private set; } = Matrix4x4.Identity;
 
     private Matrix4x4 projectionMatrix;
+
+    public static readonly ConcurrentQueue<Texture> TEXTURE_UPLOAD_QUEUE = new ConcurrentQueue<Texture>();
 
     public void Initialize()
     {
@@ -85,7 +91,7 @@ public sealed class OpenGlRenderer : IDisposable
         var vendor = OpenGL.GetStringS(GLEnum.Vendor);
         var renderer = OpenGL.GetStringS(GLEnum.Renderer);
 
-        VertexBatch2d = new VertexBatch<Vertex2d>(gl);
+        VertexBatch2d = new VertexBatch<Vertex2d>(OpenGL);
 
         Console.WriteLine(string.Empty);
         Logger.Debug("OpenGL Initialized", Logger.Platform);
@@ -95,8 +101,13 @@ public sealed class OpenGlRenderer : IDisposable
         Logger.Debug($"- GLSL:      {shadingLanguageVersion}", Logger.Platform);
     }
 
-    public void DrawQuad(DrawMatrix drawMatrix, Vector2 position, Vector2 size, uint packedColor, float radius = 0, RectangleF? textureCoord = null)
+    public void DrawQuad(DrawMatrix drawMatrix, Vector2 position, Vector2 size, uint packedColor, float radius = 0, RectangleF? textureCoord = null, Texture? texture = null)
     {
+        if (texture != CurrentTexture)
+        {
+            BindTexture(texture);
+        }
+
         var v0 = position;
         var v1 = position with { Y = position.Y + size.Y };
         var v2 = position + size;
@@ -140,6 +151,28 @@ public sealed class OpenGlRenderer : IDisposable
         updateShaderMatrix();
     }
 
+    public void BindTexture(Texture? texture)
+    {
+        ThreadSafety.AssertRunningOnRenderThread();
+
+        if (CurrentTexture == texture) return;
+
+        VertexBatch2d.Flush();
+        CurrentTexture = texture;
+
+        if (texture != null)
+        {
+            texture.Bind(OpenGL);
+            CurrentShader.SetInt("u_texture", 0);
+            CurrentShader.SetInt("u_useTexture", 1);
+        }
+        else
+        {
+            OpenGL.BindTexture(TextureTarget.Texture2D, 0);
+            CurrentShader.SetInt("u_useTexture", 0);
+        }
+    }
+
     public void Resize(int width, int height)
     {
         EnsureInitialized();
@@ -177,6 +210,14 @@ public sealed class OpenGlRenderer : IDisposable
 
         if (mask != ClearBufferMask.None) OpenGL.Clear(mask);
 
+        DrawStatistics.Set(DrawStatistics.Type.TextureUploadQueue, TEXTURE_UPLOAD_QUEUE.Count);
+
+        while (!TEXTURE_UPLOAD_QUEUE.IsEmpty)
+        {
+            TEXTURE_UPLOAD_QUEUE.TryDequeue(out var texture);
+            texture?.Upload(OpenGL);
+        }
+
         pushViewport();
 
         LoadIdentity();
@@ -190,8 +231,8 @@ public sealed class OpenGlRenderer : IDisposable
         VertexBatch2d.Flush();
 
         Surface.SwapBuffers();
-        //TODO unbind texture
         DrawStatistics.Reset();
+        BindTexture(null);
 
         ClearFlags = default_clear_flags;
     }
@@ -332,6 +373,4 @@ public sealed class OpenGlRenderer : IDisposable
         openGlInitialized = false;
         OpenGL.Dispose();
     }
-
-
 }

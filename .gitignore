@@ -1,8 +1,2 @@
-Synesthesia.Engine/bin/Debug/net10.0
-Synesthesia.Engine/obj
-Synesthesia.NativeLibs/obj
-Synesthesia.SourceGenerators/bin/Debug/netstandard2.0
-Synesthesia.SourceGenerators/bin/Debug/netstandard2.0
-Synesthesia.SourceGenerators/obj
-Synesthesia.SourceGenerators/bin/Debug/netstandard2.0
-Synesthesia.SourceGenerators/obj
+bin
+obj

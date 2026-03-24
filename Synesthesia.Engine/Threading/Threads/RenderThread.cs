@@ -2,12 +2,15 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Numerics;
+using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Graphics.Two.Container;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform.Render;
+using Synesthesia.Engine.Resources;
+using Synesthesia.Engine.Resources.Stores;
 using Synesthesia.Engine.Timing;
 
 namespace Synesthesia.Engine.Threading.Threads;
@@ -24,11 +27,16 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
 
     private CompositeDrawable2d mainComposite = null!;
 
+    [Singleton]
+    private IResourceStore<Texture> textureResourceStore = null!;
+
     protected override void OnThreadInit()
     {
         Renderer.Surface.ClaimOwnership();
         Logger.Verbose("Transferred renderer context ownership to Render Thread", Logger.Platform);
         hasContextOwnership = true;
+
+        (textureResourceStore as DeferredStore<Texture>)?.Unlock();
 
         Renderer.CompileDefaultShaders();
 
@@ -64,6 +72,7 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
                             Anchor = Anchor.TopLeft,
                             Origin = Anchor.TopLeft,
                             Color = Color.ForestGreen,
+                            Texture = textureResourceStore.Get("Synesthesia.Resources.Textures.dull_blade.png"),
                         },
                         new Circle2d
                         {
@@ -74,7 +83,6 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
                         },
                     ],
                 },
-
             ],
         };
 
