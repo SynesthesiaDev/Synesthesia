@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Synesthesia.Engine.Resources.Stores;
 
-public class FallbackStoreBuilder<T>(IDictionary<string, Func<Stream, T>> resourceLoaders)
+public class FallbackStoreBuilder<T>(IDictionary<string, Func<Stream, string, T>> resourceLoaders)
 {
     private readonly List<IResourceStore<T>> resourceStores = [];
 

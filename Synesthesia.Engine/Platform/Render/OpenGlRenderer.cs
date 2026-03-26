@@ -14,7 +14,7 @@ using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Util;
 using SynesthesiaUtil.Extensions;
 using Shader = Synesthesia.Engine.Graphics.Shader;
-using Texture = Synesthesia.Engine.Graphics.Texture;
+using Texture = Synesthesia.Engine.Graphics.Textures.Texture;
 
 namespace Synesthesia.Engine.Platform.Render;
 
@@ -93,7 +93,7 @@ public sealed class OpenGlRenderer : IDisposable
 
         VertexBatch2d = new VertexBatch<Vertex2d>(OpenGL);
 
-        Console.WriteLine(string.Empty);
+        Logger.EmptyLine();
         Logger.Debug("OpenGL Initialized", Logger.Platform);
         Logger.Debug($"- Version:   {version}", Logger.Platform);
         Logger.Debug($"- Vendor:    {vendor}", Logger.Platform);

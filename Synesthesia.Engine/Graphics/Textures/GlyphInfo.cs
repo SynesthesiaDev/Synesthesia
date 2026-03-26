@@ -1,0 +1,15 @@
+﻿// Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
+using System.Numerics;
+using System.Runtime.InteropServices;
+
+namespace Synesthesia.Engine.Graphics.Textures;
+
+[StructLayout(LayoutKind.Auto)]
+public readonly struct GlyphInfo(int regionHandle, Vector2 bearing, float advance)
+{
+    public readonly int RegionHandle = regionHandle;
+    public readonly Vector2 Bearing = bearing;
+    public readonly float Advance = advance;
+}

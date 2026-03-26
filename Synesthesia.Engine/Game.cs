@@ -3,6 +3,7 @@
 
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics;
+using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform.Host;
@@ -29,14 +30,29 @@ public class Game
     private bool initialized;
 
     public readonly IResourceStore<Texture> TextureResourceStore = new ResourceStoreBuilder<Texture>()
-        .AddLoaders(new Dictionary<string, Func<Stream, Texture>>
+        .AddLoaders(new Dictionary<string, Func<Stream, string, Texture>>
         {
-            { "png", stream => ResourceLoaders.LoadTexture(stream) },
-            { "bmp", stream => ResourceLoaders.LoadTexture(stream) },
+            { "png", (stream, name) => ResourceLoaders.LoadTexture(stream, name) },
+            { "bmp", (stream, name) => ResourceLoaders.LoadTexture(stream, name) },
         })
         .AddFallback(fallback =>
         {
             fallback.AddFileSystemStore("Assets/Textures/");
+            fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);
+        })
+        .MakeCached()
+        .MakeAsync()
+        .MakeDeferred()
+        .Build();
+
+    public readonly IResourceStore<Font> FontResourceStore = new ResourceStoreBuilder<Font>()
+        .AddLoaders(new Dictionary<string, Func<Stream, string, Font>>
+        {
+            { "ttf", ResourceLoaders.LoadFont },
+        })
+        .AddFallback(fallback =>
+        {
+            fallback.AddFileSystemStore("Assets/Fonts/");
             fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);
         })
         .MakeCached()
@@ -57,6 +73,7 @@ public class Game
         UpdateThread = new UpdateThread();
         AudioThread = new AudioThread();
 
+        DependencyContainer.AddSingleton(FontResourceStore);
         DependencyContainer.AddSingleton(TextureResourceStore);
         DependencyContainer.AddSingleton(InputHandler);
         DependencyContainer.AddSingleton(InputThread);
@@ -101,6 +118,7 @@ public class Game
             });
 
             initialized = true;
+
             WindowHost.RunWindow();
         }
         catch (Exception ex)

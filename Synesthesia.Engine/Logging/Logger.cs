@@ -77,6 +77,8 @@ public static class Logger
         }
     }
 
+    public static void EmptyLine() => Console.WriteLine(string.Empty);
+
     public static void SDLLog(IntPtr userData, SDL.LogCategory logCategory, SDL.LogPriority priority, string message)
     {
         Verbose(message, Platform);

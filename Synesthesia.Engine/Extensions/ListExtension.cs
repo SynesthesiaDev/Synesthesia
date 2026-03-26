@@ -15,11 +15,25 @@ public static class ListExtension
         return true;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T? GetOrNullStruct<T>(this IEnumerable<T> list, T item) where T : struct
+    extension<T>(IEnumerable<T> list) where T : struct
     {
-        if (list.Contains(item)) return item;
-        return null;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T? GetOrNullStruct(T item)
+        {
+            if (list.Contains(item)) return item;
+            return null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T? GetOrNullStruct(int index)
+        {
+            var enumerable = list as T[] ?? list.ToArray();
+            if (enumerable.Length - 1 >= index)
+            {
+                return enumerable[index];
+            }
+            return null;
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

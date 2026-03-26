@@ -5,7 +5,7 @@ namespace Synesthesia.Engine.Resources.Stores;
 
 public class ResourceStoreBuilder<T>
 {
-    private IDictionary<string, Func<Stream, T>> innerLoaders = new Dictionary<string, Func<Stream, T>>(StringComparer.Ordinal);
+    private IDictionary<string, Func<Stream, string, T>> innerLoaders = new Dictionary<string, Func<Stream, string, T>>(StringComparer.Ordinal);
     private FallbackResourceStore<T>? fallbackResourceStore;
     private bool cached;
     private bool async;
@@ -13,7 +13,7 @@ public class ResourceStoreBuilder<T>
 
     private IResourceStore<T>? manualStore;
 
-    public ResourceStoreBuilder<T> AddLoaders(IDictionary<string, Func<Stream, T>> loaders)
+    public ResourceStoreBuilder<T> AddLoaders(IDictionary<string, Func<Stream, string, T>> loaders)
     {
         innerLoaders = loaders;
         return this;

@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Numerics;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Layout;
+using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Platform.Render;
 using SynesthesiaUtil.Extensions;
 
@@ -14,6 +15,10 @@ public class Box2d : Drawable2d
 {
     [Singleton]
     private OpenGlRenderer renderer = null!;
+
+    private RectangleF uvCoords = new(0, 0, 1, 1);
+    private Vector2 drawSize;
+    private Vector2 drawOffset;
 
     public float CornerRadius { get; set; }
 
@@ -27,6 +32,17 @@ public class Box2d : Drawable2d
             Invalidate(Invalidation.DrawNode);
         }
     } = null;
+
+    public TextureFillMode TextureFillMode
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            Invalidate(Invalidation.DrawNode);
+        }
+    } = TextureFillMode.Stretch;
 
     public Color Color
     {
@@ -43,9 +59,51 @@ public class Box2d : Drawable2d
 
     protected override void OnLayout(Invalidation dirty)
     {
-        if (dirty.HasFlagFast(Invalidation.DrawNode))
+        if (!dirty.HasFlagFast(Invalidation.Geometry | Invalidation.DrawNode)) return;
         {
             packedColor = Color.ToRgba32();
+
+            drawSize = Size;
+            drawOffset = Vector2.Zero;
+            uvCoords = new RectangleF(0, 0, 1, 1);
+
+            if (Texture != null && TextureFillMode != TextureFillMode.Stretch)
+            {
+                var textureRatio = (float)Texture.Width / Texture.Height;
+                var boxRatio = Size.X / Size.Y;
+
+                switch (TextureFillMode)
+                {
+                    case TextureFillMode.Fit:
+                        if (textureRatio > boxRatio)
+                        {
+                            drawSize = new Vector2(Size.X, Size.X / textureRatio);
+                            drawOffset = new Vector2(0, (Size.Y - drawSize.Y) / 2f);
+                        }
+                        else
+                        {
+                            drawSize = new Vector2(Size.Y * textureRatio, Size.Y);
+                            drawOffset = new Vector2((Size.X - drawSize.X) / 2f, 0);
+                        }
+
+                        break;
+                    case TextureFillMode.Fill:
+                        var scaleX = 1f;
+                        var scaleY = 1f;
+
+                        if (textureRatio > boxRatio)
+                        {
+                            scaleX = boxRatio / textureRatio;
+                        }
+                        else
+                        {
+                            scaleY = textureRatio / boxRatio;
+                        }
+
+                        uvCoords = new RectangleF((1f - scaleX) / 2f, (1f - scaleY) / 2f, scaleX, scaleY);
+                        break;
+                }
+            }
         }
 
         base.OnLayout(dirty);
@@ -53,6 +111,6 @@ public class Box2d : Drawable2d
 
     protected override void OnDraw2d()
     {
-        renderer.DrawQuad(DrawMatrix, Vector2.Zero, Size, packedColor, radius: CornerRadius, texture: Texture, textureCoord: new RectangleF(0, 0, 1, 1));
+        renderer.DrawQuad(DrawMatrix, drawOffset, drawSize, packedColor, radius: CornerRadius, texture: Texture, textureCoord: uvCoords);
     }
 }

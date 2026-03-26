@@ -7,7 +7,7 @@ using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Util.Exceptions;
 
-namespace Synesthesia.Engine.Graphics;
+namespace Synesthesia.Engine.Graphics.Textures;
 
 public class Texture : IDisposable
 {
@@ -26,13 +26,16 @@ public class Texture : IDisposable
     private GL? gl;
     private readonly PixelFormat format;
 
-    public Texture(int width, int height, byte[] data, PixelFormat format, bool uploadImmediately)
+    public string AssetName { get; }
+
+    public Texture(int width, int height, byte[] data, PixelFormat format, string name, bool uploadImmediately)
     {
         this.format = format;
         UploadImmediately = uploadImmediately;
         Width = width;
         Height = height;
         Data = data;
+        AssetName = name;
         IsUploaded = false;
 
         if (UploadImmediately) EnqueueUpload();
@@ -103,6 +106,6 @@ public class Texture : IDisposable
 
     public override string ToString()
     {
-        return $"Texture(Handle={Handle}, Width={Width}, Height={Height}, IsUploaded={IsUploaded}, UploadQueued={UploadQueued}, Format={format})";
+        return $"Texture(Handle={Handle}, AssetName={AssetName}, Width={Width}, Height={Height}, IsUploaded={IsUploaded}, UploadQueued={UploadQueued}, Format={format})";
     }
 }

@@ -5,8 +5,8 @@ using System.Numerics;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Layout;
+using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Graphics.Two;
-using Synesthesia.Engine.Graphics.Two.Container;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Resources;
@@ -30,6 +30,9 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
     [Singleton]
     private IResourceStore<Texture> textureResourceStore = null!;
 
+    [Singleton]
+    private IResourceStore<Font> fontResourceStore = null!;
+
     protected override void OnThreadInit()
     {
         Renderer.Surface.ClaimOwnership();
@@ -37,8 +40,11 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
         hasContextOwnership = true;
 
         (textureResourceStore as DeferredStore<Texture>)?.Unlock();
+        (fontResourceStore as DeferredStore<Font>)?.Unlock();
 
         Renderer.CompileDefaultShaders();
+
+        var font = fontResourceStore.Get("Synesthesia.Resources.Fonts.Quicksand-Regular.ttf");
 
         mainComposite = new CompositeDrawable2d
         {
@@ -46,43 +52,51 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
             Parent = null,
             Children =
             [
-                new FillFlowContainer
+                new Box2d
                 {
-                    AutoSizeAxes = Axes.Both,
-                    Direction = Direction.Horizontal,
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    Children =
-                    [
-                        new Box2d
-                        {
-                            Size = new Vector2(50, 50),
-                            Anchor = Anchor.TopLeft,
-                            Origin = Anchor.TopLeft,
-                        },
-                        new Circle2d
-                        {
-                            Size = new Vector2(50, 50),
-                            Anchor = Anchor.TopLeft,
-                            Origin = Anchor.TopLeft,
-                        },
-                        new Box2d
-                        {
-                            Size = new Vector2(50, 50),
-                            Anchor = Anchor.TopLeft,
-                            Origin = Anchor.TopLeft,
-                            Color = Color.ForestGreen,
-                            Texture = textureResourceStore.Get("Synesthesia.Resources.Textures.dull_blade.png"),
-                        },
-                        new Circle2d
-                        {
-                            Size = new Vector2(50, 50),
-                            Anchor = Anchor.TopLeft,
-                            Origin = Anchor.TopLeft,
-                            Color = Color.Crimson,
-                        },
-                    ],
+                    Texture = font.Atlas.TextureAtlas.AtlasTexture,
+                    Size = new Vector2(200, 200),
+                    TextureFillMode = TextureFillMode.Fit
                 },
+                // new FillFlowContainer
+                // {
+                //     AutoSizeAxes = Axes.Both,
+                //     Direction = Direction.Vertical,
+                //     Anchor = Anchor.Centre,
+                //     Origin = Anchor.Centre,
+                //     Children =
+                //     [
+                //         new Box2d
+                //         {
+                //             Size = new Vector2(50, 50),
+                //             Anchor = Anchor.TopLeft,
+                //             Origin = Anchor.TopLeft,
+                //         },
+                //         new Circle2d
+                //         {
+                //             Size = new Vector2(50, 50),
+                //             Anchor = Anchor.TopLeft,
+                //             Origin = Anchor.TopLeft,
+                //         },
+                //         new Box2d
+                //         {
+                //             Size = new Vector2(50, 50),
+                //             Anchor = Anchor.TopLeft,
+                //             Origin = Anchor.TopLeft,
+                //             Color = Color.ForestGreen,
+                //             Texture = textureResourceStore.Get("Synesthesia.Resources.Textures.dull_blade.png"),
+                //         },
+                //         new Circle2d
+                //         {
+                //             Size = new Vector2(50, 50),
+                //             Anchor = Anchor.TopLeft,
+                //             Origin = Anchor.TopLeft,
+                //             Color = Color.Crimson,
+                //         },
+                //     ],
+                // },
             ],
         };
 
