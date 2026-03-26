@@ -6,6 +6,7 @@ layout(location = 2) in vec2 a_size;
 layout(location = 3) in vec4 a_color;
 layout(location = 4) in float a_radius;
 layout(location = 5) in vec2 a_localUV;
+layout(location = 6) in float a_mode;
 
 uniform mat4 u_transform;
 
@@ -14,6 +15,7 @@ out vec4 v_color;
 out vec2 v_size;
 out float v_radius;
 out vec2 v_localUV;
+out float v_mode;
 
 void main() {
     v_texCoord = a_texCoord;
@@ -21,6 +23,7 @@ void main() {
     v_size = a_size;
     v_radius = a_radius;
     v_localUV = a_localUV;
+    v_mode = a_mode;
     
     gl_Position = u_transform * vec4(a_position, 0.0, 1.0);
 }

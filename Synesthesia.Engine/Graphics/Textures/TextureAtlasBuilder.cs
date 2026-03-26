@@ -10,7 +10,7 @@ namespace Synesthesia.Engine.Graphics.Textures;
 
 public class TextureAtlasBuilder
 {
-    private const int padding = 2;
+    private int padding = 2;
 
     private class PendingItem(int id, int width, int height, byte[] rgbaData)
     {
@@ -31,6 +31,11 @@ public class TextureAtlasBuilder
     {
         if (texture.Data == null) throw new InvalidOperationException("Cannot add empty texture to texture atlas!");
         pendingItems.Add(new PendingItem(id, texture.Width, texture.Height, texture.Data!));
+    }
+
+    public void SetPadding(int paddingPx)
+    {
+        padding = paddingPx;
     }
 
     public TextureAtlas Build()

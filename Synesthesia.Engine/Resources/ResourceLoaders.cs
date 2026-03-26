@@ -23,6 +23,13 @@ public static class ResourceLoaders
         var data = loadFontFromMemory(stream, name);
         unsafe
         {
+            // uint spread = 8;
+            // fixed (byte* moduleName   = "sdf\0"u8)
+            // fixed (byte* propertyName = "spread\0"u8)
+            // {
+            //     FT.FT_Property_Set(library.Native, moduleName, propertyName, &spread);
+            // }
+
             fixed (byte* dataPtr = data)
             {
                 FT_FaceRec_* facePtr;
@@ -38,10 +45,10 @@ public static class ResourceLoaders
 
                 var face = new FreeTypeFaceFacade(library, facePtr);
 
-                var atlas = FontAtlas.Generate(face, 24);
+                var atlas = FontAtlas.Generate(face);
                 library.Dispose();
 
-                return new Font(name, 24, atlas);
+                return new Font(name, 64, atlas);
             }
         }
     }

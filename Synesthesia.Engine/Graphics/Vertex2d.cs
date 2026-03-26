@@ -8,7 +8,7 @@ using Silk.NET.OpenGL;
 namespace Synesthesia.Engine.Graphics;
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
-public readonly struct Vertex2d(Vector2 position, Vector2 texCoord, Vector2 size, uint color, float radius, Vector2 localUv)
+public readonly struct Vertex2d(Vector2 position, Vector2 texCoord, Vector2 size, uint color, float radius, Vector2 localUv, VertexMode mode)
 {
     [VertexInfo(0, 2, VertexAttribPointerType.Float)]
     public readonly Vector2 Position = position;
@@ -27,4 +27,7 @@ public readonly struct Vertex2d(Vector2 position, Vector2 texCoord, Vector2 size
 
     [VertexInfo(5, 2, VertexAttribPointerType.Float)]
     public readonly Vector2 LocalUV = localUv;
+
+    [VertexInfo(6, 1, VertexAttribPointerType.Float)]
+    public readonly float Mode = (float)mode;
 }

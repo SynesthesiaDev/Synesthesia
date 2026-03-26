@@ -21,6 +21,8 @@ public class Text2d : Drawable2d
 
     private Font defaultFont = null!;
 
+    public float FontSize { get; set; } = 24f;
+
     public string Text
     {
         get;
@@ -47,18 +49,21 @@ public class Text2d : Drawable2d
     {
         base.OnLayout(dirty);
 
-        if (dirty.HasFlagFast(Invalidation.Size))
+        if (dirty.HasFlagFast(Invalidation.Size) && Font != null)
         {
-            Size = Font.MeasureText(Text);
+            Size = Font.MeasureText(Text, FontSize);
         }
     }
+
+    float spread = 8f;
 
     protected override void OnDraw2d()
     {
         if (!Font.Atlas.TextureAtlas.IsUploaded || string.IsNullOrWhiteSpace(Text)) return;
 
+        float scale = FontSize / 64;
         var cursorX = 0f;
-        var baselineY = Font.Atlas.LineHeight;
+        var baselineY = Font.Atlas.LineHeight * scale;
 
         foreach (var character in Text)
         {
@@ -67,29 +72,36 @@ public class Text2d : Drawable2d
             {
                 if (c == ' ')
                 {
-                    cursorX += Font.Size / 3f;
+                    if (Font.Atlas.Glyphs.TryGetValue(' ', out var spaceGlyph))
+                        cursorX += spaceGlyph.Advance * scale;
+                    else
+                        cursorX += (FontSize / 3f);
                     continue;
                 }
-
-                c = '?';
-                glyph = Font.Atlas.Glyphs[c];
             }
 
             var region = Font.Atlas.TextureAtlas.GetRegionOrNull(glyph.RegionHandle);
             if (region == null) throw new InvalidOperationException($"Failed to get texture region for font atlas with handle {glyph.RegionHandle} (character '{c}')");
 
-            var charPos = new Vector2(cursorX + glyph.Bearing.X, baselineY - glyph.Bearing.Y);
+            var drawSize = region.Value.Size * scale;
+
+            var charPos = new Vector2(
+                cursorX + (glyph.Bearing.X - spread) * scale,
+                baselineY - (glyph.Bearing.Y + spread) * scale // Note: Bearing.Y is 'up', spread is 'out'
+            );
 
             renderer.DrawQuad(
                 DrawMatrix,
                 charPos,
-                region.Value.Size,
+                drawSize,
                 Color.ToRgba32(),
                 texture: region.Value.Texture,
-                textureCoord: region.Value.UvRect
+                textureCoord: region.Value.UvRect,
+                vertexMode: VertexMode.Font,
+                radius: 0.24f
             );
 
-            cursorX += glyph.Advance;
+            cursorX += glyph.Advance * scale;
         }
     }
 }

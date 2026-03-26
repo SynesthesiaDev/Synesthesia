@@ -15,27 +15,34 @@ public class FontAtlas : IDisposable
         "€$£¥©®™°±«»„“”“‘’…–—" +
         "¿¡†‡§";
 
+    private const int render_size = 64;
+
     public required TextureAtlas TextureAtlas { get; init; } = null!;
 
     public required IDictionary<char, GlyphInfo> Glyphs { get; init; } = null!;
 
     public required float LineHeight { get; init; }
 
-    public static FontAtlas Generate(FreeTypeFaceFacade face, int fontSize, string charset = default_charset)
+    public static FontAtlas Generate(FreeTypeFaceFacade face, string charset = default_charset)
     {
         var builder = new TextureAtlasBuilder();
         var glyphMeta = new Dictionary<char, (Vector2 bearing, int advance)>();
+        builder.SetPadding(8);
 
         unsafe
         {
-            FT.FT_Set_Pixel_Sizes(face.FaceRec, 0, (uint)fontSize);
+            FT.FT_Set_Pixel_Sizes(face.FaceRec, 0, (uint)render_size);
 
             var lineHeight = face.FaceRec->size->metrics.height >> 6;
 
             foreach (var c in charset.Distinct())
             {
                 FT.FT_Load_Char(face.FaceRec, c, FT_LOAD.FT_LOAD_RENDER);
+
                 var glyph = face.FaceRec->glyph;
+
+                FT.FT_Render_Glyph(glyph, FT_Render_Mode_.FT_RENDER_MODE_SDF);
+
                 var bitmap = glyph->bitmap;
 
                 if (bitmap.width == 0 || bitmap.rows == 0) continue;

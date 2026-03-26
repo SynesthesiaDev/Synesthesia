@@ -8,7 +8,7 @@ using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two.Container;
 
-public class FillFlowContainer : Container2d
+public class FillFlowContainer2d : Container2d
 {
     public Direction Direction
     {

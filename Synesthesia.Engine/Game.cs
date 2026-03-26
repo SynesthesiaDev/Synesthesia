@@ -2,7 +2,9 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using Synesthesia.Engine.Dependency;
+using Synesthesia.Engine.Events;
 using Synesthesia.Engine.Graphics.Textures;
+using Synesthesia.Engine.Graphics.Two.Container;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform.Host;
@@ -28,11 +30,33 @@ public class Game
 
     private bool initialized;
 
+    public readonly SingleOffEventDispatcher<Game> OnInitialized = new SingleOffEventDispatcher<Game>();
+
+    /// <summary>
+    /// Resource store which contains Textures. Is <see cref="CachedResourceStore{Texture}"/>, <see cref="AsyncResourceStore{Texture}"/>, and <see cref="DeferredResourceStore{Texture}"/>.
+    /// </summary>
+    /// <remarks>
+    /// The deferred store is unlocked after the <see cref="RenderThread"/> is fully loaded.
+    /// </remarks>
+    /// <exception cref="FileNotFoundException">File was not found</exception>
+    /// <exception cref="InvalidOperationException">Deferred store is not ready yet</exception>
+    /// <example>
+    /// <code>
+    /// [Singleton]
+    /// private IResourceStore&lt;Texture&gt; textureResourceStore = null!;
+    /// <br></br>
+    /// protected override void OnLoading() {
+    ///     textureResourceStore.Get("Synesthesia.Resources.Textures.dull_blade.png")
+    /// }
+    ///
+    /// </code>
+    /// </example>
     public readonly IResourceStore<Texture> TextureResourceStore = new ResourceStoreBuilder<Texture>()
         .AddLoaders(new Dictionary<string, Func<Stream, string, Texture>>
         {
             { "png", (stream, name) => ResourceLoaders.LoadTexture(stream, name) },
             { "bmp", (stream, name) => ResourceLoaders.LoadTexture(stream, name) },
+            { "jpg", (stream, name) => ResourceLoaders.LoadTexture(stream, name) },
         })
         .AddFallback(fallback =>
         {
@@ -44,6 +68,25 @@ public class Game
         .MakeDeferred()
         .Build();
 
+    /// <summary>
+    /// Resource store which contains Fonts. Is <see cref="CachedResourceStore{Font}"/>, <see cref="AsyncResourceStore{Font}"/>, and <see cref="DeferredResourceStore{Font}"/>.
+    /// </summary>
+    /// <remarks>
+    /// The deferred store is unlocked after the <see cref="RenderThread"/> is fully loaded.
+    /// </remarks>
+    /// <exception cref="FileNotFoundException">File was not found</exception>
+    /// <exception cref="InvalidOperationException">Deferred store is not ready yet</exception>
+    /// <example>
+    /// <code>
+    /// [Singleton]
+    /// private IResourceStore&lt;Font&gt; fontResourceStore = null!;
+    /// <br></br>
+    /// protected override void OnLoading() {
+    ///     fontResourceStore.Get("Synesthesia.Resources.Font.Quicksand-regular.ttf")
+    /// }
+    ///
+    /// </code>
+    /// </example>
     public readonly IResourceStore<Font> FontResourceStore = new ResourceStoreBuilder<Font>()
         .AddLoaders(new Dictionary<string, Func<Stream, string, Font>>
         {
@@ -59,6 +102,20 @@ public class Game
         .MakeDeferred()
         .Build();
 
+    /// <summary>
+    /// This is the main 2d scene where you add your drawables.
+    /// While <see cref="DrawableScene2d.AddChild"/> exists, please do so by overriding the children field directly
+    /// </summary>
+    /// <code>
+    /// DrawableScene2d.Children =
+    /// [
+    ///     new Text2d
+    ///     {
+    ///         Text = "Hello World!"
+    ///     }
+    /// ];
+    /// </code>
+    public DrawableScene2d DrawableScene2d = new DrawableScene2d();
 
     /// <summary>
     /// Primary game class
@@ -72,6 +129,7 @@ public class Game
         UpdateThread = new UpdateThread();
         AudioThread = new AudioThread();
 
+        DependencyContainer.AddSingleton(this);
         DependencyContainer.AddSingleton(FontResourceStore);
         DependencyContainer.AddSingleton(TextureResourceStore);
         DependencyContainer.AddSingleton(InputHandler);
@@ -117,7 +175,7 @@ public class Game
             });
 
             initialized = true;
-
+            OnInitialized.Dispatch(this);
             WindowHost.RunWindow();
         }
         catch (Exception ex)

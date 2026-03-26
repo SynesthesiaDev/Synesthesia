@@ -3,11 +3,15 @@
 
 namespace Synesthesia.Engine.Resources.Stores;
 
-public class DeferredStore<T>(IResourceStore<T> underlyingStore) : IResourceStore<T>
+public class DeferredResourceStore<T>(IResourceStore<T> underlyingStore) : IResourceStore<T>
 {
     private bool ready;
 
-    public T Get(string name) => GetOrNull(name) ?? throw new FileNotFoundException($"Resource with name {name} was not found or deferred store is not ready");
+    public T Get(string name)
+    {
+        if (!ready) throw new InvalidOperationException($"Deferred Resource Store for type {typeof(T).Name} is not ready yet");
+        return GetOrNull(name) ?? throw new FileNotFoundException($"Resource with name {name} was not found");
+    }
 
     public T? GetOrNull(string name)
     {

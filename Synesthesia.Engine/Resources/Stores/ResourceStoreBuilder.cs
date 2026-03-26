@@ -57,6 +57,6 @@ public class ResourceStoreBuilder<T>
         var baseStore = manualStore ?? fallbackResourceStore ?? throw new InvalidOperationException("Neither manual store or fallback store was added");
         var cachedStore = cached ? new CachedResourceStore<T>(baseStore) : baseStore;
         var asyncStore = async ? new AsyncResourceStore<T>(cachedStore) : cachedStore;
-        return deferred ? new DeferredStore<T>(asyncStore) : asyncStore;
+        return deferred ? new DeferredResourceStore<T>(asyncStore) : asyncStore;
     }
 }

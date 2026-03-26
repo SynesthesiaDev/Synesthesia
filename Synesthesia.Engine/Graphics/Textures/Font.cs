@@ -11,34 +11,20 @@ public class Font(string name, int size, FontAtlas atlas) : IDisposable
     public readonly int Size = size;
     public readonly FontAtlas Atlas = atlas;
 
-    public Vector2 MeasureText(string text)
+    public Vector2 MeasureText(string text, float targetSize)
     {
-        if (string.IsNullOrEmpty(text))
-            return Vector2.Zero;
+        if (string.IsNullOrEmpty(text)) return Vector2.Zero;
 
+        float scale = targetSize / 64f; // 64 is our master atlas size
         float width = 0;
 
-        float height = Atlas.LineHeight;
-
-        foreach (char character in text)
+        foreach (char c in text)
         {
-            var c = character;
-            if (!Atlas.Glyphs.TryGetValue(c, out var glyph))
-            {
-                if (c == ' ')
-                {
-                    width += Size / 3f;
-                    continue;
-                }
-
-                c = '?';
-                glyph = Atlas.Glyphs[c];
-            }
-
-            width += glyph.Advance;
+            if (Atlas.Glyphs.TryGetValue(c, out var glyph))
+                width += glyph.Advance * scale;
         }
 
-        return new Vector2(width, height);
+        return new Vector2(width, Atlas.LineHeight * scale);
     }
 
     public void Dispose()

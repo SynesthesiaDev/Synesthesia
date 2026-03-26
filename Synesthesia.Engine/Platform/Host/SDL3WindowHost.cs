@@ -201,6 +201,8 @@ public class SDL3WindowHost : IWindowHost
 
             if (glContext == null) throw new InvalidOperationException($"Failed to create GL Context. SDL Error: {GetError()}");
 
+            GLSetSwapInterval(0).LogErrorIfFailed();
+
             Surface = new OpenGLSurface
             {
                 WindowHandle = windowHandle.Value,
