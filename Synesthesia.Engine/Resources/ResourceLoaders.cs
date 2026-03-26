@@ -4,7 +4,6 @@
 using FreeTypeSharp;
 using Silk.NET.OpenGL;
 using StbImageSharp;
-using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Textures;
 using Texture = Synesthesia.Engine.Graphics.Textures.Texture;
 

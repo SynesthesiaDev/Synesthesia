@@ -222,6 +222,7 @@ public sealed class OpenGlRenderer : IDisposable
 
         LoadIdentity();
         updateShaderMatrix();
+        DrawStatistics.Reset();
     }
 
     public void EndDrawing()
@@ -231,7 +232,7 @@ public sealed class OpenGlRenderer : IDisposable
         VertexBatch2d.Flush();
 
         Surface.SwapBuffers();
-        DrawStatistics.Reset();
+
         BindTexture(null);
 
         ClearFlags = default_clear_flags;

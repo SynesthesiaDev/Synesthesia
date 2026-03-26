@@ -3,10 +3,12 @@
 
 using System.Numerics;
 using Synesthesia.Engine.Dependency;
+using Synesthesia.Engine.Extensions;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Graphics.Two;
+using Synesthesia.Engine.Graphics.Two.Container;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Resources;
@@ -33,6 +35,8 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
     [Singleton]
     private IResourceStore<Font> fontResourceStore = null!;
 
+    private Text2d statsText = null!;
+
     protected override void OnThreadInit()
     {
         Renderer.Surface.ClaimOwnership();
@@ -52,10 +56,51 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
             Parent = null,
             Children =
             [
-                new Text2d
+                // new Text2d
+                // {
+                //     Text = "Testing testing!! WOAH IT WORKS!! 12343567890 +ěščřžýáíé=é´ú)(/ů§.-"
+                // },
+
+                new FillFlowContainer
                 {
-                    Text = "Testing testing",
-                },
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    Size = font.Atlas.TextureAtlas.Size,
+                    Direction = Direction.Vertical,
+                    Children =
+                    [
+                        new Container2d
+                        {
+                            Size = font.Atlas.TextureAtlas.Size,
+                            Children =
+                            [
+                                new Box2d
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                    Color = Color.DarkGray.Darken(1.5f)
+                                },
+                                new Box2d
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                    Texture = font.Atlas.TextureAtlas.Texture,
+                                },
+                            ],
+                        },
+                        new Text2d
+                        {
+                            Text = $"FontAtlas Binds: 2, Size: {font.Atlas.TextureAtlas.Size.AsString()}, Glyphs: {font.Atlas.Glyphs.Count}",
+                            Anchor = Anchor.TopCentre,
+                            Origin = Anchor.TopCentre,
+                        },
+                        statsText = new Text2d
+                        {
+                            Text = $"Frame: 0, Invalidations: 0",
+                            Anchor = Anchor.TopCentre,
+                            Origin = Anchor.TopCentre,
+                        }
+                    ],
+                }
+
                 // new Box2d
                 // {
                 //     Anchor = Anchor.Centre,
@@ -111,10 +156,12 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
     {
         if (!Renderer.CanDraw || !hasContextOwnership) return;
 
+        statsText.Text = $"Frame: {frameInfo.FrameIndex}, Invalidations: {DrawStatistics.Get(DrawStatistics.Type.Invalidations)}";
         Renderer.BeginDrawing();
 
         mainComposite.Size = new Vector2(Renderer.BackBufferWidth, Renderer.BackBufferHeight);
 
+        mainComposite.OnUpdate(frameInfo);
         mainComposite.OnDraw();
 
         Renderer.EndDrawing();

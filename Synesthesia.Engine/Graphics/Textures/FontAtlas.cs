@@ -9,11 +9,11 @@ namespace Synesthesia.Engine.Graphics.Textures;
 public class FontAtlas : IDisposable
 {
     private const string default_charset =
-        " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" +
+        " !?\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" +
         "ěščřžýáíéůúťďňĚŠČŘŽÝÁÍÉŮÚŤĎŇ" +
         "äöüßÄÖÜñçàèìòùÀÈÌÒÙ" +
         "€$£¥©®™°±«»„“”“‘’…–—" +
-        "¿¡†‡";
+        "¿¡†‡§";
 
     public required TextureAtlas TextureAtlas { get; init; } = null!;
 

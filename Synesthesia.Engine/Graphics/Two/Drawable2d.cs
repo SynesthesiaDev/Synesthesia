@@ -243,10 +243,10 @@ public abstract class Drawable2d : Drawable
 
     protected void UpdateLayout()
     {
+        if (invalidatedFlags == Invalidation.None) return;
+
         var dirty = invalidatedFlags;
         invalidatedFlags = Invalidation.None;
-
-        if (dirty == Invalidation.None) return;
 
         OnLayout(dirty);
     }

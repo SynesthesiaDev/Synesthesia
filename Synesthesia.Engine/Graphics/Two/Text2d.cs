@@ -3,9 +3,11 @@
 
 using System.Numerics;
 using Synesthesia.Engine.Dependency;
+using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Resources;
+using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two;
 
@@ -19,7 +21,16 @@ public class Text2d : Drawable2d
 
     private Font defaultFont = null!;
 
-    public string Text { get; set; } = "";
+    public string Text
+    {
+        get;
+        set
+        {
+            if(string.Equals(field, value, StringComparison.Ordinal)) return;
+            field = value;
+            Invalidate(Invalidation.Size);
+        }
+    } = "";
 
     public Font Font { get; set; } = null!;
 
@@ -32,9 +43,19 @@ public class Text2d : Drawable2d
         base.OnLoading();
     }
 
+    protected override void OnLayout(Invalidation dirty)
+    {
+        base.OnLayout(dirty);
+
+        if (dirty.HasFlagFast(Invalidation.Size))
+        {
+            Size = Font.MeasureText(Text);
+        }
+    }
+
     protected override void OnDraw2d()
     {
-        if(string.IsNullOrWhiteSpace(Text)) return;
+        if (!Font.Atlas.TextureAtlas.IsUploaded || string.IsNullOrWhiteSpace(Text)) return;
 
         var cursorX = 0f;
         var baselineY = Font.Atlas.LineHeight;
@@ -46,31 +67,29 @@ public class Text2d : Drawable2d
             {
                 if (c == ' ')
                 {
-                    cursorX += Font.Size / 2f;
+                    cursorX += Font.Size / 3f;
                     continue;
                 }
-                else
-                {
-                    c = '?';
-                }
+
+                c = '?';
+                glyph = Font.Atlas.Glyphs[c];
             }
 
-            var region = Font.Atlas.TextureAtlas.GetRegion(glyph.RegionHandle);
+            var region = Font.Atlas.TextureAtlas.GetRegionOrNull(glyph.RegionHandle);
+            if (region == null) throw new InvalidOperationException($"Failed to get texture region for font atlas with handle {glyph.RegionHandle} (character '{c}')");
 
             var charPos = new Vector2(cursorX + glyph.Bearing.X, baselineY - glyph.Bearing.Y);
 
             renderer.DrawQuad(
                 DrawMatrix,
                 charPos,
-                region.Size,
+                region.Value.Size,
                 Color.ToRgba32(),
-                texture: region.Texture,
-                textureCoord: region.UvRect
+                texture: region.Value.Texture,
+                textureCoord: region.Value.UvRect
             );
 
             cursorX += glyph.Advance;
         }
     }
-
-
 }

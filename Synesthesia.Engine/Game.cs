@@ -2,7 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using Synesthesia.Engine.Dependency;
-using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Logging;

@@ -59,6 +59,8 @@ public class Box2d : Drawable2d
 
     protected override void OnLayout(Invalidation dirty)
     {
+        base.OnLayout(dirty);
+
         if (!dirty.HasFlagFast(Invalidation.Geometry | Invalidation.DrawNode)) return;
         {
             packedColor = Color.ToRgba32();
@@ -105,8 +107,6 @@ public class Box2d : Drawable2d
                 }
             }
         }
-
-        base.OnLayout(dirty);
     }
 
     protected override void OnDraw2d()

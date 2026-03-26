@@ -20,10 +20,20 @@ public class Font(string name, int size, FontAtlas atlas) : IDisposable
 
         float height = Atlas.LineHeight;
 
-        foreach (char c in text)
+        foreach (char character in text)
         {
+            var c = character;
             if (!Atlas.Glyphs.TryGetValue(c, out var glyph))
-                continue;
+            {
+                if (c == ' ')
+                {
+                    width += Size / 3f;
+                    continue;
+                }
+
+                c = '?';
+                glyph = Atlas.Glyphs[c];
+            }
 
             width += glyph.Advance;
         }
