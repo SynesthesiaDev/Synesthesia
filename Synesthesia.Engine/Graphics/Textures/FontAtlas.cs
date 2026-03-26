@@ -32,7 +32,7 @@ public class FontAtlas : IDisposable
 
             var lineHeight = face.FaceRec->size->metrics.height >> 6;
 
-            foreach (var c in charset)
+            foreach (var c in charset.Distinct())
             {
                 FT.FT_Load_Char(face.FaceRec, c, FT_LOAD.FT_LOAD_RENDER);
                 var glyph = face.FaceRec->glyph;

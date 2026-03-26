@@ -2,9 +2,8 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Numerics;
-using Synesthesia.Engine.Graphics.Textures;
 
-namespace Synesthesia.Engine.Graphics;
+namespace Synesthesia.Engine.Graphics.Textures;
 
 public class Font(string name, int size, FontAtlas atlas) : IDisposable
 {
@@ -14,20 +13,22 @@ public class Font(string name, int size, FontAtlas atlas) : IDisposable
 
     public Vector2 MeasureText(string text)
     {
+        if (string.IsNullOrEmpty(text))
+            return Vector2.Zero;
+
         float width = 0;
-        float maxHeight = 0;
+
+        float height = Atlas.LineHeight;
 
         foreach (char c in text)
         {
             if (!Atlas.Glyphs.TryGetValue(c, out var glyph))
                 continue;
 
-            var region = Atlas.TextureAtlas.GetRegion(glyph.RegionHandle);
             width += glyph.Advance;
-            maxHeight = Math.Max(maxHeight, region.Size.Y);
         }
 
-        return new Vector2(width, maxHeight);
+        return new Vector2(width, height);
     }
 
     public void Dispose()

@@ -52,14 +52,18 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
             Parent = null,
             Children =
             [
-                new Box2d
+                new Text2d
                 {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    Texture = font.Atlas.TextureAtlas.AtlasTexture,
-                    Size = new Vector2(200, 200),
-                    TextureFillMode = TextureFillMode.Fit
+                    Text = "Testing testing",
                 },
+                // new Box2d
+                // {
+                //     Anchor = Anchor.Centre,
+                //     Origin = Anchor.Centre,
+                //     Texture = font.Atlas.TextureAtlas.AtlasTexture,
+                //     Size = new Vector2(200, 200),
+                //     TextureFillMode = TextureFillMode.Fit
+                // },
                 // new FillFlowContainer
                 // {
                 //     AutoSizeAxes = Axes.Both,
