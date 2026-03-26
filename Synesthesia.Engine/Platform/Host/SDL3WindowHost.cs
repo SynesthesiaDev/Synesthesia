@@ -75,8 +75,6 @@ public class SDL3WindowHost : IWindowHost
 
     public bool WindowExists { get; private set; }
 
-    private bool waitingForFirstSwap = true;
-
     private readonly Event[] events = new Event[events_per_peep];
 
     private volatile uint pressedMouseButtons;
@@ -270,12 +268,6 @@ public class SDL3WindowHost : IWindowHost
         }
 
         pollEvents();
-        if (waitingForFirstSwap)
-        {
-            ShowWindow(Surface.WindowHandle).LogErrorIfFailed();
-            waitingForFirstSwap = false;
-        }
-
         pollMouse();
     }
 

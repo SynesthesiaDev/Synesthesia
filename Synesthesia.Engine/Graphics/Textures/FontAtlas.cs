@@ -15,7 +15,7 @@ public class FontAtlas : IDisposable
         "€$£¥©®™°±«»„“”“‘’…–—" +
         "¿¡†‡§";
 
-    private const int render_size = 64;
+    public const int RENDER_SIZE = 32;
 
     public required TextureAtlas TextureAtlas { get; init; } = null!;
 
@@ -31,7 +31,7 @@ public class FontAtlas : IDisposable
 
         unsafe
         {
-            FT.FT_Set_Pixel_Sizes(face.FaceRec, 0, (uint)render_size);
+            FT.FT_Set_Pixel_Sizes(face.FaceRec, 0, RENDER_SIZE);
 
             var lineHeight = face.FaceRec->size->metrics.height >> 6;
 

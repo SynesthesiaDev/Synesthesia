@@ -38,4 +38,10 @@ public interface IWindowHost : IDisposable
     bool AltPressed { get; }
 
     bool HasKeyboard { get; }
+
+    void Schedule(Action action);
+
+    void Show();
+
+    void Hide();
 }

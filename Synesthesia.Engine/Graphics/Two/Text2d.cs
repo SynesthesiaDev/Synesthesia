@@ -13,6 +13,8 @@ namespace Synesthesia.Engine.Graphics.Two;
 
 public class Text2d : Drawable2d
 {
+    private const float spread = 8f;
+
     [Singleton]
     private OpenGlRenderer renderer = null!;
 
@@ -49,28 +51,25 @@ public class Text2d : Drawable2d
     {
         base.OnLayout(dirty);
 
-        if (dirty.HasFlagFast(Invalidation.Size) && Font != null)
+        if (dirty.HasFlagFast(Invalidation.Size))
         {
             Size = Font.MeasureText(Text, FontSize);
         }
     }
 
-    float spread = 8f;
-
     protected override void OnDraw2d()
     {
         if (!Font.Atlas.TextureAtlas.IsUploaded || string.IsNullOrWhiteSpace(Text)) return;
 
-        float scale = FontSize / 64;
+        float scale = FontSize / FontAtlas.RENDER_SIZE;
         var cursorX = 0f;
         var baselineY = Font.Atlas.LineHeight * scale;
 
         foreach (var character in Text)
         {
-            var c = character;
-            if (!Font.Atlas.Glyphs.TryGetValue(c, out var glyph))
+            if (!Font.Atlas.Glyphs.TryGetValue(character, out var glyph))
             {
-                if (c == ' ')
+                if (character == ' ')
                 {
                     if (Font.Atlas.Glyphs.TryGetValue(' ', out var spaceGlyph))
                         cursorX += spaceGlyph.Advance * scale;
@@ -81,13 +80,13 @@ public class Text2d : Drawable2d
             }
 
             var region = Font.Atlas.TextureAtlas.GetRegionOrNull(glyph.RegionHandle);
-            if (region == null) throw new InvalidOperationException($"Failed to get texture region for font atlas with handle {glyph.RegionHandle} (character '{c}')");
+            if (region == null) throw new InvalidOperationException($"Failed to get texture region for font atlas with handle {glyph.RegionHandle} (character '{character}')");
 
             var drawSize = region.Value.Size * scale;
 
             var charPos = new Vector2(
                 cursorX + (glyph.Bearing.X - spread) * scale,
-                baselineY - (glyph.Bearing.Y + spread) * scale // Note: Bearing.Y is 'up', spread is 'out'
+                baselineY - (glyph.Bearing.Y + spread) * scale
             );
 
             renderer.DrawQuad(
@@ -98,7 +97,7 @@ public class Text2d : Drawable2d
                 texture: region.Value.Texture,
                 textureCoord: region.Value.UvRect,
                 vertexMode: VertexMode.Font,
-                radius: 0.24f
+                radius: 0.21f
             );
 
             cursorX += glyph.Advance * scale;

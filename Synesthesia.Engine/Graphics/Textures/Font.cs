@@ -15,7 +15,7 @@ public class Font(string name, int size, FontAtlas atlas) : IDisposable
     {
         if (string.IsNullOrEmpty(text)) return Vector2.Zero;
 
-        float scale = targetSize / 64f; // 64 is our master atlas size
+        float scale = targetSize / FontAtlas.RENDER_SIZE;
         float width = 0;
 
         foreach (char c in text)

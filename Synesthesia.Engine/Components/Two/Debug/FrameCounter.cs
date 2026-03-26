@@ -18,17 +18,24 @@ public class FrameCounter : CompositeDrawable2d
 
     protected override void OnLoading()
     {
+        Size = new Vector2(450, 150);
         Children =
         [
             new Container2d
             {
-                AutoSizeAxes = Axes.Both,
-                // BackgroundColor = Defaults.BACKGROUND2,
-                // BackgroundAlpha = 1f,
-                // BackgroundCornerRadius = 10f,
-                AutoSizePadding = new Vector4(10),
+                RelativeSizeAxes = Axes.Both,
+                Anchor = Anchor.Centre,
+                Origin = Anchor.Centre,
                 Children =
                 [
+                    new Box2d
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Color = EngineBranding.BACKGROUND2,
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        CornerRadius = 10,
+                    },
                     new FillFlowContainer2d
                     {
                         AutoSizeAxes = Axes.Both,
@@ -89,6 +96,7 @@ public class FrameCounter : CompositeDrawable2d
         protected override void OnLoading()
         {
             Size = new Vector2(400, 30);
+
             Children =
             [
                 new Container2d
@@ -101,6 +109,7 @@ public class FrameCounter : CompositeDrawable2d
                             Text = $"{Name}:",
                             Anchor = Anchor.CentreLeft,
                             Origin = Anchor.CentreLeft,
+                            Color = EngineBranding.TEXT0
                         },
                         new Container2d
                         {
@@ -113,13 +122,15 @@ public class FrameCounter : CompositeDrawable2d
                                 {
                                     Text = string.Empty,
                                     Anchor = Anchor.Centre,
-                                    Origin = Anchor.CentreRight
+                                    Origin = Anchor.CentreRight,
+                                    Color = EngineBranding.TEXT2
                                 },
                                 new Text2d
                                 {
                                     Text = $" / {MaxFps} fps",
                                     Anchor = Anchor.Centre,
-                                    Origin = Anchor.CentreLeft
+                                    Origin = Anchor.CentreLeft,
+                                    Color = EngineBranding.TEXT2
                                 },
                             ]
                         },
@@ -127,7 +138,8 @@ public class FrameCounter : CompositeDrawable2d
                         {
                             Text = "(0.000 ms)",
                             Anchor = Anchor.CentreRight,
-                            Origin = Anchor.CentreRight
+                            Origin = Anchor.CentreRight,
+                            Color = EngineBranding.TEXT1
                         },
                     ]
                 }
