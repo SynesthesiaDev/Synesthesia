@@ -23,7 +23,7 @@ public class Text2d : Drawable2d
 
     private Font defaultFont = null!;
 
-    public float FontSize { get; set; } = 24f;
+    public float FontSize { get; set; } = 16f;
 
     public string Text
     {
@@ -97,7 +97,7 @@ public class Text2d : Drawable2d
                 texture: region.Value.Texture,
                 textureCoord: region.Value.UvRect,
                 vertexMode: VertexMode.Font,
-                radius: 0.21f
+                radius: 0.22f
             );
 
             cursorX += glyph.Advance * scale;

@@ -46,7 +46,6 @@ public class EngineDebugOverlay : Container2d
                         [
                             new FrameCounter
                             {
-                                Scale = new Vector2(0.8f),
                                 Anchor = Anchor.TopLeft,
                                 Origin = Anchor.TopLeft,
                             },

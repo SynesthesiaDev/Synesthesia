@@ -44,4 +44,7 @@ public interface IWindowHost : IDisposable
     void Show();
 
     void Hide();
+
+    Bindable<bool> WindowActive { get; }
+
 }

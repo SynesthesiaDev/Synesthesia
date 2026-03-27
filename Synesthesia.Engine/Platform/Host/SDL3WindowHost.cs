@@ -55,6 +55,8 @@ public class SDL3WindowHost : IWindowHost
 
     public Bindable<WindowState> WindowState { get; } = new Bindable<WindowState>(Platform.WindowState.Normal);
 
+    public Bindable<bool> WindowActive { get; } = new Bindable<bool>(false);
+
     #endregion
 
     public Vector2 Size { get; private set; } = Vector2.Zero;
@@ -483,6 +485,13 @@ public class SDL3WindowHost : IWindowHost
 
             case EventType.SystemThemeChanged:
                 OnSystemThemeChanged.Dispatch(GetSystemTheme().ToSystemTheme());
+                break;
+
+            case EventType.WindowFocusLost:
+                WindowActive.Value = false;
+                break;
+            case EventType.WindowFocusGained:
+                WindowActive.Value = true;
                 break;
         }
     }

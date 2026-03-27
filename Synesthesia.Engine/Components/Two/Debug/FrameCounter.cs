@@ -6,8 +6,10 @@ using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Graphics.Two.Container;
+using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util;
+using Synesthesia.Engine.Util.Bindables;
 
 namespace Synesthesia.Engine.Components.Two.Debug;
 
@@ -18,7 +20,7 @@ public class FrameCounter : CompositeDrawable2d
 
     protected override void OnLoading()
     {
-        Size = new Vector2(450, 150);
+        Size = new Vector2(310, 104);
         Children =
         [
             new Container2d
@@ -43,34 +45,10 @@ public class FrameCounter : CompositeDrawable2d
                         Origin = Anchor.Centre,
                         Children =
                         [
-                            new PerformanceMonitorElement
-                            {
-                                Name = "Draw",
-                                Fps = () => game.RenderThread.Fps,
-                                MaxFps = game.RenderThread.ActiveUpdateRate.Value,
-                                FrameTime = () => game.RenderThread.FrameTime
-                            },
-                            new PerformanceMonitorElement
-                            {
-                                Name = "Update",
-                                Fps = () => game.UpdateThread.Fps,
-                                MaxFps = game.UpdateThread.ActiveUpdateRate.Value,
-                                FrameTime = () => game.UpdateThread.FrameTime
-                            },
-                            new PerformanceMonitorElement
-                            {
-                                Name = "Input",
-                                Fps = () => game.InputThread.Fps,
-                                MaxFps = game.InputThread.ActiveUpdateRate.Value,
-                                FrameTime = () => game.InputThread.FrameTime
-                            },
-                            new PerformanceMonitorElement
-                            {
-                                Name = "Audio",
-                                Fps = () => game.AudioThread.Fps,
-                                MaxFps = game.AudioThread.ActiveUpdateRate.Value,
-                                FrameTime = () => game.AudioThread.FrameTime
-                            },
+                            new PerformanceMonitorElement(game.RenderThread),
+                            new PerformanceMonitorElement(game.UpdateThread),
+                            new PerformanceMonitorElement(game.InputThread),
+                            new PerformanceMonitorElement(game.AudioThread)
                         ],
                         Direction = Direction.Vertical
                     }
@@ -79,23 +57,23 @@ public class FrameCounter : CompositeDrawable2d
         ];
     }
 
-    private class PerformanceMonitorElement : CompositeDrawable2d
+    private class PerformanceMonitorElement(ThreadRunner thread) : CompositeDrawable2d
     {
-        public string Name { get; init; } = "Element";
-        public Func<double> Fps { get; init; } = () => 0d;
-        public Func<double> FrameTime { get; init; } = () => 0d;
-
         private double lastFps;
         private double lastFrameTime;
 
-        public long MaxFps { get; init; }
+        private long maxFps = thread.ActiveUpdateRate.Value;
 
         private Text2d fpsText = null!;
         private Text2d frameTimeText = null!;
+        private Text2d maxFpsText = null!;
+
+        private BindableListener<bool> activeRateListener = null!;
+        private ThrottledUpdater throttledUpdater = new(100);
 
         protected override void OnLoading()
         {
-            Size = new Vector2(400, 30);
+            Size = new Vector2(270, 16);
 
             Children =
             [
@@ -106,7 +84,7 @@ public class FrameCounter : CompositeDrawable2d
                     [
                         new Text2d
                         {
-                            Text = $"{Name}:",
+                            Text = $"{thread.Type}:",
                             Anchor = Anchor.CentreLeft,
                             Origin = Anchor.CentreLeft,
                             Color = EngineBranding.TEXT0
@@ -125,9 +103,9 @@ public class FrameCounter : CompositeDrawable2d
                                     Origin = Anchor.CentreRight,
                                     Color = EngineBranding.TEXT2
                                 },
-                                new Text2d
+                                maxFpsText = new Text2d
                                 {
-                                    Text = $" / {MaxFps} fps",
+                                    Text = $" / {maxFps} fps",
                                     Anchor = Anchor.Centre,
                                     Origin = Anchor.CentreLeft,
                                     Color = EngineBranding.TEXT2
@@ -146,14 +124,22 @@ public class FrameCounter : CompositeDrawable2d
             ];
         }
 
-        private ThrottledUpdater throttledUpdater = new(100);
+        protected override void LoadComplete()
+        {
+            activeRateListener = thread.IsActive.OnValueChange(e =>
+            {
+                maxFps = e.NewValue ? thread.ActiveUpdateRate.Value : thread.InactiveUpdateRate.Value;
+                maxFpsText.Text = $" / {maxFps} fps";
+            });
+        }
+
 
         protected internal override void OnUpdate(FrameInfo frameInfo)
         {
             if (throttledUpdater.TryUpdate(frameInfo.Delta))
             {
-                var currentFps = Fps();
-                var currentFrameTime = FrameTime();
+                var currentFps = thread.Fps;
+                var currentFrameTime = thread.FrameTime;
 
                 if (!Precision.IsSame(currentFps, lastFps))
                 {
@@ -169,6 +155,12 @@ public class FrameCounter : CompositeDrawable2d
             }
 
             base.OnUpdate(frameInfo);
+        }
+
+        protected override void Dispose(bool isDisposing)
+        {
+            thread.IsActive.Unregister(activeRateListener);
+            base.Dispose(isDisposing);
         }
     }
 }
