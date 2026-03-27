@@ -50,29 +50,6 @@ public class CompositeDrawable2d : Drawable2d
         }
     } = false;
 
-    public ComplexColor BorderColor
-    {
-        get;
-        set
-        {
-            if (field.Equals(value)) return;
-
-            field = value;
-            Invalidate(Invalidation.DrawNode);
-        }
-    } = ComplexColor.Black;
-
-    public int BorderThickness
-    {
-        get;
-        set
-        {
-            if (field == value) return;
-            field = value;
-            Invalidate(Invalidation.DrawNode);
-        }
-    } = 0;
-
     public Vector4 AutoSizePadding
     {
         get;
@@ -205,8 +182,7 @@ public class CompositeDrawable2d : Drawable2d
             renderer.BeginStencil();
             renderer.BeginStencilMask();
 
-            // var maskRect = new Rectangle(0, 0, (int)Size.X, (int)Size.Y);
-            //TODO draw rect
+            renderer.DrawQuad(DrawMatrix, Vector2.Zero, Size, Color.White.ToRgba32(), BorderThickness, BorderColor, radius: CornerRadius);
 
             renderer.EndStencilMask();
         }
@@ -220,6 +196,11 @@ public class CompositeDrawable2d : Drawable2d
         }
 
         if (Masking) renderer.EndStencil();
+
+        if (BorderThickness > 0)
+        {
+            renderer.DrawQuad(DrawMatrix, Vector2.Zero, Size, Color.Transparent.ToRgba32(), BorderThickness, BorderColor, radius: CornerRadius);
+        }
     }
 
     #endregion

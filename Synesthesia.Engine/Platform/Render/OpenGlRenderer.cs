@@ -102,7 +102,19 @@ public sealed class OpenGlRenderer : IDisposable
         Logger.Debug($"- GLSL:      {shadingLanguageVersion}", Logger.Platform);
     }
 
-    public void DrawQuad(DrawMatrix drawMatrix, Vector2 position, Vector2 size, uint packedColor, float radius = 0, RectangleF? textureCoord = null, Texture? texture = null, VertexMode vertexMode = VertexMode.Shape)
+    public void DrawQuad
+    (
+        DrawMatrix drawMatrix,
+        Vector2 position,
+        Vector2 size,
+        uint packedColor,
+        float borderThickness,
+        ComplexColor border,
+        float radius = 0,
+        RectangleF? textureCoord = null,
+        Texture? texture = null,
+        VertexMode vertexMode = VertexMode.Shape
+    )
     {
         if (texture != CurrentTexture)
         {
@@ -121,10 +133,10 @@ public sealed class OpenGlRenderer : IDisposable
 
         var tex = textureCoord ?? new Rectangle(0, 0, 1, 1);
 
-        VertexBatch2d.PushVertex(new Vertex2d(v0, new Vector2(tex.Left, tex.Top), size, packedColor, radius, new Vector2(0, 0), vertexMode));
-        VertexBatch2d.PushVertex(new Vertex2d(v1, new Vector2(tex.Left, tex.Bottom), size, packedColor, radius, new Vector2(0, 1), vertexMode));
-        VertexBatch2d.PushVertex(new Vertex2d(v2, new Vector2(tex.Right, tex.Bottom), size, packedColor, radius, new Vector2(1, 1), vertexMode));
-        VertexBatch2d.PushVertex(new Vertex2d(v3, new Vector2(tex.Right, tex.Top), size, packedColor, radius, new Vector2(1, 0), vertexMode));
+        VertexBatch2d.PushVertex(new Vertex2d(v0, new Vector2(tex.Left, tex.Top), size, packedColor, radius, new Vector2(0, 0), vertexMode, borderThickness, border));
+        VertexBatch2d.PushVertex(new Vertex2d(v1, new Vector2(tex.Left, tex.Bottom), size, packedColor, radius, new Vector2(0, 1), vertexMode, borderThickness, border));
+        VertexBatch2d.PushVertex(new Vertex2d(v2, new Vector2(tex.Right, tex.Bottom), size, packedColor, radius, new Vector2(1, 1), vertexMode, borderThickness, border));
+        VertexBatch2d.PushVertex(new Vertex2d(v3, new Vector2(tex.Right, tex.Top), size, packedColor, radius, new Vector2(1, 0), vertexMode, borderThickness, border));
     }
 
     public void CompileDefaultShaders()

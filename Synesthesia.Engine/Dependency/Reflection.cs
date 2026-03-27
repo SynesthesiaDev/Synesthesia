@@ -73,17 +73,44 @@ public static class Reflection
         var type = typeof(T);
         var stride = (uint)sizeof(T);
 
-        var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
+        var fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
         foreach (var fieldInfo in fields)
         {
-            var vertexInfoAttribute = fieldInfo.GetCustomAttribute<VertexInfoAttribute>();
-            if(vertexInfoAttribute == null) continue;
+            var attributes = fieldInfo.GetCustomAttributes<VertexInfoAttribute>().ToArray();
+            if (attributes.Length == 0) continue;
 
-            var offset = Marshal.OffsetOf<T>(fieldInfo.Name);
+            var baseOffset = (int)Marshal.OffsetOf<T>(fieldInfo.Name);
 
-            gl.EnableVertexAttribArray((uint)vertexInfoAttribute.Index);
-            gl.VertexAttribPointer((uint)vertexInfoAttribute.Index, vertexInfoAttribute.Count, vertexInfoAttribute.Type, vertexInfoAttribute.Normalized, stride, (void*)offset);
+            for (int i = 0; i < attributes.Length; i++)
+            {
+                var attr = attributes[i];
+
+                int internalOffset = i * (attr.Count * getSizeOfAttributeType(attr.Type));
+
+                var finalOffset = (void*)(baseOffset + internalOffset);
+
+                gl.EnableVertexAttribArray((uint)attr.Index);
+                gl.VertexAttribPointer(
+                    (uint)attr.Index,
+                    attr.Count,
+                    attr.Type,
+                    attr.Normalized,
+                    stride,
+                    finalOffset
+                );
+            }
         }
+    }
+
+    private static int getSizeOfAttributeType(VertexAttribPointerType type)
+    {
+        return type switch
+        {
+            VertexAttribPointerType.Float => sizeof(float),
+            VertexAttribPointerType.UnsignedByte => sizeof(byte),
+            VertexAttribPointerType.Int => sizeof(int),
+            _ => sizeof(float)
+        };
     }
 }

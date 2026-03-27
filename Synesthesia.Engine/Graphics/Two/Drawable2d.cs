@@ -188,6 +188,29 @@ public abstract class Drawable2d : Drawable
         }
     } = null;
 
+    public ComplexColor BorderColor
+    {
+        get;
+        set
+        {
+            if (field.Equals(value)) return;
+
+            field = value;
+            Invalidate(Invalidation.DrawNode);
+        }
+    } = ComplexColor.Black;
+
+    public int BorderThickness
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            Invalidate(Invalidation.DrawNode);
+        }
+    } = 0;
+
     public bool IsHovered { get; set; } = false;
 
     public bool IsMouseDown { get; set; } = false;

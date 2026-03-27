@@ -25,6 +25,16 @@ public struct ComplexColor : IEquatable<ComplexColor>
         }
     }
 
+    public readonly Matrix4x4 ToMatrix4()
+    {
+        return new Matrix4x4(
+            TopLeft.R, TopLeft.G, TopLeft.B, TopLeft.A,
+            TopRight.R, TopRight.G, TopRight.B, TopRight.A,
+            BottomLeft.R, BottomLeft.G, BottomLeft.B, BottomLeft.A,
+            BottomRight.R, BottomRight.G, BottomRight.B, BottomRight.A
+        );
+    }
+
     public static ComplexColor Single(Color color)
     {
         var complexColor = new ComplexColor();

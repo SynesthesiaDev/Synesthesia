@@ -5,7 +5,7 @@ using Silk.NET.OpenGL;
 
 namespace Synesthesia.Engine.Graphics;
 
-[AttributeUsage(AttributeTargets.Field)]
+[AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
 public class VertexInfoAttribute(int index, int count, VertexAttribPointerType type, bool normalized = false) : Attribute
 {
     public int Index { get; } = index;

@@ -444,6 +444,7 @@ public class SDL3WindowHost : IWindowHost
             case EventType.FingerMotion:
             case EventType.FingerCanceled:
                 var touchEvent = TouchInputEvent.Rent();
+                if (sdlEvent.TFinger.FingerID == 0) touchEvent.IsPrimary = true;
                 touchEvent.Timestamp = timestamp;
                 touchEvent.IsDown = sdlEvent.TFinger.Type == EventType.FingerDown;
                 touchEvent.Pressure = sdlEvent.TFinger.Pressure;
@@ -503,6 +504,7 @@ public class SDL3WindowHost : IWindowHost
         var mask = ButtonMask(mouseButtonEvent.Button);
 
         var mousePressEvent = MouseButtonInputInputEvent.Rent();
+        if (mouseButton == MouseButton.Left) mousePressEvent.IsPrimary = true;
         switch (mouseButtonEvent.Type)
         {
             case EventType.MouseButtonDown:

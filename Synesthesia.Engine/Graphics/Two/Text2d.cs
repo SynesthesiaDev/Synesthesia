@@ -96,6 +96,8 @@ public class Text2d : Drawable2d
                 charPos,
                 drawSize,
                 Color.ToRgba32(),
+                BorderThickness,
+                BorderColor,
                 texture: region.Value.Texture,
                 textureCoord: region.Value.UvRect,
                 vertexMode: VertexMode.Font,
