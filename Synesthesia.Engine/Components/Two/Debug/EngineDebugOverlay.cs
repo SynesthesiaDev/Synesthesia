@@ -2,7 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Numerics;
-using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Two.Container;
 using Synesthesia.Engine.Timing;
@@ -11,9 +10,6 @@ namespace Synesthesia.Engine.Components.Two.Debug;
 
 public class EngineDebugOverlay : Container2d
 {
-    [Singleton]
-    private Game game = null!;
-
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {
         if (!Visible) return;
@@ -49,6 +45,11 @@ public class EngineDebugOverlay : Container2d
                                 Anchor = Anchor.TopLeft,
                                 Origin = Anchor.TopLeft,
                             },
+                            new EngineStatisticsPanel
+                            {
+                                Anchor = Anchor.TopLeft,
+                                Origin = Anchor.TopLeft,
+                            }
                         ]
                     },
                 ]

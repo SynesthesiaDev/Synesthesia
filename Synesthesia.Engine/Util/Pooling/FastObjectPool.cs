@@ -3,6 +3,7 @@
 
 using System.Runtime.CompilerServices;
 using Synesthesia.Engine.Extensions;
+using Synesthesia.Engine.Util.Statistics;
 
 namespace Synesthesia.Engine.Util.Pooling;
 
@@ -43,8 +44,8 @@ public class FastObjectPool<T>(Func<T> activator, int capacity = 32) : IDisposab
             pooledObject.ReturnAction = obj => Return((T)obj);
         }
 
-        EngineStatistics.OBJECTS_RENTED.Increment();
-        EngineStatistics.OBJECTS_ALIVE.Increment();
+        EngineStatistics.Increment(EngineStatistics.Type.ObjectsRented);
+        EngineStatistics.Increment(EngineStatistics.Type.ObjectsInflight);
         return item;
     }
 
@@ -73,8 +74,8 @@ public class FastObjectPool<T>(Func<T> activator, int capacity = 32) : IDisposab
             returnToShared(item);
         }
 
-        EngineStatistics.OBJECTS_RETURNED.Increment();
-        EngineStatistics.OBJECTS_ALIVE.Decrement();
+        EngineStatistics.Increment(EngineStatistics.Type.ObjectsReturned);
+        EngineStatistics.Decrement(EngineStatistics.Type.ObjectsInflight);
     }
 
     private T rentFromShared()

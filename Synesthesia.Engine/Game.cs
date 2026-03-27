@@ -115,7 +115,7 @@ public class Game
     ///     }
     /// ];
     /// </code>
-    public DrawableScene2d DrawableScene2d = new DrawableScene2d();
+    public readonly DrawableScene2d DrawableScene2d = new DrawableScene2d();
 
     /// <summary>
     /// Primary game class

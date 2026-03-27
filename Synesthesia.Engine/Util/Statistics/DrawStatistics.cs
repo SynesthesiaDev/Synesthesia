@@ -3,7 +3,7 @@
 
 using System.Runtime.CompilerServices;
 
-namespace Synesthesia.Engine;
+namespace Synesthesia.Engine.Util.Statistics;
 
 public static class DrawStatistics
 {

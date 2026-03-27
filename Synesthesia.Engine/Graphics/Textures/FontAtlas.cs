@@ -3,6 +3,7 @@
 
 using System.Numerics;
 using FreeTypeSharp;
+using Synesthesia.Engine.Util.Statistics;
 
 namespace Synesthesia.Engine.Graphics.Textures;
 
@@ -22,6 +23,8 @@ public class FontAtlas : IDisposable
     public required IDictionary<char, GlyphInfo> Glyphs { get; init; } = null!;
 
     public required float LineHeight { get; init; }
+
+    public FontAtlas() => EngineStatistics.Increment(EngineStatistics.Type.FontAtlases);
 
     public static FontAtlas Generate(FreeTypeFaceFacade face, string charset = default_charset)
     {
@@ -76,5 +79,6 @@ public class FontAtlas : IDisposable
     {
         TextureAtlas.Dispose();
         Glyphs.Clear();
+        EngineStatistics.Decrement(EngineStatistics.Type.FontAtlases);
     }
 }

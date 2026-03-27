@@ -22,7 +22,7 @@ void main() {
     if (v_mode == VERTEX_MODE_TEXT) {
         float threshold = 0.5 - (v_radius - 0.1);
         float dist = texture(u_texture, v_texCoord).a - 0.1;
-        float smoothing = 1.8 / v_size.y;
+        float smoothing = 1.6 / v_size.y;
         float localAlpha = smoothstep(threshold - smoothing, threshold + smoothing, dist);
         FragColor = vec4(v_color.rgb, v_color.a * localAlpha);
         return;

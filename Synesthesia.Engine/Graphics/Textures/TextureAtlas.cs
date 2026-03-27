@@ -3,18 +3,29 @@
 
 using System.Numerics;
 using Synesthesia.Engine.Extensions;
+using Synesthesia.Engine.Util.Statistics;
 
 namespace Synesthesia.Engine.Graphics.Textures;
 
-public class TextureAtlas(int width, int height, Texture texture, IDictionary<int, TextureRegion> textureRegions) : IDisposable
+public class TextureAtlas : IDisposable
 {
-    public readonly Texture Texture = texture;
-    public readonly int Width = width;
-    public readonly int Height = height;
+    public readonly Texture Texture;
+    public readonly int Width;
+    public readonly int Height;
 
-    public readonly Vector2 Size = new Vector2(width, height);
+    public readonly Vector2 Size;
 
-    public readonly IDictionary<int, TextureRegion> TextureRegions = textureRegions;
+    public readonly IDictionary<int, TextureRegion> TextureRegions;
+
+    public TextureAtlas(int width, int height, Texture texture, IDictionary<int, TextureRegion> textureRegions)
+    {
+        Texture = texture;
+        Width = width;
+        Height = height;
+        Size = new Vector2(width, height);
+        TextureRegions = textureRegions;
+        EngineStatistics.Increment(EngineStatistics.Type.TextureAtlases);
+    }
 
     public bool IsUploaded => Texture.IsUploaded;
 
@@ -26,5 +37,6 @@ public class TextureAtlas(int width, int height, Texture texture, IDictionary<in
     {
         Texture.Dispose();
         TextureRegions.Clear();
+        EngineStatistics.Decrement(EngineStatistics.Type.TextureAtlases);
     }
 }

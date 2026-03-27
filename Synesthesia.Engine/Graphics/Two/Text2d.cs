@@ -30,11 +30,13 @@ public class Text2d : Drawable2d
         get;
         set
         {
-            if(string.Equals(field, value, StringComparison.Ordinal)) return;
+            if (string.Equals(field, value, StringComparison.Ordinal)) return;
             field = value;
             Invalidate(Invalidation.Size);
         }
     } = "";
+
+    public FontWeight Weight { get; set; } = FontWeight.Normal;
 
     public Font Font { get; set; } = null!;
 
@@ -97,10 +99,28 @@ public class Text2d : Drawable2d
                 texture: region.Value.Texture,
                 textureCoord: region.Value.UvRect,
                 vertexMode: VertexMode.Font,
-                radius: 0.22f
+                radius: getWeightRadius()
             );
 
             cursorX += glyph.Advance * scale;
         }
+    }
+
+    public enum FontWeight
+    {
+        Bold,
+        Normal,
+        Thin
+    }
+
+    private float getWeightRadius()
+    {
+        return Weight switch
+        {
+            FontWeight.Bold => 0.265f,
+            FontWeight.Normal => 0.23f,
+            FontWeight.Thin => 0.15f,
+            _ => 0.23f
+        };
     }
 }

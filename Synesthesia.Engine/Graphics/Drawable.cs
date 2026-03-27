@@ -11,6 +11,7 @@ using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util.Pooling;
+using Synesthesia.Engine.Util.Statistics;
 
 namespace Synesthesia.Engine.Graphics;
 
@@ -54,8 +55,6 @@ public abstract class Drawable : IDisposable
 
     protected Drawable()
     {
-        EngineStatistics.DRAWABLES.Increment();
-
         OnLoadComplete = Pooled.DRAWABLE_LOAD_DISPATCHER_POOL.Rent();
 
         //TODO
@@ -91,6 +90,7 @@ public abstract class Drawable : IDisposable
         var timeBefore = performance_watch.CurrentTime;
 
         Reflection.ResolveDependencies(this);
+        EngineStatistics.Increment(EngineStatistics.Type.Drawables);
 
         OnLoading();
 
@@ -166,6 +166,6 @@ public abstract class Drawable : IDisposable
 #if DEBUG
         Reflection.CheckForDisposing(this);
 #endif
-        EngineStatistics.DRAWABLES.Decrement();
+        EngineStatistics.Decrement(EngineStatistics.Type.Drawables);
     }
 }

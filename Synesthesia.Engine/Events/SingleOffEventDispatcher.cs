@@ -1,5 +1,6 @@
 using Synesthesia.Engine.Util.Bindables;
 using Synesthesia.Engine.Util.Pooling;
+using Synesthesia.Engine.Util.Statistics;
 
 namespace Synesthesia.Engine.Events;
 
@@ -15,7 +16,7 @@ public class SingleOffEventDispatcher<T> : IEventDispatcher
 
     public SingleOffEventDispatcher()
     {
-        EngineStatistics.DISPATCHERS.Increment();
+        EngineStatistics.Increment(EngineStatistics.Type.Dispatchers);
     }
 
     public void Subscribe(Action<T> action)
@@ -49,7 +50,7 @@ public class SingleOffEventDispatcher<T> : IEventDispatcher
     public void Dispose()
     {
         Clear();
-        EngineStatistics.DISPATCHERS.Decrement();
+        EngineStatistics.Decrement(EngineStatistics.Type.Dispatchers);
         IsDisposed = true;
     }
 

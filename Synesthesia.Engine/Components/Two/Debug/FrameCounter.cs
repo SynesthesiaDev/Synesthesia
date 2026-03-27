@@ -13,14 +13,14 @@ using Synesthesia.Engine.Util.Bindables;
 
 namespace Synesthesia.Engine.Components.Two.Debug;
 
-public class FrameCounter : CompositeDrawable2d
+public class FrameCounter : EngineDebugElement
 {
     [Singleton]
     private Game game = null!;
 
     protected override void OnLoading()
     {
-        Size = new Vector2(310, 104);
+        Size = new Vector2(310, 124);
         Children =
         [
             new Container2d
@@ -45,6 +45,7 @@ public class FrameCounter : CompositeDrawable2d
                         Origin = Anchor.Centre,
                         Children =
                         [
+                            new HeaderComponent("Frame Counter (Ctrl + F1)"),
                             new PerformanceMonitorElement(game.RenderThread),
                             new PerformanceMonitorElement(game.UpdateThread),
                             new PerformanceMonitorElement(game.InputThread),
@@ -87,7 +88,7 @@ public class FrameCounter : CompositeDrawable2d
                             Text = $"{thread.Type}:",
                             Anchor = Anchor.CentreLeft,
                             Origin = Anchor.CentreLeft,
-                            Color = EngineBranding.TEXT0
+                            Color = EngineBranding.TEXT1
                         },
                         new Container2d
                         {

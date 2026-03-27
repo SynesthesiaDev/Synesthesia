@@ -10,6 +10,7 @@ using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform;
 using Synesthesia.Engine.Util.Pooling;
+using Synesthesia.Engine.Util.Statistics;
 
 namespace Synesthesia.Engine.Input;
 
@@ -83,6 +84,7 @@ public sealed class InputHandler : IFrameProcessor, IDisposable
     }
     private void handlePositionalInputEvent(IPositionalInputEvent positionalInputEvent)
     {
+        if(positionalInputEvent is TabletInputEvent) EngineStatistics.Increment(EngineStatistics.Type.TabletEvents);
         // var isDelta = positionalInputEvent.PositionDelta != Vector2.Zero;
         //TODO Mose Delta
         MousePosition = positionalInputEvent.Position;

@@ -4,6 +4,7 @@
 using Silk.NET.OpenGL;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Extensions;
+using Synesthesia.Engine.Util.Statistics;
 
 namespace Synesthesia.Engine.Graphics;
 

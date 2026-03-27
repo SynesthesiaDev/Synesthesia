@@ -1,12 +1,13 @@
 using Synesthesia.Engine.Util.Pooling;
+using Synesthesia.Engine.Util.Statistics;
 using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Util.Bindables;
 
-public class Bindable<T>(T defaultInternalValue) : IBindable, IPooledObject
+public class Bindable<T> : IBindable, IPooledObject
 {
-    private readonly T defaultInternal = defaultInternalValue;
-    protected T InternalValue = defaultInternalValue;
+    private readonly T defaultInternal;
+    protected T InternalValue;
 
     public bool IsDisposed { get; set; }
 
@@ -30,6 +31,13 @@ public class Bindable<T>(T defaultInternalValue) : IBindable, IPooledObject
     }
 
     protected readonly Dictionary<BindableListener<T>, BindableEventSource?> Listeners = [];
+
+    public Bindable(T defaultInternalValue)
+    {
+        defaultInternal = defaultInternalValue;
+        InternalValue = defaultInternalValue;
+        EngineStatistics.Increment(EngineStatistics.Type.Bindables);
+    }
 
     public BindableListener<T> OnValueChange(Action<BindableEvent<T>> func, bool triggerOnce = false, BindableEventSource? ignoresSource = null)
     {
@@ -78,6 +86,7 @@ public class Bindable<T>(T defaultInternalValue) : IBindable, IPooledObject
         Unbind();
         Listeners.Clear();
         IsDisposed = true;
+        EngineStatistics.Decrement(EngineStatistics.Type.Bindables);
     }
 
     public void TriggerChange()

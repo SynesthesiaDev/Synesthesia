@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Faster.Map.Core;
+using Synesthesia.Engine.Util.Statistics;
 
 namespace Synesthesia.Engine.Graphics;
 
@@ -185,6 +186,7 @@ public readonly struct Color : IEquatable<Color>
         };
 
         hexColorCache.Insert(hex, color);
+        EngineStatistics.Increment(EngineStatistics.Type.ColorCacheSize);
         return color;
     }
 

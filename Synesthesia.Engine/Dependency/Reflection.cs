@@ -34,8 +34,6 @@ public static class Reflection
 
                 var service = DependencyContainer.Get(field.FieldType);
                 field.SetValue(target, service);
-
-                EngineStatistics.DEPENDENCIES_RESOLVED_REFLECTION.Increment();
             }
 
             currentType = currentType.BaseType;

@@ -12,6 +12,7 @@ using Synesthesia.Engine.Graphics.Shaders;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Util;
+using Synesthesia.Engine.Util.Statistics;
 using SynesthesiaUtil.Extensions;
 using Shader = Synesthesia.Engine.Graphics.Shader;
 using Texture = Synesthesia.Engine.Graphics.Textures.Texture;

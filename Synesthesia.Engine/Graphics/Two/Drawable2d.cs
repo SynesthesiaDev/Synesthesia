@@ -5,6 +5,7 @@ using System.Numerics;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util;
+using Synesthesia.Engine.Util.Statistics;
 using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two;

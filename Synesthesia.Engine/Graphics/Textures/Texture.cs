@@ -6,6 +6,7 @@ using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Util.Exceptions;
+using Synesthesia.Engine.Util.Statistics;
 
 namespace Synesthesia.Engine.Graphics.Textures;
 

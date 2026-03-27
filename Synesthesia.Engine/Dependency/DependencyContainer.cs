@@ -1,5 +1,6 @@
 
 using Synesthesia.Engine.Logging;
+using Synesthesia.Engine.Util.Statistics;
 
 namespace Synesthesia.Engine.Dependency;
 
@@ -30,7 +31,7 @@ public static class DependencyContainer
         cache.TryGetValue(type, out var value);
         if (value != null)
         {
-            EngineStatistics.DEPENDENCIES_RESOLVED.Increment();
+            EngineStatistics.Increment(EngineStatistics.Type.DependenciesResolved);
             return value;
         }
 
