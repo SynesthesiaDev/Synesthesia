@@ -6,7 +6,7 @@ using Synesthesia.Engine.Util.Pooling;
 
 namespace Synesthesia.Engine.Input.Events;
 
-public class TouchInputEvent : IInputEvent
+public class TouchInputEvent : ICursorInputEvent
 {
     public void Reset()
     {
@@ -32,6 +32,8 @@ public class TouchInputEvent : IInputEvent
 
     public float Pressure { get; set; }
 
+    public bool IsPrimary { get; set; }
+
     public static TouchInputEvent Rent() => InputHandler.TOUCH_INPUT_EVENT_POOL.Rent();
 
     public void ReturnToPool() => ReturnAction?.Invoke(this);
@@ -40,4 +42,5 @@ public class TouchInputEvent : IInputEvent
     {
         return $"TouchInputEvent(IsDown={IsDown},FingerId={FingerId},Pressure={Pressure},Position={Position},IsPooled={IsPooled},Timestamp={Timestamp})";
     }
+
 }

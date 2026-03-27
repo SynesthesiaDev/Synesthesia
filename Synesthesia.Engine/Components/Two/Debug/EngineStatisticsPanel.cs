@@ -5,9 +5,11 @@ using System.Collections.Immutable;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
+using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Graphics.Two.Container;
+using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util;
 using Synesthesia.Engine.Util.Statistics;
@@ -18,6 +20,8 @@ namespace Synesthesia.Engine.Components.Two.Debug;
 public class EngineStatisticsPanel : EngineDebugElement
 {
     private static GCMemoryInfo gcMemoryInfo => GC.GetGCMemoryInfo();
+
+    private Box2d backgroundBox = null!;
 
     private readonly ImmutableList<Drawable2d> statistics = Lists.Immutable<Drawable2d>
     (
@@ -40,6 +44,9 @@ public class EngineStatisticsPanel : EngineDebugElement
         new EngineStatisticLine(EngineStatistics.Type.ObjectsRented),
         new EngineStatisticLine(EngineStatistics.Type.ObjectsReturned),
         new Spacer(),
+        new EngineStatisticLine(EngineStatistics.Type.Animators),
+        new EngineStatisticLine(EngineStatistics.Type.Animations),
+        new Spacer(),
         new EngineStatisticLine(EngineStatistics.Type.TextureAtlases),
         new EngineStatisticLine(EngineStatistics.Type.FontAtlases),
         new EngineStatisticLine(EngineStatistics.Type.CachedResourceStoreSize),
@@ -60,7 +67,7 @@ public class EngineStatisticsPanel : EngineDebugElement
                 Origin = Anchor.Centre,
                 Children =
                 [
-                    new Box2d
+                    backgroundBox = new Box2d
                     {
                         RelativeSizeAxes = Axes.Both,
                         Color = EngineBranding.BACKGROUND2,
@@ -79,6 +86,17 @@ public class EngineStatisticsPanel : EngineDebugElement
                 ]
             }
         ];
+    }
+
+    protected internal override bool OnHover(IPositionalInputEvent e)
+    {
+        backgroundBox.FadeColorTo(EngineBranding.BACKGROUND3, 150, Easing.OutQuad);
+        return true;
+    }
+
+    protected internal override void OnHoverLost(IPositionalInputEvent e)
+    {
+        backgroundBox.FadeColorTo(EngineBranding.BACKGROUND2, 150, Easing.InQuad);
     }
 
     private abstract class Line : CompositeDrawable2d;

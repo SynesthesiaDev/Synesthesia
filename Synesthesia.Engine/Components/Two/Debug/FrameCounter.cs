@@ -2,10 +2,12 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Numerics;
+using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Graphics.Two.Container;
+using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util;
@@ -17,6 +19,8 @@ public class FrameCounter : EngineDebugElement
 {
     [Singleton]
     private Game game = null!;
+
+    private Box2d backgroundBox = null!;
 
     protected override void OnLoading()
     {
@@ -30,7 +34,7 @@ public class FrameCounter : EngineDebugElement
                 Origin = Anchor.Centre,
                 Children =
                 [
-                    new Box2d
+                    backgroundBox = new Box2d
                     {
                         RelativeSizeAxes = Axes.Both,
                         Color = EngineBranding.BACKGROUND2,
@@ -56,6 +60,17 @@ public class FrameCounter : EngineDebugElement
                 ]
             }
         ];
+    }
+
+    protected internal override bool OnHover(IPositionalInputEvent e)
+    {
+        backgroundBox.FadeColorTo(EngineBranding.BACKGROUND3, 150, Easing.OutQuad);
+        return true;
+    }
+
+    protected internal override void OnHoverLost(IPositionalInputEvent e)
+    {
+        backgroundBox.FadeColorTo(EngineBranding.BACKGROUND2, 150, Easing.InQuad);
     }
 
     private class PerformanceMonitorElement(ThreadRunner thread) : CompositeDrawable2d

@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using System.Globalization;
+using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Events;
 using Synesthesia.Engine.Graphics.Layout;
@@ -21,7 +22,7 @@ public abstract class Drawable : IDisposable
 
     internal readonly object LoadLock = new();
 
-    public readonly SingleOffEventDispatcher<Drawable> OnLoadComplete;
+    public readonly SingleOffEventDispatcher<Drawable> OnLoadComplete = Pooled.DRAWABLE_LOAD_DISPATCHER_POOL.Rent();
 
     private static readonly StopwatchClock performance_watch = new(true);
 
@@ -37,6 +38,8 @@ public abstract class Drawable : IDisposable
 
     public readonly DrawMatrix DrawMatrix = Pooled.DRAW_MATRIX_POOL.Rent();
 
+    protected readonly Lazy<Animator> Animator = new(() => new Animator());
+
     protected internal abstract void OnDraw();
 
     protected internal virtual void OnUpdate(FrameInfo frameInfo)
@@ -51,15 +54,6 @@ public abstract class Drawable : IDisposable
         Loading,
         Ready,
         Loaded
-    }
-
-    protected Drawable()
-    {
-        OnLoadComplete = Pooled.DRAWABLE_LOAD_DISPATCHER_POOL.Rent();
-
-        //TODO
-        // Scheduler = new Lazy<Scheduler>(() => new Scheduler());
-        // Animator = new Lazy<Animator>(() => new Animator(Scheduler.Value));
     }
 
     internal void Load()

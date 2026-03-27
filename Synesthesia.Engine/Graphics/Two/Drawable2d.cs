@@ -2,7 +2,10 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Numerics;
+using Synesthesia.Engine.Animations;
+using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Graphics.Layout;
+using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util;
 using Synesthesia.Engine.Util.Statistics;
@@ -255,6 +258,10 @@ public abstract class Drawable2d : Drawable
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {
         UpdateLayout();
+        if (Animator.IsValueCreated)
+        {
+            Animator.Value.Update(frameInfo);
+        }
     }
 
     protected virtual void OnLayout(Invalidation dirty)
@@ -364,5 +371,138 @@ public abstract class Drawable2d : Drawable
     private void invalidateChildrenIfComposite(Invalidation invalidation)
     {
         if (this is CompositeDrawable2d composite) composite.InvalidateChildren(invalidation);
+    }
+
+    #region Input
+
+    protected internal virtual bool OnHover(IPositionalInputEvent e)
+    {
+        return false;
+    }
+
+    protected internal virtual void OnHoverLost(IPositionalInputEvent e)
+    {
+    }
+
+    protected internal virtual bool OnMouseDown(ICursorInputEvent e)
+    {
+        return false;
+    }
+
+    protected internal virtual void OnMouseUp(ICursorInputEvent e)
+    {
+    }
+
+    protected internal virtual bool OnKeyDown(KeyboardInputEvent e)
+    {
+        return false;
+    }
+
+    protected internal virtual void OnKeyUp(KeyboardInputEvent e)
+    {
+    }
+
+    protected internal virtual bool OnMouseWheel(float delta)
+    {
+        return false;
+    }
+
+    #endregion
+
+    #region Transforms
+
+    public Animation<T> TransformTo<T>(string field, T startValue, T endValue, long duration, Easing easing, Transform<T> transform, Action<T> onUpdate, Action? onComplete = null, long delay = 0L)
+    {
+        var animation = new Animation<T>
+        {
+            StartValue = startValue,
+            EndValue = endValue,
+            Duration = duration,
+            Transform = transform,
+            Easing = easing,
+            OnUpdate = onUpdate,
+            OnComplete = onComplete,
+            Delay = delay
+        };
+        Animator.Value.AddAnimation(field, animation);
+        return animation;
+    }
+
+    public Animation<Vector2> MoveTo(Vector2 newPosition, long duration, Easing easing)
+    {
+        return TransformTo(nameof(Position), Position, newPosition, duration, easing, Transforms.VECTOR2, vec => { Position = vec; });
+    }
+
+    public Animation<float> MoveXTo(float newX, long duration, Easing easing)
+    {
+        return TransformTo(nameof(X), X, newX, duration, easing, Transforms.FLOAT, f => { X = f; });
+    }
+
+    public Animation<float> MoveYTo(float newY, long duration, Easing easing)
+    {
+        return TransformTo(nameof(Y), Y, newY, duration, easing, Transforms.FLOAT, f => { Y = f; });
+    }
+
+    public Animation<Vector2> ScaleTo(float newScale, long duration, Easing easing)
+    {
+        return ScaleTo(new Vector2(newScale), duration, easing);
+    }
+
+    public Animation<Vector2> ScaleFromTo(float oldScale, float newScale, long duration, Easing easing)
+    {
+        return ScaleFromTo(new Vector2(oldScale), new Vector2(newScale), duration, easing);
+    }
+
+    public Animation<float> ResizeWidthTo(float newWidth, long duration, Easing easing)
+    {
+        return TransformTo(nameof(Width), Width, newWidth, duration, easing, Transforms.FLOAT, a => Width = a);
+    }
+
+    public Animation<float> ResizeHeightTo(float newHeight, long duration, Easing easing)
+    {
+        return TransformTo(nameof(Height), Height, newHeight, duration, easing, Transforms.FLOAT, a => Height = a);
+    }
+
+    public Animation<Vector2> ScaleTo(Vector2 newScale, long duration, Easing easing)
+    {
+        return TransformTo(nameof(Scale), Scale, newScale, duration, easing, Transforms.VECTOR2, vec => { Scale = vec; });
+    }
+
+    public Animation<Vector2> ScaleFromTo(Vector2 oldScale, Vector2 newScale, long duration, Easing easing)
+    {
+        return TransformTo(nameof(Scale), oldScale, newScale, duration, easing, Transforms.VECTOR2, vec => { Scale = vec; });
+    }
+
+    public Animation<Vector2> ResizeTo(Vector2 newSize, long duration, Easing easing)
+    {
+        return TransformTo(nameof(Size), Size, newSize, duration, easing, Transforms.VECTOR2, vec => { Size = vec; });
+    }
+
+    public Animation<float> RotateTo(float newRotation, long duration, Easing easing)
+    {
+        return TransformTo(nameof(Rotation), Rotation, newRotation, duration, easing, Transforms.FLOAT, f => { Rotation = f; });
+    }
+
+    public Animation<float> FadeTo(float newAlpha, long duration, Easing easing)
+    {
+        return TransformTo(nameof(Alpha), Alpha, newAlpha, duration, easing, Transforms.FLOAT, a => Alpha = a);
+    }
+
+    public Animation<float> FadeFromTo(float startAlpha, float endAlpha, long duration, Easing easing)
+    {
+        return TransformTo(nameof(Alpha), startAlpha, endAlpha, duration, easing, Transforms.FLOAT, a => Alpha = a);
+    }
+
+    #endregion
+
+    public bool Contains(Vector2 screenSpacePoint)
+    {
+        if (!Visible) return false;
+
+        var pos = ScreenSpacePosition;
+        var scaledSize = Size * InheritedScale;
+
+        return screenSpacePoint.X >= pos.X && screenSpacePoint.X <= pos.X + scaledSize.X &&
+               screenSpacePoint.Y >= pos.Y && screenSpacePoint.Y <= pos.Y + scaledSize.Y;
     }
 }

@@ -112,8 +112,8 @@ public abstract class ThreadRunner : IDisposable
                     FrameIndex = FrameIndex,
                 };
 
-                ProcessFrame(frameInfo);
                 tryDequeueCommand();
+                ProcessFrame(frameInfo);
             }
         }
 

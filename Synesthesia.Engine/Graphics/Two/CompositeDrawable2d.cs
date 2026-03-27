@@ -7,6 +7,9 @@ using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Util;
 using System.Runtime.InteropServices;
 using Synesthesia.Engine.Dependency;
+using Synesthesia.Engine.Input;
+using Synesthesia.Engine.Input.Events;
+using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util.Pooling;
@@ -81,6 +84,8 @@ public class CompositeDrawable2d : Drawable2d
         }
     } = Vector4.Zero;
 
+    #region Children Management
+
     protected internal void InvalidateChildren(Invalidation flags)
     {
         using var snapshot = Snapshot.Rent(InternalChildren);
@@ -124,20 +129,6 @@ public class CompositeDrawable2d : Drawable2d
         }
     }
 
-    protected override void InternalLoadComplete()
-    {
-        lock (childrenLock)
-        {
-            foreach (ref Drawable2d internalChild in CollectionsMarshal.AsSpan(InternalChildren))
-            {
-                internalChild.Load();
-            }
-        }
-        UpdateLayout();
-
-        base.InternalLoadComplete();
-    }
-
     public void AddChild(Drawable2d child)
     {
         lock (childrenLock)
@@ -149,8 +140,40 @@ public class CompositeDrawable2d : Drawable2d
         }
     }
 
+    public void RemoveChild(Drawable2d child)
+    {
+        lock (childrenLock)
+        {
+            InternalChildren.Remove(child);
+            child.Dispose();
+            Invalidate(Invalidation.Layout | Invalidation.Size);
+        }
+    }
+
+    #endregion
+
+    #region Lifecycle
+
+    protected override void InternalLoadComplete()
+    {
+        lock (childrenLock)
+        {
+            foreach (ref Drawable2d internalChild in CollectionsMarshal.AsSpan(InternalChildren))
+            {
+                internalChild.Load();
+            }
+        }
+
+        UpdateLayout();
+
+        base.InternalLoadComplete();
+    }
+
+
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {
+        if(!Visible) return;
+
         Snapshot<Drawable2d> snapshot;
         lock (childrenLock)
         {
@@ -199,6 +222,10 @@ public class CompositeDrawable2d : Drawable2d
         if (Masking) renderer.EndStencil();
     }
 
+    #endregion
+
+    #region Layout
+
     protected override void OnLayout(Invalidation dirty)
     {
         base.OnLayout(dirty);
@@ -215,16 +242,6 @@ public class CompositeDrawable2d : Drawable2d
 
         if (AutoSizeAxes.HasFlagFast(Axes.X)) Width = childrenSize.X + AutoSizePadding.X + AutoSizePadding.Z;
         if (AutoSizeAxes.HasFlagFast(Axes.Y)) Height = childrenSize.Y + AutoSizePadding.Y + AutoSizePadding.W;
-    }
-
-    public void RemoveChild(Drawable2d child)
-    {
-        lock (childrenLock)
-        {
-            InternalChildren.Remove(child);
-            child.Dispose();
-            Invalidate(Invalidation.Layout | Invalidation.Size);
-        }
     }
 
     public Vector2 GetChildrenSize()
@@ -269,6 +286,119 @@ public class CompositeDrawable2d : Drawable2d
             }
         }
     }
+
+    #endregion
+
+    #region Input
+
+    protected internal void UpdateHoverState(IPositionalInputEvent e)
+    {
+        var handled = false;
+        lock (childrenLock)
+        {
+            for (var i = InternalChildren.Count - 1; i >= 0; i--)
+            {
+                var child = InternalChildren[i];
+                if (!child.CanHandleInput) continue;
+
+                var containsMouse = child.Contains(e.Position);
+
+                if (handled | !containsMouse)
+                {
+                    if (child.IsHovered)
+                    {
+                        child.IsHovered = false;
+                        child.OnHoverLost(e);
+                    }
+                }
+                else
+                {
+                    if (!child.IsHovered)
+                    {
+                        if (child.OnHover(e))
+                        {
+                            child.IsHovered = true;
+                            handled = true;
+                        }
+                    }
+                    else
+                    {
+                        handled = true;
+                    }
+                }
+
+                if (child is CompositeDrawable2d composite)
+                {
+                    composite.UpdateHoverState(e);
+                }
+            }
+        }
+    }
+
+    protected internal void UpdateKeyState(KeyboardInputEvent keyboardInputEvent)
+    {
+        var down = keyboardInputEvent.IsDown;
+        for (int i = InternalChildren.Count - 1; i >= 0; i--)
+        {
+            var child = InternalChildren[i];
+            if (!child.CanHandleInput) continue;
+
+            var handled = down && child.OnKeyDown(keyboardInputEvent);
+            if (!down) child.OnKeyUp(keyboardInputEvent);
+
+            if (handled) break;
+
+            if (child is CompositeDrawable2d composite)
+                composite.UpdateKeyState(keyboardInputEvent);
+        }
+    }
+
+
+    protected internal void UpdateCursorInputState(ICursorInputEvent e)
+    {
+        var down = e.IsDown;
+        for (var i = InternalChildren.Count - 1; i >= 0; i--)
+        {
+            var child = InternalChildren[i];
+            if (!child.CanHandleInput) continue;
+
+            if (down && child is { IsMouseDown: false, IsHovered: true } && child.OnMouseDown(e))
+            {
+                Logger.Verbose($"{e} handled by {child.GetType().Name}", Logger.Input);
+                child.IsMouseDown = true;
+            }
+
+            if (!down && child.IsMouseDown)
+            {
+                child.IsMouseDown = false;
+                Logger.Verbose($"{e} handled by {child.GetType().Name}", Logger.Input);
+                child.OnMouseUp(e);
+            }
+
+            if (child is CompositeDrawable2d drawable2d)
+            {
+                drawable2d.UpdateCursorInputState(e);
+            }
+        }
+    }
+
+    protected internal void UpdateScrollWheelState(MouseScrollInputEvent e)
+    {
+        foreach (var child in InternalChildren.Filter(c => c.CanHandleInput && c.Contains(InputHandler.MousePosition)).Reversed())
+        {
+            var handled = child.OnMouseWheel(e.Delta);
+
+            if (handled) continue;
+
+            if (child is CompositeDrawable2d drawable2d)
+            {
+                drawable2d.UpdateScrollWheelState(e);
+            }
+        }
+    }
+
+
+    #endregion
 
     protected override void Dispose(bool isDisposing)
     {

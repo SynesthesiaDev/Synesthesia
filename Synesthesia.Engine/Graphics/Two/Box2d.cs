@@ -3,6 +3,8 @@
 
 using System.Drawing;
 using System.Numerics;
+using Synesthesia.Engine.Animations;
+using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Textures;
@@ -61,10 +63,13 @@ public class Box2d : Drawable2d
     {
         base.OnLayout(dirty);
 
-        if (!dirty.HasFlagFast(Invalidation.Geometry | Invalidation.DrawNode)) return;
+        if (dirty.HasFlagFast(Invalidation.DrawNode))
         {
             packedColor = Color.ToRgba32();
+        }
 
+        if (dirty.HasFlagFast(Invalidation.Geometry))
+        {
             drawSize = Size;
             drawOffset = Vector2.Zero;
             uvCoords = new RectangleF(0, 0, 1, 1);
@@ -107,6 +112,16 @@ public class Box2d : Drawable2d
                 }
             }
         }
+    }
+
+    public Animation<float> ChangeCornerRadius(float newCornerRadius, long duration, Easing easing)
+    {
+        return TransformTo(nameof(CornerRadius), CornerRadius, newCornerRadius, duration, easing, Transforms.FLOAT, color => CornerRadius = color);
+    }
+
+    public Animation<Color> FadeColorTo(Color newColor, long duration, Easing easing)
+    {
+        return TransformTo(nameof(Color), Color, newColor, duration, easing, Transforms.COLOR, color => Color = color);
     }
 
     protected override void OnDraw2d()

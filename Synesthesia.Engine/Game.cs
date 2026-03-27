@@ -124,7 +124,7 @@ public class Game
     public Game(IWindowHost gameWindowHost)
     {
         WindowHost = gameWindowHost;
-        InputHandler = new InputHandler();
+        InputHandler = new InputHandler(this);
         InputThread = new InputThread();
         UpdateThread = new UpdateThread();
         AudioThread = new AudioThread();

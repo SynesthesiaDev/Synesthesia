@@ -14,17 +14,17 @@ using Synesthesia.Engine.Util.Statistics;
 
 namespace Synesthesia.Engine.Input;
 
-public sealed class InputHandler : IFrameProcessor, IDisposable
+public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
 {
     public static readonly FastObjectPool<KeyboardInputEvent> KEYBOARD_EVENT_POOL = new(() => new KeyboardInputEvent());
-    public static readonly FastObjectPool<MouseButtonInputEvent> MOUSE_BUTTON_EVENT_POOL = new(() => new MouseButtonInputEvent());
+    public static readonly FastObjectPool<MouseButtonInputInputEvent> MOUSE_BUTTON_EVENT_POOL = new(() => new MouseButtonInputInputEvent());
     public static readonly FastObjectPool<MouseMoveInputEvent> MOUSE_MOVE_EVENT_POOL = new(() => new MouseMoveInputEvent());
     public static readonly FastObjectPool<MouseScrollInputEvent> MOUSE_SCROLL_INPUT_EVENT_POOL = new(() => new MouseScrollInputEvent());
     public static readonly FastObjectPool<TouchInputEvent> TOUCH_INPUT_EVENT_POOL = new(() => new TouchInputEvent());
     public static readonly FastObjectPool<TabletInputEvent> TABLET_INPUT_EVENT_POOL = new(() => new TabletInputEvent());
 
     public static readonly EventDispatcher<KeyboardInputEvent> ON_KEYBOARD_INPUT = new();
-    public static readonly EventDispatcher<MouseButtonInputEvent> ON_MOUSE_BUTTON_INPUT = new();
+    public static readonly EventDispatcher<MouseButtonInputInputEvent> ON_MOUSE_BUTTON_INPUT = new();
     public static readonly EventDispatcher<MouseScrollInputEvent> ON_MOUSE_SCROLL_INPUT = new();
     public static readonly EventDispatcher<TouchInputEvent> ON_TOUCH_INPUT = new();
 
@@ -59,7 +59,7 @@ public sealed class InputHandler : IFrameProcessor, IDisposable
                     case KeyboardInputEvent keyboardInputEvent:
                         handleKeyboardInput(keyboardInputEvent);
                         break;
-                    case MouseButtonInputEvent mouseButtonInputEvent:
+                    case MouseButtonInputInputEvent mouseButtonInputEvent:
                         handleMouseButton(mouseButtonInputEvent);
                         break;
                     case TouchInputEvent touchInputEvent:
@@ -88,6 +88,7 @@ public sealed class InputHandler : IFrameProcessor, IDisposable
         // var isDelta = positionalInputEvent.PositionDelta != Vector2.Zero;
         //TODO Mose Delta
         MousePosition = positionalInputEvent.Position;
+        game.DrawableScene2d.UpdateHoverState(positionalInputEvent);
     }
 
     private void handleKeyboardInput(KeyboardInputEvent keyboardInputEvent)
@@ -103,13 +104,14 @@ public sealed class InputHandler : IFrameProcessor, IDisposable
             held_keys.Remove(key);
         }
 
+        game.DrawableScene2d.UpdateKeyState(keyboardInputEvent);
         ON_KEYBOARD_INPUT.Dispatch(keyboardInputEvent);
     }
 
-    private void handleMouseButton(MouseButtonInputEvent mouseButtonInputEvent)
+    private void handleMouseButton(MouseButtonInputInputEvent mouseButtonInputInputEvent)
     {
-        var button = mouseButtonInputEvent.Button;
-        if (mouseButtonInputEvent.IsDown)
+        var button = mouseButtonInputInputEvent.Button;
+        if (mouseButtonInputInputEvent.IsDown)
         {
             if (held_mouse_buttons.Contains(button)) return;
             held_mouse_buttons.Add(button);
@@ -119,6 +121,8 @@ public sealed class InputHandler : IFrameProcessor, IDisposable
             if (!held_mouse_buttons.Contains(button)) return;
             held_mouse_buttons.Remove(button);
         }
+
+        game.DrawableScene2d.UpdateCursorInputState(mouseButtonInputInputEvent);
     }
 
     private void handleTouchInputEvent(TouchInputEvent touchInputEvent)
@@ -134,19 +138,8 @@ public sealed class InputHandler : IFrameProcessor, IDisposable
             if (!active_touches.Contains(finger)) return;
             active_touches.Remove(finger);
         }
+        game.DrawableScene2d.UpdateCursorInputState(touchInputEvent);
     }
-
-    // private void handleTextEditing(SDL.TextEditingEvent textEditingEvent)
-    // {
-    //     var text = textEditingEvent.Text;
-    //     Logger.Verbose($"Text editing - {text}");
-    // }
-    //
-    // private void handleTextInput(SDL.TextInputEvent textInputEvent)
-    // {
-    //     var text = textInputEvent.Text;
-    //     Logger.Verbose($"Text input - {text}");
-    // }
 
     public void Dispose()
     {

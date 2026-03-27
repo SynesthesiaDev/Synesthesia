@@ -5,8 +5,7 @@ using Synesthesia.Engine.Util.Pooling;
 
 namespace Synesthesia.Engine.Input.Events;
 
-
-public class MouseButtonInputEvent : IInputEvent
+public class MouseButtonInputInputEvent : ICursorInputEvent
 {
     public void Reset()
     {
@@ -24,9 +23,13 @@ public class MouseButtonInputEvent : IInputEvent
     public InputEventSource Source => InputEventSource.Mouse;
 
     public long Timestamp { get; set; }
+
     public bool IsDown { get; set; }
 
-    public static MouseButtonInputEvent Rent() => InputHandler.MOUSE_BUTTON_EVENT_POOL.Rent();
+
+    public bool IsPrimary { get; set; }
+
+    public static MouseButtonInputInputEvent Rent() => InputHandler.MOUSE_BUTTON_EVENT_POOL.Rent();
 
     public void ReturnToPool() => ReturnAction?.Invoke(this);
 

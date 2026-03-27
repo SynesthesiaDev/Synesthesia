@@ -502,7 +502,7 @@ public class SDL3WindowHost : IWindowHost
         var mouseButton = mouseButtonEvent.ToMouseButton();
         var mask = ButtonMask(mouseButtonEvent.Button);
 
-        var mousePressEvent = MouseButtonInputEvent.Rent();
+        var mousePressEvent = MouseButtonInputInputEvent.Rent();
         switch (mouseButtonEvent.Type)
         {
             case EventType.MouseButtonDown:
@@ -563,7 +563,7 @@ public class SDL3WindowHost : IWindowHost
 
     private void handleMouseButton(MouseButton mouseButton, bool down, long timestamp)
     {
-        var mouseButtonInputEvent = MouseButtonInputEvent.Rent();
+        var mouseButtonInputEvent = MouseButtonInputInputEvent.Rent();
         mouseButtonInputEvent.Button = mouseButton;
         mouseButtonInputEvent.IsDown = down;
         mouseButtonInputEvent.Timestamp = timestamp;
