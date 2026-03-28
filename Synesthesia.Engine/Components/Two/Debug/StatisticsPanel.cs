@@ -17,7 +17,7 @@ using SynesthesiaUtil;
 
 namespace Synesthesia.Engine.Components.Two.Debug;
 
-public class EngineStatisticsPanel : EngineDebugElement
+public class StatisticsPanel : EngineDebugElement
 {
     private static GCMemoryInfo gcMemoryInfo => GC.GetGCMemoryInfo();
 
@@ -86,6 +86,12 @@ public class EngineStatisticsPanel : EngineDebugElement
                 ]
             }
         ];
+    }
+
+    protected internal override void OnUpdate(FrameInfo frameInfo)
+    {
+        if(!Visible) return;
+        base.OnUpdate(frameInfo);
     }
 
     protected internal override bool OnHover(IPositionalInputEvent e)

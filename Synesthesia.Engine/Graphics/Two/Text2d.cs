@@ -111,6 +111,7 @@ public class Text2d : Drawable2d
                 drawMatrix: DrawMatrix,
                 position: charPos,
                 size: drawSize,
+                alpha: InheritedAlpha,
                 packedColor: packedColor,
                 borderThickness: 0,
                 borderHasSingleColor: true,

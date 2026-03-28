@@ -5,6 +5,7 @@ using System.Numerics;
 using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Graphics.Layout;
+using Synesthesia.Engine.Input.ActionBindings;
 using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util;
@@ -38,6 +39,18 @@ public abstract class Drawable2d : Drawable
             Invalidate(Invalidation.Geometry);
         }
     } = 0;
+
+    public bool Visible {
+        get;
+        set
+        {
+            if(field == value) return;
+            field = value;
+
+            Invalidate(Invalidation.Size | Invalidation.Layout | Invalidation.Size);
+        }
+
+    } = true;
 
     public float Width
     {
@@ -431,6 +444,16 @@ public abstract class Drawable2d : Drawable
     protected internal virtual void OnKeyUp(KeyboardInputEvent e)
     {
     }
+
+    protected internal virtual bool OnPlatformBindingDown(PlatformActionBinding e)
+    {
+        return false;
+    }
+
+    protected internal virtual void OnPlatformBindingUp(PlatformActionBinding e)
+    {
+    }
+
 
     protected internal virtual bool OnMouseWheel(float delta)
     {

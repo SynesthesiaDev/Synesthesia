@@ -2,6 +2,7 @@
 
 in vec2 v_texCoord;
 in vec4 v_color;
+in float v_alpha;
 in vec2 v_size;
 in float v_radius; // Shape mode: Corner Radius | Text mode: SDF Thickness
 in vec2 v_localUV;
@@ -26,7 +27,7 @@ void main() {
         float dist = texture(u_texture, v_texCoord).a - 0.1;
         float smoothing = 1.5 / v_size.y;
         float localAlpha = smoothstep(threshold - smoothing, threshold + smoothing, dist);
-        FragColor = vec4(v_color.rgb, v_color.a * localAlpha);
+        FragColor = vec4(v_color.rgb, (v_color.a * localAlpha) * v_alpha);
         return;
         
     } else if (v_mode == VERTEX_MODE_SHAPE) {
@@ -58,11 +59,9 @@ void main() {
             float fillAlpha = 1.0 - smoothstep(-edgeSoftness, edgeSoftness, fillDist);
 
             vec4 combinedColor = mix(finalBorderColor, fillColor, fillAlpha);
-            FragColor = vec4(combinedColor.rgb, combinedColor.a * outerAlpha);
+            FragColor = vec4(combinedColor.rgb, (combinedColor.a * outerAlpha) * v_alpha);
         } else {
-            FragColor = vec4(fillColor.rgb, fillColor.a * outerAlpha);
+            FragColor = vec4(fillColor.rgb, (fillColor.a * outerAlpha) * v_alpha);
         }
-
-        vec4 finalColor = texColor * v_color;
     }
 }

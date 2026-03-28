@@ -14,6 +14,7 @@ public readonly struct Vertex2d(
     Vector2 texCoord,
     Vector2 size,
     uint color,
+    float alpha,
     float radius,
     Vector2 localUv,
     VertexMode mode,
@@ -35,24 +36,27 @@ public readonly struct Vertex2d(
     public readonly uint Color = color;
 
     [VertexInfo(4, 1, VertexAttribPointerType.Float)]
+    public readonly float Alpha = alpha;
+
+    [VertexInfo(5, 1, VertexAttribPointerType.Float)]
     public readonly float Radius = radius;
 
-    [VertexInfo(5, 2, VertexAttribPointerType.Float)]
+    [VertexInfo(6, 2, VertexAttribPointerType.Float)]
     public readonly Vector2 LocalUV = localUv;
 
-    [VertexInfo(6, 1, VertexAttribPointerType.Float)]
+    [VertexInfo(7, 1, VertexAttribPointerType.Float)]
     public readonly float Mode = (float)mode;
 
-    [VertexInfo(7, 1, VertexAttribPointerType.Float)]
+    [VertexInfo(8, 1, VertexAttribPointerType.Float)]
     public readonly float BorderThickness = borderThickness;
 
-    [VertexInfo(8, 1, VertexAttribPointerType.Float)]
+    [VertexInfo(9, 1, VertexAttribPointerType.Float)]
     public readonly float BorderHasSingleColor = hasSingleColor.ToInt();
 
     // can't fucking pass 16 at once. have to break it into chunks. fucking glsl
-    [VertexInfo(9, 4, VertexAttribPointerType.Float)]
     [VertexInfo(10, 4, VertexAttribPointerType.Float)]
     [VertexInfo(11, 4, VertexAttribPointerType.Float)]
     [VertexInfo(12, 4, VertexAttribPointerType.Float)]
+    [VertexInfo(13, 4, VertexAttribPointerType.Float)]
     public readonly Matrix4x4 BorderColor = borderColor;
 }

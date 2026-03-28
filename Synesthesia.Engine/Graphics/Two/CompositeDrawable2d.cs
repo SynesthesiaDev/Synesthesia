@@ -8,6 +8,7 @@ using Synesthesia.Engine.Util;
 using System.Runtime.InteropServices;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Input;
+using Synesthesia.Engine.Input.ActionBindings;
 using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform.Render;
@@ -187,6 +188,7 @@ public class CompositeDrawable2d : Drawable2d
                 position: Vector2.Zero,
                 size: Size,
                 packedColor: Color.WhitePacked,
+                alpha: InheritedAlpha,
                 borderThickness: 0f,
                 borderHasSingleColor: true,
                 borderColor: CachedBorderColor,
@@ -213,6 +215,7 @@ public class CompositeDrawable2d : Drawable2d
                 position: Vector2.Zero,
                 size: Size,
                 packedColor: Color.TransparentPacked,
+                alpha: InheritedAlpha,
                 borderThickness: BorderThickness,
                 borderHasSingleColor: BorderColor.HasSingleColor,
                 borderColor: CachedBorderColor,
@@ -349,6 +352,24 @@ public class CompositeDrawable2d : Drawable2d
 
             if (child is CompositeDrawable2d composite)
                 composite.UpdateKeyState(keyboardInputEvent);
+        }
+    }
+
+    protected internal void UpdatePlatformActionBindingState(PlatformActionBinding platformActionBinding)
+    {
+        var down = platformActionBinding.IsDown;
+        for (int i = InternalChildren.Count - 1; i >= 0; i--)
+        {
+            var child = InternalChildren[i];
+            if (!child.CanHandleInput) continue;
+
+            var handled = down && child.OnPlatformBindingDown(platformActionBinding);
+            if (!down) child.OnPlatformBindingUp(platformActionBinding);
+
+            if (handled) break;
+
+            if (child is CompositeDrawable2d composite)
+                composite.UpdatePlatformActionBindingState(platformActionBinding);
         }
     }
 

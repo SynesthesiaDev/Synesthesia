@@ -20,7 +20,7 @@ public readonly struct EasingFunction(Easing easing) : IEasingFunction
     {
         switch (easing)
         {
-            case Easing.None:
+            case Easing.Linear:
             default:
                 return time;
 

@@ -30,8 +30,6 @@ public abstract class Drawable : IDisposable
 
     public Thread LoadThread { get; private set; } = null!;
 
-    public bool Visible { get; set; } = true;
-
     public float Alpha { get; set; } = 1f;
 
     public BlendMode BlendMode { get; set; } = BlendMode.Alpha;

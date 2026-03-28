@@ -6,11 +6,13 @@ using System.Numerics;
 using Faster.Map.Core;
 using Synesthesia.Engine.Events;
 using Synesthesia.Engine.Extensions;
+using Synesthesia.Engine.Input.ActionBindings;
 using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform;
 using Synesthesia.Engine.Util.Pooling;
 using Synesthesia.Engine.Util.Statistics;
+using System.Runtime.InteropServices;
 
 namespace Synesthesia.Engine.Input;
 
@@ -32,8 +34,11 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
 
     private static readonly List<Key> held_keys = [];
     private static readonly List<MouseButton> held_mouse_buttons = [];
+    private static readonly List<PlatformActionBinding> held_action_bindings = [];
 
     private readonly ConcurrentQueue<IInputEvent> eventQueue = new();
+
+    private static readonly List<PlatformActionBinding> platformActionBindings = [];
 
     public static bool IsKeyDown(Key key) => held_keys.Contains(key);
 
@@ -81,14 +86,41 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
                 inputEvent.ReturnToPool();
             }
         }
+        updateActionBindings();
     }
+
+    public static void RegisterActionBinding(PlatformActionBinding binding)
+    {
+        Logger.Verbose($"Registered Action Binding {binding}", Logger.Input);
+        platformActionBindings.Add(binding);
+    }
+
+    private void updateActionBindings()
+    {
+        foreach (ref PlatformActionBinding binding in CollectionsMarshal.AsSpan(platformActionBindings))
+        {
+            switch (binding.IsDown)
+            {
+                case true when !held_action_bindings.Contains(binding):
+                    held_action_bindings.Add(binding);
+                    game.DrawableScene2d.UpdatePlatformActionBindingState(binding);
+                    break;
+                case false when held_action_bindings.Contains(binding):
+                    game.DrawableScene2d.UpdatePlatformActionBindingState(binding);
+                    held_action_bindings.Remove(binding);
+                    break;
+            }
+        }
+    }
+
     private void handlePositionalInputEvent(IPositionalInputEvent positionalInputEvent)
     {
-        if(positionalInputEvent is TabletInputEvent) EngineStatistics.Increment(EngineStatistics.Type.TabletEvents);
+        if (positionalInputEvent is TabletInputEvent) EngineStatistics.Increment(EngineStatistics.Type.TabletEvents);
         // var isDelta = positionalInputEvent.PositionDelta != Vector2.Zero;
         //TODO Mose Delta
         MousePosition = positionalInputEvent.Position;
         game.DrawableScene2d.UpdateHoverState(positionalInputEvent);
+        updateActionBindings();
     }
 
     private void handleKeyboardInput(KeyboardInputEvent keyboardInputEvent)
@@ -106,6 +138,8 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
 
         game.DrawableScene2d.UpdateKeyState(keyboardInputEvent);
         ON_KEYBOARD_INPUT.Dispatch(keyboardInputEvent);
+        updateActionBindings();
+
     }
 
     private void handleMouseButton(MouseButtonInputInputEvent mouseButtonInputInputEvent)
@@ -123,6 +157,8 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
         }
 
         game.DrawableScene2d.UpdateCursorInputState(mouseButtonInputInputEvent);
+        updateActionBindings();
+
     }
 
     private void handleTouchInputEvent(TouchInputEvent touchInputEvent)
@@ -138,7 +174,10 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
             if (!active_touches.Contains(finger)) return;
             active_touches.Remove(finger);
         }
+
         game.DrawableScene2d.UpdateCursorInputState(touchInputEvent);
+        updateActionBindings();
+
     }
 
     public void Dispose()

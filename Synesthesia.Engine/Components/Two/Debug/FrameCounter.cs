@@ -62,6 +62,12 @@ public class FrameCounter : EngineDebugElement
         ];
     }
 
+    protected internal override void OnUpdate(FrameInfo frameInfo)
+    {
+        if(!Visible) return;
+        base.OnUpdate(frameInfo);
+    }
+
     protected internal override bool OnHover(IPositionalInputEvent e)
     {
         backgroundBox.FadeColorTo(EngineBranding.BACKGROUND3, 150, Easing.OutQuad);

@@ -7,5 +7,5 @@ namespace Synesthesia.Engine.Extensions;
 
 public static class MouseButtonExtension
 {
-    public static bool IsDown(MouseButton button) => InputHandler.IsMouseButtonDown(button);
+    public static bool IsDown(this MouseButton button) => InputHandler.IsMouseButtonDown(button);
 }

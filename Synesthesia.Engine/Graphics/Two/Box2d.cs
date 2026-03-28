@@ -131,6 +131,7 @@ public class Box2d : Drawable2d
             position: drawOffset,
             size: drawSize,
             packedColor: packedColor,
+            alpha: InheritedAlpha,
             borderThickness: BorderThickness,
             borderHasSingleColor: BorderColor.HasSingleColor,
             borderColor: CachedBorderColor,

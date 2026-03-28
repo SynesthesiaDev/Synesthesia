@@ -2,7 +2,7 @@ namespace Synesthesia.Engine.Animations.Easings;
 
 public enum Easing
 {
-    None,
+    Linear,
     Out,
     In,
     InQuad,

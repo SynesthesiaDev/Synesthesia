@@ -44,6 +44,7 @@ public class Circle2d : Drawable2d
             position: Vector2.Zero,
             size: Size,
             packedColor: packedColor,
+            alpha: InheritedAlpha,
             borderThickness: BorderThickness,
             borderHasSingleColor: BorderColor.HasSingleColor,
             borderColor: CachedBorderColor,
