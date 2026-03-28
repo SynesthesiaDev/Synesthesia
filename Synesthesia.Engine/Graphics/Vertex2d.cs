@@ -9,7 +9,18 @@ using SynesthesiaUtil.Extensions;
 namespace Synesthesia.Engine.Graphics;
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
-public readonly struct Vertex2d(Vector2 position, Vector2 texCoord, Vector2 size, uint color, float radius, Vector2 localUv, VertexMode mode, float borderThickness, ComplexColor borderColor)
+public readonly struct Vertex2d(
+    Vector2 position,
+    Vector2 texCoord,
+    Vector2 size,
+    uint color,
+    float radius,
+    Vector2 localUv,
+    VertexMode mode,
+    float borderThickness,
+    bool hasSingleColor,
+    Matrix4x4 borderColor
+)
 {
     [VertexInfo(0, 2, VertexAttribPointerType.Float)]
     public readonly Vector2 Position = position;
@@ -36,12 +47,12 @@ public readonly struct Vertex2d(Vector2 position, Vector2 texCoord, Vector2 size
     public readonly float BorderThickness = borderThickness;
 
     [VertexInfo(8, 1, VertexAttribPointerType.Float)]
-    public readonly float BorderHasSingleColor = borderColor.HasSingleColor.ToInt();
+    public readonly float BorderHasSingleColor = hasSingleColor.ToInt();
 
     // can't fucking pass 16 at once. have to break it into chunks. fucking glsl
     [VertexInfo(9, 4, VertexAttribPointerType.Float)]
     [VertexInfo(10, 4, VertexAttribPointerType.Float)]
     [VertexInfo(11, 4, VertexAttribPointerType.Float)]
     [VertexInfo(12, 4, VertexAttribPointerType.Float)]
-    public readonly Matrix4x4 BorderColor = borderColor.ToMatrix4();
+    public readonly Matrix4x4 BorderColor = borderColor;
 }

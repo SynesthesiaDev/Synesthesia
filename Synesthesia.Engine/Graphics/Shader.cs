@@ -13,8 +13,6 @@ namespace Synesthesia.Engine.Graphics;
 
 public class Shader : IDisposable
 {
-    public const string TRANSFORM_UNIFORM_NAME = "u_transform";
-
     private readonly GL gl;
     public readonly uint Program;
 
@@ -72,11 +70,9 @@ public class Shader : IDisposable
         return shaderId;
     }
 
-    public void SetMatrix4(string name, Matrix4x4 matrix)
+    public void SetMatrix4(int location, Matrix4x4 matrix)
     {
         ThreadSafety.AssertRunningOnRenderThread();
-
-        int location = GetUniformLocation(name);
         unsafe
         {
             gl.UniformMatrix4(location, 1, false, (float*)&matrix);
@@ -84,58 +80,91 @@ public class Shader : IDisposable
         DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }
 
-    public void SetFloat(string name, float value)
+    public void SetMatrix4(string name, Matrix4x4 matrix)
+    {
+        int location = GetUniformLocation(name);
+        SetMatrix4(location, matrix);
+    }
+
+    public void SetFloat(int location, float value)
     {
         ThreadSafety.AssertRunningOnRenderThread();
+        gl.Uniform1(location, value);
+        DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
+    }
 
+    public void SetFloat(string name, float value)
+    {
         var location = GetUniformLocation(name);
+        SetFloat(location, value);
+    }
+
+    public void SetDouble(int location, double value)
+    {
+        ThreadSafety.AssertRunningOnRenderThread();
         gl.Uniform1(location, value);
         DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }
 
     public void SetDouble(string name, double value)
     {
-        ThreadSafety.AssertRunningOnRenderThread();
-
         var location = GetUniformLocation(name);
+        SetDouble(location, value);
+    }
+
+    public void SetInt(int location, int value)
+    {
+        ThreadSafety.AssertRunningOnRenderThread();
         gl.Uniform1(location, value);
         DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }
 
     public void SetInt(string name, int value)
     {
+        var location = GetUniformLocation(name);
+        SetInt(location, value);
+    }
+
+    public void SetVector2(int location, Vector2 value)
+    {
         ThreadSafety.AssertRunningOnRenderThread();
 
-        var location = GetUniformLocation(name);
-        gl.Uniform1(location, value);
+        gl.Uniform2(location, value);
         DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }
 
     public void SetVector2(string name, Vector2 value)
     {
+        var location = GetUniformLocation(name);
+        SetVector2(location, value);
+    }
+
+    public void SetVector3(int location, Vector3 value)
+    {
         ThreadSafety.AssertRunningOnRenderThread();
 
-        var location = GetUniformLocation(name);
-        gl.Uniform2(location, value);
+        gl.Uniform3(location, value);
         DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }
 
     public void SetVector3(string name, Vector3 value)
     {
+        var location = GetUniformLocation(name);
+        SetVector3(location, value);
+    }
+
+    public void SetVector4(int location, Vector4 value)
+    {
         ThreadSafety.AssertRunningOnRenderThread();
 
-        var location = GetUniformLocation(name);
-        gl.Uniform3(location, value);
+        gl.Uniform4(location, value);
         DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }
 
     public void SetVector4(string name, Vector4 value)
     {
-        ThreadSafety.AssertRunningOnRenderThread();
-
         var location = GetUniformLocation(name);
-        gl.Uniform4(location, value);
-        DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
+        SetVector4(location, value);
     }
 
     public void Use()

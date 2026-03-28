@@ -8,32 +8,56 @@ namespace Synesthesia.Engine.Threading;
 
 public static class ThreadSafety
 {
-    [Conditional("DEBUG")]
-    private static void assertRunningOnThread(string threadName)
+
+    [ThreadStatic]
+    private static bool isInputThread;
+
+    [ThreadStatic]
+    private static bool isAudioThread;
+
+    [ThreadStatic]
+    private static bool isUpdateThread;
+
+    [ThreadStatic]
+    private static bool isRenderThread;
+
+    public static void SetThreadType(ThreadType type)
     {
-        var isNotCorrectThread = !string.Equals(Thread.CurrentThread.Name, threadName, StringComparison.Ordinal);
-        var message = $"This action can only be performed on {threadName} thread!";
-        if (isNotCorrectThread) throw new ThreadStateException(message);
+        isUpdateThread = type == ThreadType.Update;
+        isRenderThread = type == ThreadType.Draw;
+        isAudioThread = type == ThreadType.Audio;
+        isInputThread = type == ThreadType.Input;
     }
 
     [Conditional("DEBUG")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void AssertRunningOnInputThread() => assertRunningOnThread(nameof(ThreadType.Input));
+    public static void AssertRunningOnInputThread()
+    {
+        if (!isInputThread) throw new ThreadStateException("This action can only be performed on Input thread!");
+    }
 
     [Conditional("DEBUG")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void AssertRunningOnAudioThread() => assertRunningOnThread(nameof(ThreadType.Audio));
+    public static void AssertRunningOnAudioThread()
+    {
+        if (!isAudioThread) throw new ThreadStateException("This action can only be performed on Audio thread!");
+    }
+    [Conditional("DEBUG")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AssertRunningOnRenderThread()
+    {
+        if (!isRenderThread) throw new ThreadStateException("This action can only be performed on Render thread!");
+    }
 
     [Conditional("DEBUG")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void AssertRunningOnRenderThread() => assertRunningOnThread(nameof(ThreadType.Draw));
+    public static void AssertRunningOnUpdateThread()
+    {
+        if (!isUpdateThread) throw new ThreadStateException("This action can only be performed on Update thread!");
+    }
 
-    [Conditional("DEBUG")]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void AssertRunningOnUpdateThread() => assertRunningOnThread(nameof(ThreadType.Update));
-
-    public static bool IsUpdateThread => string.Equals(Thread.CurrentThread.Name, nameof(ThreadType.Update), StringComparison.Ordinal);
-    public static bool IsRenderThread => string.Equals(Thread.CurrentThread.Name, nameof(ThreadType.Draw), StringComparison.Ordinal);
-    public static bool IsAudioThread => string.Equals(Thread.CurrentThread.Name, nameof(ThreadType.Audio), StringComparison.Ordinal);
-    public static bool IsInputThread => string.Equals(Thread.CurrentThread.Name, nameof(ThreadType.Input), StringComparison.Ordinal);
+    public static bool IsUpdateThread => isUpdateThread;
+    public static bool IsRenderThread => isRenderThread;
+    public static bool IsAudioThread => isAudioThread;
+    public static bool IsInputThread => isInputThread;
 }

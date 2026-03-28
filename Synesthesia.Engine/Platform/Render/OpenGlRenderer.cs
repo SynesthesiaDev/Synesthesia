@@ -23,6 +23,9 @@ public sealed class OpenGlRenderer : IDisposable
 {
     private const ClearFlags default_clear_flags = ClearFlags.ColorBuffer | ClearFlags.DepthBuffer | ClearFlags.StencilBuffer;
 
+    private const string shader_uniform_texture = "u_texture";
+    private const string shader_uniform_use_texture = "u_useTexture";
+    private const string shader_uniform_transform_matrix = "u_transform";
     public required OpenGLSurface Surface { get; init; }
 
     private bool openGlInitialized;
@@ -69,6 +72,11 @@ public sealed class OpenGlRenderer : IDisposable
 
     public static readonly ConcurrentQueue<Texture> TEXTURE_UPLOAD_QUEUE = new ConcurrentQueue<Texture>();
 
+    // Cache so we don't query with string every frame. That's expensive on gc allocations!!
+    private int textureShaderLocation;
+    private int useTextureShaderLocation;
+    private int transformMatrixShaderLocation;
+
     public void Initialize()
     {
         if (openGlInitialized) throw new InvalidOperationException("OpenGL is already initialized");
@@ -109,8 +117,9 @@ public sealed class OpenGlRenderer : IDisposable
         Vector2 size,
         uint packedColor,
         float borderThickness,
-        ComplexColor border,
-        float radius = 0,
+        bool borderHasSingleColor,
+        Matrix4x4 borderColor,
+        float cornerRadius,
         RectangleF? textureCoord = null,
         Texture? texture = null,
         VertexMode vertexMode = VertexMode.Shape
@@ -133,10 +142,61 @@ public sealed class OpenGlRenderer : IDisposable
 
         var tex = textureCoord ?? new Rectangle(0, 0, 1, 1);
 
-        VertexBatch2d.PushVertex(new Vertex2d(v0, new Vector2(tex.Left, tex.Top), size, packedColor, radius, new Vector2(0, 0), vertexMode, borderThickness, border));
-        VertexBatch2d.PushVertex(new Vertex2d(v1, new Vector2(tex.Left, tex.Bottom), size, packedColor, radius, new Vector2(0, 1), vertexMode, borderThickness, border));
-        VertexBatch2d.PushVertex(new Vertex2d(v2, new Vector2(tex.Right, tex.Bottom), size, packedColor, radius, new Vector2(1, 1), vertexMode, borderThickness, border));
-        VertexBatch2d.PushVertex(new Vertex2d(v3, new Vector2(tex.Right, tex.Top), size, packedColor, radius, new Vector2(1, 0), vertexMode, borderThickness, border));
+        VertexBatch2d.PushVertex(new Vertex2d(
+            position: v0,
+            texCoord: new Vector2(tex.Left, tex.Top),
+            size: size,
+            color: packedColor,
+            radius: cornerRadius,
+            localUv: new Vector2(0, 0),
+            mode: vertexMode,
+            borderThickness: borderThickness,
+            hasSingleColor: borderHasSingleColor,
+            borderColor: borderColor
+        ));
+
+        VertexBatch2d.PushVertex(new Vertex2d(
+            position: v1,
+            texCoord: new Vector2(tex.Left, tex.Bottom),
+            size: size,
+            color: packedColor,
+            radius: cornerRadius,
+            localUv: new Vector2(0, 1),
+            mode: vertexMode,
+            borderThickness: borderThickness,
+            hasSingleColor: borderHasSingleColor,
+            borderColor: borderColor
+        ));
+
+        VertexBatch2d.PushVertex(new Vertex2d(
+            position: v2,
+            texCoord: new Vector2(tex.Right, tex.Bottom),
+            size: size,
+            color: packedColor,
+            radius: cornerRadius,
+            localUv: new Vector2(1, 1),
+            mode: vertexMode,
+            borderThickness: borderThickness,
+            hasSingleColor: borderHasSingleColor,
+            borderColor: borderColor
+        ));
+
+        VertexBatch2d.PushVertex(new Vertex2d(
+            position: v3,
+            texCoord: new Vector2(tex.Right, tex.Top),
+            size: size,
+            color: packedColor,
+            radius: cornerRadius,
+            localUv: new Vector2(1, 0),
+            mode: vertexMode,
+            borderThickness: borderThickness,
+            hasSingleColor: borderHasSingleColor,
+            borderColor: borderColor
+        ));
+
+        // VertexBatch2d.PushVertex(new Vertex2d(v1, new Vector2(tex.Left, tex.Bottom), size, packedColor, radius, new Vector2(0, 1), vertexMode, borderThickness, border));
+        // VertexBatch2d.PushVertex(new Vertex2d(v2, new Vector2(tex.Right, tex.Bottom), size, packedColor, radius, new Vector2(1, 1), vertexMode, borderThickness, border));
+        // VertexBatch2d.PushVertex(new Vertex2d(v3, new Vector2(tex.Right, tex.Top), size, packedColor, radius, new Vector2(1, 0), vertexMode, borderThickness, border));
     }
 
     public void CompileDefaultShaders()
@@ -155,6 +215,7 @@ public sealed class OpenGlRenderer : IDisposable
         CurrentShader = shader;
         shader.Use();
         updateShaderMatrix();
+        cacheShaderUniformLocations();
     }
 
     public void UnbindShader()
@@ -162,6 +223,13 @@ public sealed class OpenGlRenderer : IDisposable
         ThreadSafety.AssertRunningOnRenderThread();
         BindShader(DefaultShader);
         updateShaderMatrix();
+    }
+
+    private void cacheShaderUniformLocations()
+    {
+        textureShaderLocation = CurrentShader.GetUniformLocation(shader_uniform_texture);
+        useTextureShaderLocation = CurrentShader.GetUniformLocation(shader_uniform_use_texture);
+        transformMatrixShaderLocation = CurrentShader.GetUniformLocation(shader_uniform_transform_matrix);
     }
 
     public void BindTexture(Texture? texture)
@@ -176,13 +244,13 @@ public sealed class OpenGlRenderer : IDisposable
         if (texture != null)
         {
             texture.Bind(OpenGL);
-            CurrentShader.SetInt("u_texture", 0);
-            CurrentShader.SetInt("u_useTexture", 1);
+            CurrentShader.SetInt(textureShaderLocation, 0);
+            CurrentShader.SetInt(useTextureShaderLocation, 1);
         }
         else
         {
             OpenGL.BindTexture(TextureTarget.Texture2D, 0);
-            CurrentShader.SetInt("u_useTexture", 0);
+            CurrentShader.SetInt(useTextureShaderLocation, 0);
         }
     }
 
@@ -340,7 +408,7 @@ public sealed class OpenGlRenderer : IDisposable
 
     private void updateShaderMatrix()
     {
-        CurrentShader.SetMatrix4(Shader.TRANSFORM_UNIFORM_NAME, Matrix * projectionMatrix);
+        CurrentShader.SetMatrix4(transformMatrixShaderLocation, Matrix * projectionMatrix);
     }
 
     public void RotateAround(Vector2 pivot, float degrees)

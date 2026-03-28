@@ -149,7 +149,7 @@ public class CompositeDrawable2d : Drawable2d
 
     protected internal override void OnUpdate(FrameInfo frameInfo)
     {
-        if(!Visible) return;
+        if (!Visible) return;
 
         Snapshot<Drawable2d> snapshot;
         lock (childrenLock)
@@ -182,7 +182,16 @@ public class CompositeDrawable2d : Drawable2d
             renderer.BeginStencil();
             renderer.BeginStencilMask();
 
-            renderer.DrawQuad(DrawMatrix, Vector2.Zero, Size, Color.White.ToRgba32(), BorderThickness, BorderColor, radius: CornerRadius);
+            renderer.DrawQuad(
+                drawMatrix: DrawMatrix,
+                position: Vector2.Zero,
+                size: Size,
+                packedColor: Color.WhitePacked,
+                borderThickness: 0f,
+                borderHasSingleColor: true,
+                borderColor: CachedBorderColor,
+                cornerRadius: 0f
+            );
 
             renderer.EndStencilMask();
         }
@@ -199,7 +208,16 @@ public class CompositeDrawable2d : Drawable2d
 
         if (BorderThickness > 0)
         {
-            renderer.DrawQuad(DrawMatrix, Vector2.Zero, Size, Color.Transparent.ToRgba32(), BorderThickness, BorderColor, radius: CornerRadius);
+            renderer.DrawQuad(
+                drawMatrix: DrawMatrix,
+                position: Vector2.Zero,
+                size: Size,
+                packedColor: Color.TransparentPacked,
+                borderThickness: BorderThickness,
+                borderHasSingleColor: BorderColor.HasSingleColor,
+                borderColor: CachedBorderColor,
+                cornerRadius: CornerRadius
+            );
         }
     }
 
@@ -378,14 +396,12 @@ public class CompositeDrawable2d : Drawable2d
         }
     }
 
-
     #endregion
 
     protected override void Dispose(bool isDisposing)
     {
         lock (childrenLock)
         {
-            // ReSharper disable once ForCanBeConvertedToForeach
             for (int i = 0; i < InternalChildren.Count; i++)
             {
                 var child = InternalChildren[i];

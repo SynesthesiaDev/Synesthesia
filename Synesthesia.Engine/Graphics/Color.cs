@@ -222,32 +222,36 @@ public readonly struct Color : IEquatable<Color>
 
     public override int GetHashCode() => ToArgb();
 
-    public static Color White => new Color(255, 255, 255, 255);
-    public static Color Black => new Color(0, 0, 0, 255);
-    public static Color Transparent => new Color(0, 0, 0, 0);
+    public static Color White = new Color(255, 255, 255, 255);
+    public static Color Black = new Color(0, 0, 0, 255);
+    public static Color Transparent = new Color(0, 0, 0, 0);
 
-    public static Color Red => new Color(255, 0, 0, 255);
-    public static Color Green => new Color(0, 255, 0, 255);
-    public static Color Blue => new Color(0, 0, 255, 255);
+    public static uint WhitePacked = White.ToRgba32();
+    public static uint BlackPacked = Black.ToRgba32();
+    public static uint TransparentPacked = Transparent.ToRgba32();
 
-    public static Color Yellow => new Color(255, 255, 0, 255);
-    public static Color Cyan => new Color(0, 255, 255, 255);
-    public static Color Magenta => new Color(255, 0, 255, 255);
+    public static Color Red = new Color(255, 0, 0, 255);
+    public static Color Green = new Color(0, 255, 0, 255);
+    public static Color Blue = new Color(0, 0, 255, 255);
 
-    public static Color Gray => new Color(128, 128, 128, 255);
-    public static Color LightGray => new Color(211, 211, 211, 255);
-    public static Color DarkGray => new Color(64, 64, 64, 255);
-    public static Color SlateGray => new Color(112, 128, 144, 255);
+    public static Color Yellow = new Color(255, 255, 0, 255);
+    public static Color Cyan = new Color(0, 255, 255, 255);
+    public static Color Magenta = new Color(255, 0, 255, 255);
 
-    public static Color Orange => new Color(255, 165, 0, 255);
-    public static Color Brown => new Color(165, 42, 42, 255);
-    public static Color Purple => new Color(128, 0, 128, 255);
-    public static Color Gold => new Color(255, 215, 0, 255);
-    public static Color SkyBlue => new Color(135, 206, 235, 255);
+    public static Color Gray = new Color(128, 128, 128, 255);
+    public static Color LightGray = new Color(211, 211, 211, 255);
+    public static Color DarkGray = new Color(64, 64, 64, 255);
+    public static Color SlateGray = new Color(112, 128, 144, 255);
 
-    public static Color Crimson => new Color(220, 20, 60, 255);
-    public static Color ForestGreen => new Color(34, 139, 34, 255);
-    public static Color RoyalBlue => new Color(65, 105, 225, 255);
+    public static Color Orange = new Color(255, 165, 0, 255);
+    public static Color Brown = new Color(165, 42, 42, 255);
+    public static Color Purple = new Color(128, 0, 128, 255);
+    public static Color Gold = new Color(255, 215, 0, 255);
+    public static Color SkyBlue = new Color(135, 206, 235, 255);
+
+    public static Color Crimson = new Color(220, 20, 60, 255);
+    public static Color ForestGreen = new Color(34, 139, 34, 255);
+    public static Color RoyalBlue = new Color(65, 105, 225, 255);
 
     public override string ToString()
     {

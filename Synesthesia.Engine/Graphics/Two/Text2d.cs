@@ -25,6 +25,8 @@ public class Text2d : Drawable2d
 
     public float FontSize { get; set; } = 16f;
 
+    private uint packedColor;
+
     public string Text
     {
         get;
@@ -40,7 +42,16 @@ public class Text2d : Drawable2d
 
     public Font Font { get; set; } = null!;
 
-    public Color Color { get; set; } = Color.White;
+    public Color Color
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            Invalidate(Invalidation.DrawNode);
+        }
+    } = Color.White;
 
     protected override void OnLoading()
     {
@@ -56,6 +67,11 @@ public class Text2d : Drawable2d
         if (dirty.HasFlagFast(Invalidation.Size))
         {
             Size = Font.MeasureText(Text, FontSize);
+        }
+
+        if (dirty.HasFlagFast(Invalidation.DrawNode))
+        {
+            packedColor = Color.ToRgba32();
         }
     }
 
@@ -92,16 +108,17 @@ public class Text2d : Drawable2d
             );
 
             renderer.DrawQuad(
-                DrawMatrix,
-                charPos,
-                drawSize,
-                Color.ToRgba32(),
-                BorderThickness,
-                BorderColor,
+                drawMatrix: DrawMatrix,
+                position: charPos,
+                size: drawSize,
+                packedColor: packedColor,
+                borderThickness: 0,
+                borderHasSingleColor: true,
+                borderColor: CachedBorderColor,
                 texture: region.Value.Texture,
                 textureCoord: region.Value.UvRect,
                 vertexMode: VertexMode.Font,
-                radius: getWeightRadius()
+                cornerRadius: getWeightRadius()
             );
 
             cursorX += glyph.Advance * scale;
@@ -121,7 +138,7 @@ public class Text2d : Drawable2d
         {
             FontWeight.Bold => 0.265f,
             FontWeight.Normal => 0.23f,
-            FontWeight.Thin => 0.15f,
+            FontWeight.Thin => 0.19f,
             _ => 0.23f
         };
     }

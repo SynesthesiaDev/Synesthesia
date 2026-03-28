@@ -93,6 +93,7 @@ public abstract class ThreadRunner : IDisposable
     {
         try
         {
+            ThreadSafety.SetThreadType(Type);
             OnThreadInit();
             Logger.Debug($"{Type} Thread polling at {ActiveUpdateRate.Value}hz", LoggerCategory);
 

@@ -211,6 +211,8 @@ public abstract class Drawable2d : Drawable
         }
     } = 0;
 
+    protected Matrix4x4 CachedBorderColor;
+
     public bool IsHovered { get; set; } = false;
 
     public bool IsMouseDown { get; set; } = false;
@@ -292,6 +294,11 @@ public abstract class Drawable2d : Drawable
         if (dirty.HasFlagFast(Invalidation.Size))
         {
             UpdateRelativeSize();
+        }
+
+        if (dirty.HasFlagFast(Invalidation.DrawNode))
+        {
+            CachedBorderColor = BorderColor.ToMatrix4();
         }
     }
 

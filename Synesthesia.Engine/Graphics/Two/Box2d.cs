@@ -126,6 +126,17 @@ public class Box2d : Drawable2d
 
     protected override void OnDraw2d()
     {
-        renderer.DrawQuad(DrawMatrix, drawOffset, drawSize, packedColor, BorderThickness, BorderColor, radius: CornerRadius, texture: Texture, textureCoord: uvCoords);
+        renderer.DrawQuad(
+            drawMatrix: DrawMatrix,
+            position: drawOffset,
+            size: drawSize,
+            packedColor: packedColor,
+            borderThickness: BorderThickness,
+            borderHasSingleColor: BorderColor.HasSingleColor,
+            borderColor: CachedBorderColor,
+            cornerRadius: CornerRadius,
+            texture: Texture,
+            textureCoord: uvCoords
+        );
     }
 }

@@ -39,6 +39,15 @@ public class Circle2d : Drawable2d
 
     protected override void OnDraw2d()
     {
-        renderer.DrawQuad(DrawMatrix, Vector2.Zero, Size, packedColor, BorderThickness, BorderColor, radius: Size.X / 2f);
+        renderer.DrawQuad(
+            drawMatrix: DrawMatrix,
+            position: Vector2.Zero,
+            size: Size,
+            packedColor: packedColor,
+            borderThickness: BorderThickness,
+            borderHasSingleColor: BorderColor.HasSingleColor,
+            borderColor: CachedBorderColor,
+            cornerRadius: Size.X / 2f
+        );
     }
 }
