@@ -7,14 +7,9 @@ namespace Synesthesia.Engine.Input.ActionBindings;
 
 public record KeyboardActionBinding(Key Primary, params Key[] Modifiers) : IActionBinding
 {
-    public bool IsDown
-    {
-        get
-        {
-            if (Primary.IsDown()) return Modifiers.Length != 0 && Modifiers.All(k => k.IsDown());
-            return false;
-        }
-    }
+    public bool IsDown => Primary.IsDown() && Modifiers.All(k => k.IsDown());
+
+    public int Complexity => 1 + Modifiers.Length;
 
     public override string ToString() => $"KeyboardActionBinding(Primary={Primary}, Modifiers={Modifiers.AsString()})";
 }

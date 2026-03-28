@@ -9,5 +9,7 @@ public record CoordinatedActionBinding(params IActionBinding[] ActionBindings) :
 {
     public bool IsDown => ActionBindings.Length > 0 && ActionBindings.All(b => b.IsDown);
 
+    public int Complexity => ActionBindings.Sum(c => c.Complexity);
+
     public override string ToString() => $"CoordinatedActionBinding(ActionBindings={ActionBindings.AsString()})";
 }

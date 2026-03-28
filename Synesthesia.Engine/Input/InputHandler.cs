@@ -12,7 +12,6 @@ using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform;
 using Synesthesia.Engine.Util.Pooling;
 using Synesthesia.Engine.Util.Statistics;
-using System.Runtime.InteropServices;
 
 namespace Synesthesia.Engine.Input;
 
@@ -70,7 +69,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
                     case TouchInputEvent touchInputEvent:
                         handleTouchInputEvent(touchInputEvent);
                         break;
-                    // Mouse and Tablet events
+                    // Mouse AND Tablet events
                     case IPositionalInputEvent positionalInputEvent:
                         handlePositionalInputEvent(positionalInputEvent);
                         break;
@@ -86,31 +85,70 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
                 inputEvent.ReturnToPool();
             }
         }
+
         updateActionBindings();
     }
 
     public static void RegisterActionBinding(PlatformActionBinding binding)
     {
-        Logger.Verbose($"Registered Action Binding {binding}", Logger.Input);
+        var comparer = new ActionBindingComparer();
+
+        foreach (var conflict in platformActionBindings
+                     .Select(existing => binding.AlternativeBindings
+                         .FirstOrDefault(newB => existing.AlternativeBindings
+                             .Any(extB => comparer.Equals(newB, extB))))
+                     .OfType<IActionBinding>())
+        {
+            throw new InvalidOperationException($"Cannot register a binding that overlaps with another binding ({conflict} is already bound)");
+        }
+
         platformActionBindings.Add(binding);
     }
 
+    // man I should really write tests for this but I don't feel like it
     private void updateActionBindings()
     {
-        foreach (ref PlatformActionBinding binding in CollectionsMarshal.AsSpan(platformActionBindings))
+        var consumedTriggers = new List<IActionBinding>();
+
+        foreach (var action in platformActionBindings.OrderByDescending(a => a.Complexity))
         {
-            switch (binding.IsDown)
+            var activeTrigger = action.AlternativeBindings.FirstOrDefault(b => b.IsDown);
+
+            if (activeTrigger != null)
             {
-                case true when !held_action_bindings.Contains(binding):
-                    held_action_bindings.Add(binding);
-                    game.DrawableScene2d.UpdatePlatformActionBindingState(binding);
-                    break;
-                case false when held_action_bindings.Contains(binding):
-                    game.DrawableScene2d.UpdatePlatformActionBindingState(binding);
-                    held_action_bindings.Remove(binding);
-                    break;
+                // check if the physical binding was used by another action binding
+                // Ex. Pressing CTRL + F1 should not trigger just F1 binding
+                bool isAlreadyUsed = consumedTriggers.Exists(t => isBindingComponentOf(activeTrigger, t));
+
+                if (!isAlreadyUsed)
+                {
+                    consumedTriggers.Add(activeTrigger);
+
+                    if (!held_action_bindings.Contains(action))
+                    {
+                        held_action_bindings.Add(action);
+                        game.DrawableScene2d.UpdatePlatformActionBindingState(action);
+                    }
+                    continue;
+                }
+            }
+
+            // action is not pressed or is shadowed
+            if (held_action_bindings.Contains(action))
+            {
+                game.DrawableScene2d.UpdatePlatformActionBindingState(action);
+                held_action_bindings.Remove(action);
             }
         }
+    }
+
+    private static bool isBindingComponentOf(IActionBinding simple, IActionBinding complex)
+    {
+        if (complex is KeyboardActionBinding complexKey && simple is KeyboardActionBinding simpleKey)
+        {
+            return complexKey.Primary == simpleKey.Primary && simpleKey.Modifiers.All(m => complexKey.Modifiers.Contains(m));
+        }
+        return false;
     }
 
     private void handlePositionalInputEvent(IPositionalInputEvent positionalInputEvent)
@@ -139,7 +177,6 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
         game.DrawableScene2d.UpdateKeyState(keyboardInputEvent);
         ON_KEYBOARD_INPUT.Dispatch(keyboardInputEvent);
         updateActionBindings();
-
     }
 
     private void handleMouseButton(MouseButtonInputInputEvent mouseButtonInputInputEvent)
@@ -158,7 +195,6 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
 
         game.DrawableScene2d.UpdateCursorInputState(mouseButtonInputInputEvent);
         updateActionBindings();
-
     }
 
     private void handleTouchInputEvent(TouchInputEvent touchInputEvent)
@@ -177,7 +213,6 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
 
         game.DrawableScene2d.UpdateCursorInputState(touchInputEvent);
         updateActionBindings();
-
     }
 
     public void Dispose()

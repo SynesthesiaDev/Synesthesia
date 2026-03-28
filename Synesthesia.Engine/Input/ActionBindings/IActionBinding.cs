@@ -6,4 +6,5 @@ namespace Synesthesia.Engine.Input.ActionBindings;
 public interface IActionBinding
 {
     bool IsDown { get; }
+    int Complexity => 1;
 }

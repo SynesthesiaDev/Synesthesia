@@ -14,9 +14,16 @@ public record PlatformActionBinding(IList<IActionBinding> AlternativeBindings)
 
     public bool IsDown => AlternativeBindings.Any(b => b.IsDown);
 
+    public int Complexity => AlternativeBindings.Sum(c => c.Complexity);
+
     public PlatformActionBinding Register()
     {
         InputHandler.RegisterActionBinding(this);
         return this;
+    }
+
+    public bool ContainsBinding(IActionBinding binding, IEqualityComparer<IActionBinding> comparer)
+    {
+        return AlternativeBindings.Any(b => comparer.Equals(b, binding));
     }
 }
