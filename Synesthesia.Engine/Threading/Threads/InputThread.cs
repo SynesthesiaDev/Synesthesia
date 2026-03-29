@@ -24,6 +24,7 @@ public class InputThread : ThreadRunner
 
     protected override void OnThreadInit()
     {
+        LoadFuture.Complete(this);
     }
 
 }

@@ -7,6 +7,7 @@ using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Graphics.Two.Container;
+using Synesthesia.Engine.Graphics.Two.Text;
 using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Timing;

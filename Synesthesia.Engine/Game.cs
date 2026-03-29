@@ -11,6 +11,7 @@ using Synesthesia.Engine.Platform.Host;
 using Synesthesia.Engine.Resources;
 using Synesthesia.Engine.Resources.Stores;
 using Synesthesia.Engine.Threading.Threads;
+using Synesthesia.Engine.Util.Future;
 using Synesthesia.Resources;
 
 namespace Synesthesia.Engine;
@@ -102,6 +103,8 @@ public class Game
         .MakeDeferred()
         .Build();
 
+    private readonly InternalGameContainer2d internalGameContainer2d = new InternalGameContainer2d();
+
     /// <summary>
     /// This is the main 2d scene where you add your drawables.
     /// While <see cref="DrawableScene2d.AddChild"/> exists, please do so by overriding the children field directly
@@ -115,7 +118,7 @@ public class Game
     ///     }
     /// ];
     /// </code>
-    public readonly DrawableScene2d DrawableScene2d = new DrawableScene2d();
+    public DrawableScene2d DrawableScene2d => internalGameContainer2d.DrawableScene2d;
 
     /// <summary>
     /// Primary game class
@@ -174,8 +177,12 @@ public class Game
                 InputHandler.Dispose();
             });
 
-            initialized = true;
-            OnInitialized.Dispatch(this);
+            CompletableFuture.All(RenderThread.LoadFuture, UpdateThread.LoadFuture, AudioThread.LoadFuture, InputThread.LoadFuture).Then(_ =>
+            {
+                initialized = true;
+                OnInitialized.Dispatch(this);
+            });
+
             WindowHost.RunWindow();
         }
         catch (Exception ex)
@@ -183,4 +190,6 @@ public class Game
             Logger.Exception(ex, Logger.Platform);
         }
     }
+
+    public InternalGameContainer2d GetInternalGameContainer() => internalGameContainer2d;
 }

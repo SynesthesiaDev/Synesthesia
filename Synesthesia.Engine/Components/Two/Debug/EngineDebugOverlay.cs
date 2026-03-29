@@ -4,6 +4,7 @@
 using System.Numerics;
 using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Graphics.Layout;
+using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Graphics.Two.Container;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Input.ActionBindings;
@@ -13,7 +14,7 @@ using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Components.Two.Debug;
 
-public class EngineDebugOverlay : Container2d
+public class EngineDebugOverlay : CompositeDrawable2d
 {
     private const long toggle_animation_length = 150;
     private const Easing toggle_animation_easing = Easing.Linear;

@@ -6,6 +6,7 @@ using System.Numerics;
 using Faster.Map.Core;
 using Synesthesia.Engine.Events;
 using Synesthesia.Engine.Extensions;
+using Synesthesia.Engine.Graphics.Two.Container;
 using Synesthesia.Engine.Input.ActionBindings;
 using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Logging;
@@ -51,6 +52,8 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
 
     public static Vector2 MousePosition = Vector2.Zero;
 
+    private InternalGameContainer2d gameContainer = game.GetInternalGameContainer();
+
     public void ProcessFrame()
     {
         while (!eventQueue.IsEmpty)
@@ -86,7 +89,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
             }
         }
 
-        updateActionBindings();
+        // updateActionBindings();
     }
 
     public static void RegisterActionBinding(PlatformActionBinding binding)
@@ -105,7 +108,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
         platformActionBindings.Add(binding);
     }
 
-    // man I should really write tests for this but I don't feel like it
+    // man I should really write tests for this, but I don't feel like it
     private void updateActionBindings()
     {
         var consumedTriggers = new List<IActionBinding>();
@@ -127,7 +130,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
                     if (!held_action_bindings.Contains(action))
                     {
                         held_action_bindings.Add(action);
-                        game.DrawableScene2d.UpdatePlatformActionBindingState(action);
+                        gameContainer.UpdatePlatformActionBindingState(action);
                     }
                     continue;
                 }
@@ -136,7 +139,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
             // action is not pressed or is shadowed
             if (held_action_bindings.Contains(action))
             {
-                game.DrawableScene2d.UpdatePlatformActionBindingState(action);
+                    gameContainer.UpdatePlatformActionBindingState(action);
                 held_action_bindings.Remove(action);
             }
         }
@@ -157,7 +160,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
         // var isDelta = positionalInputEvent.PositionDelta != Vector2.Zero;
         //TODO Mose Delta
         MousePosition = positionalInputEvent.Position;
-        game.DrawableScene2d.UpdateHoverState(positionalInputEvent);
+        gameContainer.UpdateHoverState(positionalInputEvent);
         updateActionBindings();
     }
 
@@ -174,7 +177,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
             held_keys.Remove(key);
         }
 
-        game.DrawableScene2d.UpdateKeyState(keyboardInputEvent);
+        gameContainer.UpdateKeyState(keyboardInputEvent);
         ON_KEYBOARD_INPUT.Dispatch(keyboardInputEvent);
         updateActionBindings();
     }
@@ -193,7 +196,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
             held_mouse_buttons.Remove(button);
         }
 
-        game.DrawableScene2d.UpdateCursorInputState(mouseButtonInputInputEvent);
+        gameContainer.UpdateCursorInputState(mouseButtonInputInputEvent);
         updateActionBindings();
     }
 
@@ -211,7 +214,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
             active_touches.Remove(finger);
         }
 
-        game.DrawableScene2d.UpdateCursorInputState(touchInputEvent);
+        gameContainer.UpdateCursorInputState(touchInputEvent);
         updateActionBindings();
     }
 

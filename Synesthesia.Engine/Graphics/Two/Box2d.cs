@@ -135,7 +135,7 @@ public class Box2d : Drawable2d
             borderThickness: BorderThickness,
             borderHasSingleColor: BorderColor.HasSingleColor,
             borderColor: CachedBorderColor,
-            cornerRadius: CornerRadius,
+            cornerRadius: Math.Clamp(CornerRadius, 0f, Math.Min(Width, Height) / 2f),
             texture: Texture,
             textureCoord: uvCoords
         );

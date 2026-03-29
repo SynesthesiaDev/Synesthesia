@@ -6,6 +6,7 @@ using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util.Bindables;
+using Synesthesia.Engine.Util.Future;
 
 namespace Synesthesia.Engine.Threading;
 
@@ -29,6 +30,8 @@ public abstract class ThreadRunner : IDisposable
     private volatile bool isRunning;
 
     public ulong FrameIndex { get; private set; }
+
+    public CompletableFuture<ThreadRunner> LoadFuture = new CompletableFuture<ThreadRunner>();
 
     public abstract ThreadType Type { get; }
 

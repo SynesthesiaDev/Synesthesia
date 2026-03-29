@@ -17,7 +17,7 @@ public static class EngineBranding
 
     public static readonly Color TEXT0 = Color.FromHex("#939BC2");
     public static readonly Color TEXT1 = Color.FromHex("#B0B8DA");
-    public static readonly Color TEXT2 = Color.FromHex("#D3DBFF");
+    public static readonly Color TEXT2 = Color.FromHex("#E9EDFF");
 
     public static readonly Color DARK_BLUE = Color.FromHex("#3D59A1");
     public static readonly Color LIGHT_BLUE = Color.FromHex("#7AA2F7");

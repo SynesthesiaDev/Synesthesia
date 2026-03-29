@@ -23,11 +23,15 @@ public class UpdateThread : ThreadRunner
 
     protected override void ProcessFrame(FrameInfo frameInfo)
     {
-        game.DrawableScene2d.Size = new Vector2(renderer.BackBufferWidth, renderer.BackBufferHeight);
-        game.DrawableScene2d.OnUpdate(frameInfo);
+        var windowSize = new Vector2(renderer.BackBufferWidth, renderer.BackBufferHeight);
+        var gameContainer = game.GetInternalGameContainer();
+
+        gameContainer.Size = windowSize;
+        gameContainer.OnUpdate(frameInfo);
     }
 
     protected override void OnThreadInit()
     {
+        LoadFuture.Complete(this);
     }
 }

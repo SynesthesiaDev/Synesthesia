@@ -9,6 +9,7 @@ using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Graphics.Two.Container;
+using Synesthesia.Engine.Graphics.Two.Text;
 using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util;

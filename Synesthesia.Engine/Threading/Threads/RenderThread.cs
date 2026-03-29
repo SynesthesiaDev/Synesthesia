@@ -46,17 +46,19 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
 
         game.UpdateThread.Schedule(() =>
         {
-            game.DrawableScene2d.Load();
+            game.GetInternalGameContainer().Load();
+            LoadFuture.Complete(this);
         });
     }
 
     protected override void ProcessFrame(FrameInfo frameInfo)
     {
         if (!Renderer.CanDraw || !hasContextOwnership) return;
+        var gameContainer = game.GetInternalGameContainer();
 
         Renderer.BeginDrawing();
 
-        game.DrawableScene2d.OnDraw();
+        gameContainer.OnDraw();
 
         Renderer.EndDrawing();
         if (isFirstSwap)

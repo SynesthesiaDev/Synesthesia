@@ -3,6 +3,7 @@
 
 using System.Numerics;
 using Synesthesia.Engine.Graphics.Two;
+using Synesthesia.Engine.Graphics.Two.Text;
 using Synesthesia.Engine.Util;
 
 namespace Synesthesia.Engine.Components.Two.Debug;
@@ -19,7 +20,7 @@ public abstract class EngineDebugElement : CompositeDrawable2d
                 new Text2d
                 {
                     Text = name,
-                    Weight = Text2d.FontWeight.Bold,
+                    Weight = FontWeight.Bold,
                     Color = EngineBranding.TEXT2
                 },
             ];

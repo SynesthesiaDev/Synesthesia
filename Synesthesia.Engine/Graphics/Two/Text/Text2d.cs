@@ -2,6 +2,8 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Numerics;
+using Synesthesia.Engine.Animations;
+using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Textures;
@@ -9,7 +11,7 @@ using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Resources;
 using SynesthesiaUtil.Extensions;
 
-namespace Synesthesia.Engine.Graphics.Two;
+namespace Synesthesia.Engine.Graphics.Two.Text;
 
 public class Text2d : Drawable2d
 {
@@ -126,12 +128,12 @@ public class Text2d : Drawable2d
         }
     }
 
-    public enum FontWeight
+
+    public Animation<Color> FadeColorTo(Color newColor, long duration, Easing easing)
     {
-        Bold,
-        Normal,
-        Thin
+        return TransformTo(nameof(Color), Color, newColor, duration, easing, Transforms.COLOR, color => Color = color);
     }
+
 
     private float getWeightRadius()
     {
