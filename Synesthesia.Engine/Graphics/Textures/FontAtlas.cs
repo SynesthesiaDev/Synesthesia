@@ -14,7 +14,7 @@ public class FontAtlas : IDisposable
         "ěščřžýáíéůúťďňĚŠČŘŽÝÁÍÉŮÚŤĎŇ" +
         "äöüßÄÖÜñçàèìòùÀÈÌÒÙ" +
         "€$£¥©®™°±«»„“”“‘’…–—" +
-        "¿¡†‡§";
+        "¿¡†‡§ ";
 
     public const int RENDER_SIZE = 32;
 
@@ -23,6 +23,8 @@ public class FontAtlas : IDisposable
     public required IDictionary<char, GlyphInfo> Glyphs { get; init; } = null!;
 
     public required float LineHeight { get; init; }
+    public required float Ascent { get; init; }
+    public required float Descent { get; init; }
 
     public FontAtlas() => EngineStatistics.Increment(EngineStatistics.Type.FontAtlases);
 
@@ -36,13 +38,24 @@ public class FontAtlas : IDisposable
         {
             FT.FT_Set_Pixel_Sizes(face.FaceRec, 0, RENDER_SIZE);
 
-            var lineHeight = face.FaceRec->size->metrics.height >> 6;
+            var metrics = face.FaceRec->size->metrics;
+            var ascent = metrics.ascender >> 6;
+            var descent = metrics.descender >> 6;
+            var lineHeight = metrics.height >> 6;
 
             foreach (var c in charset.Distinct())
             {
                 FT.FT_Load_Char(face.FaceRec, c, FT_LOAD.FT_LOAD_RENDER);
 
                 var glyph = face.FaceRec->glyph;
+                var advance = glyph->advance.x.ToInt32() >> 6;
+                var bearing = new Vector2(glyph->bitmap_left, glyph->bitmap_top);
+
+                if (glyph->bitmap.width == 0 || glyph->bitmap.rows == 0)
+                {
+                    glyphMeta[c] = (bearing, advance);
+                    continue;
+                }
 
                 FT.FT_Render_Glyph(glyph, FT_Render_Mode_.FT_RENDER_MODE_SDF);
 
@@ -71,7 +84,14 @@ public class FontAtlas : IDisposable
                 glyphInfoMap[c] = new GlyphInfo(c, meta.bearing, meta.advance);
             }
 
-            return new FontAtlas { TextureAtlas = textureAtlas, LineHeight = lineHeight, Glyphs = glyphInfoMap };
+            return new FontAtlas
+            {
+                TextureAtlas = textureAtlas,
+                LineHeight = lineHeight,
+                Glyphs = glyphInfoMap,
+                Ascent = ascent,
+                Descent = descent
+            };
         }
     }
 

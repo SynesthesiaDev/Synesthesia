@@ -61,6 +61,32 @@ public struct ComplexColor : IEquatable<ComplexColor>
         return result;
     }
 
+    public ComplexColor Multiply(float scalar)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(scalar);
+        if (HasSingleColor) return ComplexColor.Single(TopLeft.Multiply(scalar));
+
+        return new ComplexColor()
+        {
+            TopLeft = TopLeft.Multiply(scalar),
+            TopRight = TopRight.Multiply(scalar),
+            BottomLeft = BottomLeft.Multiply(scalar),
+            BottomRight = BottomRight.Multiply(scalar),
+        };
+    }
+
+    /// <summary>
+    /// Returns a lightened version of the color.
+    /// </summary>
+    /// <param name="amount">Decimal light addition</param>
+    public ComplexColor Lighten(float amount) => Multiply(1 + amount);
+
+    /// <summary>
+    /// Returns a darkened version of the color.
+    /// </summary>
+    /// <param name="amount">Percentage light reduction</param>
+    public ComplexColor Darken(float amount) => Multiply(1 / (1 + amount));
+
     public static ComplexColor Custom(Color topLeft, Color topRight, Color bottomLeft, Color bottomRight)
     {
         var result = new ComplexColor
@@ -120,6 +146,4 @@ public struct ComplexColor : IEquatable<ComplexColor>
     public static readonly ComplexColor Black = Single(Color.Black);
     public static readonly ComplexColor White = Single(Color.White);
     public static readonly ComplexColor Transparent = Single(Color.Transparent);
-
 }
-

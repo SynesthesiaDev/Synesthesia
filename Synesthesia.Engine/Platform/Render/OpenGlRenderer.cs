@@ -198,10 +198,6 @@ public sealed class OpenGlRenderer : IDisposable
             hasSingleColor: borderHasSingleColor,
             borderColor: borderColor
         ));
-
-        // VertexBatch2d.PushVertex(new Vertex2d(v1, new Vector2(tex.Left, tex.Bottom), size, packedColor, radius, new Vector2(0, 1), vertexMode, borderThickness, border));
-        // VertexBatch2d.PushVertex(new Vertex2d(v2, new Vector2(tex.Right, tex.Bottom), size, packedColor, radius, new Vector2(1, 1), vertexMode, borderThickness, border));
-        // VertexBatch2d.PushVertex(new Vertex2d(v3, new Vector2(tex.Right, tex.Top), size, packedColor, radius, new Vector2(1, 0), vertexMode, borderThickness, border));
     }
 
     public void CompileDefaultShaders()

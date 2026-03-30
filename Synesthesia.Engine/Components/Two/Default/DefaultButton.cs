@@ -15,6 +15,8 @@ namespace Synesthesia.Engine.Components.Two.Default;
 
 public class DefaultButton : Container2d
 {
+    private const long transform_length = 150;
+
     public string Text
     {
         get => text2d.Text;
@@ -50,52 +52,75 @@ public class DefaultButton : Container2d
         get;
         set
         {
-            if(field == value) return;
+            if (field == value) return;
             field = value;
-            updateVisualState();
+            updateStyle();
         }
-
     } = Style.Secondary;
 
     protected override void OnLoading()
     {
-        updateVisualState();
+        updateStyle();
         base.OnLoading();
+    }
+
+    private void updateStyle()
+    {
+        if (Disabled)
+        {
+            styleForeground = EngineBranding.TEXT0;
+            if (ButtonStyle == Style.Tertiary)
+            {
+                background.BorderThickness = 3;
+                styleBackground = Color.Transparent;
+                styleBorderColor = ComplexColor.Single(EngineBranding.SLATE1);
+            }
+            else
+            {
+                styleBackground = EngineBranding.SLATE1;
+                background.BorderThickness = 0;
+            }
+        }
+        else
+        {
+            switch (ButtonStyle)
+            {
+                case Style.Primary:
+                    styleBackground = EngineBranding.PURPLE;
+                    styleForeground = EngineBranding.TEXT2;
+                    background.BorderThickness = 0;
+                    break;
+                case Style.Secondary:
+                    styleBackground = EngineBranding.PINK;
+                    styleForeground = Color.Black;
+                    background.BorderThickness = 0;
+                    break;
+                case Style.Tertiary:
+                    styleBackground = Color.Transparent;
+                    styleForeground = EngineBranding.TEXT2;
+                    styleBorderColor = ComplexColor.GradientVertical(EngineBranding.PINK, EngineBranding.PURPLE);
+                    background.BorderThickness = 3;
+                    break;
+            }
+        }
+
+        background.FadeBorderColorTo(styleBorderColor, transform_length, Easing.OutCubic);
+        text2d.FadeColorTo(styleForeground, transform_length, Easing.OutCubic);
+        background.FadeColorTo(styleForeground, transform_length, Easing.OutCubic);
+        updateVisualState();
     }
 
     private void updateVisualState()
     {
-        switch (ButtonStyle)
-        {
-            case Style.Primary:
-                styleBackground = EngineBranding.PURPLE;
-                styleForeground = EngineBranding.TEXT2;
-                styleBorderColor = ComplexColor.GradientVertical(EngineBranding.PINK, Color.Transparent);
-                break;
-            case Style.Secondary:
-                styleBackground = EngineBranding.PINK;
-                styleForeground = Color.Black;
-                styleBorderColor = ComplexColor.GradientVertical(Color.White.WithOpacity(0.7f), Color.Transparent);
-                break;
-            case Style.Tertiary:
-                styleBackground = Color.Transparent;
-                styleForeground = EngineBranding.TEXT2;
-                styleBorderColor = ComplexColor.GradientVertical(EngineBranding.PINK, EngineBranding.PURPLE);
-                background.BorderThickness = 3;
-                break;
-        }
-
-        background.BorderColor = styleBorderColor;
-        text2d.FadeColorTo(styleForeground, 100, Easing.OutCubic);
-        background.FadeColorTo(styleForeground, 100, Easing.OutCubic);
-
         if (IsHovered)
         {
-            background.FadeColorTo(styleBackground.Lighten(0.1f), 100, Easing.InCubic);
+            background.FadeColorTo(styleBackground.Lighten(0.2f), transform_length, Easing.OutCubic);
+            if (ButtonStyle == Style.Tertiary) background.FadeBorderColorTo(styleBorderColor.Lighten(0.25f), transform_length, Easing.OutCubic);
         }
         else
         {
-            background.FadeColorTo(styleBackground, 100, Easing.OutCubic);
+            background.FadeColorTo(styleBackground, transform_length, Easing.InCubic);
+            if (ButtonStyle == Style.Tertiary) background.FadeBorderColorTo(styleBorderColor, transform_length, Easing.InCubic);
         }
     }
 
@@ -115,7 +140,7 @@ public class DefaultButton : Container2d
                         RelativeSizeAxes = Axes.Both,
                         Color = styleBackground,
                         CornerRadius = 999,
-                        BorderThickness = 2
+                        BorderThickness = 3
                     },
                     text2d = new Text2d
                     {
@@ -123,7 +148,7 @@ public class DefaultButton : Container2d
                         Origin = Anchor.Centre,
                         Text = string.Empty,
                         Color = styleForeground,
-                        FontSize = 24
+                        FontSize = 20
                     }
                 ]
             }
@@ -165,4 +190,3 @@ public class DefaultButton : Container2d
         Tertiary
     }
 }
-

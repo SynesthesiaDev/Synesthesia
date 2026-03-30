@@ -82,8 +82,8 @@ public class Text2d : Drawable2d
         if (!Font.Atlas.TextureAtlas.IsUploaded || string.IsNullOrWhiteSpace(Text)) return;
 
         float scale = FontSize / FontAtlas.RENDER_SIZE;
-        var cursorX = 0f;
-        var baselineY = Font.Atlas.LineHeight * scale;
+        var cursorX = spread * scale;
+        var baselineY = (Font.Atlas.Ascent + spread) * scale;
 
         foreach (var character in Text)
         {
@@ -91,38 +91,35 @@ public class Text2d : Drawable2d
             {
                 if (character == ' ')
                 {
-                    if (Font.Atlas.Glyphs.TryGetValue(' ', out var spaceGlyph))
-                        cursorX += spaceGlyph.Advance * scale;
-                    else
-                        cursorX += (FontSize / 3f);
-                    continue;
+                    cursorX += (Font.Atlas.Glyphs.TryGetValue(' ', out var s)) ? s.Advance * scale : (FontSize / 3f);
                 }
+
+                continue;
             }
 
             var region = Font.Atlas.TextureAtlas.GetRegionOrNull(glyph.RegionHandle);
-            if (region == null) throw new InvalidOperationException($"Failed to get texture region for font atlas with handle {glyph.RegionHandle} (character '{character}')");
+            if (region != null)
+            {
+                var charPos = new Vector2(
+                    cursorX + (glyph.Bearing.X - spread) * scale,
+                    baselineY - (glyph.Bearing.Y + spread) * scale
+                );
 
-            var drawSize = region.Value.Size * scale;
-
-            var charPos = new Vector2(
-                cursorX + (glyph.Bearing.X - spread) * scale,
-                baselineY - (glyph.Bearing.Y + spread) * scale
-            );
-
-            renderer.DrawQuad(
-                drawMatrix: DrawMatrix,
-                position: charPos,
-                size: drawSize,
-                alpha: InheritedAlpha,
-                packedColor: packedColor,
-                borderThickness: 0,
-                borderHasSingleColor: true,
-                borderColor: CachedBorderColor,
-                texture: region.Value.Texture,
-                textureCoord: region.Value.UvRect,
-                vertexMode: VertexMode.Font,
-                cornerRadius: getWeightRadius()
-            );
+                renderer.DrawQuad(
+                    drawMatrix: DrawMatrix,
+                    position: charPos,
+                    size: region.Value.Size * scale,
+                    alpha: InheritedAlpha,
+                    packedColor: packedColor,
+                    borderThickness: 0,
+                    borderHasSingleColor: true,
+                    borderColor: CachedBorderColor,
+                    texture: region.Value.Texture,
+                    textureCoord: region.Value.UvRect,
+                    vertexMode: VertexMode.Font,
+                    cornerRadius: getWeightRadius()
+                );
+            }
 
             cursorX += glyph.Advance * scale;
         }

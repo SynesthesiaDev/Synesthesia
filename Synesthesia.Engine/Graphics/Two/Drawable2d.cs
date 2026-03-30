@@ -546,6 +546,11 @@ public abstract class Drawable2d : Drawable
         return TransformTo(nameof(Alpha), startAlpha, endAlpha, duration, easing, Transforms.FLOAT, a => Alpha = a);
     }
 
+    public Animation<ComplexColor> FadeBorderColorTo(ComplexColor newColor, long duration, Easing easing)
+    {
+        return TransformTo(nameof(BorderColor), BorderColor, newColor, duration, easing, Transforms.COMPLEX_COLOR, color => BorderColor = color);
+    }
+
     #endregion
 
     public bool Contains(Vector2 screenSpacePoint)

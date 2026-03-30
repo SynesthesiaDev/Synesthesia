@@ -29,11 +29,13 @@ internal static class Demo
                 // }
                 button = new DefaultButton
                 {
-                    Size = new Vector2(259, 62),
+                    Size = new Vector2(140, 50),
                     Text = "Testing",
                     Origin = Anchor.Centre,
                     Anchor = Anchor.Centre,
-                    OnClick = clickButton
+                    OnClick = clickButton,
+                    ButtonStyle = DefaultButton.Style.Tertiary,
+                    Disabled = true
                 }
             ];
         });

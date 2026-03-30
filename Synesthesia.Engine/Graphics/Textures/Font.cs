@@ -21,10 +21,12 @@ public class Font(string name, int size, FontAtlas atlas) : IDisposable
         foreach (char c in text)
         {
             if (Atlas.Glyphs.TryGetValue(c, out var glyph))
+            {
                 width += glyph.Advance * scale;
+            }
         }
 
-        return new Vector2(width, Atlas.LineHeight * scale);
+        return new Vector2(width + (2 * scale), (Atlas.Ascent - Atlas.Descent) * scale);
     }
 
     public void Dispose()
