@@ -4,6 +4,7 @@
 using System.Numerics;
 using Synesthesia.Engine;
 using Synesthesia.Engine.Animations.Easings;
+using Synesthesia.Engine.Components.Two.Default;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Graphics.Two.Container;
@@ -133,10 +134,9 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
                             Size = new Vector2(240, 40),
                             Text = "Clear Current Test",
                             Scale = new Vector2(0.8f),
-                            ColorCombination = DefaultEngineColorCombination.RED,
-                            TextColor = Color.Black,
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.TopCentre,
+                            ButtonStyle = DefaultButton.Style.Tertiary,
                             OnClick = () =>
                             {
                                 CurrentSelectedTest.Value = null;
@@ -147,11 +147,10 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
                             Size = new Vector2(240, 40),
                             Text = "Reset Current Test",
                             Scale = new Vector2(0.8f),
-                            ColorCombination = DefaultEngineColorCombination.ORANGE,
-                            TextColor = Color.Black,
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.TopCentre,
-                            OnClick = ResetCurrentTest
+                            ButtonStyle = DefaultButton.Style.Primary,
+                            OnClick = ResetCurrentTest,
                         },
                         defaultCheckbox = new DefaultCheckbox
                         {

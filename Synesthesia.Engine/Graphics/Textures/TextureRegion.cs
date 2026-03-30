@@ -3,26 +3,22 @@
 
 using System.Drawing;
 using System.Numerics;
+using System.Runtime.InteropServices;
+using Codon.Binary;
+using Synesthesia.Engine.Util.Codecs;
 
 namespace Synesthesia.Engine.Graphics.Textures;
 
-public readonly struct TextureRegion
+[StructLayout(LayoutKind.Auto)]
+public readonly struct TextureRegion(RectangleF uvRect, Vector2 size)
 {
-    public readonly Texture Texture;
-    public readonly RectangleF UvRect;
-    public readonly Vector2 Size;
+    public readonly RectangleF UvRect = uvRect;
+    public readonly Vector2 Size = size;
 
-    public TextureRegion(Texture texture)
-    {
-        Texture = texture;
-        UvRect = new RectangleF(0, 0, 1, 1);
-        Size = new Vector2(Texture.Width, Texture.Height);
-    }
-
-    public TextureRegion(Texture texture, RectangleF uvRect, Vector2 size)
-    {
-        Texture = texture;
-        UvRect = uvRect;
-        Size = size;
-    }
+    public static readonly IBinaryCodec<TextureRegion> BINARY_CODEC = BinaryCodec.Of
+    (
+        ExtraCodecs.RECTANGLE_F, r => r.UvRect,
+        ExtraCodecs.VECTOR_2, r => r.Size,
+        (uv, size) => new TextureRegion(uv, size)
+    );
 }

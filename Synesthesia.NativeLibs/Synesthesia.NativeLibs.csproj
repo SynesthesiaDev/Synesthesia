@@ -16,4 +16,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="FreeTypeSharp" Version="3.1.0" />
+  </ItemGroup>
+
 </Project>

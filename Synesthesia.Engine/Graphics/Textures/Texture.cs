@@ -13,10 +13,12 @@ namespace Synesthesia.Engine.Graphics.Textures;
 public class Texture : IDisposable
 {
     public uint Handle { get; private set; }
-    public int Width { get; private set; }
-    public int Height { get; private set; }
 
-    public byte[]? Data { get; private set; }
+    public TextureData TextureData { get; private set; }
+
+    public int Width => TextureData.Width;
+    public int Height => TextureData.Height;
+    public PixelFormat PixelFormat => TextureData.PixelFormat;
 
     public bool IsUploaded { get; private set; }
 
@@ -25,18 +27,11 @@ public class Texture : IDisposable
     public bool UploadImmediately { get; }
 
     private GL? gl;
-    private readonly PixelFormat format;
 
-    public string AssetName { get; }
-
-    public Texture(int width, int height, byte[] data, PixelFormat format, string name, bool uploadImmediately)
+    public Texture(TextureData textureData, bool uploadImmediately)
     {
-        this.format = format;
         UploadImmediately = uploadImmediately;
-        Width = width;
-        Height = height;
-        Data = data;
-        AssetName = name;
+        TextureData = textureData;
         IsUploaded = false;
 
         if (UploadImmediately) EnqueueUpload();
@@ -53,7 +48,7 @@ public class Texture : IDisposable
         ThreadSafety.AssertRunningOnRenderThread();
 
         if (IsUploaded) return;
-        if (Data == null || Data.Length == 0) throw new OpenGLException("No pixel data");
+        if (TextureData.Data.Length == 0) throw new OpenGLException("No pixel data");
 
         gl = opengl;
         Handle = gl.GenTexture();
@@ -66,15 +61,14 @@ public class Texture : IDisposable
 
         unsafe
         {
-            fixed (void* ptr = Data)
+            fixed (void* ptr = TextureData.Data)
             {
-                gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, (uint)Width, (uint)Height, 0, format, PixelType.UnsignedByte, ptr);
+                gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, (uint)Width, (uint)Height, 0, TextureData.PixelFormat, PixelType.UnsignedByte, ptr);
             }
         }
 
         IsUploaded = true;
         UploadQueued = false;
-        Data = null;
         Logger.Verbose($"Uploaded texture {ToString()}", Logger.Render);
     }
 
@@ -107,6 +101,7 @@ public class Texture : IDisposable
 
     public override string ToString()
     {
-        return $"Texture(Handle={Handle}, AssetName={AssetName}, Width={Width}, Height={Height}, IsUploaded={IsUploaded}, UploadQueued={UploadQueued}, Format={format})";
+        return $"Texture(Handle={Handle}, TextureData={TextureData}, IsUploaded={IsUploaded}, UploadQueued={UploadQueued})";
     }
+
 }

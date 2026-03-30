@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Numerics;
+using Codon.Binary;
 using FreeTypeSharp;
 using Synesthesia.Engine.Util.Statistics;
 
@@ -16,15 +17,31 @@ public class FontAtlas : IDisposable
         "€$£¥©®™°±«»„“”“‘’…–—" +
         "¿¡†‡§ ";
 
-    public const int RENDER_SIZE = 32;
+    public const int RENDER_SIZE = 64;
 
     public required TextureAtlas TextureAtlas { get; init; } = null!;
 
-    public required IDictionary<char, GlyphInfo> Glyphs { get; init; } = null!;
+    public required Dictionary<int, GlyphInfo> Glyphs { get; init; } = null!;
 
     public required float LineHeight { get; init; }
     public required float Ascent { get; init; }
     public required float Descent { get; init; }
+
+    public static readonly IBinaryCodec<FontAtlas> BINARY_CODEC = BinaryCodec.Of
+    (
+        TextureAtlas.BINARY_CODEC, f => f.TextureAtlas,
+        BinaryCodec.INT.MapTo(GlyphInfo.BINARY_CODEC), f => f.Glyphs,
+        BinaryCodec.FLOAT, f => f.LineHeight,
+        BinaryCodec.FLOAT, f => f.Ascent,
+        BinaryCodec.FLOAT, f => f.Descent,
+        (atlas, glyphs, lineHeight, ascent, descent) => new FontAtlas
+        {
+            TextureAtlas = atlas,
+            Glyphs = glyphs,
+            LineHeight = lineHeight,
+            Ascent = ascent,
+            Descent = descent
+        });
 
     public FontAtlas() => EngineStatistics.Increment(EngineStatistics.Type.FontAtlases);
 
@@ -78,7 +95,7 @@ public class FontAtlas : IDisposable
 
             var textureAtlas = builder.Build();
 
-            var glyphInfoMap = new Dictionary<char, GlyphInfo>();
+            var glyphInfoMap = new Dictionary<int, GlyphInfo>();
             foreach (var (c, meta) in glyphMeta)
             {
                 glyphInfoMap[c] = new GlyphInfo(c, meta.bearing, meta.advance);

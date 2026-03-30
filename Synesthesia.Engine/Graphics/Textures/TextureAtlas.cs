@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Numerics;
+using Codon.Binary;
 using Synesthesia.Engine.Extensions;
 using Synesthesia.Engine.Util.Statistics;
 
@@ -9,25 +10,32 @@ namespace Synesthesia.Engine.Graphics.Textures;
 
 public class TextureAtlas : IDisposable
 {
-    public readonly Texture Texture;
     public readonly int Width;
     public readonly int Height;
+    public readonly Texture Texture;
+    public readonly Dictionary<int, TextureRegion> TextureRegions;
 
-    public readonly Vector2 Size;
+    public Vector2 Size => new Vector2(Width, Height);
 
-    public readonly IDictionary<int, TextureRegion> TextureRegions;
-
-    public TextureAtlas(int width, int height, Texture texture, IDictionary<int, TextureRegion> textureRegions)
+    public TextureAtlas(int width, int height, Texture texture, Dictionary<int, TextureRegion> textureRegions)
     {
         Texture = texture;
         Width = width;
         Height = height;
-        Size = new Vector2(width, height);
         TextureRegions = textureRegions;
         EngineStatistics.Increment(EngineStatistics.Type.TextureAtlases);
     }
 
     public bool IsUploaded => Texture.IsUploaded;
+
+    public static readonly IBinaryCodec<TextureAtlas> BINARY_CODEC = BinaryCodec.Of
+    (
+        BinaryCodec.INT, a => a.Width,
+        BinaryCodec.INT, a => a.Height,
+        TextureData.BINARY_CODEC.Transform<Texture>(texture => texture.TextureData, textureData => new Texture(textureData, true)), a => a.Texture,
+        BinaryCodec.INT.MapTo(TextureRegion.BINARY_CODEC), a => a.TextureRegions,
+        (width, height, texture, areas) => new TextureAtlas(width, height, texture, areas)
+    );
 
     public TextureRegion GetRegion(int handle) => GetRegionOrNull(handle) ?? throw new InvalidOperationException($"No texture in atlas with handle {handle}");
 

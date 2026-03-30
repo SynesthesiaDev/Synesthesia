@@ -55,9 +55,9 @@ public class Game
     public readonly IResourceStore<Texture> TextureResourceStore = new ResourceStoreBuilder<Texture>()
         .AddLoaders(new Dictionary<string, Func<Stream, string, Texture>>
         {
-            { "png", (stream, name) => ResourceLoaders.LoadTexture(stream, name) },
-            { "bmp", (stream, name) => ResourceLoaders.LoadTexture(stream, name) },
-            { "jpg", (stream, name) => ResourceLoaders.LoadTexture(stream, name) },
+            { "png", (stream, _) => ResourceLoaders.LoadTexture(stream) },
+            { "bmp", (stream, _) => ResourceLoaders.LoadTexture(stream) },
+            { "jpg", (stream, _) => ResourceLoaders.LoadTexture(stream) },
         })
         .AddFallback(fallback =>
         {
@@ -67,6 +67,31 @@ public class Game
         .MakeCached()
         .MakeAsync()
         .MakeDeferred()
+        .Build();
+
+    public readonly IResourceStore<TextureAtlas> TextureAtlasResourceStore = new ResourceStoreBuilder<TextureAtlas>()
+        .AddLoaders(new Dictionary<string, Func<Stream, string, TextureAtlas>>
+        {
+            { ResourceLoaders.TEXTURE_ATLAS_FILE_EXT, (stream, _) => ResourceLoaders.LoadFromTextureAtlasFile(stream) },
+        })
+        .AddFallback(fallback =>
+        {
+            fallback.AddFileSystemStore("Assets/Atlases/");
+            fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);
+        })
+        .Build();
+
+
+    public readonly IResourceStore<FontAtlas> FontAtlasResourceStore = new ResourceStoreBuilder<FontAtlas>()
+        .AddLoaders(new Dictionary<string, Func<Stream, string, FontAtlas>>
+        {
+            { ResourceLoaders.FONT_ATLAS_FILE_EXT, (stream, _) => ResourceLoaders.LoadFromFontAtlasFile(stream) },
+        })
+        .AddFallback(fallback =>
+        {
+            fallback.AddFileSystemStore("Assets/Atlases/");
+            fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);
+        })
         .Build();
 
     /// <summary>

@@ -29,8 +29,8 @@ public class TextureAtlasBuilder
 
     public void Add(int id, Texture texture)
     {
-        if (texture.Data == null) throw new InvalidOperationException("Cannot add empty texture to texture atlas!");
-        pendingItems.Add(new PendingItem(id, texture.Width, texture.Height, texture.Data!));
+        if (texture.TextureData.Data == null) throw new InvalidOperationException("Cannot add empty texture to texture atlas!");
+        pendingItems.Add(new PendingItem(id, texture.Width, texture.Height, texture.TextureData.Data));
     }
 
     public void SetPadding(int paddingPx)
@@ -59,7 +59,8 @@ public class TextureAtlasBuilder
             blit(item.RgbaData, item.Width, item.Height, atlasData, (int)rect.X, (int)rect.Y, atlasWidth);
         }
 
-        var texture = new Texture(atlasWidth, atlasHeight, atlasData, PixelFormat.Rgba, "TextureAtlas", true);
+        var textureData = new TextureData(atlasWidth, atlasHeight, atlasData, PixelFormat.Rgba);
+        var texture = new Texture(textureData, true);
 
         foreach (var rect in rectangles)
         {
@@ -72,7 +73,7 @@ public class TextureAtlasBuilder
                 (float)item.Height / atlasHeight
             );
 
-            regionMapping[item.Id] = new TextureRegion(texture, uv, new Vector2(item.Width, item.Height));
+            regionMapping[item.Id] = new TextureRegion(uv, new Vector2(item.Width, item.Height));
         }
 
         return new TextureAtlas(atlasWidth, atlasHeight, texture, regionMapping);

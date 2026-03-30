@@ -3,6 +3,8 @@
 
 using System.Numerics;
 using System.Runtime.InteropServices;
+using Codon.Binary;
+using Synesthesia.Engine.Util.Codecs;
 
 namespace Synesthesia.Engine.Graphics.Textures;
 
@@ -12,4 +14,12 @@ public readonly struct GlyphInfo(int regionHandle, Vector2 bearing, float advanc
     public readonly int RegionHandle = regionHandle;
     public readonly Vector2 Bearing = bearing;
     public readonly float Advance = advance;
+
+    public static readonly IBinaryCodec<GlyphInfo> BINARY_CODEC = BinaryCodec.Of
+    (
+        BinaryCodec.INT, g => g.RegionHandle,
+        ExtraCodecs.VECTOR_2, g => g.Bearing,
+        BinaryCodec.FLOAT, g => g.Advance,
+        (handle, bearing, advance) => new GlyphInfo(handle, bearing, advance)
+    );
 }

@@ -14,14 +14,14 @@ public class InternalGameContainer2d : CompositeDrawable2d
     {
         Children =
         [
+            DrawableScene2d = new DrawableScene2d
+            {
+                RelativeSizeAxes = Axes.Both
+            },
             new EngineDebugOverlay
             {
                 RelativeSizeAxes = Axes.Both
             },
-            DrawableScene2d = new DrawableScene2d
-            {
-                RelativeSizeAxes = Axes.Both
-            }
         ];
     }
 }

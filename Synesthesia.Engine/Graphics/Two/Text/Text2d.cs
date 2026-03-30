@@ -114,7 +114,7 @@ public class Text2d : Drawable2d
                     borderThickness: 0,
                     borderHasSingleColor: true,
                     borderColor: CachedBorderColor,
-                    texture: region.Value.Texture,
+                    texture: Font.Atlas.TextureAtlas.Texture,
                     textureCoord: region.Value.UvRect,
                     vertexMode: VertexMode.Font,
                     cornerRadius: getWeightRadius()
