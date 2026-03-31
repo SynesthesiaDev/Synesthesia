@@ -382,7 +382,7 @@ public class CompositeDrawable2d : Drawable2d
             var child = InternalChildren[i];
             if (!child.CanHandleInput) continue;
 
-            if (down && child is { IsMouseDown: false, IsHovered: true } && child.OnMouseDown(e))
+            if (down && child is { IsMouseDown: false} && child.Contains(InputHandler.MousePosition) && child.OnMouseDown(e))
             {
                 Logger.Verbose($"{e} handled by {child.GetType().Name}", Logger.Input);
                 child.IsMouseDown = true;

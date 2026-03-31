@@ -2,8 +2,9 @@
 using Synesthesia.Engine;
 using Synesthesia.Engine.Components.Two.Default;
 using Synesthesia.Engine.Graphics.Layout;
+using Synesthesia.Engine.Graphics.Two.Container;
 using Synesthesia.Engine.Platform.Host;
-using SynesthesiaUtil.Extensions;
+using Synesthesia.Engine.Util.Bindables;
 
 namespace Synesthesia.Demo;
 
@@ -16,35 +17,42 @@ internal static class Demo
     {
         var windowHost = new SDL3WindowHost();
         var game = new Game(windowHost);
+        var toggled = new Bindable<bool>(false);
 
         game.OnInitialized.Subscribe(_ =>
         {
             game.DrawableScene2d.Children =
             [
-                // new Text2d
-                // {
-                //     Text = "hello there",
-                //     Origin = Anchor.Centre,
-                //     Anchor = Anchor.Centre
-                // }
-                button = new DefaultButton
+                new FillFlowContainer2d
                 {
-                    Size = new Vector2(140, 50),
-                    Text = "Testing",
+                    AutoSizeAxes = Axes.Both,
+                    Direction = Direction.Vertical,
                     Origin = Anchor.Centre,
                     Anchor = Anchor.Centre,
-                    OnClick = clickButton,
-                    ButtonStyle = DefaultButton.Style.Tertiary,
-                    Disabled = true
-                }
+                    Spacing = 10,
+                    Children =
+                    [
+                        button = new DefaultButton
+                        {
+                            Size = new Vector2(140, 50),
+                            Text = "Testing",
+                            Origin = Anchor.TopCentre,
+                            Anchor = Anchor.TopCentre,
+                            ButtonStyle = DefaultButton.Style.Tertiary,
+                        },
+
+                        new DefaultToggle
+                        {
+                            Size = new Vector2(65, 24),
+                            Origin = Anchor.TopCentre,
+                            Anchor = Anchor.TopCentre,
+                            Checked = toggled
+                        }
+                    ]
+                },
             ];
         });
 
         game.Run();
-    }
-
-    private static void clickButton()
-    {
-        button?.ButtonStyle = button.ButtonStyle.Next();
     }
 }

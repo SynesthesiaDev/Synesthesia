@@ -3,7 +3,6 @@
 
 using Codon.Binary;
 using Silk.NET.OpenGL;
-using Buffer = System.Buffer;
 
 namespace Synesthesia.Engine.Graphics.Textures;
 
@@ -19,12 +18,7 @@ public class TextureData(int width, int height, byte[] data, PixelFormat pixelFo
         BinaryCodec.INT, d => d.Height,
         BinaryCodec.BYTE_ARRAY, d => d.Data,
         BinaryCodec.Enum<PixelFormat>(), d => d.PixelFormat,
-        (w, h, data, format) =>
-        {
-            var newArray = new byte[data.Length];
-            Buffer.BlockCopy(data, 0, newArray, 0, data.Length);
-            return new TextureData(w, h, newArray, format);
-        });
+        (w, h, data, format) => new TextureData(w, h, data, format));
 
     public override string ToString() => $"TextureData(Width={Width}, Height={Height}, Data={Data.Length} PixelFormat={PixelFormat})";
 }
