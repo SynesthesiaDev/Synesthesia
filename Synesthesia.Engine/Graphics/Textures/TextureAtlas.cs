@@ -15,6 +15,8 @@ public class TextureAtlas : IDisposable
     public readonly Texture Texture;
     public readonly Dictionary<int, TextureRegion> TextureRegions;
 
+    public override string ToString() => $"TextureAtlas(Texture={Texture}, Width={Width}, Height={Height}, TextureRegions={TextureRegions.Count})";
+
     public Vector2 Size => new Vector2(Width, Height);
 
     public TextureAtlas(int width, int height, Texture texture, Dictionary<int, TextureRegion> textureRegions)

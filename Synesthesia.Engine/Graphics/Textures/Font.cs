@@ -2,14 +2,23 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Numerics;
+using Codon.Binary;
 
 namespace Synesthesia.Engine.Graphics.Textures;
 
-public class Font(string name, int size, FontAtlas atlas) : IDisposable
+public class Font(int size, FontAtlas atlas) : IDisposable
 {
-    public readonly string Name = name;
     public readonly int Size = size;
     public readonly FontAtlas Atlas = atlas;
+
+    public static readonly IBinaryCodec<Font> BINARY_CODEC = BinaryCodec.Of
+    (
+        BinaryCodec.INT, f => f.Size,
+        FontAtlas.BINARY_CODEC, f => f.Atlas,
+        (size, atlas) => new Font(size, atlas)
+    );
+
+    public override string ToString() => $"Font(Size={Size}, Atlas={Atlas})";
 
     public Vector2 MeasureText(string text, float targetSize)
     {

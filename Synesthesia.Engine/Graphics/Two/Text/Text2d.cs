@@ -57,7 +57,7 @@ public class Text2d : Drawable2d
 
     protected override void OnLoading()
     {
-        defaultFont = fontResourceStore.Get("Synesthesia.Resources.Fonts.Quicksand-Regular.ttf");
+        defaultFont = fontResourceStore.Get("Synesthesia.Resources.Fonts.Quicksand-Regular.fna");
         Font = defaultFont;
         base.OnLoading();
     }
@@ -136,8 +136,8 @@ public class Text2d : Drawable2d
     {
         return Weight switch
         {
-            FontWeight.Bold => 0.265f,
-            FontWeight.Normal => 0.23f,
+            FontWeight.Bold => 0.32f,
+            FontWeight.Normal => 0.26f,
             FontWeight.Thin => 0.19f,
             _ => 0.23f
         };

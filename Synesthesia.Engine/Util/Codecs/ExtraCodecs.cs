@@ -29,10 +29,10 @@ public static class ExtraCodecs
     {
         public void Write(IByteBuffer buffer, RectangleF value)
         {
-            buffer.WriteFloat(value.Width);
-            buffer.WriteFloat(value.Height);
             buffer.WriteFloat(value.X);
             buffer.WriteFloat(value.Y);
+            buffer.WriteFloat(value.Width);
+            buffer.WriteFloat(value.Height);
         }
 
         public RectangleF Read(IByteBuffer buffer) =>

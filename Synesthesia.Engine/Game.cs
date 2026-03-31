@@ -82,18 +82,6 @@ public class Game
         .Build();
 
 
-    public readonly IResourceStore<FontAtlas> FontAtlasResourceStore = new ResourceStoreBuilder<FontAtlas>()
-        .AddLoaders(new Dictionary<string, Func<Stream, string, FontAtlas>>
-        {
-            { ResourceLoaders.FONT_ATLAS_FILE_EXT, (stream, _) => ResourceLoaders.LoadFromFontAtlasFile(stream) },
-        })
-        .AddFallback(fallback =>
-        {
-            fallback.AddFileSystemStore("Assets/Atlases/");
-            fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);
-        })
-        .Build();
-
     /// <summary>
     /// Resource store which contains Fonts. Is <see cref="CachedResourceStore{Font}"/>, <see cref="AsyncResourceStore{Font}"/>, and <see cref="DeferredResourceStore{Font}"/>.
     /// </summary>
@@ -117,6 +105,7 @@ public class Game
         .AddLoaders(new Dictionary<string, Func<Stream, string, Font>>
         {
             { "ttf", ResourceLoaders.LoadFont },
+            { ResourceLoaders.FONT_ATLAS_FILE_EXT, ResourceLoaders.LoadFontFromAtlas },
         })
         .AddFallback(fallback =>
         {

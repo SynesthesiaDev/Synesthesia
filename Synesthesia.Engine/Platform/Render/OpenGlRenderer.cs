@@ -126,6 +126,8 @@ public sealed class OpenGlRenderer : IDisposable
         VertexMode vertexMode = VertexMode.Shape
     )
     {
+        if(texture is { IsUploaded: false }) return;
+
         if (texture != CurrentTexture)
         {
             BindTexture(texture);
@@ -236,15 +238,12 @@ public sealed class OpenGlRenderer : IDisposable
     public void BindTexture(Texture? texture)
     {
         ThreadSafety.AssertRunningOnRenderThread();
-
         if (CurrentTexture == texture) return;
 
         VertexBatch2d.Flush();
         CurrentTexture = texture;
-
-        if (texture != null)
+        if (texture != null && texture.Bind(OpenGL))
         {
-            texture.Bind(OpenGL);
             CurrentShader.SetInt(textureShaderLocation, 0);
             CurrentShader.SetInt(useTextureShaderLocation, 1);
         }
@@ -253,6 +252,19 @@ public sealed class OpenGlRenderer : IDisposable
             OpenGL.BindTexture(TextureTarget.Texture2D, 0);
             CurrentShader.SetInt(useTextureShaderLocation, 0);
         }
+
+        //
+        // if (texture is { IsUploaded: true })
+        // {
+        //     texture.Bind(OpenGL);
+        //     CurrentShader.SetInt(textureShaderLocation, 0);
+        //     CurrentShader.SetInt(useTextureShaderLocation, 1);
+        // }
+        // else
+        // {
+        //     OpenGL.BindTexture(TextureTarget.Texture2D, 0);
+        //     CurrentShader.SetInt(useTextureShaderLocation, 0);
+        // }
     }
 
     public void Resize(int width, int height)

@@ -54,6 +54,7 @@ public class Texture : IDisposable
         Handle = gl.GenTexture();
         opengl.BindTexture(TextureTarget.Texture2D, Handle);
 
+        gl.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
         gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
         gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMinFilter.Linear);
         gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);

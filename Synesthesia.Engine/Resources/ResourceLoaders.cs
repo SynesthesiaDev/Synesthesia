@@ -24,7 +24,11 @@ public static class ResourceLoaders
 
     public static TextureAtlas LoadFromTextureAtlasFile(Stream stream) => TextureAtlas.BINARY_CODEC.Read(stream.ToByteBuffer());
 
-    public static FontAtlas LoadFromFontAtlasFile(Stream stream) => FontAtlas.BINARY_CODEC.Read(stream.ToByteBuffer());
+    public static Font LoadFontFromAtlas(Stream stream, string _)
+    {
+        var font = Font.BINARY_CODEC.Read(stream.ToByteBuffer());
+        return font;
+    }
 
     public static Font LoadFont(Stream stream, string name)
     {
@@ -50,7 +54,7 @@ public static class ResourceLoaders
                 var atlas = FontAtlas.Generate(face);
                 library.Dispose();
 
-                return new Font(name, 64, atlas);
+                return new Font(64, atlas);
             }
         }
     }

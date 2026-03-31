@@ -42,7 +42,7 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
         (fontResourceStore as DeferredResourceStore<Font>)?.Unlock();
 
         Renderer.CompileDefaultShaders();
-        fontResourceStore.Get("Synesthesia.Resources.Fonts.Quicksand-Regular.ttf");
+        fontResourceStore.Get("Synesthesia.Resources.Fonts.Quicksand-Regular.fna"); // cache
 
         game.UpdateThread.Schedule(() =>
         {

@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.Demo", "Synesth
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.VisualTests", "Synesthesia.VisualTests\Synesthesia.VisualTests.csproj", "{5C4679BC-5697-439B-B6AD-F53BD617B3D4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.AssetGenerators", "Synesthesia.AssetGenerators\Synesthesia.AssetGenerators.csproj", "{AF67CCA7-CE1F-4D76-890A-E1E166480F52}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{5C4679BC-5697-439B-B6AD-F53BD617B3D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C4679BC-5697-439B-B6AD-F53BD617B3D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C4679BC-5697-439B-B6AD-F53BD617B3D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF67CCA7-CE1F-4D76-890A-E1E166480F52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF67CCA7-CE1F-4D76-890A-E1E166480F52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF67CCA7-CE1F-4D76-890A-E1E166480F52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF67CCA7-CE1F-4D76-890A-E1E166480F52}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

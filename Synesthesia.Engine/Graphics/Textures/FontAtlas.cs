@@ -27,6 +27,8 @@ public class FontAtlas : IDisposable
     public required float Ascent { get; init; }
     public required float Descent { get; init; }
 
+    public override string ToString() => $"FontAtlas(TextureAtlas={TextureAtlas}, LineHeight={LineHeight}, Ascent={Ascent}, Descent={Descent}, Glyphs={Glyphs.Count})";
+
     public static readonly IBinaryCodec<FontAtlas> BINARY_CODEC = BinaryCodec.Of
     (
         TextureAtlas.BINARY_CODEC, f => f.TextureAtlas,
