@@ -5,7 +5,6 @@ using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Input.Events;
-using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Util.Bindables;
 
 namespace Synesthesia.Engine.Components.Two.Barebones;
@@ -33,14 +32,8 @@ public abstract class BarebonesToggle : CompositeDrawable2d
 
     protected internal override bool OnMouseDown(ICursorInputEvent e)
     {
-        Logger.Verbose("AAAAAaa");
         return true;
     }
-
-    // protected internal override bool OnHover(IPositionalInputEvent e)
-    // {
-        // return true;
-    // }
 
     protected override void Dispose(bool isDisposing)
     {

@@ -152,6 +152,7 @@ public class Game
         DependencyContainer.AddSingleton(InputHandler);
         DependencyContainer.AddSingleton(InputThread);
         DependencyContainer.AddSingleton(WindowHost);
+        DependencyContainer.AddSingleton(WindowHost.Clipboard);
         //Note: RenderThread is registered as a dependency after initialization of IWindowHost
     }
 
@@ -190,6 +191,8 @@ public class Game
                 RenderThread.Dispose();
                 InputHandler.Dispose();
             });
+
+            WindowHost.WindowActive.OnValueChange(e => InputHandler.FocusedDrawable?.OnWindowActiveChange(e.NewValue));
 
             CompletableFuture.All(RenderThread.LoadFuture, UpdateThread.LoadFuture, AudioThread.LoadFuture, InputThread.LoadFuture).Then(_ =>
             {

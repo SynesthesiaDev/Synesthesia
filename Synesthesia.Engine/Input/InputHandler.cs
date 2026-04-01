@@ -24,6 +24,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
     public static readonly FastObjectPool<MouseScrollInputEvent> MOUSE_SCROLL_INPUT_EVENT_POOL = new(() => new MouseScrollInputEvent());
     public static readonly FastObjectPool<TouchInputEvent> TOUCH_INPUT_EVENT_POOL = new(() => new TouchInputEvent());
     public static readonly FastObjectPool<TabletInputEvent> TABLET_INPUT_EVENT_POOL = new(() => new TabletInputEvent());
+    public static readonly FastObjectPool<TextInputEvent> TEXT_INPUT_EVENT_POOL = new(() => new TextInputEvent());
 
     public static readonly EventDispatcher<KeyboardInputEvent> ON_KEYBOARD_INPUT = new();
     public static readonly EventDispatcher<MouseButtonInputInputEvent> ON_MOUSE_BUTTON_INPUT = new();
@@ -38,7 +39,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
 
     private readonly ConcurrentQueue<IInputEvent> eventQueue = new();
 
-    private static readonly List<PlatformActionBinding> platformActionBindings = [];
+    private static readonly List<PlatformActionBinding> platform_action_bindings = [];
 
     public static bool IsKeyDown(Key key) => held_keys.Contains(key);
 
@@ -52,7 +53,29 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
 
     public static Vector2 MousePosition = Vector2.Zero;
 
-    private InternalGameContainer2d gameContainer = game.GetInternalGameContainer();
+    private readonly InternalGameContainer2d gameContainer = game.GetInternalGameContainer();
+
+    public static IAcceptsFocus? FocusedDrawable
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            if (field != null)
+            {
+                field.OnFocusLost();
+                Logger.Verbose($"Focus lost => {field.GetType().Name}", Logger.Input);
+            }
+
+            if (value != null)
+            {
+                value.OnFocusGained();
+                Logger.Verbose($"Focus gained => {value.GetType().Name}", Logger.Input);
+            }
+
+            field = value;
+        }
+    } = null;
 
     public void ProcessFrame()
     {
@@ -76,6 +99,11 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
                     case IPositionalInputEvent positionalInputEvent:
                         handlePositionalInputEvent(positionalInputEvent);
                         break;
+                    case TextInputEvent textInputEvent:
+                    {
+                        handleTextInputEvent(textInputEvent);
+                        break;
+                    }
                 }
             }
             catch (Exception exception)
@@ -96,7 +124,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
     {
         var comparer = new ActionBindingComparer();
 
-        foreach (var conflict in platformActionBindings
+        foreach (var conflict in platform_action_bindings
                      .Select(existing => binding.AlternativeBindings
                          .FirstOrDefault(newB => existing.AlternativeBindings
                              .Any(extB => comparer.Equals(newB, extB))))
@@ -105,7 +133,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
             throw new InvalidOperationException($"Cannot register a binding that overlaps with another binding ({conflict} is already bound)");
         }
 
-        platformActionBindings.Add(binding);
+        platform_action_bindings.Add(binding);
     }
 
     // man I should really write tests for this, but I don't feel like it
@@ -113,7 +141,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
     {
         var consumedTriggers = new List<IActionBinding>();
 
-        foreach (var action in platformActionBindings.OrderByDescending(a => a.Complexity))
+        foreach (var action in platform_action_bindings.OrderByDescending(a => a.Complexity))
         {
             var activeTrigger = action.AlternativeBindings.FirstOrDefault(b => b.IsDown);
 
@@ -132,6 +160,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
                         held_action_bindings.Add(action);
                         gameContainer.UpdatePlatformActionBindingState(action);
                     }
+
                     continue;
                 }
             }
@@ -139,7 +168,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
             // action is not pressed or is shadowed
             if (held_action_bindings.Contains(action))
             {
-                    gameContainer.UpdatePlatformActionBindingState(action);
+                gameContainer.UpdatePlatformActionBindingState(action);
                 held_action_bindings.Remove(action);
             }
         }
@@ -151,7 +180,14 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
         {
             return complexKey.Primary == simpleKey.Primary && simpleKey.Modifiers.All(m => complexKey.Modifiers.Contains(m));
         }
+
         return false;
+    }
+
+    private void handleTextInputEvent(TextInputEvent textInputEvent)
+    {
+        if(textInputEvent.Text == string.Empty) return;
+        FocusedDrawable?.OnTextTyped(textInputEvent.Text);
     }
 
     private void handlePositionalInputEvent(IPositionalInputEvent positionalInputEvent)
@@ -194,10 +230,21 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
         {
             if (!held_mouse_buttons.Contains(button)) return;
             held_mouse_buttons.Remove(button);
+            tryInvalidateFocusedDrawableFocus();
         }
 
         gameContainer.UpdateCursorInputState(mouseButtonInputInputEvent);
         updateActionBindings();
+    }
+
+    private void tryInvalidateFocusedDrawableFocus()
+    {
+        if (FocusedDrawable != null && !FocusedDrawable
+                .OwningDrawable
+                .Contains(MousePosition))
+        {
+            FocusedDrawable = null;
+        }
     }
 
     private void handleTouchInputEvent(TouchInputEvent touchInputEvent)
@@ -212,6 +259,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
         {
             if (!active_touches.Contains(finger)) return;
             active_touches.Remove(finger);
+            tryInvalidateFocusedDrawableFocus();
         }
 
         gameContainer.UpdateCursorInputState(touchInputEvent);

@@ -10,7 +10,6 @@ using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Input.ActionBindings;
 using Synesthesia.Engine.Input.Events;
-using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util.Pooling;
@@ -180,6 +179,7 @@ public class CompositeDrawable2d : Drawable2d
 
         if (Masking)
         {
+            renderer.VertexBatch2d.Flush();
             renderer.BeginStencil();
             renderer.BeginStencilMask();
 
@@ -195,6 +195,7 @@ public class CompositeDrawable2d : Drawable2d
                 cornerRadius: 0f
             );
 
+            renderer.VertexBatch2d.Flush();
             renderer.EndStencilMask();
         }
 
@@ -384,14 +385,12 @@ public class CompositeDrawable2d : Drawable2d
 
             if (down && child is { IsMouseDown: false} && child.Contains(InputHandler.MousePosition) && child.OnMouseDown(e))
             {
-                Logger.Verbose($"{e} handled by {child.GetType().Name}", Logger.Input);
                 child.IsMouseDown = true;
             }
 
             if (!down && child.IsMouseDown)
             {
                 child.IsMouseDown = false;
-                Logger.Verbose($"{e} handled by {child.GetType().Name}", Logger.Input);
                 child.OnMouseUp(e);
             }
 

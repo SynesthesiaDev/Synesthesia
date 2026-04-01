@@ -11,6 +11,8 @@ namespace Synesthesia.Demo;
 internal static class Demo
 {
     private static DefaultButton? button;
+    private static DefaultTextbox? textbox;
+    private static DefaultToggle? toggle;
 
     [STAThread]
     private static void Main(string[] args)
@@ -41,16 +43,25 @@ internal static class Demo
                             ButtonStyle = DefaultButton.Style.Tertiary,
                         },
 
-                        new DefaultToggle
+                        toggle = new DefaultToggle
                         {
                             Size = new Vector2(65, 24),
                             Origin = Anchor.TopCentre,
                             Anchor = Anchor.TopCentre,
                             Checked = toggled
+                        },
+
+                        textbox = new DefaultTextbox
+                        {
+                            Size = new Vector2(200, 40),
+                            Origin = Anchor.TopCentre,
+                            Anchor = Anchor.TopCentre,
                         }
                     ]
                 },
             ];
+
+            textbox.IsPassword.BindTo(toggled);
         });
 
         game.Run();

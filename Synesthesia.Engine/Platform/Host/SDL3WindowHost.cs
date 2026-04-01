@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Numerics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using OpenTabletDriver.Plugin.Tablet;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Events;
@@ -82,6 +83,8 @@ public class SDL3WindowHost : IWindowHost
     private volatile uint pressedMouseButtons;
 
     private PointF previousMousePolledPoint = PointF.Empty;
+
+    public IClipboard Clipboard { get; } = new SDL3Clipboard();
 
     public bool IsWayland => string.Equals(GetCurrentVideoDriver(), "wayland", StringComparison.Ordinal);
 
@@ -210,6 +213,7 @@ public class SDL3WindowHost : IWindowHost
             };
 
             Surface.ClaimOwnership();
+            StartTextInput(Surface.WindowHandle);
 
             Renderer = new OpenGlRenderer
             {
@@ -431,9 +435,16 @@ public class SDL3WindowHost : IWindowHost
             // GlobalInputHandler.HandleTextEditing(sdlEvent.Edit);
             // break;
 
-            // case EventType.TextInput:
-            // GlobalInputHandler.HandleTextInput(sdlEvent.Text);
-            // break;
+            case EventType.TextInput:
+                var text = Marshal.PtrToStringUTF8(sdlEvent.Text.Text);
+                if (text == null) return;
+
+                var textEvent = InputHandler.TEXT_INPUT_EVENT_POOL.Rent();
+                textEvent.Timestamp = timestamp;
+                textEvent.Text = text;
+
+                inputHandler.Enqueue(textEvent);
+                break;
 
             // case EventType.KeymapChanged:
             // GlobalInputHandler.HandleKeymapChange();

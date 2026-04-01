@@ -18,6 +18,7 @@ public interface IWindowHost : IDisposable
     EventDispatcher<Vector4> OnSafeAreaChanged { get; }
     Bindable<bool> CursorInWindow { get; }
     Bindable<WindowState> WindowState { get; }
+    Bindable<bool> WindowActive { get; }
 
     void Flash(bool flashUntilFocused);
 
@@ -45,6 +46,6 @@ public interface IWindowHost : IDisposable
 
     void Hide();
 
-    Bindable<bool> WindowActive { get; }
+    IClipboard Clipboard { get; }
 
 }

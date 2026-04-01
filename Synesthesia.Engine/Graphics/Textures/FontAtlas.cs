@@ -15,7 +15,7 @@ public class FontAtlas : IDisposable
         "ěščřžýáíéůúťďňĚŠČŘŽÝÁÍÉŮÚŤĎŇ" +
         "äöüßÄÖÜñçàèìòùÀÈÌÒÙ" +
         "€$£¥©®™°±«»„“”“‘’…–—" +
-        "¿¡†‡§ ";
+        "¿¡†‡§●⬤";
 
     public const int RENDER_SIZE = 64;
 
