@@ -30,6 +30,8 @@ public abstract class Drawable : IDisposable
 
     public Thread LoadThread { get; private set; } = null!;
 
+    public readonly Lazy<Scheduler> Scheduler = new Lazy<Scheduler>(() => new Scheduler());
+
     public float Alpha { get; set; } = 1f;
 
     public BlendMode BlendMode { get; set; } = BlendMode.Alpha;
@@ -153,7 +155,7 @@ public abstract class Drawable : IDisposable
         Pooled.DRAWABLE_LOAD_DISPATCHER_POOL.Return(OnLoadComplete);
         Pooled.DRAW_MATRIX_POOL.Return(DrawMatrix);
         IsDisposed = true;
-        // Scheduler.Value.Dispose(); //TODO
+        if (Scheduler.IsValueCreated) Scheduler.Value.Dispose();
 
 #if DEBUG
         Reflection.CheckForDisposing(this);

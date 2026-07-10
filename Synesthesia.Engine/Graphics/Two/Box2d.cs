@@ -124,6 +124,15 @@ public class Box2D : Drawable2D
         return TransformTo(nameof(Color), Color, newColor, duration, easing, Transforms.COLOR, color => Color = color);
     }
 
+    public Animation<Color> FlashBackground(Color flashColor, long durationIn, long durationOut, Easing easingIn, Easing easingOut)
+    {
+        var originalColor = Color;
+        return TransformTo(nameof(Color), Color, flashColor, durationIn, easingIn, Transforms.COLOR, color => Color = color).Then(() =>
+        {
+            TransformTo(nameof(Color), flashColor, originalColor, durationOut, easingOut, Transforms.COLOR, color => Color = color);
+        });
+    }
+
     protected override void OnDraw2d()
     {
         renderer.DrawQuad(
