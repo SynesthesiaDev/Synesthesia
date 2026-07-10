@@ -39,7 +39,7 @@ public sealed class OpenGlRenderer : IDisposable
     public Shader DefaultShader = null!;
     public Shader StencilShader = null!;
 
-    public VertexBatch<Vertex2d> VertexBatch2d = null!;
+    public VertexBatch<Vertex2D> VertexBatch2D = null!;
 
     public GL OpenGL
     {
@@ -100,7 +100,7 @@ public sealed class OpenGlRenderer : IDisposable
         var vendor = OpenGL.GetStringS(GLEnum.Vendor);
         var renderer = OpenGL.GetStringS(GLEnum.Renderer);
 
-        VertexBatch2d = new VertexBatch<Vertex2d>(OpenGL);
+        VertexBatch2D = new VertexBatch<Vertex2D>(OpenGL);
 
         Logger.EmptyLine();
         Logger.Debug("OpenGL Initialized", Logger.Platform);
@@ -145,7 +145,7 @@ public sealed class OpenGlRenderer : IDisposable
 
         var tex = textureCoord ?? new Rectangle(0, 0, 1, 1);
 
-        VertexBatch2d.PushVertex(new Vertex2d(
+        VertexBatch2D.PushVertex(new Vertex2D(
             position: v0,
             texCoord: new Vector2(tex.Left, tex.Top),
             size: size,
@@ -159,7 +159,7 @@ public sealed class OpenGlRenderer : IDisposable
             borderColor: borderColor
         ));
 
-        VertexBatch2d.PushVertex(new Vertex2d(
+        VertexBatch2D.PushVertex(new Vertex2D(
             position: v1,
             texCoord: new Vector2(tex.Left, tex.Bottom),
             size: size,
@@ -173,7 +173,7 @@ public sealed class OpenGlRenderer : IDisposable
             borderColor: borderColor
         ));
 
-        VertexBatch2d.PushVertex(new Vertex2d(
+        VertexBatch2D.PushVertex(new Vertex2D(
             position: v2,
             texCoord: new Vector2(tex.Right, tex.Bottom),
             size: size,
@@ -187,7 +187,7 @@ public sealed class OpenGlRenderer : IDisposable
             borderColor: borderColor
         ));
 
-        VertexBatch2d.PushVertex(new Vertex2d(
+        VertexBatch2D.PushVertex(new Vertex2D(
             position: v3,
             texCoord: new Vector2(tex.Right, tex.Top),
             size: size,
@@ -240,7 +240,7 @@ public sealed class OpenGlRenderer : IDisposable
         ThreadSafety.AssertRunningOnRenderThread();
         if (CurrentTexture == texture) return;
 
-        VertexBatch2d.Flush();
+        VertexBatch2D.Flush();
         CurrentTexture = texture;
         if (texture != null && texture.Bind(OpenGL))
         {
@@ -323,7 +323,7 @@ public sealed class OpenGlRenderer : IDisposable
     {
         EnsureInitialized();
 
-        VertexBatch2d.Flush();
+        VertexBatch2D.Flush();
 
         Surface.SwapBuffers();
 

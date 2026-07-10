@@ -23,9 +23,9 @@ internal static class Demo
 
         game.OnInitialized.Subscribe(_ =>
         {
-            game.DrawableScene2d.Children =
+            game.DrawableScene2D.Children =
             [
-                new FillFlowContainer2d
+                new FillFlowContainer2D
                 {
                     AutoSizeAxes = Axes.Both,
                     Direction = Direction.Vertical,

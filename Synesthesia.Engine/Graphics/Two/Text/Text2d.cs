@@ -13,7 +13,7 @@ using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two.Text;
 
-public class Text2d : Drawable2d
+public class Text2D : Drawable2D
 {
     private const float spread = 8f;
 

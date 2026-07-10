@@ -10,9 +10,9 @@ using Synesthesia.Engine.Graphics.Two.Container;
 
 namespace Synesthesia.VisualTests;
 
-public class VisualTestCategoryDrawable(VisualTestCategory visualTestCategory, TestLibrary owningLibrary) : CompositeDrawable2d
+public class VisualTestCategoryDrawable(VisualTestCategory visualTestCategory, TestLibrary owningLibrary) : CompositeDrawable2D
 {
-    private FillFlowContainer2d testContainer = null!;
+    private FillFlowContainer2D testContainer = null!;
     private bool expanded;
 
     private const int button_width = 240;
@@ -23,7 +23,7 @@ public class VisualTestCategoryDrawable(VisualTestCategory visualTestCategory, T
         AutoSizeAxes = Axes.Both;
         Children =
         [
-            new FillFlowContainer2d
+            new FillFlowContainer2D
             {
                 AutoSizeAxes = Axes.Both,
                 Direction = Direction.Vertical,
@@ -40,7 +40,7 @@ public class VisualTestCategoryDrawable(VisualTestCategory visualTestCategory, T
                         }
                     },
 
-                    testContainer = new FillFlowContainer2d
+                    testContainer = new FillFlowContainer2D
                     {
                         Scale = new Vector2(0f),
                         AutoSizeAxes = Axes.Both,

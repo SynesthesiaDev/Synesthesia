@@ -9,7 +9,7 @@ using SynesthesiaUtil.Extensions;
 namespace Synesthesia.Engine.Graphics;
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
-public readonly struct Vertex2d(
+public readonly struct Vertex2D(
     Vector2 position,
     Vector2 texCoord,
     Vector2 size,

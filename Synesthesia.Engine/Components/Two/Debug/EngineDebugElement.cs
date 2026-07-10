@@ -8,16 +8,16 @@ using Synesthesia.Engine.Util;
 
 namespace Synesthesia.Engine.Components.Two.Debug;
 
-public abstract class EngineDebugElement : CompositeDrawable2d
+public abstract class EngineDebugElement : CompositeDrawable2D
 {
-    protected class HeaderComponent(string name) : CompositeDrawable2d
+    protected class HeaderComponent(string name) : CompositeDrawable2D
     {
         protected override void OnLoading()
         {
             Size = new Vector2(270, 30);
             Children =
             [
-                new Text2d
+                new Text2D
                 {
                     Text = name,
                     Weight = FontWeight.Bold,

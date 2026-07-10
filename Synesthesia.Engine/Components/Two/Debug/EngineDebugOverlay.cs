@@ -14,7 +14,7 @@ using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Components.Two.Debug;
 
-public class EngineDebugOverlay : CompositeDrawable2d
+public class EngineDebugOverlay : CompositeDrawable2D
 {
     private const long toggle_animation_length = 150;
     private const Easing toggle_animation_easing = Easing.Linear;
@@ -43,14 +43,14 @@ public class EngineDebugOverlay : CompositeDrawable2d
         Visible = true;
         Children =
         [
-            new Container2d
+            new Container2D
             {
                 RelativeSizeAxes = Axes.Both,
                 Anchor = Anchor.TopLeft,
                 Origin = Anchor.TopLeft,
                 Children =
                 [
-                    new FillFlowContainer2d
+                    new FillFlowContainer2D
                     {
                         Position = new Vector2(10, 10),
                         AutoSizeAxes = Axes.Both,

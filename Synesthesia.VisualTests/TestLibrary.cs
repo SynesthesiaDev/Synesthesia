@@ -15,11 +15,11 @@ using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.VisualTests;
 
-public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawable2d
+public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawable2D
 {
-    private FillFlowContainer2d sidebar = null!;
-    private Container2d visualTestScene = null!;
-    private Container2d stepContainerContainer = null!;
+    private FillFlowContainer2D sidebar = null!;
+    private Container2D visualTestScene = null!;
+    private Container2D stepContainerContainer = null!;
 
     public readonly Bindable<VisualTest?> CurrentSelectedTest = new(null);
     public readonly Bindable<bool> RunAutomatically = new(VisualTestRunner.TestConfiguration.RunAutomatically);
@@ -74,16 +74,16 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
 
     protected override void OnLoading()
     {
-        var childs = new List<Drawable2d>();
+        var childs = new List<Drawable2D>();
         RelativeSizeAxes = Axes.Both;
 
-        var content = new FillFlowContainer2d
+        var content = new FillFlowContainer2D
         {
             RelativeSizeAxes = Axes.Both,
             Direction = Direction.Horizontal,
             Children =
             [
-                sidebar = new FillFlowContainer2d
+                sidebar = new FillFlowContainer2D
                 {
                     Direction = Direction.Vertical,
                     RelativeSizeAxes = Axes.Y,
@@ -99,7 +99,7 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
                     BackgroundColor = Defaults.BACKGROUND0,
                 },
 
-                visualTestScene = new Container2d
+                visualTestScene = new Container2D
                 {
                     Masking = true,
                     FillRemainingAxes = Axes.Both,
@@ -110,7 +110,7 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
             ]
         };
 
-        childs.Add(new Container2d
+        childs.Add(new Container2D
         {
             AutoSizeAxes = Axes.Both,
             AutoSizePadding = new Vector4(10),
@@ -120,7 +120,7 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
             Origin = Anchor.TopCentre,
             Children =
             [
-                new FillFlowContainer2d
+                new FillFlowContainer2D
                 {
                     Direction = Direction.Vertical,
                     AutoSizeAxes = Axes.Both,
@@ -197,7 +197,7 @@ public class TestLibrary(List<VisualTestCategory> categories) : CompositeDrawabl
 
             if (e.NewValue == null)
             {
-                visualTestScene.AddChild(new Text2d
+                visualTestScene.AddChild(new Text2D
                 {
                     Text = "No Test Selected",
                     Color = Color.White,

@@ -3,6 +3,6 @@
 
 namespace Synesthesia.Engine.Graphics.Two.Container;
 
-public class Container2d : CompositeDrawable2d
+public class Container2D : CompositeDrawable2D
 {
 }

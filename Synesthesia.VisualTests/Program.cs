@@ -15,9 +15,9 @@ internal static class Program
 
         game.OnInitialized.Subscribe(_ =>
         {
-            game.DrawableScene2d.Children =
+            game.DrawableScene2D.Children =
             [
-                new Text2d
+                new Text2D
                 {
                     Text = "testing testing",
                     Origin = Anchor.Centre,

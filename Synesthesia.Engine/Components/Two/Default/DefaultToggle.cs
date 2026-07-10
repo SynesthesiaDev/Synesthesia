@@ -15,19 +15,19 @@ namespace Synesthesia.Engine.Components.Two.Default;
 
 public class DefaultToggle : BarebonesToggle
 {
-    private Box2d background = null!;
-    private Box2d head = null!;
+    private Box2D background = null!;
+    private Box2D head = null!;
 
     protected override void OnLoading()
     {
         Children =
         [
-            new Container2d
+            new Container2D
             {
                 RelativeSizeAxes = Axes.Both,
                 Children =
                 [
-                    background = new Box2d
+                    background = new Box2D
                     {
                         RelativeSizeAxes = Axes.Both,
                         Color = EngineBranding.BACKGROUND0,
@@ -35,7 +35,7 @@ public class DefaultToggle : BarebonesToggle
                         CornerRadius = 999,
                         BorderColor = ComplexColor.GradientHorizontal(EngineBranding.PURPLE, EngineBranding.PINK),
                     },
-                    head = new Box2d
+                    head = new Box2D
                     {
                         Size = new Vector2(24, 15),
                         Color = EngineBranding.PINK,

@@ -22,9 +22,9 @@ public class StatisticsPanel : EngineDebugElement
 {
     private static GCMemoryInfo gcMemoryInfo => GC.GetGCMemoryInfo();
 
-    private Box2d backgroundBox = null!;
+    private Box2D backgroundBox = null!;
 
-    private readonly ImmutableList<Drawable2d> statistics = Lists.Immutable<Drawable2d>
+    private readonly ImmutableList<Drawable2D> statistics = Lists.Immutable<Drawable2D>
     (
         new HeaderComponent("Statistics Panel (Ctrl + F2)"),
         new EngineStatisticLine(EngineStatistics.Type.Drawables),
@@ -61,14 +61,14 @@ public class StatisticsPanel : EngineDebugElement
         Size = new Vector2(310, height);
         Children =
         [
-            new Container2d
+            new Container2D
             {
                 RelativeSizeAxes = Axes.Both,
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
                 Children =
                 [
-                    backgroundBox = new Box2d
+                    backgroundBox = new Box2D
                     {
                         RelativeSizeAxes = Axes.Both,
                         Color = EngineBranding.BACKGROUND2,
@@ -76,7 +76,7 @@ public class StatisticsPanel : EngineDebugElement
                         Origin = Anchor.Centre,
                         CornerRadius = 10,
                     },
-                    new FillFlowContainer2d
+                    new FillFlowContainer2D
                     {
                         AutoSizeAxes = Axes.Both,
                         Anchor = Anchor.Centre,
@@ -106,7 +106,7 @@ public class StatisticsPanel : EngineDebugElement
         backgroundBox.FadeColorTo(EngineBranding.BACKGROUND2, 150, Easing.InQuad);
     }
 
-    private abstract class Line : CompositeDrawable2d;
+    private abstract class Line : CompositeDrawable2D;
 
     private class EngineStatisticLine(EngineStatistics.Type type) : StatisticLine(type.ToString(), () => EngineStatistics.Get(type));
 
@@ -125,21 +125,21 @@ public class StatisticsPanel : EngineDebugElement
         private readonly StringBuilder formatBuffer = new(16);
 
         private long lastValue = long.MinValue;
-        private Text2d valueText = null!;
+        private Text2D valueText = null!;
 
         protected override void OnLoading()
         {
             Size = new Vector2(270, 20);
             Children =
             [
-                new Text2d
+                new Text2D
                 {
                     Anchor = Anchor.CentreLeft,
                     Origin = Anchor.CentreLeft,
                     Text = name,
                     Color = EngineBranding.TEXT1
                 },
-                valueText = new Text2d
+                valueText = new Text2D
                 {
                     Anchor = Anchor.CentreRight,
                     Origin = Anchor.CentreRight,

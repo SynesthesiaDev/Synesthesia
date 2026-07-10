@@ -474,7 +474,7 @@ public enum Key
     BackSlash,
 
     /// <summary>The secondary backslash key.</summary>
-    NonUSBackSlash,
+    NonUsBackSlash,
 
     // Multimedia keys
     /// <summary> The mute media key. </summary>

@@ -14,7 +14,7 @@ using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two;
 
-public abstract class Drawable2d : Drawable
+public abstract class Drawable2D : Drawable
 {
     private Invalidation invalidatedFlags = Invalidation.All;
 
@@ -189,7 +189,7 @@ public abstract class Drawable2d : Drawable
         }
     } = Vector2.One;
 
-    public Drawable2d? Parent
+    public Drawable2D? Parent
     {
         get;
         set
@@ -270,7 +270,7 @@ public abstract class Drawable2d : Drawable
 
         if ((flags & Invalidation.Geometry) != Invalidation.None)
         {
-            if (this is CompositeDrawable2d composite)
+            if (this is CompositeDrawable2D composite)
             {
                 for (int i = 0; i < composite.InternalChildren.Count; i++)
                     composite.InternalChildren[i].Invalidate(Invalidation.Geometry);
@@ -413,7 +413,7 @@ public abstract class Drawable2d : Drawable
 
     private void invalidateChildrenIfComposite(Invalidation invalidation)
     {
-        if (this is CompositeDrawable2d composite) composite.InvalidateChildren(invalidation);
+        if (this is CompositeDrawable2D composite) composite.InvalidateChildren(invalidation);
     }
 
     #region Input

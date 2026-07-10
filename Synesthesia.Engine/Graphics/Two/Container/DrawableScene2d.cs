@@ -3,7 +3,7 @@
 
 namespace Synesthesia.Engine.Graphics.Two.Container;
 
-public class DrawableScene2d : Container2d
+public class DrawableScene2D : Container2D
 {
 
 }

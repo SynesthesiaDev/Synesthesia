@@ -17,12 +17,12 @@ using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two;
 
-public class CompositeDrawable2d : Drawable2d
+public class CompositeDrawable2D : Drawable2D
 {
     private readonly Lock childrenLock = new();
 
     [SuppressMessage("Design", "MA0016:Prefer using collection abstraction instead of implementation")]
-    protected internal List<Drawable2d> InternalChildren = [];
+    protected internal List<Drawable2D> InternalChildren = [];
 
     [Singleton]
     private OpenGlRenderer renderer = null!;
@@ -67,13 +67,13 @@ public class CompositeDrawable2d : Drawable2d
     {
         using var snapshot = Snapshot.Rent(InternalChildren);
 
-        foreach (ref Drawable2d internalChild in snapshot.Span)
+        foreach (ref Drawable2D internalChild in snapshot.Span)
         {
             internalChild.Invalidate(flags);
         }
     }
 
-    public IEnumerable<Drawable2d> Children
+    public IEnumerable<Drawable2D> Children
     {
         get => InternalChildren;
         set
@@ -82,7 +82,7 @@ public class CompositeDrawable2d : Drawable2d
             {
                 if (InternalChildren.Count > 0)
                 {
-                    foreach (ref Drawable2d oldChild in CollectionsMarshal.AsSpan(InternalChildren))
+                    foreach (ref Drawable2D oldChild in CollectionsMarshal.AsSpan(InternalChildren))
                     {
                         oldChild.Parent = null;
                         oldChild.Dispose();
@@ -106,7 +106,7 @@ public class CompositeDrawable2d : Drawable2d
         }
     }
 
-    public void AddChild(Drawable2d child)
+    public void AddChild(Drawable2D child)
     {
         lock (childrenLock)
         {
@@ -117,7 +117,7 @@ public class CompositeDrawable2d : Drawable2d
         }
     }
 
-    public void RemoveChild(Drawable2d child)
+    public void RemoveChild(Drawable2D child)
     {
         lock (childrenLock)
         {
@@ -135,7 +135,7 @@ public class CompositeDrawable2d : Drawable2d
     {
         lock (childrenLock)
         {
-            foreach (ref Drawable2d internalChild in CollectionsMarshal.AsSpan(InternalChildren))
+            foreach (ref Drawable2D internalChild in CollectionsMarshal.AsSpan(InternalChildren))
             {
                 internalChild.Load();
             }
@@ -151,7 +151,7 @@ public class CompositeDrawable2d : Drawable2d
     {
         if (!Visible) return;
 
-        Snapshot<Drawable2d> snapshot;
+        Snapshot<Drawable2D> snapshot;
         lock (childrenLock)
         {
             snapshot = Snapshot.Rent(InternalChildren);
@@ -159,7 +159,7 @@ public class CompositeDrawable2d : Drawable2d
 
         using (snapshot)
         {
-            foreach (ref Drawable2d child in snapshot.Span)
+            foreach (ref Drawable2D child in snapshot.Span)
             {
                 child.OnUpdate(frameInfo);
             }
@@ -170,7 +170,7 @@ public class CompositeDrawable2d : Drawable2d
 
     protected override void OnDraw2d()
     {
-        Snapshot<Drawable2d> snapshot;
+        Snapshot<Drawable2D> snapshot;
 
         lock (childrenLock)
         {
@@ -179,7 +179,7 @@ public class CompositeDrawable2d : Drawable2d
 
         if (Masking)
         {
-            renderer.VertexBatch2d.Flush();
+            renderer.VertexBatch2D.Flush();
             renderer.BeginStencil();
             renderer.BeginStencilMask();
 
@@ -195,13 +195,13 @@ public class CompositeDrawable2d : Drawable2d
                 cornerRadius: 0f
             );
 
-            renderer.VertexBatch2d.Flush();
+            renderer.VertexBatch2D.Flush();
             renderer.EndStencilMask();
         }
 
         using (snapshot)
         {
-            foreach (ref Drawable2d child in snapshot.Span)
+            foreach (ref Drawable2D child in snapshot.Span)
             {
                 child.OnDraw();
             }
@@ -271,19 +271,19 @@ public class CompositeDrawable2d : Drawable2d
         }
     }
 
-    public IList<Drawable2d> GetFlattenedChildrenList()
+    public IList<Drawable2D> GetFlattenedChildrenList()
     {
-        var list = new List<Drawable2d>();
+        var list = new List<Drawable2D>();
         getChildrenRecursive(this, list);
         return list;
     }
 
-    private static void getChildrenRecursive(CompositeDrawable2d compositeDrawable2d, List<Drawable2d> outList)
+    private static void getChildrenRecursive(CompositeDrawable2D compositeDrawable2D, List<Drawable2D> outList)
     {
-        foreach (ref Drawable2d child in CollectionsMarshal.AsSpan(compositeDrawable2d.InternalChildren))
+        foreach (ref Drawable2D child in CollectionsMarshal.AsSpan(compositeDrawable2D.InternalChildren))
         {
             outList.Add(child);
-            if (child is CompositeDrawable2d compositeChild)
+            if (child is CompositeDrawable2D compositeChild)
             {
                 getChildrenRecursive(compositeChild, outList);
             }
@@ -330,7 +330,7 @@ public class CompositeDrawable2d : Drawable2d
                     }
                 }
 
-                if (child is CompositeDrawable2d composite)
+                if (child is CompositeDrawable2D composite)
                 {
                     composite.UpdateHoverState(e);
                 }
@@ -351,7 +351,7 @@ public class CompositeDrawable2d : Drawable2d
 
             if (handled) break;
 
-            if (child is CompositeDrawable2d composite)
+            if (child is CompositeDrawable2D composite)
                 composite.UpdateKeyState(keyboardInputEvent);
         }
     }
@@ -369,7 +369,7 @@ public class CompositeDrawable2d : Drawable2d
 
             if (handled) break;
 
-            if (child is CompositeDrawable2d composite)
+            if (child is CompositeDrawable2D composite)
                 composite.UpdatePlatformActionBindingState(platformActionBinding);
         }
     }
@@ -394,9 +394,9 @@ public class CompositeDrawable2d : Drawable2d
                 child.OnMouseUp(e);
             }
 
-            if (child is CompositeDrawable2d drawable2d)
+            if (child is CompositeDrawable2D drawable2D)
             {
-                drawable2d.UpdateCursorInputState(e);
+                drawable2D.UpdateCursorInputState(e);
             }
         }
     }
@@ -409,9 +409,9 @@ public class CompositeDrawable2d : Drawable2d
 
             if (handled) continue;
 
-            if (child is CompositeDrawable2d drawable2d)
+            if (child is CompositeDrawable2D drawable2D)
             {
-                drawable2d.UpdateScrollWheelState(e);
+                drawable2D.UpdateScrollWheelState(e);
             }
         }
     }

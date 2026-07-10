@@ -9,7 +9,7 @@ using Synesthesia.Engine.Util;
 
 namespace Synesthesia.VisualTests;
 
-public abstract class VisualTest : CompositeDrawable2d
+public abstract class VisualTest : CompositeDrawable2D
 {
     public string Name => GetType().Name;
 
@@ -56,9 +56,9 @@ public abstract class VisualTest : CompositeDrawable2d
         Origin = Anchor.Centre;
     }
 
-    public class StepContainer : CompositeDrawable2d
+    public class StepContainer : CompositeDrawable2D
     {
-        protected FillFlowContainer2d StepsContainer = null!;
+        protected FillFlowContainer2D StepsContainer = null!;
 
         private readonly List<StepButton> testSteps = [];
 
@@ -83,7 +83,7 @@ public abstract class VisualTest : CompositeDrawable2d
                     RelativeSizeAxes = Axes.Both,
                     ScrollContent =
                     [
-                        StepsContainer = new FillFlowContainer2d
+                        StepsContainer = new FillFlowContainer2D
                         {
                             RelativeSizeAxes = Axes.Both,
                             Direction = Direction.Vertical,

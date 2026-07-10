@@ -117,11 +117,11 @@ public class Game
         .MakeDeferred()
         .Build();
 
-    private readonly InternalGameContainer2d internalGameContainer2d = new InternalGameContainer2d();
+    private readonly InternalGameContainer2D internalGameContainer2D = new InternalGameContainer2D();
 
     /// <summary>
     /// This is the main 2d scene where you add your drawables.
-    /// While <see cref="DrawableScene2d.AddChild"/> exists, please do so by overriding the children field directly
+    /// While <see cref="DrawableScene2D.AddChild"/> exists, please do so by overriding the children field directly
     /// </summary>
     /// <code>
     /// DrawableScene2d.Children =
@@ -132,7 +132,7 @@ public class Game
     ///     }
     /// ];
     /// </code>
-    public DrawableScene2d DrawableScene2d => internalGameContainer2d.DrawableScene2d;
+    public DrawableScene2D DrawableScene2D => internalGameContainer2D.DrawableScene2D;
 
     /// <summary>
     /// Primary game class
@@ -208,5 +208,5 @@ public class Game
         }
     }
 
-    public InternalGameContainer2d GetInternalGameContainer() => internalGameContainer2d;
+    public InternalGameContainer2D GetInternalGameContainer() => internalGameContainer2D;
 }

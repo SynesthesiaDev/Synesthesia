@@ -11,7 +11,7 @@ using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two.Container;
 
-public class ScrollableContainer : Container2d
+public class ScrollableContainer : Container2D
 {
     private const int scrollbar_container_width = 10;
     private const float layout_buffer = 10f;
@@ -28,7 +28,7 @@ public class ScrollableContainer : Container2d
         set => ScrollTo(value);
     }
 
-    public IEnumerable<Drawable2d> ScrollContent
+    public IEnumerable<Drawable2D> ScrollContent
     {
         get => scrollableContainer.Children;
         set => scrollableContainer.Children = value.ToList();
@@ -47,17 +47,17 @@ public class ScrollableContainer : Container2d
         }
     }
 
-    private Container2d viewport { get; } = new Container2d
+    private Container2D viewport { get; } = new Container2D
     {
         RelativeSizeAxes = Axes.Both,
     };
 
-    private Container2d scrollableContainer { get; } = new()
+    private Container2D scrollableContainer { get; } = new()
     {
         RelativeSizeAxes = Axes.Both,
     };
 
-    private Container2d scrollbarContainer = null!;
+    private Container2D scrollbarContainer = null!;
 
     private void updateScrollBarState()
     {
@@ -79,7 +79,7 @@ public class ScrollableContainer : Container2d
 
         Children =
         [
-            new FillFlowContainer2d
+            new FillFlowContainer2D
             {
                 RelativeSizeAxes = Axes.Both,
                 Direction = Direction.Horizontal,
@@ -88,7 +88,7 @@ public class ScrollableContainer : Container2d
                     viewport,
                 ]
             },
-            scrollbarContainer = new Container2d
+            scrollbarContainer = new Container2D
             {
                 RelativeSizeAxes = Axes.Y,
                 Anchor = Anchor.CentreRight,
@@ -166,7 +166,7 @@ public class ScrollableContainer : Container2d
 
     private int currentAnimationLength = 350;
 
-    public void RemoveScrollChild(Drawable2d child)
+    public void RemoveScrollChild(Drawable2D child)
     {
         scrollableContainer.RemoveChild(child);
     }

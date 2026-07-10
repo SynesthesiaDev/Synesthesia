@@ -5,7 +5,7 @@ using Synesthesia.Engine.Graphics.Two;
 
 namespace Synesthesia.Engine.Components.Two.Barebones;
 
-public abstract class TextboxCaret : CompositeDrawable2d
+public abstract class TextboxCaret : CompositeDrawable2D
 {
     public abstract void Show();
     public abstract void Hide();

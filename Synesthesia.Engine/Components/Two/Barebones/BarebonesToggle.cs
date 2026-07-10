@@ -9,7 +9,7 @@ using Synesthesia.Engine.Util.Bindables;
 
 namespace Synesthesia.Engine.Components.Two.Barebones;
 
-public abstract class BarebonesToggle : CompositeDrawable2d
+public abstract class BarebonesToggle : CompositeDrawable2D
 {
     private BindableListener<bool> checkedListener = null!;
 

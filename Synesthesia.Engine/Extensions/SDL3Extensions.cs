@@ -418,7 +418,7 @@ public static class SDL3Extensions
                 return numLockOn ? Key.KeypadPeriod : Key.Delete;
 
             case SDL.Scancode.NonUsBackSlash:
-                return Key.NonUSBackSlash;
+                return Key.NonUsBackSlash;
 
             case SDL.Scancode.F13:
                 return Key.F13;

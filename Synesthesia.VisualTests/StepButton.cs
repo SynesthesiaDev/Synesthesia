@@ -16,30 +16,29 @@ using Synesthesia.Engine.Util.Pooling;
 
 namespace Synesthesia.VisualTests;
 
-public class StepButton : CompositeDrawable2d, IPooledObject
+public class StepButton : CompositeDrawable2D, IPooledObject
 {
     public Action? Action { get; set; }
 
-    private string name = string.Empty;
     public required string Name
     {
-        get => name;
+        get;
         set
         {
-            name = value;
-            if (Text != null) Text.Text = value;
+            field = value;
+            Text?.Text = value;
         }
-    }
+    } = string.Empty;
 
     protected Color RunningColor => Color.Yellow;
 
     protected Color IdleColor = EngineBranding.PINK;
 
-    protected FillFlowContainer2d BackgroundContainer = null!;
+    protected FillFlowContainer2D BackgroundContainer = null!;
 
-    protected Box2d Highlight = null!;
+    protected Box2D Highlight = null!;
 
-    protected Text2d? Text = null;
+    protected Text2D? Text = null;
 
     public bool RunNextStepImmediately = false;
 
@@ -79,20 +78,20 @@ public class StepButton : CompositeDrawable2d, IPooledObject
 
         Children =
         [
-            BackgroundContainer = new FillFlowContainer2d
+            BackgroundContainer = new FillFlowContainer2D
             {
                 RelativeSizeAxes = Axes.Both,
                 Direction = Direction.Horizontal,
                 Spacing = 4,
                 Children =
                 [
-                    Highlight = new Box2d
+                    Highlight = new Box2D
                     {
                         Color = IdleColor,
                         RelativeSizeAxes = Axes.Y,
                         Width = 5,
                     },
-                    Text = new Text2d
+                    Text = new Text2D
                     {
                         Anchor = Anchor.CentreLeft,
                         Origin = Anchor.CentreLeft,

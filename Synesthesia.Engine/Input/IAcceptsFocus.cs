@@ -7,7 +7,7 @@ namespace Synesthesia.Engine.Input;
 
 public interface IAcceptsFocus
 {
-    Drawable2d OwningDrawable { get; }
+    Drawable2D OwningDrawable { get; }
 
     void OnFocusGained();
 

@@ -21,21 +21,21 @@ public class FrameCounter : EngineDebugElement
     [Singleton]
     private Game game = null!;
 
-    private Box2d backgroundBox = null!;
+    private Box2D backgroundBox = null!;
 
     protected override void OnLoading()
     {
         Size = new Vector2(310, 124);
         Children =
         [
-            new Container2d
+            new Container2D
             {
                 RelativeSizeAxes = Axes.Both,
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
                 Children =
                 [
-                    backgroundBox = new Box2d
+                    backgroundBox = new Box2D
                     {
                         RelativeSizeAxes = Axes.Both,
                         Color = EngineBranding.BACKGROUND2,
@@ -43,7 +43,7 @@ public class FrameCounter : EngineDebugElement
                         Origin = Anchor.Centre,
                         CornerRadius = 10,
                     },
-                    new FillFlowContainer2d
+                    new FillFlowContainer2D
                     {
                         AutoSizeAxes = Axes.Both,
                         Anchor = Anchor.Centre,
@@ -80,16 +80,16 @@ public class FrameCounter : EngineDebugElement
         backgroundBox.FadeColorTo(EngineBranding.BACKGROUND2, 150, Easing.InQuad);
     }
 
-    private class PerformanceMonitorElement(ThreadRunner thread) : CompositeDrawable2d
+    private class PerformanceMonitorElement(ThreadRunner thread) : CompositeDrawable2D
     {
         private double lastFps;
         private double lastFrameTime;
 
         private long maxFps = thread.ActiveUpdateRate.Value;
 
-        private Text2d fpsText = null!;
-        private Text2d frameTimeText = null!;
-        private Text2d maxFpsText = null!;
+        private Text2D fpsText = null!;
+        private Text2D frameTimeText = null!;
+        private Text2D maxFpsText = null!;
 
         private BindableListener<bool> activeRateListener = null!;
         private ThrottledUpdater throttledUpdater = new(100);
@@ -100,33 +100,33 @@ public class FrameCounter : EngineDebugElement
 
             Children =
             [
-                new Container2d
+                new Container2D
                 {
                     RelativeSizeAxes = Axes.Both,
                     Children =
                     [
-                        new Text2d
+                        new Text2D
                         {
                             Text = $"{thread.Type}:",
                             Anchor = Anchor.CentreLeft,
                             Origin = Anchor.CentreLeft,
                             Color = EngineBranding.TEXT1
                         },
-                        new Container2d
+                        new Container2D
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.CentreRight,
                             AutoSizeAxes = Axes.Both,
                             Children =
                             [
-                                fpsText = new Text2d
+                                fpsText = new Text2D
                                 {
                                     Text = string.Empty,
                                     Anchor = Anchor.Centre,
                                     Origin = Anchor.CentreRight,
                                     Color = EngineBranding.TEXT2
                                 },
-                                maxFpsText = new Text2d
+                                maxFpsText = new Text2D
                                 {
                                     Text = $" / {maxFps} fps",
                                     Anchor = Anchor.Centre,
@@ -135,7 +135,7 @@ public class FrameCounter : EngineDebugElement
                                 },
                             ]
                         },
-                        frameTimeText = new Text2d
+                        frameTimeText = new Text2D
                         {
                             Text = "(0.000 ms)",
                             Anchor = Anchor.CentreRight,

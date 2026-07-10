@@ -6,15 +6,15 @@ using Synesthesia.Engine.Graphics.Layout;
 
 namespace Synesthesia.Engine.Graphics.Two.Container;
 
-public class InternalGameContainer2d : CompositeDrawable2d
+public class InternalGameContainer2D : CompositeDrawable2D
 {
-    public DrawableScene2d DrawableScene2d { get; private set; } = null!;
+    public DrawableScene2D DrawableScene2D { get; private set; } = null!;
 
     protected override void OnLoading()
     {
         Children =
         [
-            DrawableScene2d = new DrawableScene2d
+            DrawableScene2D = new DrawableScene2D
             {
                 RelativeSizeAxes = Axes.Both
             },

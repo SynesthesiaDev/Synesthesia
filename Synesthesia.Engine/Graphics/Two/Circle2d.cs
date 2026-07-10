@@ -9,7 +9,7 @@ using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two;
 
-public class Circle2d : Drawable2d
+public class Circle2D : Drawable2D
 {
     [Singleton]
     private OpenGlRenderer renderer = null!;

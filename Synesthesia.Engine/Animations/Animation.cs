@@ -105,7 +105,7 @@ public sealed class Animation<T> : IAnimation
         return this;
     }
 
-    public Animation<T> ThenHide(Drawable2d drawable)
+    public Animation<T> ThenHide(Drawable2D drawable)
     {
         OnComplete = () => drawable.Visible = false;
         return this;

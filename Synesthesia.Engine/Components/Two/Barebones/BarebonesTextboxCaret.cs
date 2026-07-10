@@ -16,18 +16,18 @@ public class BarebonesTextboxCaret : TextboxCaret
     public Easing BlinkingEasingIn { get; set; } = Easing.InCubic;
     public Easing BlinkingEasingOut { get; set; } = Easing.OutCubic;
 
-    private Box2d caretBox = null!;
+    private Box2D caretBox = null!;
 
     protected override void OnLoading()
     {
         Children =
         [
-            new Container2d
+            new Container2D
             {
                 RelativeSizeAxes = Axes.Both,
                 Children =
                 [
-                    caretBox = new Box2d { RelativeSizeAxes = Axes.Both }
+                    caretBox = new Box2D { RelativeSizeAxes = Axes.Both }
                 ],
             },
         ];

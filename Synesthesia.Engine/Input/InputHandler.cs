@@ -53,7 +53,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
 
     public static Vector2 MousePosition = Vector2.Zero;
 
-    private readonly InternalGameContainer2d gameContainer = game.GetInternalGameContainer();
+    private readonly InternalGameContainer2D gameContainer = game.GetInternalGameContainer();
 
     public static IAcceptsFocus? FocusedDrawable
     {

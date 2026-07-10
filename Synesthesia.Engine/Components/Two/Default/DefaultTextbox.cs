@@ -16,7 +16,7 @@ using Synesthesia.Engine.Util.Bindables;
 
 namespace Synesthesia.Engine.Components.Two.Default;
 
-public class DefaultTextbox : CompositeDrawable2d, IAcceptsFocus
+public class DefaultTextbox : CompositeDrawable2D, IAcceptsFocus
 {
     private static readonly ComplexColor border_active_color = ComplexColor.Single(EngineBranding.PURPLE);
     private static readonly ComplexColor border_inactive_color = ComplexColor.Single(EngineBranding.SLATE0);
@@ -33,17 +33,17 @@ public class DefaultTextbox : CompositeDrawable2d, IAcceptsFocus
     public bool HasSelection => textbox.HasSelection;
     public string SelectedText => textbox.SelectedText;
 
-    public Drawable2d OwningDrawable => this;
+    public Drawable2D OwningDrawable => this;
 
 
-    private Box2d background = null!;
+    private Box2D background = null!;
     private BarebonesTextbox textbox = null!;
 
     protected override void OnLoading()
     {
         Children =
         [
-            background = new Box2d
+            background = new Box2D
             {
                 RelativeSizeAxes = Axes.Both,
                 Color = EngineBranding.BACKGROUND0,
@@ -51,7 +51,7 @@ public class DefaultTextbox : CompositeDrawable2d, IAcceptsFocus
                 BorderThickness = 2,
                 CornerRadius = 10
             },
-            new Container2d
+            new Container2D
             {
                 RelativeSizeAxes = Axes.Both,
                 Anchor = Anchor.Centre,

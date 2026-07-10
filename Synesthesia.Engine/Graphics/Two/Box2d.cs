@@ -13,7 +13,7 @@ using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two;
 
-public class Box2d : Drawable2d
+public class Box2D : Drawable2D
 {
     [Singleton]
     private OpenGlRenderer renderer = null!;

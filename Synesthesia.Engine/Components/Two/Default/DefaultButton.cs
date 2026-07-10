@@ -13,35 +13,35 @@ using Synesthesia.Engine.Util;
 
 namespace Synesthesia.Engine.Components.Two.Default;
 
-public class DefaultButton : Container2d
+public class DefaultButton : Container2D
 {
     private const long transform_length = 150;
 
     public string Text
     {
-        get => text2d.Text;
-        set => text2d.Text = value;
+        get => text2D.Text;
+        set => text2D.Text = value;
     }
 
     public float FontSize
     {
-        get => text2d.FontSize;
-        set => text2d.FontSize = value;
+        get => text2D.FontSize;
+        set => text2D.FontSize = value;
     }
 
     public Color TextColor
     {
-        get => text2d.Color;
-        set => text2d.Color = value;
+        get => text2D.Color;
+        set => text2D.Color = value;
     }
 
     public bool Disabled = false;
 
     public Action? OnClick { get; set; }
 
-    private Box2d background;
-    private Container2d contianer;
-    private Text2d text2d;
+    private Box2D background;
+    private Container2D contianer;
+    private Text2D text2D;
 
     private Color styleBackground = EngineBranding.PURPLE;
     private Color styleForeground = EngineBranding.TEXT2;
@@ -105,7 +105,7 @@ public class DefaultButton : Container2d
         }
 
         background.FadeBorderColorTo(styleBorderColor, transform_length, Easing.OutCubic);
-        text2d.FadeColorTo(styleForeground, transform_length, Easing.OutCubic);
+        text2D.FadeColorTo(styleForeground, transform_length, Easing.OutCubic);
         background.FadeColorTo(styleForeground, transform_length, Easing.OutCubic);
         updateVisualState();
     }
@@ -128,21 +128,21 @@ public class DefaultButton : Container2d
     {
         Children =
         [
-            contianer = new Container2d
+            contianer = new Container2D
             {
                 RelativeSizeAxes = Axes.Both,
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
                 Children =
                 [
-                    background = new Box2d
+                    background = new Box2D
                     {
                         RelativeSizeAxes = Axes.Both,
                         Color = styleBackground,
                         CornerRadius = 999,
                         BorderThickness = 3
                     },
-                    text2d = new Text2d
+                    text2D = new Text2D
                     {
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,

@@ -22,12 +22,12 @@ using SynesthesiaUtil.Extensions;
 
 namespace Synesthesia.Engine.Components.Two.Barebones;
 
-public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
+public class BarebonesTextbox : CompositeDrawable2D, IAcceptsFocus
 {
     [Singleton]
     private IClipboard clipboard = null!;
 
-    public Drawable2d OwningDrawable => this;
+    public Drawable2D OwningDrawable => this;
 
     public required Func<TextboxCaret> Caret { get; init; }
 
@@ -67,11 +67,11 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
 
     public bool IsFocused { get; private set; }
 
-    public Text2d Text2d = null!;
+    public Text2D Text2D = null!;
 
     public TextboxCaret CaretDrawable = null!;
 
-    private Box2d selectionBox = null!;
+    private Box2D selectionBox = null!;
 
     private ScrollableContainer scrollableContainer = null!;
 
@@ -83,7 +83,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
             if (value == field) return;
             field = value;
             // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-            if (Text2d != null) Text2d.Color = field;
+            if (Text2D != null) Text2D.Color = field;
         }
     } = Color.White;
 
@@ -97,7 +97,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
                 ScrollDirection = Direction.Horizontal,
                 ScrollContent =
                 [
-                    selectionBox = new Box2d
+                    selectionBox = new Box2D
                     {
                         RelativeSizeAxes = Axes.Y,
                         Color = SelectionColor.Value,
@@ -105,7 +105,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
                         Alpha = 0,
                         Position = new Vector2(0, 0)
                     },
-                    Text2d = new Text2d
+                    Text2D = new Text2D
                     {
                         Anchor = Anchor.CentreLeft,
                         Origin = Anchor.CentreLeft,
@@ -124,7 +124,7 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
     {
         Text.OnValueChange(e =>
         {
-            Text2d.Text = IsPassword ? getMaskedText(e.NewValue) : e.NewValue;
+            Text2D.Text = IsPassword ? getMaskedText(e.NewValue) : e.NewValue;
             updateVisualState();
         });
 
@@ -292,11 +292,11 @@ public class BarebonesTextbox : CompositeDrawable2d, IAcceptsFocus
 
     private void updateVisualState()
     {
-        if (Text2d.Font is null) return;
+        if (Text2D.Font is null) return;
 
-        float fontSize = Text2d.FontSize;
-        var font = Text2d.Font;
-        var text = Text2d.Text;
+        float fontSize = Text2D.FontSize;
+        var font = Text2D.Font;
+        var text = Text2D.Text;
 
         float caretX = measurePartialText(font, text, caretPosition, fontSize);
         var newCaretPos = CaretDrawable.Position with { X = caretX };

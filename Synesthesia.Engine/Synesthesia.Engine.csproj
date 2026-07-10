@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ErrorProne.NET.CoreAnalyzers" Version="0.8.2-beta.1">
+    <PackageReference Include="ErrorProne.NET.CoreAnalyzers" Version="0.9.0-beta.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -31,8 +31,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Faster.Map" Version="8.1.1"/>
-    <PackageReference Include="JetBrains.Annotations" Version="2025.2.4"/>
-    <PackageReference Include="Meziantou.Analyzer" Version="3.0.22">
+    <PackageReference Include="JetBrains.Annotations" Version="2026.2.0" />
+    <PackageReference Include="Meziantou.Analyzer" Version="3.0.122">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

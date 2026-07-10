@@ -86,7 +86,7 @@ public abstract class Drawable : IDisposable
 
         OnLoading();
 
-        if (this is Drawable2d drawable)
+        if (this is Drawable2D drawable)
         {
             drawable.Invalidate(Invalidation.All);
             drawable.Parent?.Invalidate(Invalidation.All);
@@ -122,9 +122,9 @@ public abstract class Drawable : IDisposable
 
         InternalLoadComplete();
 
-        if (this is Drawable2d drawable2d)
+        if (this is Drawable2D drawable2D)
         {
-            drawable2d.Invalidate(Invalidation.All);
+            drawable2D.Invalidate(Invalidation.All);
         }
 
         LoadComplete();

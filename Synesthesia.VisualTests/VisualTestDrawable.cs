@@ -8,7 +8,7 @@ using Synesthesia.Engine.Graphics.Two.Drawables;
 
 namespace Synesthesia.VisualTests;
 
-public class VisualTestDrawable : CompositeDrawable2d
+public class VisualTestDrawable : CompositeDrawable2D
 {
     protected override void OnLoading()
     {
