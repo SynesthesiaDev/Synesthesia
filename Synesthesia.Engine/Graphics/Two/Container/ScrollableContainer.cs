@@ -34,7 +34,7 @@ public class ScrollableContainer : Container2D
         set => scrollableContainer.Children = value.ToList();
     }
 
-    private bool contentExtendsContainer = false;
+    private bool contentExtendsContainer;
 
     public bool ContentExtendsContainer
     {
@@ -96,7 +96,7 @@ public class ScrollableContainer : Container2D
                 Width = 0,
                 Visible = false,
                 // BackgroundColor = Defaults.BACKGROUND3,
-            }
+            },
         ];
     }
 

@@ -76,6 +76,7 @@ public sealed class OpenGlRenderer : IDisposable
     private int textureShaderLocation;
     private int useTextureShaderLocation;
     private int transformMatrixShaderLocation;
+    private int stencilDepthStack;
 
     public void Initialize()
     {
@@ -126,7 +127,7 @@ public sealed class OpenGlRenderer : IDisposable
         VertexMode vertexMode = VertexMode.Shape
     )
     {
-        if(texture is { IsUploaded: false }) return;
+        if (texture is { IsUploaded: false }) return;
 
         if (texture != CurrentTexture)
         {
@@ -214,11 +215,24 @@ public sealed class OpenGlRenderer : IDisposable
         ThreadSafety.AssertRunningOnRenderThread();
 
         if (CurrentShader == shader) return;
+        // Flush any pending vertices BEFORE swapping shaders
+        if (openGlInitialized)
+            VertexBatch2D.Flush();
 
         CurrentShader = shader;
         shader.Use();
         updateShaderMatrix();
         cacheShaderUniformLocations();
+
+        if (CurrentTexture != null)
+        {
+            CurrentShader.SetInt(textureShaderLocation, 0);
+            CurrentShader.SetInt(useTextureShaderLocation, 1);
+        }
+        else
+        {
+            CurrentShader.SetInt(useTextureShaderLocation, 0);
+        }
     }
 
     public void UnbindShader()
@@ -293,6 +307,9 @@ public sealed class OpenGlRenderer : IDisposable
     public void BeginDrawing()
     {
         EnsureInitialized();
+
+        stencilDepthStack = 0;
+
         ClearBufferMask mask = ClearBufferMask.None;
 
         if (ClearFlags.HasFlagFast(ClearFlags.ColorBuffer))
@@ -435,32 +452,63 @@ public sealed class OpenGlRenderer : IDisposable
 
     public void BeginStencil()
     {
-        OpenGL.Clear(ClearBufferMask.StencilBufferBit);
-        OpenGL.Enable(GLEnum.StencilTest);
+        if (stencilDepthStack == 0)
+        {
+            OpenGL.Enable(GLEnum.StencilTest);
+            // OpenGL.Clear(ClearBufferMask.StencilBufferBit);
+        }
+
+        stencilDepthStack++;
     }
 
     public void BeginStencilMask()
     {
         OpenGL.Enable(EnableCap.Multisample);
         OpenGL.ColorMask(false, false, false, false);
-        OpenGL.StencilFunc(StencilFunction.Always, 1, 0x0FF);
-        OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
+
+        OpenGL.StencilFunc(StencilFunction.Equal, stencilDepthStack - 1, 0xFF);
+        OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr);
 
         BindShader(StencilShader);
     }
 
     public void EndStencilMask()
     {
-        OpenGL.StencilFunc(StencilFunction.Equal, 1, 0x0FF);
-        OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
         OpenGL.ColorMask(true, true, true, true);
+
+        OpenGL.StencilFunc(StencilFunction.Equal, stencilDepthStack, 0xFF);
+        OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
 
         UnbindShader();
     }
 
     public void EndStencil()
     {
-        OpenGL.Disable(EnableCap.StencilTest);
+        stencilDepthStack--;
+
+        if (stencilDepthStack == 0)
+        {
+            OpenGL.Disable(EnableCap.StencilTest);
+        }
+        else
+        {
+            OpenGL.StencilFunc(StencilFunction.Equal, stencilDepthStack, 0xFF);
+            OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
+        }
+
+        OpenGL.ColorMask(true, true, true, true);
+        UnbindShader();
+    }
+
+    public void BeginStencilRestore()
+    {
+        OpenGL.Enable(EnableCap.Multisample);
+        OpenGL.ColorMask(false, false, false, false);
+
+        OpenGL.StencilFunc(StencilFunction.Equal, stencilDepthStack, 0xFF);
+        OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Decr);
+
+        BindShader(StencilShader);
     }
 
     public void Dispose()

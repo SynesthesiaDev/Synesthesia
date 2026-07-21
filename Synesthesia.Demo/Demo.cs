@@ -61,6 +61,7 @@ internal static class Demo
                 },
             ];
 
+            textbox.Text.Value = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
             textbox.IsPassword.BindTo(toggled);
         });
 

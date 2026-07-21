@@ -190,15 +190,16 @@ public class SDL3WindowHost : IWindowHost
             SetHint(Hints.MouseRelativeModeCenter, "0").LogErrorIfFailed();
             SetHint(Hints.IMEImplementedUI, "composition").LogErrorIfFailed();
 
+            GLSetAttribute(GLAttr.ContextMajorVersion, 3).LogErrorIfFailed();
+            GLSetAttribute(GLAttr.ContextMinorVersion, 3).LogErrorIfFailed();
+            GLSetAttribute(GLAttr.ContextProfileMask, (int)GLProfile.Core).LogErrorIfFailed();
+
+            GLSetAttribute(GLAttr.StencilSize, 8).LogErrorIfFailed();
+
             IntPtr? windowHandle = CreateWindow(Title, IWindowHost.DEFAULT_WIDTH, IWindowHost.DEFAULT_HEIGHT, window_creation_flags);
             if (windowHandle == null) throw new InvalidOperationException($"Failed to create SDL window. SDL Error: {GetError()}");
 
             StopTextInput(windowHandle.Value).LogErrorIfFailed();
-
-            GLSetAttribute(GLAttr.ContextMajorVersion, 3).LogErrorIfFailed();
-            GLSetAttribute(GLAttr.ContextMinorVersion, 3).LogErrorIfFailed();
-            GLSetAttribute(GLAttr.ContextProfileMask, (int)GLProfile.Core).LogErrorIfFailed();
-            GLSetAttribute(GLAttr.StencilSize, 8).LogErrorIfFailed();
 
             IntPtr? glContext = GLCreateContext(windowHandle.Value);
 
@@ -226,6 +227,12 @@ public class SDL3WindowHost : IWindowHost
 
             var driver = TabletDriver.Create();
             driver.DeviceReported += handleTabletDeviceReport;
+
+            GLGetAttribute(GLAttr.StencilSize, out var stencilSize).LogErrorIfFailed();
+            if (stencilSize < 8)
+            {
+                Logger.Error($"Requested 8-bit stencil, but got {stencilSize}. Masking will fail.");
+            }
         }
         catch (Exception exception)
         {

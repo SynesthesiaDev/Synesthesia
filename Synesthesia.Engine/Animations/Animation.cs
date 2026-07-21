@@ -29,7 +29,7 @@ public sealed class Animation<T> : IAnimation
 
     public bool IsRunning => StartTime != -1 && !IsCompleted && !IsPaused;
 
-    public long CurrentTime = 0;
+    public long CurrentTime;
 
     public void Start(long currentTime)
     {

@@ -180,20 +180,11 @@ public class CompositeDrawable2D : Drawable2D
         if (Masking)
         {
             renderer.VertexBatch2D.Flush();
+
             renderer.BeginStencil();
             renderer.BeginStencilMask();
 
-            renderer.DrawQuad(
-                drawMatrix: DrawMatrix,
-                position: Vector2.Zero,
-                size: Size,
-                packedColor: Color.WhitePacked,
-                alpha: InheritedAlpha,
-                borderThickness: 0f,
-                borderHasSingleColor: true,
-                borderColor: CachedBorderColor,
-                cornerRadius: 0f
-            );
+            drawStencilQuad();
 
             renderer.VertexBatch2D.Flush();
             renderer.EndStencilMask();
@@ -207,7 +198,16 @@ public class CompositeDrawable2D : Drawable2D
             }
         }
 
-        if (Masking) renderer.EndStencil();
+        if (Masking)
+        {
+            renderer.VertexBatch2D.Flush();
+
+            renderer.BeginStencilRestore();
+            drawStencilQuad();
+            renderer.VertexBatch2D.Flush();
+
+            renderer.EndStencil();
+        }
 
         if (BorderThickness > 0)
         {
@@ -223,6 +223,21 @@ public class CompositeDrawable2D : Drawable2D
                 cornerRadius: CornerRadius
             );
         }
+    }
+
+    private void drawStencilQuad()
+    {
+        renderer.DrawQuad(
+            drawMatrix: DrawMatrix,
+            position: Vector2.Zero,
+            size: Size,
+            packedColor: Color.WhitePacked,
+            alpha: InheritedAlpha,
+            borderThickness: BorderThickness,
+            borderHasSingleColor: true,
+            borderColor: CachedBorderColor,
+            cornerRadius: CornerRadius
+        );
     }
 
     #endregion

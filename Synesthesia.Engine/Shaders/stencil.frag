@@ -22,6 +22,6 @@ void main()
     if (texColor.a <= 0.05) {
         discard;
     }
-
+    
     FragColor = texColor;
 }
