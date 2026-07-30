@@ -74,7 +74,7 @@ public class SDL3WindowHost : IWindowHost
     /// <summary>
     /// Manages everything related to rendering/drawing
     /// </summary>
-    public OpenGlRenderer Renderer { get; private set; } = null!;
+    public GraphicsDevice GraphicsDevice { get; private set; } = null!;
 
     public bool WindowExists { get; private set; }
 
@@ -216,14 +216,14 @@ public class SDL3WindowHost : IWindowHost
             Surface.ClaimOwnership();
             StartTextInput(Surface.WindowHandle);
 
-            Renderer = new OpenGlRenderer
+            GraphicsDevice = new GraphicsDevice
             {
                 Surface = Surface,
             };
 
             WindowState.OnValueChange(e => updateWindowState(e.NewValue), ignoresSource: windowStateEventSource);
 
-            Renderer.Initialize();
+            GraphicsDevice.Initialize();
 
             var driver = TabletDriver.Create();
             driver.DeviceReported += handleTabletDeviceReport;
@@ -380,8 +380,8 @@ public class SDL3WindowHost : IWindowHost
             WindowState.Set(Platform.WindowState.Normal, windowStateEventSource);
         }
 
-        GetWindowSizeInPixels(handle, out int w, out int h);
-        Renderer.Resize(w, h);
+        // GetWindowSizeInPixels(handle, out int w, out int h);
+        GraphicsDevice.PushViewport();
     }
 
     private void updateWindowState(WindowState windowState)

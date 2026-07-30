@@ -12,7 +12,7 @@ namespace Synesthesia.Engine.Graphics.Two;
 public class Circle2D : Drawable2D
 {
     [Singleton]
-    private OpenGlRenderer renderer = null!;
+    private Renderer2D renderer = null!;
 
     public Color Color
     {

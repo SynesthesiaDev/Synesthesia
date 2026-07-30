@@ -11,9 +11,9 @@ using Synesthesia.Engine.Timing;
 
 namespace Synesthesia.Engine.Threading.Threads;
 
-public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
+public class RenderThread(GraphicsDevice graphicsDevice) : ThreadRunner
 {
-    public OpenGlRenderer Renderer { get; } = renderer;
+    public GraphicsDevice GraphicsDevice { get; } = graphicsDevice;
 
     public override ThreadType Type => ThreadType.Draw;
 
@@ -34,14 +34,14 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
 
     protected override void OnThreadInit()
     {
-        Renderer.Surface.ClaimOwnership();
+        GraphicsDevice.Surface.ClaimOwnership();
         Logger.Verbose("Transferred renderer context ownership to Render Thread", Logger.Platform);
         hasContextOwnership = true;
 
         (textureResourceStore as DeferredResourceStore<Texture>)?.Unlock();
         (fontResourceStore as DeferredResourceStore<Font>)?.Unlock();
 
-        Renderer.CompileDefaultShaders();
+        GraphicsDevice.CompileDefaultShaders();
         fontResourceStore.Get("Synesthesia.Resources.Fonts.Quicksand-Regular.fna"); // cache
 
         game.UpdateThread.Schedule(() =>
@@ -53,16 +53,17 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
 
     protected override void ProcessFrame(FrameInfo frameInfo)
     {
-        if (!Renderer.CanDraw || !hasContextOwnership) return;
+        if (!GraphicsDevice.CanDraw || !hasContextOwnership) return;
         var gameContainer = game.GetInternalGameContainer();
 
-        Renderer.BeginDrawing();
-        Renderer.BeginDrawing2D();
+        GraphicsDevice.BeginDrawing();
+        GraphicsDevice.Renderer2D.BeginDrawing();
 
         gameContainer.OnDraw();
 
-        Renderer.EndDrawing2D();
-        Renderer.EndDrawing();
+        GraphicsDevice.Renderer2D.EndDrawing();
+        GraphicsDevice.EndDrawing();
+
         if (isFirstSwap)
         {
             isFirstSwap = false;

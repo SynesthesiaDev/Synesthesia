@@ -18,7 +18,7 @@ public class Text2D : Drawable2D
     private const float spread = 8f;
 
     [Singleton]
-    private OpenGlRenderer renderer = null!;
+    private Renderer2D renderer = null!;
 
     [Singleton]
     private IResourceStore<Font> fontResourceStore = null!;

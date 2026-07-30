@@ -16,7 +16,7 @@ namespace Synesthesia.Engine.Graphics.Two;
 public class Box2D : Drawable2D
 {
     [Singleton]
-    private OpenGlRenderer renderer = null!;
+    private Renderer2D renderer = null!;
 
     private RectangleF uvCoords = new(0, 0, 1, 1);
     private Vector2 drawSize;
