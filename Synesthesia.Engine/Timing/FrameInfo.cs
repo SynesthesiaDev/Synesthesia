@@ -3,7 +3,7 @@
 
 using System.Runtime.InteropServices;
 using Synesthesia.Engine.Threading;
-using SynesthesiaUtil.Extensions;
+using Synesthesia.Utils.Extensions;
 
 namespace Synesthesia.Engine.Timing;
 

@@ -13,7 +13,7 @@ using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Util;
 using Synesthesia.Engine.Util.Statistics;
-using SynesthesiaUtil.Extensions;
+using Synesthesia.Utils.Extensions;
 using Shader = Synesthesia.Engine.Graphics.Shader;
 using Texture = Synesthesia.Engine.Graphics.Textures.Texture;
 
@@ -69,6 +69,9 @@ public sealed class OpenGlRenderer : IDisposable
     public Matrix4x4 InverseMatrix { get; private set; } = Matrix4x4.Identity;
 
     private Matrix4x4 projectionMatrix;
+
+    public Matrix4x4 View3D { get; private set; } = Matrix4x4.Identity;
+    public Matrix4x4 Projection3D { get; private set; } = Matrix4x4.Identity;
 
     public static readonly ConcurrentQueue<Texture> TEXTURE_UPLOAD_QUEUE = new ConcurrentQueue<Texture>();
 
@@ -284,10 +287,10 @@ public sealed class OpenGlRenderer : IDisposable
     public void Resize(int width, int height)
     {
         EnsureInitialized();
-        pushViewport();
+        pushViewport2D();
     }
 
-    private void pushViewport()
+    private void pushViewport2D()
     {
         SDL.GetWindowSizeInPixels(Surface.WindowHandle, out int w, out int h);
         BackBufferWidth = w;
@@ -304,11 +307,39 @@ public sealed class OpenGlRenderer : IDisposable
         if (!openGlInitialized) throw new InvalidOperationException("OpenGL is not initialized yet");
     }
 
-    public void BeginDrawing()
+    public void BeginDrawing3D(Matrix4x4 view, Matrix4x4 projection)
     {
         EnsureInitialized();
 
+        OpenGL.Enable(EnableCap.DepthTest);
+        OpenGL.DepthFunc(DepthFunction.Less);
+        OpenGL.Enable(EnableCap.CullFace);
+        OpenGL.CullFace(TriangleFace.Back);
+        OpenGL.FrontFace(FrontFaceDirection.Ccw);
+
+        View3D = view;
+        Projection3D = projection;
+    }
+
+    public void EndDrawing3D()
+    {
+        OpenGL.Disable(EnableCap.DepthTest);
+        OpenGL.Disable(EnableCap.CullFace);
+    }
+
+    public void BeginDrawing2D()
+    {
         stencilDepthStack = 0;
+        pushViewport2D();
+
+        LoadIdentity();
+        updateShaderMatrix();
+        DrawStatistics.Reset();
+    }
+
+    public void BeginDrawing()
+    {
+        EnsureInitialized();
 
         ClearBufferMask mask = ClearBufferMask.None;
 
@@ -328,25 +359,22 @@ public sealed class OpenGlRenderer : IDisposable
             TEXTURE_UPLOAD_QUEUE.TryDequeue(out var texture);
             texture?.Upload(OpenGL);
         }
-
-        pushViewport();
-
-        LoadIdentity();
-        updateShaderMatrix();
-        DrawStatistics.Reset();
     }
 
     public void EndDrawing()
     {
         EnsureInitialized();
 
-        VertexBatch2D.Flush();
-
         Surface.SwapBuffers();
-
         BindTexture(null);
-
         ClearFlags = default_clear_flags;
+    }
+
+
+    public void EndDrawing2D()
+    {
+        EnsureInitialized();
+        VertexBatch2D.Flush();
     }
 
     public void PushMatrix()
@@ -455,7 +483,6 @@ public sealed class OpenGlRenderer : IDisposable
         if (stencilDepthStack == 0)
         {
             OpenGL.Enable(GLEnum.StencilTest);
-            // OpenGL.Clear(ClearBufferMask.StencilBufferBit);
         }
 
         stencilDepthStack++;

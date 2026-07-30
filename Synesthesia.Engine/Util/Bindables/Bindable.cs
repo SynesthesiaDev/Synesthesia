@@ -1,6 +1,6 @@
 using Synesthesia.Engine.Util.Pooling;
 using Synesthesia.Engine.Util.Statistics;
-using SynesthesiaUtil.Extensions;
+using Synesthesia.Utils.Extensions;
 
 namespace Synesthesia.Engine.Util.Bindables;
 

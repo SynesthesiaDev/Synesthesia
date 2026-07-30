@@ -30,14 +30,12 @@ public class TextureAtlas : IDisposable
 
     public bool IsUploaded => Texture.IsUploaded;
 
-    public static readonly IBinaryCodec<TextureAtlas> BINARY_CODEC = BinaryCodec.Of
-    (
-        BinaryCodec.INT, a => a.Width,
-        BinaryCodec.INT, a => a.Height,
-        TextureData.BINARY_CODEC.Transform<Texture>(texture => texture.TextureData, textureData => new Texture(textureData, true)), a => a.Texture,
-        BinaryCodec.INT.MapTo(TextureRegion.BINARY_CODEC), a => a.TextureRegions,
-        (width, height, texture, areas) => new TextureAtlas(width, height, texture, areas)
-    );
+    public static readonly IBinaryCodec<TextureAtlas> BINARY_CODEC = BinaryCodecs.For<TextureAtlas>()
+        .Field(BinaryCodecs.INT, a => a.Width)
+        .Field(BinaryCodecs.INT, a => a.Height)
+        .Field(TextureData.BINARY_CODEC.Transform<Texture>(texture => texture.TextureData, textureData => new Texture(textureData, true)), a => a.Texture)
+        .Field(BinaryCodecs.INT.MapTo(TextureRegion.BINARY_CODEC), a => a.TextureRegions)
+        .Build((width, height, texture, areas) => new TextureAtlas(width, height, texture, areas));
 
     public TextureRegion GetRegion(int handle) => GetRegionOrNull(handle) ?? throw new InvalidOperationException($"No texture in atlas with handle {handle}");
 

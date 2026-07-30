@@ -6,8 +6,8 @@ using System.Runtime.InteropServices;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Threading.Threads;
 using Synesthesia.Engine.Util.Statistics;
-using SynesthesiaUtil.Extensions;
-using SynesthesiaUtil.Types;
+using Synesthesia.Utils.Extensions;
+using Synesthesia.Utils.Types;
 
 namespace Synesthesia.Engine.Timing;
 

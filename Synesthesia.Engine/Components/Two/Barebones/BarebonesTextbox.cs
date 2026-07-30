@@ -18,7 +18,7 @@ using Synesthesia.Engine.Platform.Host;
 using Synesthesia.Engine.Util;
 using Synesthesia.Engine.Util.Bindables;
 using Synesthesia.Engine.Util.Pooling;
-using SynesthesiaUtil.Extensions;
+using Synesthesia.Utils.Extensions;
 
 namespace Synesthesia.Engine.Components.Two.Barebones;
 

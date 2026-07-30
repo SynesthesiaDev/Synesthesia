@@ -4,7 +4,7 @@
 using System.Numerics;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Util;
-using SynesthesiaUtil.Extensions;
+using Synesthesia.Utils.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two.Container;
 

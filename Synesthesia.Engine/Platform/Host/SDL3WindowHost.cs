@@ -17,8 +17,8 @@ using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Util.Bindables;
 using Synesthesia.Engine.Util.Future;
-using SynesthesiaUtil;
-using SynesthesiaUtil.Extensions;
+using Synesthesia.Utils;
+using Synesthesia.Utils.Extensions;
 using static SDL3.SDL;
 
 namespace Synesthesia.Engine.Platform.Host;

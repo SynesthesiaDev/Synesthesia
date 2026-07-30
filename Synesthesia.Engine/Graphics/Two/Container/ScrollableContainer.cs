@@ -7,7 +7,7 @@ using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util.Bindables;
-using SynesthesiaUtil.Extensions;
+using Synesthesia.Utils.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two.Container;
 

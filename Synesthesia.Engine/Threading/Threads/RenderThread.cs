@@ -57,9 +57,11 @@ public class RenderThread(OpenGlRenderer renderer) : ThreadRunner
         var gameContainer = game.GetInternalGameContainer();
 
         Renderer.BeginDrawing();
+        Renderer.BeginDrawing2D();
 
         gameContainer.OnDraw();
 
+        Renderer.EndDrawing2D();
         Renderer.EndDrawing();
         if (isFirstSwap)
         {

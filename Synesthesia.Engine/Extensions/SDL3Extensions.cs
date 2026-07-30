@@ -8,8 +8,8 @@ using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform;
 using Synesthesia.Engine.Util.Exceptions;
-using SynesthesiaUtil;
-using SynesthesiaUtil.Extensions;
+using Synesthesia.Utils;
+using Synesthesia.Utils.Extensions;
 
 namespace Synesthesia.Engine.Extensions;
 

@@ -2,7 +2,8 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using Synesthesia.Engine.Events;
-using SynesthesiaUtil.Types;
+using Synesthesia.Utils.Types;
+using System.Runtime.InteropServices;
 
 namespace Synesthesia.Engine.Util.Bindables;
 
@@ -22,7 +23,7 @@ public class BindableProxy : IBindable
     {
         foreach (var (dispatcher, subscriberList) in eventDispatchers)
         {
-            foreach (var subscriber in subscriberList)
+            foreach (ref IEventSubscriber subscriber in CollectionsMarshal.AsSpan(subscriberList))
             {
                 dispatcher.Unsubscribe(subscriber);
             }

@@ -29,14 +29,13 @@ public class FontAtlas : IDisposable
 
     public override string ToString() => $"FontAtlas(TextureAtlas={TextureAtlas}, LineHeight={LineHeight}, Ascent={Ascent}, Descent={Descent}, Glyphs={Glyphs.Count})";
 
-    public static readonly IBinaryCodec<FontAtlas> BINARY_CODEC = BinaryCodec.Of
-    (
-        TextureAtlas.BINARY_CODEC, f => f.TextureAtlas,
-        BinaryCodec.INT.MapTo(GlyphInfo.BINARY_CODEC), f => f.Glyphs,
-        BinaryCodec.FLOAT, f => f.LineHeight,
-        BinaryCodec.FLOAT, f => f.Ascent,
-        BinaryCodec.FLOAT, f => f.Descent,
-        (atlas, glyphs, lineHeight, ascent, descent) => new FontAtlas
+    public static readonly IBinaryCodec<FontAtlas> BINARY_CODEC = BinaryCodecs.For<FontAtlas>()
+        .Field(TextureAtlas.BINARY_CODEC, f => f.TextureAtlas)
+        .Field(BinaryCodecs.INT.MapTo(GlyphInfo.BINARY_CODEC), f => f.Glyphs)
+        .Field(BinaryCodecs.FLOAT, f => f.LineHeight)
+        .Field(BinaryCodecs.FLOAT, f => f.Ascent)
+        .Field(BinaryCodecs.FLOAT, f => f.Descent)
+        .Build((atlas, glyphs, lineHeight, ascent, descent) => new FontAtlas
         {
             TextureAtlas = atlas,
             Glyphs = glyphs,

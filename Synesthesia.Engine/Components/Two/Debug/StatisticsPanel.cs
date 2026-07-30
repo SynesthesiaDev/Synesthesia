@@ -14,7 +14,7 @@ using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util;
 using Synesthesia.Engine.Util.Statistics;
-using SynesthesiaUtil;
+using Synesthesia.Utils;
 
 namespace Synesthesia.Engine.Components.Two.Debug;
 
