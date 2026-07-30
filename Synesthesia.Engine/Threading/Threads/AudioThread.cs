@@ -19,6 +19,7 @@ public class AudioThread : ThreadRunner
     protected override void OnThreadInit()
     {
         LoadFuture.Complete(this);
+        InactiveUpdateRate.Value = ActiveUpdateRate.Value;
     }
 
 }
