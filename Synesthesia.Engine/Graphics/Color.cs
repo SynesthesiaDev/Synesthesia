@@ -14,7 +14,7 @@ public readonly struct Color : IEquatable<Color>
 {
     public const double GAMMA = 2.4;
 
-    private static readonly DenseMap<string, Color> hexColorCache = new();
+    private static readonly BlitzMap<string, Color> hexColorCache = new();
 
     public readonly float R;
     public readonly float G;
