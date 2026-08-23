@@ -34,7 +34,7 @@ void main() {
     v_mode = a_mode;
     v_borderThickness = a_borderThickness;
     v_borderColor = a_borderColor;
-    v_borderHasSingleColor = v_borderHasSingleColor;
+    v_borderHasSingleColor = a_borderHasSingleColor;
     v_alpha = a_alpha;
     
     gl_Position = u_transform * vec4(a_position, 0.0, 1.0);

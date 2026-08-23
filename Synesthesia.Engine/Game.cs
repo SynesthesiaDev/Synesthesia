@@ -52,34 +52,7 @@ public class Game
     ///
     /// </code>
     /// </example>
-    public readonly IResourceStore<Texture> TextureResourceStore = new ResourceStoreBuilder<Texture>()
-        .AddLoaders(new Dictionary<string, Func<Stream, string, Texture>>
-        {
-            { "png", (stream, _) => ResourceLoaders.LoadTexture(stream) },
-            { "bmp", (stream, _) => ResourceLoaders.LoadTexture(stream) },
-            { "jpg", (stream, _) => ResourceLoaders.LoadTexture(stream) },
-        })
-        .AddFallback(fallback =>
-        {
-            fallback.AddFileSystemStore("Assets/Textures/");
-            fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);
-        })
-        .MakeCached()
-        .MakeAsync()
-        .MakeDeferred()
-        .Build();
-
-    public readonly IResourceStore<TextureAtlas> TextureAtlasResourceStore = new ResourceStoreBuilder<TextureAtlas>()
-        .AddLoaders(new Dictionary<string, Func<Stream, string, TextureAtlas>>
-        {
-            { ResourceLoaders.TEXTURE_ATLAS_FILE_EXT, (stream, _) => ResourceLoaders.LoadFromTextureAtlasFile(stream) },
-        })
-        .AddFallback(fallback =>
-        {
-            fallback.AddFileSystemStore("Assets/Atlases/");
-            fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);
-        })
-        .Build();
+    public readonly IResourceStore<Texture> TextureResourceStore;
 
 
     /// <summary>
@@ -101,21 +74,10 @@ public class Game
     ///
     /// </code>
     /// </example>
-    public readonly IResourceStore<Font> FontResourceStore = new ResourceStoreBuilder<Font>()
-        .AddLoaders(new Dictionary<string, Func<Stream, string, Font>>
-        {
-            { "ttf", ResourceLoaders.LoadFont },
-            { ResourceLoaders.FONT_ATLAS_FILE_EXT, ResourceLoaders.LoadFontFromAtlas },
-        })
-        .AddFallback(fallback =>
-        {
-            fallback.AddFileSystemStore("Assets/Fonts/");
-            fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);
-        })
-        .MakeCached()
-        .MakeAsync()
-        .MakeDeferred()
-        .Build();
+    public readonly IResourceStore<Font> FontResourceStore;
+
+    public readonly IResourceStore<TextureAtlas> TextureAtlasResourceStore;
+
 
     private readonly InternalGameContainer2D internalGameContainer2D = new InternalGameContainer2D();
 
@@ -138,8 +100,67 @@ public class Game
     /// Primary game class
     /// </summary>
     /// <param name="gameWindowHost">Window Host that the game uses to create window and handle os events</param>
-    public Game(IWindowHost gameWindowHost)
+    /// <param name="textureAtlasResourceStoreInitializer"></param>
+    /// <param name="fontResourceStoreInitializer"></param>
+    /// <param name="textureResourceStoreInitializer"></param>
+    /// <param name="windowName"></param>
+    public Game(
+        IWindowHost gameWindowHost,
+        Action<FallbackStoreBuilder<Texture>>? textureResourceStoreInitializer,
+        Action<FallbackStoreBuilder<TextureAtlas>>? textureAtlasResourceStoreInitializer,
+        Action<FallbackStoreBuilder<Font>>? fontResourceStoreInitializer,
+        string windowName
+    )
     {
+
+        FontResourceStore = new ResourceStoreBuilder<Font>()
+            .AddLoaders(new Dictionary<string, Func<Stream, string, Font>>(StringComparer.Ordinal)
+            {
+                { "ttf", ResourceLoaders.LoadFont },
+                { ResourceLoaders.FONT_ATLAS_FILE_EXT, ResourceLoaders.LoadFontFromAtlas },
+            })
+            .AddFallback(fallback =>
+            {
+                fallback.AddFileSystemStore("Assets/Fonts/");
+                fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);
+                fontResourceStoreInitializer?.Invoke(fallback);
+            })
+            .MakeCached()
+            .MakeAsync()
+            .MakeDeferred()
+            .Build();
+
+        TextureResourceStore = new ResourceStoreBuilder<Texture>()
+            .AddLoaders(new Dictionary<string, Func<Stream, string, Texture>>(StringComparer.Ordinal)
+            {
+                { "png", (stream, _) => ResourceLoaders.LoadTexture(stream) },
+                { "bmp", (stream, _) => ResourceLoaders.LoadTexture(stream) },
+                { "jpg", (stream, _) => ResourceLoaders.LoadTexture(stream) },
+            })
+            .AddFallback(fallback =>
+            {
+                fallback.AddFileSystemStore("Assets/Textures/");
+                fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);
+                textureResourceStoreInitializer?.Invoke(fallback);
+            })
+            .MakeCached()
+            .MakeAsync()
+            .MakeDeferred()
+            .Build();
+
+        TextureAtlasResourceStore = new ResourceStoreBuilder<TextureAtlas>()
+            .AddLoaders(new Dictionary<string, Func<Stream, string, TextureAtlas>>(StringComparer.Ordinal)
+            {
+                { ResourceLoaders.TEXTURE_ATLAS_FILE_EXT, (stream, _) => ResourceLoaders.LoadFromTextureAtlasFile(stream) },
+            })
+            .AddFallback(fallback =>
+            {
+                fallback.AddFileSystemStore("Assets/Atlases/");
+                fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);
+                textureAtlasResourceStoreInitializer?.Invoke(fallback);
+            })
+            .Build();
+
         WindowHost = gameWindowHost;
         InputHandler = new InputHandler(this);
         InputThread = new InputThread();
@@ -153,6 +174,9 @@ public class Game
         DependencyContainer.AddSingleton(InputThread);
         DependencyContainer.AddSingleton(WindowHost);
         DependencyContainer.AddSingleton(WindowHost.Clipboard);
+
+        WindowHost.Title = windowName;
+
         //Note: RenderThread is registered as a dependency after initialization of IWindowHost
     }
 

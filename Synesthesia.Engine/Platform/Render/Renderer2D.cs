@@ -61,7 +61,11 @@ public class Renderer2D(GraphicsDevice graphicsDevice) : IRenderer<Vertex2D>
         VertexMode vertexMode = VertexMode.Shape
     )
     {
-        if (texture is { IsUploaded: false }) return;
+        if (texture is { IsUploaded: false })
+        {
+            if (!texture.UploadQueued) texture.EnqueueUpload();
+            return;
+        }
 
         var v0 = position;
         if (texture != GraphicsDevice.CurrentTexture)

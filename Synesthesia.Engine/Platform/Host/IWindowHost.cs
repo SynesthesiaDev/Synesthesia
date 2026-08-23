@@ -20,6 +20,8 @@ public interface IWindowHost : IDisposable
     Bindable<WindowState> WindowState { get; }
     Bindable<bool> WindowActive { get; }
 
+    string Title { get; set; }
+
     void Flash(bool flashUntilFocused);
 
     void CancelFlash();

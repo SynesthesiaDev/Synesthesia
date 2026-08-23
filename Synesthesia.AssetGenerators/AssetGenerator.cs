@@ -2,7 +2,6 @@
 using Synesthesia.Engine;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Textures;
-using Synesthesia.Engine.Platform.Host;
 using Synesthesia.Engine.Resources;
 using Synesthesia.Utils;
 
@@ -12,8 +11,7 @@ internal static class AssetGenerator
 {
     private static void Main(string[] args)
     {
-        var sdl = new SDL3WindowHost();
-        var game = new Game(sdl);
+        var game = new GameBuilder().Build();
 
         var fontAtlasGenerator = new FontAtlasGenerator();
 
