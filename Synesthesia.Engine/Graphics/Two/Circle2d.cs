@@ -5,14 +5,14 @@ using System.Numerics;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Platform.Render;
-using SynesthesiaUtil.Extensions;
+using Synesthesia.Utils.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two;
 
 public class Circle2D : Drawable2D
 {
     [Singleton]
-    private OpenGlRenderer renderer = null!;
+    private Renderer2D renderer = null!;
 
     public Color Color
     {

@@ -19,7 +19,7 @@ public class UpdateThread : ThreadRunner
     private Game game = null!;
 
     [Singleton]
-    private OpenGlRenderer renderer = null!;
+    private GraphicsDevice renderer = null!;
 
     protected override void ProcessFrame(FrameInfo frameInfo)
     {

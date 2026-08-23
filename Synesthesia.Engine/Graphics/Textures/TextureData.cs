@@ -13,12 +13,12 @@ public class TextureData(int width, int height, byte[] data, PixelFormat pixelFo
     public byte[] Data { get; set; } = data;
     public PixelFormat PixelFormat { get; set; } = pixelFormat;
 
-    public static readonly IBinaryCodec<TextureData> BINARY_CODEC = BinaryCodec.Of<int, int, byte[], PixelFormat, TextureData>(
-        BinaryCodec.INT, d => d.Width,
-        BinaryCodec.INT, d => d.Height,
-        BinaryCodec.BYTE_ARRAY, d => d.Data,
-        BinaryCodec.Enum<PixelFormat>(), d => d.PixelFormat,
-        (w, h, data, format) => new TextureData(w, h, data, format));
+    public static readonly IBinaryCodec<TextureData> BINARY_CODEC = BinaryCodecs.For<TextureData>()
+        .Field(BinaryCodecs.INT, d => d.Width)
+        .Field(BinaryCodecs.INT, d => d.Height)
+        .Field(BinaryCodecs.BYTE_ARRAY, d => d.Data)
+        .Field(BinaryCodecs.Enum<PixelFormat>(), d => d.PixelFormat)
+        .Build((w, h, data, format) => new TextureData(w, h, data, format));
 
     public override string ToString() => $"TextureData(Width={Width}, Height={Height}, Data={Data.Length} PixelFormat={PixelFormat})";
 }

@@ -1,4 +1,5 @@
-using SynesthesiaUtil.Extensions;
+
+using Synesthesia.Utils.Extensions;
 
 namespace Synesthesia.Engine.Animations;
 

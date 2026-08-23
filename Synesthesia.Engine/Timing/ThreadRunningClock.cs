@@ -2,7 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Diagnostics;
-using SynesthesiaUtil;
+using Synesthesia.Utils;
 
 namespace Synesthesia.Engine.Timing;
 
@@ -10,7 +10,7 @@ public class ThreadRunningClock : FramedClock, IDisposable
 {
     private const double spin_threshold = 1.0;
 
-    private readonly INativeSleep? nativeSleep = RuntimeInfo.OS == RuntimeInfo.Platform.Windows ? new WindowsSleep() : new UnixSleep();
+    private readonly INativeSleep? nativeSleep = RuntimeInfo.OperatingSystem == RuntimeInfo.Platform.Windows ? new WindowsSleep() : new UnixSleep();
 
     public double MaximumUpdateHz
     {

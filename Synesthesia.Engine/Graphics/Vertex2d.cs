@@ -4,7 +4,7 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Silk.NET.OpenGL;
-using SynesthesiaUtil.Extensions;
+using Synesthesia.Utils.Extensions;
 
 namespace Synesthesia.Engine.Graphics;
 

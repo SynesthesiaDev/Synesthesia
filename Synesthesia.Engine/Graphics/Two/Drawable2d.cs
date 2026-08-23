@@ -10,7 +10,7 @@ using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util;
 using Synesthesia.Engine.Util.Statistics;
-using SynesthesiaUtil.Extensions;
+using Synesthesia.Utils.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two;
 

@@ -1,6 +1,6 @@
 using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Graphics.Two;
-using SynesthesiaUtil.Extensions;
+using Synesthesia.Utils.Extensions;
 
 namespace Synesthesia.Engine.Animations;
 

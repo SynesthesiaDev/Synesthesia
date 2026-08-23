@@ -13,7 +13,7 @@ using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util.Pooling;
-using SynesthesiaUtil.Extensions;
+using Synesthesia.Utils.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two;
 
@@ -25,7 +25,10 @@ public class CompositeDrawable2D : Drawable2D
     protected internal List<Drawable2D> InternalChildren = [];
 
     [Singleton]
-    private OpenGlRenderer renderer = null!;
+    private GraphicsDevice graphicsDevice = null!;
+
+    [Singleton]
+    private Renderer2D renderer = null!;
 
     public float CornerRadius
     {
@@ -179,15 +182,15 @@ public class CompositeDrawable2D : Drawable2D
 
         if (Masking)
         {
-            renderer.VertexBatch2D.Flush();
+            graphicsDevice.FlushAllVertexBuffers();
 
-            renderer.BeginStencil();
-            renderer.BeginStencilMask();
+            graphicsDevice.BeginStencil();
+            graphicsDevice.BeginStencilMask();
 
             drawStencilQuad();
 
-            renderer.VertexBatch2D.Flush();
-            renderer.EndStencilMask();
+            graphicsDevice.FlushAllVertexBuffers();
+            graphicsDevice.EndStencilMask();
         }
 
         using (snapshot)
@@ -200,13 +203,13 @@ public class CompositeDrawable2D : Drawable2D
 
         if (Masking)
         {
-            renderer.VertexBatch2D.Flush();
+            renderer.FlushVertexBatch();
 
-            renderer.BeginStencilRestore();
+            graphicsDevice.BeginStencilRestore();
             drawStencilQuad();
-            renderer.VertexBatch2D.Flush();
+            renderer.FlushVertexBatch();
 
-            renderer.EndStencil();
+            graphicsDevice.EndStencil();
         }
 
         if (BorderThickness > 0)

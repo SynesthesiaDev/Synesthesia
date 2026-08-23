@@ -168,9 +168,10 @@ public class Game
             if (initialized) throw new InvalidOperationException("Game is already initialized");
 
             WindowHost.Initialize();
-            renderThread = new RenderThread(WindowHost.Renderer);
+            renderThread = new RenderThread(WindowHost.GraphicsDevice);
 
-            DependencyContainer.AddSingleton(renderThread.Renderer);
+            DependencyContainer.AddSingleton(renderThread.GraphicsDevice);
+            DependencyContainer.AddSingleton(renderThread.GraphicsDevice.Renderer2D);
             DependencyContainer.AddSingleton(renderThread);
 
             WindowHost.Surface.ReleaseOwnership();

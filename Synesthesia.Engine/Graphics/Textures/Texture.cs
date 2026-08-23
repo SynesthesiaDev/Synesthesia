@@ -39,7 +39,7 @@ public class Texture : IDisposable
 
     public void EnqueueUpload()
     {
-        OpenGlRenderer.TEXTURE_UPLOAD_QUEUE.Enqueue(this);
+        GraphicsDevice.TEXTURE_UPLOAD_QUEUE.Enqueue(this);
         UploadQueued = true;
     }
 

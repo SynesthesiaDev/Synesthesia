@@ -4,7 +4,7 @@ using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Platform.Host;
 using Synesthesia.Engine.Resources;
-using SynesthesiaUtil;
+using Synesthesia.Utils;
 
 namespace Synesthesia.AssetGenerators;
 

@@ -26,7 +26,7 @@ public interface IWindowHost : IDisposable
 
     OpenGLSurface Surface { get; }
 
-    OpenGlRenderer Renderer { get; }
+    GraphicsDevice GraphicsDevice { get; }
 
     bool WindowExists { get; }
 

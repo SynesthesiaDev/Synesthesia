@@ -14,13 +14,15 @@ public class VertexBatch<T> : IDisposable where T : unmanaged
     private readonly uint vao, vbo, ebo;
     private readonly T[] vertexArray;
     private readonly int maxVertices;
+    private readonly bool is2D;
     private int vertexIndex;
 
-    public VertexBatch(GL gl, int maxQuads = 1000)
+    public VertexBatch(GL gl, bool is2D, int maxQuads = 1000)
     {
         this.gl = gl;
         maxVertices = maxQuads * 4;
         vertexArray = new T[maxVertices];
+        this.is2D = is2D;
 
         gl.GenVertexArrays(1, out vao);
         gl.BindVertexArray(vao);
@@ -105,7 +107,7 @@ public class VertexBatch<T> : IDisposable where T : unmanaged
 
             gl.BindVertexArray(vao);
             gl.DrawElements(PrimitiveType.Triangles, (uint)(vertexIndex / 4 * 6), DrawElementsType.UnsignedInt, (void*)0);
-            DrawStatistics.Increment(DrawStatistics.Type.DrawCalls);
+            DrawStatistics.Increment(is2D ? DrawStatistics.Type.DrawCalls2D : DrawStatistics.Type.DrawCalls3D);
 
             vertexIndex = 0;
         }

@@ -3,14 +3,14 @@
 
 using System.Numerics;
 using Synesthesia.Engine.Animations.Easings;
+using Synesthesia.Engine.Extensions;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Graphics.Two.Container;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Input.ActionBindings;
 using Synesthesia.Engine.Timing;
-using SynesthesiaUtil;
-using SynesthesiaUtil.Extensions;
+using Synesthesia.Utils;
 
 namespace Synesthesia.Engine.Components.Two.Debug;
 

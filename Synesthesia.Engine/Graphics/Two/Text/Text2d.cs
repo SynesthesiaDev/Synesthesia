@@ -9,7 +9,7 @@ using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Resources;
-using SynesthesiaUtil.Extensions;
+using Synesthesia.Utils.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Two.Text;
 
@@ -18,7 +18,7 @@ public class Text2D : Drawable2D
     private const float spread = 8f;
 
     [Singleton]
-    private OpenGlRenderer renderer = null!;
+    private Renderer2D renderer = null!;
 
     [Singleton]
     private IResourceStore<Font> fontResourceStore = null!;

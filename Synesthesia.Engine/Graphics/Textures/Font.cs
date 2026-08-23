@@ -11,12 +11,10 @@ public class Font(int size, FontAtlas atlas) : IDisposable
     public readonly int Size = size;
     public readonly FontAtlas Atlas = atlas;
 
-    public static readonly IBinaryCodec<Font> BINARY_CODEC = BinaryCodec.Of
-    (
-        BinaryCodec.INT, f => f.Size,
-        FontAtlas.BINARY_CODEC, f => f.Atlas,
-        (size, atlas) => new Font(size, atlas)
-    );
+    public static readonly IBinaryCodec<Font> BINARY_CODEC = BinaryCodecs.For<Font>()
+        .Field(BinaryCodecs.INT, f => f.Size)
+        .Field(FontAtlas.BINARY_CODEC, f => f.Atlas)
+        .Build((size, atlas) => new Font(size, atlas));
 
     public override string ToString() => $"Font(Size={Size}, Atlas={Atlas})";
 

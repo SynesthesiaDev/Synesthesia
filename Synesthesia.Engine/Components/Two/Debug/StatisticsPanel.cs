@@ -14,7 +14,7 @@ using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util;
 using Synesthesia.Engine.Util.Statistics;
-using SynesthesiaUtil;
+using Synesthesia.Utils;
 
 namespace Synesthesia.Engine.Components.Two.Debug;
 
@@ -30,7 +30,8 @@ public class StatisticsPanel : EngineDebugElement
         new EngineStatisticLine(EngineStatistics.Type.Drawables),
         new DrawStatisticLine(DrawStatistics.Type.Invalidations),
         new Spacer(),
-        new DrawStatisticLine(DrawStatistics.Type.DrawCalls),
+        new DrawStatisticLine(DrawStatistics.Type.DrawCalls2D),
+        new DrawStatisticLine(DrawStatistics.Type.DrawCalls3D),
         new DrawStatisticLine(DrawStatistics.Type.TextureBinds),
         new DrawStatisticLine(DrawStatistics.Type.ShaderBinds),
         new DrawStatisticLine(DrawStatistics.Type.TextureUploadQueue),

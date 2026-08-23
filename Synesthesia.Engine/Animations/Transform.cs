@@ -2,7 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using Synesthesia.Engine.Animations.Easings;
-using SynesthesiaUtil.Extensions;
+using Synesthesia.Utils.Extensions;
 
 namespace Synesthesia.Engine.Animations;
 
