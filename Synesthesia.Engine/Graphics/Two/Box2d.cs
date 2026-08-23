@@ -46,6 +46,17 @@ public class Box2D : Drawable2D
         }
     } = TextureFillMode.Stretch;
 
+    public TextureFilterMode TextureFilterMode
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            Invalidate(Invalidation.DrawNode);
+        }
+    } = TextureFilterMode.Linear;
+
     public Color Color
     {
         get;
@@ -146,7 +157,8 @@ public class Box2D : Drawable2D
             borderColor: CachedBorderColor,
             cornerRadius: Math.Clamp(CornerRadius, 0f, Math.Min(Width, Height) / 2f),
             texture: Texture,
-            textureCoord: uvCoords
+            textureCoord: uvCoords,
+            filterMode: TextureFilterMode
         );
     }
 }

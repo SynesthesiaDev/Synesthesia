@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Util;
+using Texture = Synesthesia.Engine.Graphics.Textures.Texture;
 
 namespace Synesthesia.Engine.Platform.Render;
 
@@ -58,7 +59,8 @@ public class Renderer2D(GraphicsDevice graphicsDevice) : IRenderer<Vertex2D>
         float cornerRadius,
         RectangleF? textureCoord = null,
         Texture? texture = null,
-        VertexMode vertexMode = VertexMode.Shape
+        VertexMode vertexMode = VertexMode.Shape,
+        TextureFilterMode filterMode = TextureFilterMode.Linear
     )
     {
         if (texture is { IsUploaded: false })
@@ -70,7 +72,7 @@ public class Renderer2D(GraphicsDevice graphicsDevice) : IRenderer<Vertex2D>
         var v0 = position;
         if (texture != GraphicsDevice.CurrentTexture)
         {
-            GraphicsDevice.BindTexture(texture);
+            GraphicsDevice.BindTexture(texture, filterMode);
         }
 
         var v1 = position with { Y = position.Y + size.Y };

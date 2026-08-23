@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using SDL3;
 using Silk.NET.OpenGL;
 using Synesthesia.Engine.Graphics.Shaders;
+using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Util.Statistics;
@@ -40,6 +41,7 @@ public class GraphicsDevice
     //Renderer3D
 
     public Texture? CurrentTexture { get; private set; }
+    public TextureFilterMode CurrentTextureFilterMode { get; private set; } = TextureFilterMode.Linear;
 
     public static readonly ConcurrentQueue<Texture> TEXTURE_UPLOAD_QUEUE = new ConcurrentQueue<Texture>();
 
@@ -153,16 +155,31 @@ public class GraphicsDevice
         Renderer2D.CacheUniformLocations();
     }
 
-    public void BindTexture(Texture? texture)
+    public void BindTexture(Texture? texture, TextureFilterMode mode = TextureFilterMode.Linear)
     {
         ThreadSafety.AssertRunningOnRenderThread();
-        if (CurrentTexture == texture) return;
+
+        bool sameTexture = CurrentTexture == texture;
+        bool sameFilter = CurrentTextureFilterMode == mode;
+        if (sameTexture && sameFilter) return;
 
         Renderer2D.FlushVertexBatch();
 
         CurrentTexture = texture;
         if (texture != null && texture.Bind(OpenGL))
         {
+            if (!sameFilter || !sameTexture)
+            {
+                var (min, mag) = mode == TextureFilterMode.Nearest
+                    ? ((int)TextureMinFilter.Nearest, (int)TextureMagFilter.Nearest)
+                    : ((int)TextureMinFilter.Linear, (int)TextureMagFilter.Linear);
+
+                OpenGL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, min);
+                OpenGL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, mag);
+            }
+
+            CurrentTextureFilterMode = mode;
+
             CurrentShader.SetInt(TextureShaderLocation, 0);
             CurrentShader.SetInt(UseTextureShaderLocation, 1);
         }
@@ -170,6 +187,7 @@ public class GraphicsDevice
         {
             OpenGL.BindTexture(TextureTarget.Texture2D, 0);
             CurrentShader.SetInt(UseTextureShaderLocation, 0);
+            CurrentTextureFilterMode = mode;
         }
     }
 
