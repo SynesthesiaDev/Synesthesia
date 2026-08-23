@@ -32,7 +32,7 @@
     </PackageReference>
     <PackageReference Include="Faster.Map" Version="9.0.3" />
     <PackageReference Include="JetBrains.Annotations" Version="2026.2.0" />
-    <PackageReference Include="Meziantou.Analyzer" Version="3.0.122">
+    <PackageReference Include="Meziantou.Analyzer" Version="3.0.177">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -51,8 +51,8 @@
     <PackageReference Include="Silk.NET.OpenGL" Version="2.23.0"/>
     <PackageReference Include="StbImageSharp" Version="2.30.16" />
     <PackageReference Include="StbImageWriteSharp" Version="1.16.7" />
-    <PackageReference Include="SynesthesiaDev.Codon.Codon" Version="2026.730.0" />
-    <PackageReference Include="SynesthesiaUtils" Version="2026.614.0" />
+    <PackageReference Include="SynesthesiaDev.Codon.Codon" Version="2026.821.0" />
+    <PackageReference Include="SynesthesiaUtils" Version="2026.804.0" />
   </ItemGroup>
 
   <ItemGroup>
