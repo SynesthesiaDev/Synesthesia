@@ -33,5 +33,6 @@ public static class DrawStatistics
         ShaderBinds,
         UniformUploads,
         TextureUploadQueue,
+        SupersamplingDraws
     }
 }

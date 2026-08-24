@@ -10,6 +10,7 @@ using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Platform.Render;
+using Synesthesia.Engine.Util.Statistics;
 using Synesthesia.Utils.Extensions;
 using Texture = Synesthesia.Engine.Graphics.Textures.Texture;
 
@@ -26,6 +27,7 @@ public class Box2D : Drawable2D
     private Framebuffer? ssFramebuffer;
     private Texture? ssTexture;
     private Vector2 cachedTargetSize;
+    private bool supersampleDirty = true;
 
     public float CornerRadius { get; set; }
 
@@ -81,53 +83,57 @@ public class Box2D : Drawable2D
     {
         base.OnLayout(dirty);
 
-        if (dirty.HasFlagFast(Invalidation.DrawNode))
+        if (dirty.HasFlagFast(Invalidation.Geometry) || dirty.HasFlagFast(Invalidation.DrawNode))
         {
-            packedColor = Color.ToRgba32();
+            recomputeDrawSize();
         }
 
-        if (dirty.HasFlagFast(Invalidation.Geometry))
+        if (dirty.HasFlagFast(Invalidation.DrawNode) || dirty.HasFlagFast(Invalidation.Size))
         {
-            drawSize = Size;
-            drawOffset = Vector2.Zero;
-            uvCoords = new RectangleF(0, 0, 1, 1);
+            if (dirty.HasFlagFast(Invalidation.DrawNode))
+                packedColor = Color.ToRgba32();
 
-            if (Texture != null && TextureFillMode != TextureFillMode.Stretch)
+            supersampleDirty = true;
+        }
+    }
+
+    private void recomputeDrawSize()
+    {
+        drawSize = Size;
+        drawOffset = Vector2.Zero;
+        uvCoords = new RectangleF(0, 0, 1, 1);
+
+        if (Texture != null && TextureFillMode != TextureFillMode.Stretch)
+        {
+            var textureRatio = (float)Texture.Width / Texture.Height;
+            var boxRatio = Size.X / Size.Y;
+
+            switch (TextureFillMode)
             {
-                var textureRatio = (float)Texture.Width / Texture.Height;
-                var boxRatio = Size.X / Size.Y;
+                case TextureFillMode.Fit:
+                    if (textureRatio > boxRatio)
+                    {
+                        drawSize = new Vector2(Size.X, Size.X / textureRatio);
+                        drawOffset = new Vector2(0, (Size.Y - drawSize.Y) / 2f);
+                    }
+                    else
+                    {
+                        drawSize = new Vector2(Size.Y * textureRatio, Size.Y);
+                        drawOffset = new Vector2((Size.X - drawSize.X) / 2f, 0);
+                    }
+                    break;
 
-                switch (TextureFillMode)
-                {
-                    case TextureFillMode.Fit:
-                        if (textureRatio > boxRatio)
-                        {
-                            drawSize = new Vector2(Size.X, Size.X / textureRatio);
-                            drawOffset = new Vector2(0, (Size.Y - drawSize.Y) / 2f);
-                        }
-                        else
-                        {
-                            drawSize = new Vector2(Size.Y * textureRatio, Size.Y);
-                            drawOffset = new Vector2((Size.X - drawSize.X) / 2f, 0);
-                        }
+                case TextureFillMode.Fill:
+                    var scaleX = 1f;
+                    var scaleY = 1f;
 
-                        break;
-                    case TextureFillMode.Fill:
-                        var scaleX = 1f;
-                        var scaleY = 1f;
+                    if (textureRatio > boxRatio)
+                        scaleX = boxRatio / textureRatio;
+                    else
+                        scaleY = textureRatio / boxRatio;
 
-                        if (textureRatio > boxRatio)
-                        {
-                            scaleX = boxRatio / textureRatio;
-                        }
-                        else
-                        {
-                            scaleY = textureRatio / boxRatio;
-                        }
-
-                        uvCoords = new RectangleF((1f - scaleX) / 2f, (1f - scaleY) / 2f, scaleX, scaleY);
-                        break;
-                }
+                    uvCoords = new RectangleF((1f - scaleX) / 2f, (1f - scaleY) / 2f, scaleX, scaleY);
+                    break;
             }
         }
     }
@@ -180,25 +186,35 @@ public class Box2D : Drawable2D
 
         if (ssFramebuffer == null || cachedTargetSize != targetSize)
         {
+            ssTexture?.Dispose();
+
             ssFramebuffer = renderer.GraphicsDevice.CreateFramebuffer(targetSize);
 
             ssTexture = Texture.FromExistingHandle(renderer.GraphicsDevice.OpenGL, ssFramebuffer.Value.ColorTexture, (int)targetSize.X, (int)targetSize.Y, PixelFormat.Rgba);
             cachedTargetSize = targetSize;
+            supersampleDirty = true;
         }
 
-        renderer.BeginRenderTarget(ssFramebuffer.Value);
-        renderer.ClearCurrentTarget();
+        if (supersampleDirty)
+        {
+            renderer.BeginRenderTarget(ssFramebuffer.Value);
+            renderer.ClearCurrentTarget();
 
-        renderer.DrawQuad(
-            drawMatrix: DrawMatrix.IDENTITY, position: Vector2.Zero, size: targetSize,
-            packedColor: packedColor, alpha: 1f,
-            borderThickness: 0, borderHasSingleColor: true, borderColor: Matrix4x4.Identity,
-            cornerRadius: 0, texture: Texture, textureCoord: uvCoords,
-            filterMode: TextureFilterMode.Nearest
-        );
 
-        renderer.EndRenderTarget();
-        ssTexture!.GenerateMipmaps();
+            renderer.DrawQuad(
+                drawMatrix: DrawMatrix.IDENTITY, position: Vector2.Zero, size: targetSize,
+                packedColor: packedColor, alpha: 1f,
+                borderThickness: 0, borderHasSingleColor: true, borderColor: Matrix4x4.Identity,
+                cornerRadius: 0, texture: Texture, textureCoord: uvCoords,
+                filterMode: TextureFilterMode.Nearest
+            );
+
+            renderer.EndRenderTarget();
+            ssTexture!.GenerateMipmaps();
+
+            supersampleDirty = false;
+            DrawStatistics.Increment(DrawStatistics.Type.SupersamplingDraws);
+        }
 
         renderer.DrawQuad(
             drawMatrix: DrawMatrix, position: drawOffset, size: drawSize,
@@ -206,8 +222,14 @@ public class Box2D : Drawable2D
             borderThickness: BorderThickness, borderHasSingleColor: BorderColor.HasSingleColor,
             borderColor: CachedBorderColor,
             cornerRadius: Math.Clamp(CornerRadius, 0f, Math.Min(Width, Height) / 2f),
-            texture: ssTexture, textureCoord: new RectangleF(0, 0, 1, 1),
+            texture: ssTexture, textureCoord: new RectangleF(0, 1, 1, -1),
             filterMode: TextureFilterMode
         );
+    }
+
+    protected override void Dispose(bool isDisposing)
+    {
+        ssTexture?.Dispose();
+        base.Dispose(isDisposing);
     }
 }
