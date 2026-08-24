@@ -4,9 +4,11 @@
 using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using Silk.NET.OpenGL;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Util;
+using Framebuffer = Synesthesia.Engine.Graphics.Framebuffer;
 using Texture = Synesthesia.Engine.Graphics.Textures.Texture;
 
 namespace Synesthesia.Engine.Platform.Render;
@@ -151,6 +153,30 @@ public class Renderer2D(GraphicsDevice graphicsDevice) : IRenderer<Vertex2D>
         InverseMatrix *= Matrix4x4.CreateTranslation(-x, -y, -z);
 
         UpdateShaderMatrix();
+    }
+
+    public void BeginRenderTarget(Framebuffer framebuffer)
+    {
+        FlushVertexBatch();
+        GraphicsDevice.BindFramebuffer(framebuffer);
+
+        projectionMatrix = Matrix4x4.CreateOrthographicOffCenter(0, framebuffer.Size.X, framebuffer.Size.Y, 0, -1, 1);
+        LoadIdentity();
+    }
+
+    public void EndRenderTarget()
+    {
+        FlushVertexBatch();
+        GraphicsDevice.UnbindFramebuffer();
+
+        projectionMatrix = Matrix4x4.CreateOrthographicOffCenter(0, GraphicsDevice.BackBufferWidth, GraphicsDevice.BackBufferHeight, 0, -1, 1);
+        LoadIdentity();
+    }
+
+    public void ClearCurrentTarget()
+    {
+        GraphicsDevice.OpenGL.ClearColor(0, 0, 0, 0);
+        GraphicsDevice.OpenGL.Clear(ClearBufferMask.ColorBufferBit);
     }
 
     public void Scale(float x, float y, float z)

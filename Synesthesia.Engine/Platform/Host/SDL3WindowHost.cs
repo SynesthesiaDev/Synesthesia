@@ -195,6 +195,7 @@ public class SDL3WindowHost : IWindowHost
             GLSetAttribute(GLAttr.ContextProfileMask, (int)GLProfile.Core).LogErrorIfFailed();
 
             GLSetAttribute(GLAttr.StencilSize, 8).LogErrorIfFailed();
+            GLSetAttribute(GLAttr.MultisampleSamples, 4).LogErrorIfFailed();
 
             IntPtr? windowHandle = CreateWindow(Title, IWindowHost.DEFAULT_WIDTH, IWindowHost.DEFAULT_HEIGHT, window_creation_flags);
             if (windowHandle == null) throw new InvalidOperationException($"Failed to create SDL window. SDL Error: {GetError()}");

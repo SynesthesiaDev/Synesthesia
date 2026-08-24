@@ -10,6 +10,8 @@ namespace Synesthesia.Engine.Graphics;
 
 public class DrawMatrix : IPooledObject, IEquatable<DrawMatrix>
 {
+    public static readonly DrawMatrix IDENTITY = new DrawMatrix();
+
     public Matrix4x4 Matrix { get; set; } = Matrix4x4.Identity;
 
     public Matrix4x4 InverseMatrix { get; set; } = Matrix4x4.Identity;

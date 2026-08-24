@@ -3,6 +3,7 @@
 
 using System.Drawing;
 using System.Numerics;
+using Silk.NET.OpenGL;
 using Synesthesia.Engine.Animations;
 using Synesthesia.Engine.Animations.Easings;
 using Synesthesia.Engine.Dependency;
@@ -10,6 +11,7 @@ using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Utils.Extensions;
+using Texture = Synesthesia.Engine.Graphics.Textures.Texture;
 
 namespace Synesthesia.Engine.Graphics.Two;
 
@@ -21,6 +23,9 @@ public class Box2D : Drawable2D
     private RectangleF uvCoords = new(0, 0, 1, 1);
     private Vector2 drawSize;
     private Vector2 drawOffset;
+    private Framebuffer? ssFramebuffer;
+    private Texture? ssTexture;
+    private Vector2 cachedTargetSize;
 
     public float CornerRadius { get; set; }
 
@@ -56,6 +61,8 @@ public class Box2D : Drawable2D
             Invalidate(Invalidation.DrawNode);
         }
     } = TextureFilterMode.Linear;
+
+    public int Supersampling { get; set; } = 1;
 
     public Color Color
     {
@@ -146,18 +153,60 @@ public class Box2D : Drawable2D
 
     protected override void OnDraw2d()
     {
+        if (Supersampling <= 1)
+        {
+            renderer.DrawQuad(
+                drawMatrix: DrawMatrix,
+                position: drawOffset,
+                size: drawSize,
+                packedColor: packedColor,
+                alpha: InheritedAlpha,
+                borderThickness: BorderThickness,
+                borderHasSingleColor: BorderColor.HasSingleColor,
+                borderColor: CachedBorderColor,
+                cornerRadius: Math.Clamp(CornerRadius, 0f, Math.Min(Width, Height) / 2f),
+                texture: Texture,
+                textureCoord: uvCoords,
+                filterMode: TextureFilterMode
+            );
+
+            return;
+        }
+
+        var targetSize = new Vector2(
+            MathF.Max(1, MathF.Round(drawSize.X * Supersampling)),
+            MathF.Max(1, MathF.Round(drawSize.Y * Supersampling)));
+
+
+        if (ssFramebuffer == null || cachedTargetSize != targetSize)
+        {
+            ssFramebuffer = renderer.GraphicsDevice.CreateFramebuffer(targetSize);
+
+            ssTexture = Texture.FromExistingHandle(renderer.GraphicsDevice.OpenGL, ssFramebuffer.Value.ColorTexture, (int)targetSize.X, (int)targetSize.Y, PixelFormat.Rgba);
+            cachedTargetSize = targetSize;
+        }
+
+        renderer.BeginRenderTarget(ssFramebuffer.Value);
+        renderer.ClearCurrentTarget();
+
         renderer.DrawQuad(
-            drawMatrix: DrawMatrix,
-            position: drawOffset,
-            size: drawSize,
-            packedColor: packedColor,
-            alpha: InheritedAlpha,
-            borderThickness: BorderThickness,
-            borderHasSingleColor: BorderColor.HasSingleColor,
+            drawMatrix: DrawMatrix.IDENTITY, position: Vector2.Zero, size: targetSize,
+            packedColor: packedColor, alpha: 1f,
+            borderThickness: 0, borderHasSingleColor: true, borderColor: Matrix4x4.Identity,
+            cornerRadius: 0, texture: Texture, textureCoord: uvCoords,
+            filterMode: TextureFilterMode.Nearest
+        );
+
+        renderer.EndRenderTarget();
+        ssTexture!.GenerateMipmaps();
+
+        renderer.DrawQuad(
+            drawMatrix: DrawMatrix, position: drawOffset, size: drawSize,
+            packedColor: packedColor, alpha: InheritedAlpha,
+            borderThickness: BorderThickness, borderHasSingleColor: BorderColor.HasSingleColor,
             borderColor: CachedBorderColor,
             cornerRadius: Math.Clamp(CornerRadius, 0f, Math.Min(Width, Height) / 2f),
-            texture: Texture,
-            textureCoord: uvCoords,
+            texture: ssTexture, textureCoord: new RectangleF(0, 0, 1, 1),
             filterMode: TextureFilterMode
         );
     }

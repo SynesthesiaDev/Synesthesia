@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Concurrent;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using SDL3;
 using Silk.NET.OpenGL;
@@ -9,8 +10,10 @@ using Synesthesia.Engine.Graphics.Shaders;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Threading;
+using Synesthesia.Engine.Util.Exceptions;
 using Synesthesia.Engine.Util.Statistics;
 using Synesthesia.Utils.Extensions;
+using Framebuffer = Synesthesia.Engine.Graphics.Framebuffer;
 using Shader = Synesthesia.Engine.Graphics.Shader;
 using Texture = Synesthesia.Engine.Graphics.Textures.Texture;
 
@@ -170,10 +173,12 @@ public class GraphicsDevice
         {
             if (!sameFilter || !sameTexture)
             {
-                var (min, mag) = mode == TextureFilterMode.Nearest
-                    ? ((int)TextureMinFilter.Nearest, (int)TextureMagFilter.Nearest)
-                    : ((int)TextureMinFilter.Linear, (int)TextureMagFilter.Linear);
-
+                var (min, mag) = mode switch
+                {
+                    TextureFilterMode.Nearest      => ((int)TextureMinFilter.Nearest, (int)TextureMagFilter.Nearest),
+                    TextureFilterMode.Trilinear => ((int)TextureMinFilter.LinearMipmapLinear, (int)TextureMagFilter.Linear),
+                    _                               => ((int)TextureMinFilter.Linear, (int)TextureMagFilter.Linear)
+                };
                 OpenGL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, min);
                 OpenGL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, mag);
             }
@@ -245,6 +250,43 @@ public class GraphicsDevice
         }
 
         stencilDepthStack++;
+    }
+
+    public Framebuffer CreateFramebuffer(Vector2 size, PixelFormat format = PixelFormat.Rgba)
+    {
+        var fbo = OpenGL.GenFramebuffer();
+        OpenGL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo);
+
+        var colorTex = OpenGL.GenTexture();
+        OpenGL.BindTexture(TextureTarget.Texture2D, colorTex);
+        unsafe
+        {
+            OpenGL.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba,
+                (uint)size.X, (uint)size.Y, 0, format, PixelType.UnsignedByte, null);
+        }
+        OpenGL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+        OpenGL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+        OpenGL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0,
+            TextureTarget.Texture2D, colorTex, 0);
+
+        if (OpenGL.CheckFramebufferStatus(FramebufferTarget.Framebuffer) != GLEnum.FramebufferComplete)
+            throw new OpenGLException("Framebuffer incomplete");
+
+        OpenGL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+
+        return new Framebuffer(fbo, colorTex, size, format);
+    }
+
+    public void BindFramebuffer(Framebuffer framebuffer)
+    {
+        OpenGL.BindFramebuffer(FramebufferTarget.Framebuffer, framebuffer.Fbo);
+        OpenGL.Viewport(0, 0, (uint)framebuffer.Size.X, (uint)framebuffer.Size.Y);
+    }
+
+    public void UnbindFramebuffer()
+    {
+        OpenGL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+        PushViewport();
     }
 
     public void BeginStencilMask()

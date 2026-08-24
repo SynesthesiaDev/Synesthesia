@@ -6,5 +6,6 @@ namespace Synesthesia.Engine.Graphics.Textures;
 public enum TextureFilterMode
 {
     Linear,
-    Nearest
+    Nearest,
+    Trilinear
 }

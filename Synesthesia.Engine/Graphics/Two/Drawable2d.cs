@@ -378,6 +378,10 @@ public abstract class Drawable2D : Drawable
         return screenPos + scaledSize / 2f;
     }
 
+    public Vector2 ScreenSpaceOrigin =>
+        ScreenSpacePosition + GetAnchorOffset(Size, Origin) * InheritedScale;
+
+
     public static Vector2 GetAnchorOffset(Vector2 size, Anchor anchor)
     {
         return anchor switch

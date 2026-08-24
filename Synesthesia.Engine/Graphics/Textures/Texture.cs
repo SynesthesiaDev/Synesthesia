@@ -55,8 +55,6 @@ public class Texture : IDisposable
         opengl.BindTexture(TextureTarget.Texture2D, Handle);
 
         gl.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
-        // gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-        // gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMinFilter.Linear);
         gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
         gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 
@@ -92,6 +90,15 @@ public class Texture : IDisposable
         return true;
     }
 
+    public void GenerateMipmaps()
+    {
+        ThreadSafety.AssertRunningOnRenderThread();
+        if (!IsUploaded) return;
+
+        gl!.BindTexture(TextureTarget.Texture2D, Handle);
+        gl.GenerateMipmap(TextureTarget.Texture2D);
+    }
+
     public void Dispose()
     {
         if (!IsUploaded || gl == null) return;
@@ -105,4 +112,16 @@ public class Texture : IDisposable
         return $"Texture(Handle={Handle}, TextureData={TextureData}, IsUploaded={IsUploaded}, UploadQueued={UploadQueued})";
     }
 
+    public static Texture FromExistingHandle(GL gl, uint handle, int width, int height, PixelFormat pixelFormat)
+    {
+        var data = new TextureData(width, height, [], pixelFormat);
+        var texture = new Texture(data, uploadImmediately: false);
+
+        texture.gl = gl;
+        texture.Handle = handle;
+        texture.IsUploaded = true;
+        texture.UploadQueued = false;
+
+        return texture;
+    }
 }
