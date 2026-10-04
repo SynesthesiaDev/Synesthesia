@@ -19,7 +19,7 @@ public class InputThread : ThreadRunner
 
     protected override void ProcessFrame(FrameInfo frameInfo)
     {
-        inputHandler.ProcessFrame();
+        inputHandler.ProcessFrame(frameInfo);
     }
 
     protected override void OnThreadInit()

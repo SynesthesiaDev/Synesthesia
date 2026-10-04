@@ -16,9 +16,9 @@ public readonly struct FrameInfo
 
     public required long Timestamp { get; init; }
 
-    public required  ThreadType Type { get; init; }
+    public required ThreadType Type { get; init; }
 
-    public required  ulong FrameIndex { get; init; }
+    public required ulong FrameIndex { get; init; }
 
     public long TimeLong => (long)Time;
 
@@ -26,8 +26,7 @@ public readonly struct FrameInfo
     {
         get
         {
-            var delta = Delta.ToFloat();
-            if (delta > 1f) delta /= 1000f;
+            var delta = Delta.ToFloat() / 1000f;
             return MathF.Min(delta, 0.05f);
         }
     }

@@ -19,7 +19,7 @@ namespace Synesthesia.Engine.Graphics.Two;
 
 public class CompositeDrawable2D : Drawable2D
 {
-    private readonly Lock childrenLock = new();
+    protected readonly Lock ChildrenLock = new();
 
     [SuppressMessage("Design", "MA0016:Prefer using collection abstraction instead of implementation")]
     protected internal List<Drawable2D> InternalChildren = [];
@@ -81,7 +81,7 @@ public class CompositeDrawable2D : Drawable2D
         get => InternalChildren;
         set
         {
-            lock (childrenLock)
+            lock (ChildrenLock)
             {
                 if (InternalChildren.Count > 0)
                 {
@@ -111,7 +111,7 @@ public class CompositeDrawable2D : Drawable2D
 
     public void AddChild(Drawable2D child)
     {
-        lock (childrenLock)
+        lock (ChildrenLock)
         {
             InternalChildren.Add(child);
             child.Parent = this;
@@ -122,7 +122,7 @@ public class CompositeDrawable2D : Drawable2D
 
     public void RemoveChild(Drawable2D child)
     {
-        lock (childrenLock)
+        lock (ChildrenLock)
         {
             InternalChildren.Remove(child);
             child.Dispose();
@@ -136,7 +136,7 @@ public class CompositeDrawable2D : Drawable2D
 
     protected override void InternalLoadComplete()
     {
-        lock (childrenLock)
+        lock (ChildrenLock)
         {
             foreach (ref Drawable2D internalChild in CollectionsMarshal.AsSpan(InternalChildren))
             {
@@ -155,7 +155,7 @@ public class CompositeDrawable2D : Drawable2D
         if (!Visible) return;
 
         Snapshot<Drawable2D> snapshot;
-        lock (childrenLock)
+        lock (ChildrenLock)
         {
             snapshot = Snapshot.Rent(InternalChildren);
         }
@@ -175,7 +175,7 @@ public class CompositeDrawable2D : Drawable2D
     {
         Snapshot<Drawable2D> snapshot;
 
-        lock (childrenLock)
+        lock (ChildrenLock)
         {
             snapshot = Snapshot.Rent(InternalChildren);
         }
@@ -267,7 +267,7 @@ public class CompositeDrawable2D : Drawable2D
 
     public Vector2 GetChildrenSize()
     {
-        lock (childrenLock)
+        lock (ChildrenLock)
         {
             if (InternalChildren.Count == 0) return Vector2.Zero;
 
@@ -315,7 +315,7 @@ public class CompositeDrawable2D : Drawable2D
     protected internal void UpdateHoverState(IPositionalInputEvent e)
     {
         var handled = false;
-        lock (childrenLock)
+        lock (ChildrenLock)
         {
             for (var i = InternalChildren.Count - 1; i >= 0; i--)
             {
@@ -438,7 +438,7 @@ public class CompositeDrawable2D : Drawable2D
 
     protected override void Dispose(bool isDisposing)
     {
-        lock (childrenLock)
+        lock (ChildrenLock)
         {
             for (int i = 0; i < InternalChildren.Count; i++)
             {

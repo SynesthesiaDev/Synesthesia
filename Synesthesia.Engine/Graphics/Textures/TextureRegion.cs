@@ -5,7 +5,6 @@ using System.Drawing;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Codon.Binary;
-using Synesthesia.Engine.Util.Codecs;
 
 namespace Synesthesia.Engine.Graphics.Textures;
 
@@ -16,7 +15,7 @@ public readonly struct TextureRegion(RectangleF uvRect, Vector2 size)
     public readonly Vector2 Size = size;
 
     public static readonly IBinaryCodec<TextureRegion> BINARY_CODEC = BinaryCodecs.For<TextureRegion>()
-        .Field(ExtraCodecs.RECTANGLE_F, r => r.UvRect)
-        .Field(ExtraCodecs.VECTOR_2, r => r.Size)
+        .Field(BinaryCodecs.RECTANGLE_F, r => r.UvRect)
+        .Field(BinaryCodecs.VECTOR_2, r => r.Size)
         .Build((uv, size) => new TextureRegion(uv, size));
 }

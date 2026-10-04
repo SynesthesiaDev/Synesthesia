@@ -1,11 +1,10 @@
 ﻿// Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using Synesthesia.Engine.Timing;
+namespace Synesthesia.Engine.Physics;
 
-namespace Synesthesia.Engine.Platform;
-
-public interface IFrameProcessor
+public enum CollisionResult
 {
-    void ProcessFrame(FrameInfo frameInfo);
+    Pass,
+    Hit,
 }

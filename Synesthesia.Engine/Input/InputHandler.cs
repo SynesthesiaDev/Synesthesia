@@ -11,6 +11,7 @@ using Synesthesia.Engine.Input.ActionBindings;
 using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform;
+using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util.Pooling;
 using Synesthesia.Engine.Util.Statistics;
 
@@ -77,7 +78,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
         }
     } = null;
 
-    public void ProcessFrame()
+    public void ProcessFrame(FrameInfo frameInfo)
     {
         while (!eventQueue.IsEmpty)
         {

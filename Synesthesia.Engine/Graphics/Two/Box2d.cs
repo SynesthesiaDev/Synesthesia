@@ -93,8 +93,8 @@ public class Box2D : Drawable2D
             if (dirty.HasFlagFast(Invalidation.DrawNode))
                 packedColor = Color.ToRgba32();
 
-            supersampleDirty = true;
         }
+        supersampleDirty = true;
     }
 
     private void recomputeDrawSize()
@@ -183,7 +183,6 @@ public class Box2D : Drawable2D
             MathF.Max(1, MathF.Round(drawSize.X * Supersampling)),
             MathF.Max(1, MathF.Round(drawSize.Y * Supersampling)));
 
-
         if (ssFramebuffer == null || cachedTargetSize != targetSize)
         {
             ssTexture?.Dispose();
@@ -199,7 +198,6 @@ public class Box2D : Drawable2D
         {
             renderer.BeginRenderTarget(ssFramebuffer.Value);
             renderer.ClearCurrentTarget();
-
 
             renderer.DrawQuad(
                 drawMatrix: DrawMatrix.IDENTITY, position: Vector2.Zero, size: targetSize,
