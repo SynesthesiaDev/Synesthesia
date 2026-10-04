@@ -21,7 +21,7 @@ public abstract class ThreadRunner : IDisposable
 
     public readonly Bindable<long> InactiveUpdateRate = new(default_inactive_update_rate);
 
-    public readonly Bindable<bool> IsActive = new(true);
+    public readonly Bindable<bool> IsActive = new(defaultInternalValue: true);
 
     private readonly FrameStatistics frameStatistics = new();
 
@@ -73,7 +73,7 @@ public abstract class ThreadRunner : IDisposable
         {
             if (IsActive.Value)
                 clock.MaximumUpdateHz = e.NewValue;
-        }, true);
+        }, triggerOnce: true);
 
         InactiveUpdateRate.OnValueChange(e =>
         {
@@ -84,7 +84,7 @@ public abstract class ThreadRunner : IDisposable
         IsActive.OnValueChange(e =>
         {
             clock.MaximumUpdateHz = e.NewValue ? ActiveUpdateRate.Value : InactiveUpdateRate.Value;
-        }, true);
+        }, triggerOnce: true);
 
         IsActive.BindTo(game.WindowHost.WindowActive);
 

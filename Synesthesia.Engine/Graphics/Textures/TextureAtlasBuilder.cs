@@ -60,7 +60,7 @@ public class TextureAtlasBuilder
         }
 
         var textureData = new TextureData(atlasWidth, atlasHeight, atlasData, PixelFormat.Rgba);
-        var texture = new Texture(textureData, true);
+        var texture = new Texture(textureData, uploadImmediately: true);
 
         foreach (var rect in rectangles)
         {

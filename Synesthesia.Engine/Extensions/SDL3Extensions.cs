@@ -36,7 +36,7 @@ public static class SDL3Extensions
             SDL.SystemTheme.Unknown => SystemTheme.Unknown,
             SDL.SystemTheme.Light => SystemTheme.Light,
             SDL.SystemTheme.Dark => SystemTheme.Dark,
-            _ => throw new ArgumentOutOfRangeException(nameof(sdlTheme), sdlTheme, null),
+            _ => throw new ArgumentOutOfRangeException(nameof(sdlTheme), sdlTheme, message: null),
         };
     }
 

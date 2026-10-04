@@ -20,7 +20,7 @@ public abstract class BarebonesToggle : CompositeDrawable2D
 
     protected override void LoadComplete()
     {
-        checkedListener = Checked.OnValueChange(e => OnToggle(e.NewValue), true);
+        checkedListener = Checked.OnValueChange(e => OnToggle(e.NewValue), triggerOnce: true);
         base.LoadComplete();
     }
 

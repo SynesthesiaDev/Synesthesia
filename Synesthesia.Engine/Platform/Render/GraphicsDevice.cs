@@ -238,7 +238,7 @@ public class GraphicsDevice
         EnsureInitialized();
 
         Surface.SwapBuffers();
-        BindTexture(null);
+        BindTexture(texture: null);
         ClearFlags = DEFAULT_CLEAR_FLAGS;
     }
 
@@ -262,7 +262,7 @@ public class GraphicsDevice
         unsafe
         {
             OpenGL.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba,
-                (uint)size.X, (uint)size.Y, 0, format, PixelType.UnsignedByte, null);
+                (uint)size.X, (uint)size.Y, 0, format, PixelType.UnsignedByte, pixels: null);
         }
         OpenGL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
         OpenGL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
@@ -292,7 +292,7 @@ public class GraphicsDevice
     public void BeginStencilMask()
     {
         OpenGL.Enable(EnableCap.Multisample);
-        OpenGL.ColorMask(false, false, false, false);
+        OpenGL.ColorMask(red: false, green: false, blue: false, alpha: false);
 
         OpenGL.StencilFunc(StencilFunction.Equal, stencilDepthStack - 1, 0xFF);
         OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr);
@@ -302,7 +302,7 @@ public class GraphicsDevice
 
     public void EndStencilMask()
     {
-        OpenGL.ColorMask(true, true, true, true);
+        OpenGL.ColorMask(red: true, green: true, blue: true, alpha: true);
 
         OpenGL.StencilFunc(StencilFunction.Equal, stencilDepthStack, 0xFF);
         OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
@@ -324,14 +324,14 @@ public class GraphicsDevice
             OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
         }
 
-        OpenGL.ColorMask(true, true, true, true);
+        OpenGL.ColorMask(red: true, green: true, blue: true, alpha: true);
         UnbindShader();
     }
 
     public void BeginStencilRestore()
     {
         OpenGL.Enable(EnableCap.Multisample);
-        OpenGL.ColorMask(false, false, false, false);
+        OpenGL.ColorMask(red: false, green: false, blue: false, alpha: false);
 
         OpenGL.StencilFunc(StencilFunction.Equal, stencilDepthStack, 0xFF);
         OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Decr);

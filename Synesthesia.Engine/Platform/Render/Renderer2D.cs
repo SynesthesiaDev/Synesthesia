@@ -24,7 +24,7 @@ public class Renderer2D(GraphicsDevice graphicsDevice) : IRenderer<Vertex2D>
     private Matrix4x4 projectionMatrix;
     private int transformMatrixShaderLocation;
 
-    public VertexBatch<Vertex2D> VertexBatch { get; private set; } = new(graphicsDevice.OpenGL, true);
+    public VertexBatch<Vertex2D> VertexBatch { get; private set; } = new(graphicsDevice.OpenGL, is2D: true);
 
     public Matrix4x4 Matrix { get; private set; } = Matrix4x4.Identity;
     public Matrix4x4 InverseMatrix { get; private set; } = Matrix4x4.Identity;

@@ -8,7 +8,7 @@ using Synesthesia.Engine.Util.Statistics;
 
 namespace Synesthesia.Engine.Graphics;
 
-public class VertexBatch<T> : IDisposable where T : unmanaged
+public class VertexBatch<T> : IDisposable where T : unmanaged, IVertex
 {
     private readonly GL gl;
     private readonly uint vao, vbo, ebo;
@@ -34,7 +34,7 @@ public class VertexBatch<T> : IDisposable where T : unmanaged
 
         unsafe
         {
-            gl.BufferData(BufferTargetARB.ArrayBuffer, (nuint)(maxVertices * sizeof(T)), null, BufferUsageARB.StreamDraw);
+            gl.BufferData(BufferTargetARB.ArrayBuffer, (nuint)(maxVertices * sizeof(T)), data: null, BufferUsageARB.StreamDraw);
         }
 
         gl.GenBuffers(1, out ebo);

@@ -52,21 +52,21 @@ public static class Logger
         Console.WriteLine(logString);
     }
 
-    public static void Debug(string message) => log(message, debug, Runtime, true);
-    public static void Verbose(string message) => log(message, verbose, Runtime, true);
-    public static void Warning(string message) => log(message, warning, Runtime, true);
-    public static void Error(string message) => log(message, error, Runtime, true);
+    public static void Debug(string message) => log(message, debug, Runtime, displayTimestamp: true);
+    public static void Verbose(string message) => log(message, verbose, Runtime, displayTimestamp: true);
+    public static void Warning(string message) => log(message, warning, Runtime, displayTimestamp: true);
+    public static void Error(string message) => log(message, error, Runtime, displayTimestamp: true);
 
-    public static void Debug(string message, LogCategory category) => log(message, debug, category, true);
-    public static void Verbose(string message, LogCategory category) => log(message, verbose, category, true);
-    public static void Warning(string message, LogCategory category) => log(message, warning, category, true);
-    public static void Error(string message, LogCategory category) => log(message, error, category, true);
+    public static void Debug(string message, LogCategory category) => log(message, debug, category, displayTimestamp: true);
+    public static void Verbose(string message, LogCategory category) => log(message, verbose, category, displayTimestamp: true);
+    public static void Warning(string message, LogCategory category) => log(message, warning, category, displayTimestamp: true);
+    public static void Error(string message, LogCategory category) => log(message, error, category, displayTimestamp: true);
 
     public static void Exception(Exception exception, LogCategory category)
     {
         while (true)
         {
-            log(exception.ToString(), error, category, true);
+            log(exception.ToString(), error, category, displayTimestamp: true);
             if (exception.InnerException != null)
             {
                 exception = exception.InnerException;

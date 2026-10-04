@@ -52,11 +52,11 @@ public class SDL3WindowHost : IWindowHost
 
     public EventDispatcher<Vector4> OnSafeAreaChanged { get; } = new EventDispatcher<Vector4>();
 
-    public Bindable<bool> CursorInWindow { get; } = new Bindable<bool>(false);
+    public Bindable<bool> CursorInWindow { get; } = new Bindable<bool>(defaultInternalValue: false);
 
     public Bindable<WindowState> WindowState { get; } = new Bindable<WindowState>(Platform.WindowState.Normal);
 
-    public Bindable<bool> WindowActive { get; } = new Bindable<bool>(false);
+    public Bindable<bool> WindowActive { get; } = new Bindable<bool>(defaultInternalValue: false);
 
     #endregion
 
@@ -328,11 +328,11 @@ public class SDL3WindowHost : IWindowHost
             Interlocked.And(ref pressedMouseButtons, (uint)~buttonsToRelease);
             var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Left)) handleMouseButton(MouseButton.Left, false, timestamp);
-            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Middle)) handleMouseButton(MouseButton.Middle, false, timestamp);
-            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Right)) handleMouseButton(MouseButton.Right, false, timestamp);
-            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.X1)) handleMouseButton(MouseButton.Button1, false, timestamp);
-            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.X2)) handleMouseButton(MouseButton.Button2, false, timestamp);
+            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Left)) handleMouseButton(MouseButton.Left, down: false, timestamp);
+            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Middle)) handleMouseButton(MouseButton.Middle, down: false, timestamp);
+            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Right)) handleMouseButton(MouseButton.Right, down: false, timestamp);
+            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.X1)) handleMouseButton(MouseButton.Button1, down: false, timestamp);
+            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.X2)) handleMouseButton(MouseButton.Button2, down: false, timestamp);
         }
     }
 
@@ -410,7 +410,7 @@ public class SDL3WindowHost : IWindowHost
                 MinimizeWindow(handle).LogErrorIfFailed();
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(windowState), windowState, null);
+                throw new ArgumentOutOfRangeException(nameof(windowState), windowState, message: null);
         }
     }
 
@@ -425,7 +425,7 @@ public class SDL3WindowHost : IWindowHost
         {
             case EventType.Quit:
             {
-                ExitRequested.Dispatch(true);
+                ExitRequested.Dispatch(value: true);
                 WindowExists = false;
                 break;
             }

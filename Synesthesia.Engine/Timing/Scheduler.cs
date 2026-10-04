@@ -26,7 +26,7 @@ public class Scheduler : IDisposable
     public Scheduler()
     {
         stopwatch.Start();
-        timer = new Timer(tick, null, Timeout.Infinite, Timeout.Infinite);
+        timer = new Timer(tick, state: null, Timeout.Infinite, Timeout.Infinite);
         timerRunning = false;
 
         EngineStatistics.Increment(EngineStatistics.Type.Schedulers);
@@ -156,7 +156,7 @@ public class Scheduler : IDisposable
     public ScheduledTask Schedule(long time, Action<ScheduledTask> action)
     {
         var now = Interlocked.Read(ref currentTime);
-        var task = new ScheduledTask(this, false, time, action, new CancellationTokenSource());
+        var task = new ScheduledTask(this, HasBeenRun: false, time, action, new CancellationTokenSource());
         scheduledTasks.AddValue(now + time, task);
         EngineStatistics.Increment(EngineStatistics.Type.SchedulerTasks);
 

@@ -75,7 +75,7 @@ public class Shader : IDisposable
         ThreadSafety.AssertRunningOnRenderThread();
         unsafe
         {
-            gl.UniformMatrix4(location, 1, false, (float*)&matrix);
+            gl.UniformMatrix4(location, 1, transpose: false, (float*)&matrix);
         }
         DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }

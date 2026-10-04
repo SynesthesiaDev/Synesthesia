@@ -23,7 +23,7 @@ public class DefaultTextbox : CompositeDrawable2D, IAcceptsFocus
 
     public bool IsFocused { get; private set; }
 
-    public readonly Bindable<bool> IsPassword = new Bindable<bool>(false);
+    public readonly Bindable<bool> IsPassword = new Bindable<bool>(defaultInternalValue: false);
     public int MaxLenght { get; init; }
     public Func<string, bool>? Filter { get; init; }
 

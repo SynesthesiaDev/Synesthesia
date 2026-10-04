@@ -33,7 +33,7 @@ public class TextureAtlas : IDisposable
     public static readonly IBinaryCodec<TextureAtlas> BINARY_CODEC = BinaryCodecs.For<TextureAtlas>()
         .Field(BinaryCodecs.INT, a => a.Width)
         .Field(BinaryCodecs.INT, a => a.Height)
-        .Field(TextureData.BINARY_CODEC.Transform<Texture>(texture => texture.TextureData, textureData => new Texture(textureData, true)), a => a.Texture)
+        .Field(TextureData.BINARY_CODEC.Transform<Texture>(texture => texture.TextureData, textureData => new Texture(textureData, uploadImmediately: true)), a => a.Texture)
         .Field(BinaryCodecs.INT.MapTo(TextureRegion.BINARY_CODEC), a => a.TextureRegions)
         .Build((width, height, texture, areas) => new TextureAtlas(width, height, texture, areas));
 
