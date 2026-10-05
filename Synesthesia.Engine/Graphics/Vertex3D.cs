@@ -11,6 +11,8 @@ namespace Synesthesia.Engine.Graphics;
 public readonly struct Vertex3D
 (
     Vector3 position,
+    Vector3 normal,
+    Vector3 tangent,
     uint color,
     Vector2 texCoord
 ) : IVertex
@@ -18,9 +20,16 @@ public readonly struct Vertex3D
     [VertexInfo(0, 3, VertexAttribPointerType.Float)]
     public readonly Vector3 Position = position;
 
+    [VertexInfo(1, 3, VertexAttribPointerType.Float)]
+    public readonly Vector3 Normal = normal;
+
+    [VertexInfo(2, 3, VertexAttribPointerType.Float)]
+    public readonly Vector3 Tangent = tangent;
+
     [VertexInfo(3, 4, VertexAttribPointerType.UnsignedByte, normalized: true)]
     public readonly uint Color = color;
 
-    [VertexInfo(1, 2, VertexAttribPointerType.Float)]
+    [VertexInfo(4, 2, VertexAttribPointerType.Float)]
     public readonly Vector2 TextureCoord = texCoord;
 }
+

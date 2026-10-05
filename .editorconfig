@@ -204,6 +204,9 @@ dotnet_diagnostic.MA0134.severity = none
 
 dotnet_diagnostic.EPC13.severity = none
 
+
+dotnet_diagnostic.MA0026.severity = none
+
 [*.{yaml,yml}]
 insert_final_newline = true
 indent_style = space

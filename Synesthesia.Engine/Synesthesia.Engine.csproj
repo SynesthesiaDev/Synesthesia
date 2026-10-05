@@ -76,8 +76,4 @@
     <ProjectReference Include="..\Synesthesia.SourceGenerators\Synesthesia.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Graphics\Three\" />
-  </ItemGroup>
-
 </Project>

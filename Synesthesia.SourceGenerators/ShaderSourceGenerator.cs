@@ -17,13 +17,12 @@ public class ShaderSourceGenerator : IIncrementalGenerator
                 file.Path.EndsWith(".frag") ||
                 file.Path.EndsWith(".vs") ||
                 file.Path.EndsWith(".fs"))
-            .Collect(); // This creates ImmutableArray<AdditionalText>
+            .Collect();
 
-        // Register ONCE for the entire collection
-        context.RegisterSourceOutput(shaderFiles, GenerateShaderSources);
+        context.RegisterSourceOutput(shaderFiles, generateShaderSources);
     }
 
-    private void GenerateShaderSources(
+    private void generateShaderSources(
         SourceProductionContext context,
         ImmutableArray<AdditionalText> files)
     {
@@ -37,12 +36,11 @@ public class ShaderSourceGenerator : IIncrementalGenerator
         }
 
         sb.AppendLine();
-        sb.AppendLine("namespace Synesthesia.Engine.Graphics.Shaders");
+        sb.AppendLine("namespace Synesthesia.Engine.Shaders");
         sb.AppendLine("{");
         sb.AppendLine("    public static partial class ShaderSources");
         sb.AppendLine("    {");
 
-        // Process ALL files in ONE loop
         foreach (var file in files)
         {
             var fileName = Path.GetFileName(file.Path);
@@ -64,7 +62,6 @@ public class ShaderSourceGenerator : IIncrementalGenerator
         sb.AppendLine("    }");
         sb.AppendLine("}");
 
-        // Add ONLY ONE source file with ALL constants
         context.AddSource("ShaderSources.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
     }
 

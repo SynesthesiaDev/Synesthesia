@@ -6,9 +6,9 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using SDL3;
 using Silk.NET.OpenGL;
-using Synesthesia.Engine.Graphics.Shaders;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Logging;
+using Synesthesia.Engine.Shaders;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Util.Exceptions;
 using Synesthesia.Engine.Util.Statistics;
@@ -103,8 +103,8 @@ public class GraphicsDevice
 
     public void CompileDefaultShaders()
     {
-        DefaultShader = new Shader(OpenGL, ShaderSources.DefaultVertex, ShaderSources.DefaultFragment);
-        StencilShader = new Shader(OpenGL, ShaderSources.DefaultVertex, ShaderSources.StencilFragment);
+        DefaultShader = new Shader(OpenGL, ShaderSources.Default2dVertex, ShaderSources.Default2dFragment);
+        StencilShader = new Shader(OpenGL, ShaderSources.Default2dVertex, ShaderSources.Stencil2dFragment);
         BindShader(DefaultShader);
     }
 
