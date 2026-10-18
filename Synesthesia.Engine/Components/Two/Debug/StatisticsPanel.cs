@@ -31,6 +31,7 @@ public class StatisticsPanel : EngineDebugElement
         new DrawStatisticLine(DrawStatistics.Type.Invalidations),
         new Spacer(),
         new DrawStatisticLine(DrawStatistics.Type.DrawCalls2D),
+        new DrawStatisticLine(DrawStatistics.Type.DrawCalls3D),
         new DrawStatisticLine(DrawStatistics.Type.SupersamplingDraws),
         new DrawStatisticLine(DrawStatistics.Type.TextureBinds),
         new DrawStatisticLine(DrawStatistics.Type.ShaderBinds),

@@ -57,6 +57,11 @@ public class RenderThread(GraphicsDevice graphicsDevice) : ThreadRunner
         var gameContainer = game.GetInternalGameContainer();
 
         GraphicsDevice.BeginDrawing();
+
+        GraphicsDevice.Renderer3D.BeginDrawing();
+        game.DrawableScene3D.OnDraw();
+        GraphicsDevice.Renderer3D.EndDrawing();
+
         GraphicsDevice.Renderer2D.BeginDrawing();
 
         gameContainer.OnDraw();

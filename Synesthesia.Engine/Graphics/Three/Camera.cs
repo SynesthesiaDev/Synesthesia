@@ -10,11 +10,29 @@ namespace Synesthesia.Engine.Graphics.Three;
 
 public class Camera : Drawable3D
 {
-    public Vector3 Target { get; set; } = Vector3.Zero;
+    public Vector3 Target
+    {
+        get;
+        set
+        {
+            if(field == value) return;
+            field = value;
+            Invalidate(Invalidation.CameraView);
+        }
+    } = Vector3.Zero;
 
-    public Vector3 Up { get; set; } = Vector3.UnitY;
+    public Vector3 Up
+    {
+        get;
+        set
+        {
+            if(field == value) return;
+            field = value;
+            Invalidate(Invalidation.CameraView);
+        }
+    } = Vector3.UnitY;
 
-    public Matrix4x4 ViewMatrix { get; private set; } = Matrix4x4.CreateLookAt(Vector3.Zero, Vector3.Zero, Vector3.UnitY);
+    public Matrix4x4 ViewMatrix { get; private set; } = Matrix4x4.Identity;
 
     protected override void OnLayout(Invalidation dirty)
     {

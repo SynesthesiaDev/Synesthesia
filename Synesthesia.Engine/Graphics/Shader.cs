@@ -9,19 +9,24 @@ using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Util.Exceptions;
 using Synesthesia.Engine.Util.Statistics;
 
+
 namespace Synesthesia.Engine.Graphics;
 
 public class Shader : IDisposable
 {
     private readonly GL gl;
     public readonly uint Program;
+    public readonly string Name;
+    public readonly ShaderKind Kind;
 
     private readonly DenseMap<string, int> uniformCache = new();
 
-    public Shader(GL openGl, string? vertexCode, string? fragmentCode)
+    public Shader(string name, ShaderKind kind, GL openGl, string? vertexCode, string? fragmentCode)
     {
         ThreadSafety.AssertRunningOnRenderThread();
 
+        Name = name;
+        Kind = kind;
         gl = openGl;
 
         if (vertexCode == null && fragmentCode == null) throw new OpenGLException("Cannot have both Vertex and Fragment shaders empty");
@@ -54,6 +59,10 @@ public class Shader : IDisposable
             return cached;
 
         var location = gl.GetUniformLocation(Program, uniform);
+
+        if (location != -1)
+            uniformCache.Insert(uniform, location);
+
         return location != -1 ? location : throw new OpenGLException($"Failed to get shader uniform '{uniform}'");
     }
 
@@ -66,7 +75,7 @@ public class Shader : IDisposable
         gl.GetShader(shader, ShaderParameterName.CompileStatus, out int success);
 
         var shaderId = success == 0 ? throw new OpenGLException($"Shader compilation failed: ({shaderType}): {gl.GetShaderInfoLog(shader)}") : shader;
-        Logger.Verbose($"Compiled {shaderType.ToString().Replace("Shader", string.Empty)} shader with id {shaderId}", Logger.Render);
+        Logger.Verbose($"Compiled {shaderType.ToString().Replace("Shader", string.Empty)} shader '{Name}' with id {shaderId}", Logger.Render);
         return shaderId;
     }
 
@@ -161,6 +170,15 @@ public class Shader : IDisposable
         DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }
 
+    public void SetColor(int location, Color value)
+    {
+        ThreadSafety.AssertRunningOnRenderThread();
+
+        gl.Uniform4(location, value.ToVector());
+        DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
+    }
+
+
     public void SetVector4(string name, Vector4 value)
     {
         var location = GetUniformLocation(name);
@@ -181,6 +199,8 @@ public class Shader : IDisposable
 
     public override string ToString()
     {
-        return $"Shader(program={Program},cacheSize={uniformCache.Size})";
+        return $"Shader(Name={Name}, Program={Program}, CacheSize={uniformCache.Size})";
     }
+
+
 }

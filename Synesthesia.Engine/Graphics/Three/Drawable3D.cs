@@ -2,7 +2,9 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Numerics;
+using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Layout;
+using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util;
 using Synesthesia.Engine.Util.Statistics;
@@ -12,6 +14,9 @@ namespace Synesthesia.Engine.Graphics.Three;
 public abstract class Drawable3D : Drawable
 {
     private Invalidation invalidatedFlags = Invalidation.All;
+
+    [Singleton]
+    protected Renderer3D Renderer = null!;
 
     public float X
     {
@@ -60,7 +65,7 @@ public abstract class Drawable3D : Drawable
             // Parent?.Invalidate(Invalidation.Layout);
             // invalidateChildrenIfComposite(Invalidation.Size | Invalidation.Geometry);
         }
-    } = 0f;
+    } = 1f;
 
     public float Height
     {
@@ -73,7 +78,7 @@ public abstract class Drawable3D : Drawable
             // Parent?.Invalidate(Invalidation.Layout);
             // invalidateChildrenIfComposite(Invalidation.Size | Invalidation.Geometry);
         }
-    } = 0f;
+    } = 1f;
 
     public float Length
     {
@@ -113,7 +118,7 @@ public abstract class Drawable3D : Drawable
     //TODO rotation xyz
 
 
-    public Vector2 Scale
+    public Vector3 Scale
     {
         get;
         set
@@ -122,7 +127,7 @@ public abstract class Drawable3D : Drawable
             field = value;
             Invalidate(Invalidation.Geometry | Invalidation.Size);
         }
-    } = Vector2.One;
+    } = Vector3.One;
 
     public bool Visible {
         get;
@@ -131,7 +136,7 @@ public abstract class Drawable3D : Drawable
             if(field == value) return;
             field = value;
 
-            Invalidate(Invalidation.Size | Invalidation.Layout | Invalidation.Size | Invalidation.CameraView);
+            Invalidate(Invalidation.Layout | Invalidation.Size | Invalidation.CameraView);
         }
 
     } = true;
@@ -146,7 +151,7 @@ public abstract class Drawable3D : Drawable
 
     public bool ShouldBeDrawn => Visible && IsLoaded && Alpha > 0;
 
-    public Vector2 InheritedScale => Parent == null ? Scale : Parent.InheritedScale * Scale;
+    public Vector3 InheritedScale => Parent == null ? Scale : Parent.InheritedScale * Scale;
 
     protected float InheritedAlpha => Alpha * (Parent?.InheritedAlpha ?? 1f);
 
@@ -218,6 +223,7 @@ public abstract class Drawable3D : Drawable
         if (!Visible || InheritedAlpha <= 0.001f || !IsLoaded) return;
 
         updateDrawMatrix();
+        Renderer.Matrix = DrawMatrix.Matrix;
         OnDraw3D();
     }
 

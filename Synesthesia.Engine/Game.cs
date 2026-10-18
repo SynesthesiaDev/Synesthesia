@@ -4,6 +4,7 @@
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Events;
 using Synesthesia.Engine.Graphics.Textures;
+using Synesthesia.Engine.Graphics.Three;
 using Synesthesia.Engine.Graphics.Two.Container;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Logging;
@@ -80,6 +81,7 @@ public class Game
 
 
     private readonly InternalGameContainer2D internalGameContainer2D = new InternalGameContainer2D();
+    private readonly DrawableScene3D drawableScene3D = new DrawableScene3D();
 
     /// <summary>
     /// This is the main 2d scene where you add your drawables.
@@ -95,6 +97,7 @@ public class Game
     /// ];
     /// </code>
     public DrawableScene2D DrawableScene2D => internalGameContainer2D.DrawableScene2D;
+    public DrawableScene3D DrawableScene3D => drawableScene3D;
 
     /// <summary>
     /// Primary game class

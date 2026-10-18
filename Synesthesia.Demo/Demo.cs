@@ -1,6 +1,4 @@
-﻿using Synesthesia.Demo.TopDownPhysics;
-using Synesthesia.Engine;
-using Synesthesia.Engine.Graphics.Layout;
+﻿using Synesthesia.Engine;
 
 namespace Synesthesia.Demo;
 
@@ -11,16 +9,16 @@ internal static class Demo
     {
         var game = new GameBuilder().Build();
 
-        game.OnInitialized.Subscribe(_ =>
-        {
-            game.DrawableScene2D.Children =
-            [
-                new SideScrollerTest
-                {
-                    RelativeSizeAxes = Axes.Both
-                }
-            ];
-        });
+        // game.OnInitialized.Subscribe(_ =>
+        // {
+        //     game.DrawableScene2D.Children =
+        //     [
+        //         new SideScrollerTest
+        //         {
+        //             RelativeSizeAxes = Axes.Both
+        //         }
+        //     ];
+        // });
 
         game.Run();
     }
