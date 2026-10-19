@@ -121,4 +121,9 @@ public class VertexBatch<T> : IDisposable where T : unmanaged, IVertex
         gl.DeleteBuffer(vbo);
         gl.DeleteBuffer(ebo);
     }
+
+    public override string ToString()
+    {
+        return $"VertexBatch(Is2D={is2D}, MaxVertices={maxVertices}, VertexIndex={vertexIndex})";
+    }
 }

@@ -47,6 +47,7 @@ public class RenderThread(GraphicsDevice graphicsDevice) : ThreadRunner
         game.UpdateThread.Schedule(() =>
         {
             game.GetInternalGameContainer().Load();
+            game.DrawableScene3D.Load();
             LoadFuture.Complete(this);
         });
     }

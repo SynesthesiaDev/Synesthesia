@@ -241,7 +241,7 @@ public abstract class Drawable3D : Drawable
         // DrawMatrix.Translate(anchorPos.X + Position.X + Margin.X, anchorPos.Y + Position.Y + Margin.Y, 0);
         DrawMatrix.Translate(X, Y, Z);
 
-        DrawMatrix.Scale(Scale.X, Scale.Y, 1f);
+        DrawMatrix.Scale(Scale.X, Scale.Y, Scale.Z);
         // if (Rotation != 0) DrawMatrix.Rotate(Rotation, 0, 0, 1);
 
         // var originOffset = GetAnchorOffset(Size, Origin);

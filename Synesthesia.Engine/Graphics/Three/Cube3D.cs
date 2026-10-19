@@ -2,13 +2,20 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Numerics;
+using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Layout;
+using Synesthesia.Engine.Graphics.Textures;
+using Synesthesia.Engine.Resources;
 using Synesthesia.Utils.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Three;
 
-public class Box3D : Drawable3D
+public class Cube3D : Drawable3D
 {
+
+    [Singleton]
+    private IResourceStore<Texture> textureStore = null!;
+
     public Color Color
     {
         get;
@@ -34,6 +41,7 @@ public class Box3D : Drawable3D
 
     protected override void OnDraw3D()
     {
+        // Renderer.GraphicsDevice.BindTexture(textureStore.Get("Synesthesia.Resources.Textures.dull_blade.png"));
         var batch = Renderer.VertexBatch;
         var half = Size * 0.5f;
         foreach (var (n, r, u) in faces)

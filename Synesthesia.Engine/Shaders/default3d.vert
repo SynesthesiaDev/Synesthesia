@@ -17,7 +17,7 @@ out vec4 v_color;
 out vec2 v_texCoord;
 
 void main() {
-    vec4 worldProjection = u_transform * vec4(a_position, 1.0);
+    vec4 worldProjection = u_model * vec4(a_position, 1.0);
     gl_Position = u_perspective * worldProjection;
 
     mat3 normalMatrix = transpose(inverse(mat3(u_model)));

@@ -392,7 +392,6 @@ public class CompositeDrawable2D : Drawable2D
         }
     }
 
-
     protected internal void UpdateCursorInputState(ICursorInputEvent e)
     {
         var down = e.IsDown;

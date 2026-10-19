@@ -93,9 +93,9 @@ public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D>
 
         OpenGL.Clear(ClearBufferMask.DepthBufferBit); // confused if I need to clear color buffer
 
-        OpenGL.Enable(EnableCap.CullFace);
-        OpenGL.CullFace(TriangleFace.Back);
-        OpenGL.FrontFace(FrontFaceDirection.CW);
+        OpenGL.Disable(EnableCap.CullFace); //TODO enable culling
+        // OpenGL.CullFace(TriangleFace.Back);
+        // OpenGL.FrontFace(FrontFaceDirection.Ccw);
 
         uploadFrameUniforms();
         LoadIdentity();
@@ -111,6 +111,7 @@ public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D>
 
     public void FlushVertexBatch()
     {
+
         VertexBatch.Flush();
     }
 

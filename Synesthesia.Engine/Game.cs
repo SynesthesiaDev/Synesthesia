@@ -79,9 +79,7 @@ public class Game
 
     public readonly IResourceStore<TextureAtlas> TextureAtlasResourceStore;
 
-
     private readonly InternalGameContainer2D internalGameContainer2D = new InternalGameContainer2D();
-    private readonly DrawableScene3D drawableScene3D = new DrawableScene3D();
 
     /// <summary>
     /// This is the main 2d scene where you add your drawables.
@@ -97,7 +95,7 @@ public class Game
     /// ];
     /// </code>
     public DrawableScene2D DrawableScene2D => internalGameContainer2D.DrawableScene2D;
-    public DrawableScene3D DrawableScene3D => drawableScene3D;
+    public DrawableScene3D DrawableScene3D { get; } = new DrawableScene3D();
 
     /// <summary>
     /// Primary game class
@@ -199,6 +197,7 @@ public class Game
 
             DependencyContainer.AddSingleton(renderThread.GraphicsDevice);
             DependencyContainer.AddSingleton(renderThread.GraphicsDevice.Renderer2D);
+            DependencyContainer.AddSingleton(renderThread.GraphicsDevice.Renderer3D);
             DependencyContainer.AddSingleton(renderThread);
 
             WindowHost.Surface.ReleaseOwnership();
