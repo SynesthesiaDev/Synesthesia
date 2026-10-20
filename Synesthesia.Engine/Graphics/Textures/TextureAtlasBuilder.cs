@@ -8,7 +8,7 @@ using Silk.NET.OpenGL;
 
 namespace Synesthesia.Engine.Graphics.Textures;
 
-public class TextureAtlasBuilder
+public class TextureAtlasBuilder(string Name)
 {
     private int padding = 2;
 
@@ -19,6 +19,7 @@ public class TextureAtlasBuilder
         public readonly int Height = height;
         public readonly byte[] RgbaData = rgbaData;
     }
+
 
     private readonly List<PendingItem> pendingItems = [];
 
@@ -60,7 +61,7 @@ public class TextureAtlasBuilder
         }
 
         var textureData = new TextureData(atlasWidth, atlasHeight, atlasData, PixelFormat.Rgba);
-        var texture = new Texture(textureData, uploadImmediately: true);
+        var texture = new Texture($"_atlas_{Name}", textureData, uploadImmediately: true);
 
         foreach (var rect in rectangles)
         {
@@ -76,7 +77,7 @@ public class TextureAtlasBuilder
             regionMapping[item.Id] = new TextureRegion(uv, new Vector2(item.Width, item.Height));
         }
 
-        return new TextureAtlas(atlasWidth, atlasHeight, texture, regionMapping);
+        return new TextureAtlas(Name, atlasWidth, atlasHeight, texture, regionMapping);
     }
 
     private static void blit(byte[] src, int sw, int sh, byte[] dst, int dx, int dy, int dw)

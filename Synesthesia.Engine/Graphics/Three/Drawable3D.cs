@@ -141,11 +141,32 @@ public abstract class Drawable3D : Drawable
 
     } = true;
 
+    public Quaternion RawRotation
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            Invalidate(Invalidation.Layout | Invalidation.Geometry);
+        }
+    }
+
+    public Vector3 Rotation // or manage in Cube3D
+    {
+        get;
+        set
+        {
+            field = value;
+            RawRotation = Quaternion.CreateFromYawPitchRoll(value.X, value.Y, value.Z);
+        }
+    }
+
     public Drawable3D? Parent
     {
         get;
         set;
-    } = null;
+    }
 
     public bool IsLoaded => LoadState >= DrawableLoadState.Loaded;
 
@@ -242,6 +263,7 @@ public abstract class Drawable3D : Drawable
         DrawMatrix.Translate(X, Y, Z);
 
         DrawMatrix.Scale(Scale.X, Scale.Y, Scale.Z);
+        DrawMatrix.Rotate(RawRotation);
         // if (Rotation != 0) DrawMatrix.Rotate(Rotation, 0, 0, 1);
 
         // var originOffset = GetAnchorOffset(Size, Origin);

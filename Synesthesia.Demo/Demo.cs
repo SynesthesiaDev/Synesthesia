@@ -13,7 +13,7 @@ internal static class Demo
         var game = new GameBuilder().Build();
         var camera = new Camera
         {
-            Position = new Vector3(2, 0, 5)
+            Position = new Vector3(2, 0, 8)
         };
 
         game.OnInitialized.Subscribe(_ =>
@@ -24,13 +24,7 @@ internal static class Demo
                 new Cube3D
                 {
                     Size = new Vector3(1, 1, 1),
-                    Color = Color.Red,
-                },
-                new Cube3D
-                {
-                    Position = new Vector3(0, 1, 0),
-                    Size = new Vector3(1, 1, 1),
-                    Color = Color.Green
+                    Color = Color.White,
                 }
             ];
 

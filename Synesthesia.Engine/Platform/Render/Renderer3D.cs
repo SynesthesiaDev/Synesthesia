@@ -9,8 +9,7 @@ using Synesthesia.Engine.Util;
 
 namespace Synesthesia.Engine.Platform.Render;
 
-public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D>
-{
+public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D> {
     public VertexBatch<Vertex3D> VertexBatch { get; } = new VertexBatch<Vertex3D>(graphicsDevice.OpenGL, is2D: false);
     public GL OpenGL { get; } = graphicsDevice.OpenGL;
 
@@ -91,11 +90,11 @@ public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D>
         OpenGL.Enable(EnableCap.DepthTest);
         OpenGL.DepthFunc(DepthFunction.Less); //TODO or equal... figure out which better
 
-        OpenGL.Clear(ClearBufferMask.DepthBufferBit); // confused if I need to clear color buffer
+        OpenGL.Clear(ClearBufferMask.DepthBufferBit);
 
-        OpenGL.Disable(EnableCap.CullFace); //TODO enable culling
-        // OpenGL.CullFace(TriangleFace.Back);
-        // OpenGL.FrontFace(FrontFaceDirection.Ccw);
+        OpenGL.Enable(EnableCap.CullFace);
+        OpenGL.CullFace(TriangleFace.Back);
+        OpenGL.FrontFace(FrontFaceDirection.Ccw);
 
         uploadFrameUniforms();
         LoadIdentity();
@@ -111,7 +110,6 @@ public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D>
 
     public void FlushVertexBatch()
     {
-
         VertexBatch.Flush();
     }
 

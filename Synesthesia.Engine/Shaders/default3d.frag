@@ -11,6 +11,7 @@ uniform vec4 u_lightColor;
 uniform float u_ambientLight;
 uniform sampler2D u_texture;
 uniform int u_useTexture;
+uniform int u_tint;
 
 out vec4 FragColor;
 

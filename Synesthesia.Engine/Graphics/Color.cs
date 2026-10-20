@@ -45,6 +45,9 @@ public readonly struct Color : IEquatable<Color>
     //abgr in memory (Little Endian) for shaders
     public uint ToRgba32()
     {
+        if (this == White) return WhitePacked;
+        if (this == Black) return BlackPacked;
+
         uint r = (uint)(Math.Clamp(R, 0, 1) * 255);
         uint g = (uint)(Math.Clamp(G, 0, 1) * 255);
         uint b = (uint)(Math.Clamp(B, 0, 1) * 255);
@@ -257,4 +260,6 @@ public readonly struct Color : IEquatable<Color>
     {
         return $"Color({R}, {G}, {B}, {A})";
     }
+
+    public string ToStringRaw() => string.Create(CultureInfo.InvariantCulture, $"{R}, {G}, {B}, {A}");
 }

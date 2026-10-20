@@ -46,6 +46,15 @@ public class DrawMatrix : IPooledObject, IEquatable<DrawMatrix>
         InverseMatrix *= Matrix4x4.CreateFromAxisAngle(axis, -rads);
     }
 
+    public void Rotate(Quaternion quaternion)
+    {
+        var rotationMatrix = Matrix4x4.CreateFromQuaternion(quaternion);
+        Matrix = rotationMatrix * Matrix; // Change to left-multiplication
+
+        var inverse = Matrix4x4.CreateFromQuaternion(Quaternion.Inverse(quaternion));
+        InverseMatrix = inverse * InverseMatrix;
+    }
+
     public void RotateAround(Vector2 pivot, float degrees)
     {
         Translate(-pivot.X, -pivot.Y, 0);

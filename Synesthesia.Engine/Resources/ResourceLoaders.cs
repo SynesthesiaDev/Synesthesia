@@ -6,6 +6,7 @@ using Silk.NET.OpenGL;
 using StbImageSharp;
 using Synesthesia.Engine.Extensions;
 using Synesthesia.Engine.Graphics.Textures;
+using StringUtil = Synesthesia.Engine.Util.StringUtil;
 using Texture = Synesthesia.Engine.Graphics.Textures.Texture;
 
 namespace Synesthesia.Engine.Resources;
@@ -15,16 +16,16 @@ public static class ResourceLoaders
     public const string TEXTURE_ATLAS_FILE_EXT = "txa";
     public const string FONT_ATLAS_FILE_EXT = "fna";
 
-    public static Texture LoadTexture(Stream stream, bool uploadImmediately = false)
+    public static Texture LoadTexture(Stream stream, string name, bool uploadImmediately = false)
     {
         var image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
         var textureData = new TextureData(image.Width, image.Height, image.Data, PixelFormat.Rgba);
-        return new Texture(textureData, uploadImmediately);
+        return new Texture(StringUtil.FileName(name), textureData, uploadImmediately);
     }
 
     public static TextureAtlas LoadFromTextureAtlasFile(Stream stream) => TextureAtlas.BINARY_CODEC.Read(stream.ToByteBuffer());
 
-    public static Font LoadFontFromAtlas(Stream stream, string _)
+    public static Font LoadFontFromAtlas(Stream stream, string name)
     {
         var font = Font.BINARY_CODEC.Read(stream.ToByteBuffer());
         return font;
@@ -51,7 +52,7 @@ public static class ResourceLoaders
 
                 var face = new FreeTypeFaceFacade(library, facePtr);
 
-                var atlas = FontAtlas.Generate(face);
+                var atlas = FontAtlas.Generate($"atlas_{StringUtil.FileName(name)}", face);
                 library.Dispose();
 
                 return new Font(64, atlas);

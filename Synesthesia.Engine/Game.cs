@@ -134,9 +134,9 @@ public class Game
         TextureResourceStore = new ResourceStoreBuilder<Texture>()
             .AddLoaders(new Dictionary<string, Func<Stream, string, Texture>>(StringComparer.Ordinal)
             {
-                { "png", (stream, _) => ResourceLoaders.LoadTexture(stream) },
-                { "bmp", (stream, _) => ResourceLoaders.LoadTexture(stream) },
-                { "jpg", (stream, _) => ResourceLoaders.LoadTexture(stream) },
+                { "png", (stream, name) => ResourceLoaders.LoadTexture(stream, name) },
+                { "bmp", (stream, name) => ResourceLoaders.LoadTexture(stream, name) },
+                { "jpg", (stream, name) => ResourceLoaders.LoadTexture(stream, name) },
             })
             .AddFallback(fallback =>
             {

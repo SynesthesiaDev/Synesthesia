@@ -41,7 +41,7 @@ public class Cube3D : Drawable3D
 
     protected override void OnDraw3D()
     {
-        // Renderer.GraphicsDevice.BindTexture(textureStore.Get("Synesthesia.Resources.Textures.dull_blade.png"));
+        Renderer.GraphicsDevice.BindTexture(textureStore.Get("Synesthesia.Resources.Textures.cat.png"));
         var batch = Renderer.VertexBatch;
         var half = Size * 0.5f;
         foreach (var (n, r, u) in faces)
