@@ -4,6 +4,7 @@
 using System.Numerics;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Layout;
+using Synesthesia.Engine.Graphics.Materials;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Resources;
 using Synesthesia.Utils.Extensions;
@@ -26,6 +27,8 @@ public class Cube3D : Drawable3D
             Invalidate(Invalidation.DrawNode);
         }
     } = Color.White;
+
+    public Material Material;
 
     private uint packedColor;
 

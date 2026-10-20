@@ -5,6 +5,7 @@ using System.Numerics;
 using Silk.NET.OpenGL;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Three;
+using Synesthesia.Engine.Shaders;
 using Synesthesia.Engine.Util;
 
 namespace Synesthesia.Engine.Platform.Render;
@@ -84,7 +85,7 @@ public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D> {
     public void BeginDrawing()
     {
         //TODO invalidation
-        GraphicsDevice.BindShader(GraphicsDevice.DefaultShader3D);
+        GraphicsDevice.BindShader(BuiltInShaders.DefaultShader3D);
         updatePerspective();
 
         OpenGL.Enable(EnableCap.DepthTest);
@@ -126,7 +127,6 @@ public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D> {
 
     public void CacheUniformLocations()
     {
-
         var shader = GraphicsDevice.CurrentShader;
         modelShaderLocation = shader.GetUniformLocation("u_model");
         viewProjShaderLocation = shader.GetUniformLocation("u_perspective");

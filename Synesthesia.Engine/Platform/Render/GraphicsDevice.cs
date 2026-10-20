@@ -35,9 +35,6 @@ public class GraphicsDevice
     private int stencilDepthStack;
 
     public Shader CurrentShader { get; private set; } = null!;
-    public Shader DefaultShader2D = null!;
-    public Shader StencilShader2D = null!;
-    public Shader DefaultShader3D = null!;
 
     public int TextureShaderLocation;
     public int UseTextureShaderLocation;
@@ -106,12 +103,13 @@ public class GraphicsDevice
 
     public void CompileDefaultShaders()
     {
-        DefaultShader2D = new Shader("Default 2D", ShaderKind.Two, OpenGL, ShaderSources.Default2dVertex, ShaderSources.Default2dFragment);
-        StencilShader2D = new Shader("Stencil 2D", ShaderKind.Two, OpenGL, ShaderSources.Default2dVertex, ShaderSources.Stencil2dFragment);
+        BuiltInShaders.Initialize(this);
+        // DefaultShader2D = new Shader("Default 2D", ShaderKind.Two, OpenGL, ShaderSources.Default2dVertex, ShaderSources.Default2dFragment);
+        // StencilShader2D = new Shader("Stencil 2D", ShaderKind.Two, OpenGL, ShaderSources.Default2dVertex, ShaderSources.Stencil2dFragment);
 
-        DefaultShader3D = new Shader("Default 3D", ShaderKind.Three, OpenGL, ShaderSources.Default3dVertex, ShaderSources.Default3dFragment);
+        // DefaultShader3D = new Shader("Default 3D", ShaderKind.Three, OpenGL, ShaderSources.Default3dVertex, ShaderSources.Default3dFragment);
 
-        BindShader(DefaultShader2D);
+        BindShader(BuiltInShaders.DefaultShader2D);
     }
 
     public void FlushAllVertexBuffers()
@@ -157,7 +155,7 @@ public class GraphicsDevice
     public void UnbindShader()
     {
         ThreadSafety.AssertRunningOnRenderThread();
-        BindShader(DefaultShader2D);
+        BindShader(BuiltInShaders.DefaultShader2D);
 
         Renderer2D.UpdateShaderMatrix();
     }
@@ -314,7 +312,7 @@ public class GraphicsDevice
         OpenGL.StencilFunc(StencilFunction.Equal, stencilDepthStack - 1, 0xFF);
         OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr);
 
-        BindShader(StencilShader2D);
+        BindShader(BuiltInShaders.StencilShader2D);
     }
 
     public void EndStencilMask()
@@ -353,6 +351,6 @@ public class GraphicsDevice
         OpenGL.StencilFunc(StencilFunction.Equal, stencilDepthStack, 0xFF);
         OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Decr);
 
-        BindShader(StencilShader2D);
+        BindShader(BuiltInShaders.StencilShader2D);
     }
 }

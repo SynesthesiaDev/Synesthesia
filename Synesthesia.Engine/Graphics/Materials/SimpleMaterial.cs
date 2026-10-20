@@ -46,7 +46,7 @@ public sealed class SimpleMaterial(string name) : Material
 
     public static SimpleMaterial From(Texture texture) => new SimpleMaterial(texture.ResourceName) { Texture = texture };
     public static SimpleMaterial From(Texture texture, Color tint) => new SimpleMaterial(texture.ResourceName) { Texture = texture, Tint = tint };
-    public static SimpleMaterial From(Color tint) => new SimpleMaterial($"_colorMaterial${tint.ToStringRaw()}") { Tint = tint };
+    public static SimpleMaterial From(Color tint) => new SimpleMaterial($"_color{tint.ToStringRaw()}") { Tint = tint };
 
     public static SimpleMaterial From(string name, Texture texture) => new SimpleMaterial(name) { Texture = texture };
     public static SimpleMaterial From(string name, Texture texture, Color tint) => new SimpleMaterial(name) { Texture = texture, Tint = tint };
