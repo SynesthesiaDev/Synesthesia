@@ -12,7 +12,7 @@ public interface IRenderer<T> where T : unmanaged, IVertex
     void FlushVertexBatch();
 
     void UpdateShaderMatrix();
-    void CacheUniformLocations();
+    void CacheGlobalUniformLocations();
 
     VertexBatch<T> VertexBatch { get; }
 }

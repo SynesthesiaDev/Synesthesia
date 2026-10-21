@@ -3,6 +3,7 @@
 
 using System.Reflection;
 using Synesthesia.Engine.Graphics.Textures;
+using Synesthesia.Engine.Graphics.Three;
 using Synesthesia.Engine.Platform.Host;
 using Synesthesia.Engine.Resources.Stores;
 
@@ -14,6 +15,7 @@ public class GameBuilder
     private Action<FallbackStoreBuilder<Texture>>? textureResourceStoreInitializer;
     private Action<FallbackStoreBuilder<TextureAtlas>>? textureAtlasResourceStoreInitializer;
     private Action<FallbackStoreBuilder<Font>>? fontResourceStoreInitializer;
+    private Action<FallbackStoreBuilder<Mesh>>? meshResourceStoreInitializer;
     private IWindowHost windowHost = new SDL3WindowHost();
 
     public GameBuilder AddTextureSources(Action<FallbackStoreBuilder<Texture>> action)
@@ -48,6 +50,6 @@ public class GameBuilder
 
     public Game Build()
     {
-        return new Game(windowHost, textureResourceStoreInitializer, textureAtlasResourceStoreInitializer, fontResourceStoreInitializer, windowName);
+        return new Game(windowHost, textureResourceStoreInitializer, meshResourceStoreInitializer, textureAtlasResourceStoreInitializer, fontResourceStoreInitializer, windowName);
     }
 }

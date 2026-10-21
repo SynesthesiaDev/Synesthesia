@@ -2,10 +2,11 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using Synesthesia.Engine.Logging;
+using Synesthesia.Engine.Platform.Render;
 
 namespace Synesthesia.Engine.Resources.Stores;
 
-public class FallbackResourceStore<T>(IList<IResourceStore<T>> resourceStores) : IResourceStore<T>
+public class FallbackResourceStore<T>(IList<IResourceStore<T>> resourceStores) : IResourceStore<T>, IResolvesGraphicsDeferred
 {
     public FallbackResourceStore(IEnumerable<IResourceStore<T>> stores) : this(stores.ToList())
     {
@@ -35,12 +36,19 @@ public class FallbackResourceStore<T>(IList<IResourceStore<T>> resourceStores) :
 
     public IEnumerable<string> List(string prefix = "") => resourceStores.SelectMany(s => s.List(prefix)).Distinct(StringComparer.Ordinal);
 
-
     public void Dispose()
     {
         foreach (var resourceStore in resourceStores.AsEnumerable())
         {
             resourceStore.Dispose();
+        }
+    }
+
+    public void ResolveGraphicsDeferred(GraphicsDevice graphicsDevice)
+    {
+        foreach (var store in resourceStores)
+        {
+            if(store is IResolvesGraphicsDeferred resolvable) resolvable.ResolveGraphicsDeferred(graphicsDevice);
         }
     }
 }

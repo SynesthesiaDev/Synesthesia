@@ -8,7 +8,7 @@ using Synesthesia.Engine.Shaders;
 
 namespace Synesthesia.Engine.Graphics.Materials;
 
-public sealed class SimpleMaterial(string name) : Material
+public sealed class DefaultMaterial(string name) : Material
 {
     private const string tint_uniform_name = "u_tint";
 
@@ -44,13 +44,13 @@ public sealed class SimpleMaterial(string name) : Material
 
     protected override int ComputeBatchKey() => HashCode.Combine(base.ComputeBatchKey(), Texture?.Handle ?? 0, cachedTintVector);
 
-    public static SimpleMaterial From(Texture texture) => new SimpleMaterial(texture.ResourceName) { Texture = texture };
-    public static SimpleMaterial From(Texture texture, Color tint) => new SimpleMaterial(texture.ResourceName) { Texture = texture, Tint = tint };
-    public static SimpleMaterial From(Color tint) => new SimpleMaterial($"_color{tint.ToStringRaw()}") { Tint = tint };
+    public static DefaultMaterial From(Texture texture) => new DefaultMaterial(texture.ResourceName) { Texture = texture };
+    public static DefaultMaterial From(Texture texture, Color tint) => new DefaultMaterial(texture.ResourceName) { Texture = texture, Tint = tint };
+    public static DefaultMaterial From(Color tint) => new DefaultMaterial($"_color{tint.ToStringRaw()}") { Tint = tint };
 
-    public static SimpleMaterial From(string name, Texture texture) => new SimpleMaterial(name) { Texture = texture };
-    public static SimpleMaterial From(string name, Texture texture, Color tint) => new SimpleMaterial(name) { Texture = texture, Tint = tint };
-    public static SimpleMaterial From(string name, Color tint) => new SimpleMaterial(name) { Tint = tint };
+    public static DefaultMaterial From(string name, Texture texture) => new DefaultMaterial(name) { Texture = texture };
+    public static DefaultMaterial From(string name, Texture texture, Color tint) => new DefaultMaterial(name) { Texture = texture, Tint = tint };
+    public static DefaultMaterial From(string name, Color tint) => new DefaultMaterial(name) { Tint = tint };
 
     protected override void OnDispose()
     {

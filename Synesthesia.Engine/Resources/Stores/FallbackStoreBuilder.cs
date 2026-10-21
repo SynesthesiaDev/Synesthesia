@@ -9,6 +9,15 @@ public class FallbackStoreBuilder<T>(IDictionary<string, Func<Stream, string, T>
 {
     private readonly List<IResourceStore<T>> resourceStores = [];
 
+    public FallbackStoreBuilder<T> AddBuiltIn(Action<BuiltInResourceStoreBuilder<T>> action)
+    {
+        var builder = new BuiltInResourceStoreBuilder<T>();
+        action.Invoke(builder);
+
+        resourceStores.Add(builder.Build());
+        return this;
+    }
+
     public FallbackStoreBuilder<T> AddFileSystemStore(string path)
     {
         resourceStores.Add(new FileSystemResourceStore<T>(path, resourceLoaders));

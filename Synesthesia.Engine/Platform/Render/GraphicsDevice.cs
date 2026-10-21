@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using SDL3;
 using Silk.NET.OpenGL;
 using Synesthesia.Engine.Graphics;
+using Synesthesia.Engine.Graphics.Materials;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Shaders;
@@ -93,6 +94,8 @@ public class GraphicsDevice
         private set;
     } = null!;
 
+    public DefaultMaterial DefaultMaterial = null!;
+
     public bool CanDraw => BackBufferWidth > 0 && BackBufferHeight > 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,10 +107,8 @@ public class GraphicsDevice
     public void CompileDefaultShaders()
     {
         BuiltInShaders.Initialize(this);
-        // DefaultShader2D = new Shader("Default 2D", ShaderKind.Two, OpenGL, ShaderSources.Default2dVertex, ShaderSources.Default2dFragment);
-        // StencilShader2D = new Shader("Stencil 2D", ShaderKind.Two, OpenGL, ShaderSources.Default2dVertex, ShaderSources.Stencil2dFragment);
-
-        // DefaultShader3D = new Shader("Default 3D", ShaderKind.Three, OpenGL, ShaderSources.Default3dVertex, ShaderSources.Default3dFragment);
+        DefaultMaterial = DefaultMaterial.From("Default Material", Color.White);
+        DefaultMaterial.CacheUniformLocations();
 
         BindShader(BuiltInShaders.DefaultShader2D);
     }
@@ -167,9 +168,16 @@ public class GraphicsDevice
 
 
         if (CurrentShader.Kind == ShaderKind.Two)
-            Renderer2D.CacheUniformLocations();
+            Renderer2D.CacheGlobalUniformLocations();
         else
-            Renderer3D.CacheUniformLocations();
+            Renderer3D.CacheGlobalUniformLocations();
+    }
+
+    public void BindMaterial(Material? material)
+    {
+        material ??= DefaultMaterial;
+        material.CacheUniformLocations();
+        material.Bind(this);
     }
 
     public void BindTexture(Texture? texture, TextureFilterMode mode = TextureFilterMode.Linear)

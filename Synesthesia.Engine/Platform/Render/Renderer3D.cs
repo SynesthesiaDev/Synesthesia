@@ -33,6 +33,7 @@ public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D> {
     public Color LightColor { get; set; } = Color.White;
     public float AmbientLight { get; set; } = 0.2f;
 
+
     public Matrix4x4 Matrix
     {
         get;
@@ -86,6 +87,7 @@ public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D> {
     {
         //TODO invalidation
         GraphicsDevice.BindShader(BuiltInShaders.DefaultShader3D);
+
         updatePerspective();
 
         OpenGL.Enable(EnableCap.DepthTest);
@@ -97,7 +99,7 @@ public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D> {
         OpenGL.CullFace(TriangleFace.Back);
         OpenGL.FrontFace(FrontFaceDirection.Ccw);
 
-        uploadFrameUniforms();
+        uploadGlobalFrameUniforms();
         LoadIdentity();
     }
 
@@ -125,7 +127,7 @@ public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D> {
         Matrix = Matrix4x4.Identity;
     }
 
-    public void CacheUniformLocations()
+    public void CacheGlobalUniformLocations()
     {
         var shader = GraphicsDevice.CurrentShader;
         modelShaderLocation = shader.GetUniformLocation("u_model");
@@ -135,7 +137,7 @@ public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D> {
         ambientShaderLocation = shader.GetUniformLocation("u_ambientLight");
     }
 
-    private void uploadFrameUniforms()
+    private void uploadGlobalFrameUniforms()
     {
         var view = Camera?.ViewMatrix ?? Matrix4x4.Identity;
         var viewProjection = view * perspectiveMatrix;

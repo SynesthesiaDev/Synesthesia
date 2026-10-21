@@ -201,7 +201,7 @@ public class Renderer2D(GraphicsDevice graphicsDevice) : IRenderer<Vertex2D>
         UpdateShaderMatrix();
     }
 
-    public void CacheUniformLocations()
+    public void CacheGlobalUniformLocations()
     {
         transformMatrixShaderLocation = GraphicsDevice.CurrentShader.GetUniformLocation(shader_uniform_transform_matrix);
     }

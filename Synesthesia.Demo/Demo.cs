@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using Synesthesia.Engine;
 using Synesthesia.Engine.Graphics;
+using Synesthesia.Engine.Graphics.Materials;
 using Synesthesia.Engine.Graphics.Three;
 
 namespace Synesthesia.Demo;
@@ -18,6 +19,7 @@ internal static class Demo
 
         game.OnInitialized.Subscribe(_ =>
         {
+            var catto = DefaultMaterial.From(game.TextureResourceStore.Get("Synesthesia.Resources.Textures.cat.png"), Color.Orange);
             game.DrawableScene3D.Children =
             [
                 camera,
@@ -25,6 +27,7 @@ internal static class Demo
                 {
                     Size = new Vector3(1, 1, 1),
                     Color = Color.White,
+                    Material = catto
                 }
             ];
 

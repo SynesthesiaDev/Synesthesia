@@ -97,6 +97,8 @@ public class Game
     public DrawableScene2D DrawableScene2D => internalGameContainer2D.DrawableScene2D;
     public DrawableScene3D DrawableScene3D { get; } = new DrawableScene3D();
 
+    public readonly IResourceStore<Mesh> MeshResourceStore;
+
     /// <summary>
     /// Primary game class
     /// </summary>
@@ -108,6 +110,7 @@ public class Game
     public Game(
         IWindowHost gameWindowHost,
         Action<FallbackStoreBuilder<Texture>>? textureResourceStoreInitializer,
+        Action<FallbackStoreBuilder<Mesh>>? meshResourceStoreInitializer,
         Action<FallbackStoreBuilder<TextureAtlas>>? textureAtlasResourceStoreInitializer,
         Action<FallbackStoreBuilder<Font>>? fontResourceStoreInitializer,
         string windowName
@@ -125,6 +128,23 @@ public class Game
                 fallback.AddFileSystemStore("Assets/Fonts/");
                 fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);
                 fontResourceStoreInitializer?.Invoke(fallback);
+            })
+            .MakeCached()
+            .MakeAsync()
+            .MakeDeferred()
+            .Build();
+
+        MeshResourceStore = new ResourceStoreBuilder<Mesh>()
+            .AddLoaders(new Dictionary<string, Func<Stream, string, Mesh>>(StringComparer.Ordinal))
+            .AddFallback(fallback =>
+            {
+                fallback.AddBuiltIn(builder =>
+                {
+                    builder.AddGraphicsDeferred("default_cube", Cube3D.CreateSharedMesh);
+                });
+                fallback.AddFileSystemStore("Assets/Meshes/");
+                fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);
+                meshResourceStoreInitializer?.Invoke(fallback);
             })
             .MakeCached()
             .MakeAsync()
@@ -171,6 +191,7 @@ public class Game
         DependencyContainer.AddSingleton(this);
         DependencyContainer.AddSingleton(FontResourceStore);
         DependencyContainer.AddSingleton(TextureResourceStore);
+        DependencyContainer.AddSingleton(MeshResourceStore);
         DependencyContainer.AddSingleton(InputHandler);
         DependencyContainer.AddSingleton(InputThread);
         DependencyContainer.AddSingleton(WindowHost);

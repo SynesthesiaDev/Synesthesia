@@ -5,7 +5,7 @@ using System.Numerics;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Materials;
-using Synesthesia.Engine.Graphics.Textures;
+using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Resources;
 using Synesthesia.Utils.Extensions;
 
@@ -13,9 +13,8 @@ namespace Synesthesia.Engine.Graphics.Three;
 
 public class Cube3D : Drawable3D
 {
-
     [Singleton]
-    private IResourceStore<Texture> textureStore = null!;
+    private IResourceStore<Mesh> meshStore = null!;
 
     public Color Color
     {
@@ -28,7 +27,7 @@ public class Cube3D : Drawable3D
         }
     } = Color.White;
 
-    public Material Material;
+    public Material? Material { get; set; }
 
     private uint packedColor;
 
@@ -44,16 +43,17 @@ public class Cube3D : Drawable3D
 
     protected override void OnDraw3D()
     {
-        Renderer.GraphicsDevice.BindTexture(textureStore.Get("Synesthesia.Resources.Textures.cat.png"));
-        var batch = Renderer.VertexBatch;
-        var half = Size * 0.5f;
-        foreach (var (n, r, u) in faces)
-        {
-            batch.PushVertex(new Vertex3D((n - r - u) * half, n, r, packedColor, new Vector2(0, 1)));
-            batch.PushVertex(new Vertex3D((n + r - u) * half, n, r, packedColor, new Vector2(1, 1)));
-            batch.PushVertex(new Vertex3D((n + r + u) * half, n, r, packedColor, new Vector2(1, 0)));
-            batch.PushVertex(new Vertex3D((n - r + u) * half, n, r, packedColor, new Vector2(0, 0)));
-        }
+
+        Renderer.GraphicsDevice.BindMaterial(Material);
+        mesh?.Draw();
+    }
+
+    private Mesh? mesh;
+
+    protected override void OnLoading()
+    {
+        mesh = meshStore.Get("default_cube");
+        base.OnLoading();
     }
 
     protected override void OnLayout(Invalidation dirty)
@@ -64,5 +64,40 @@ public class Cube3D : Drawable3D
         {
             packedColor = Color.ToRgba32();
         }
+    }
+
+    public static Mesh CreateSharedMesh(GraphicsDevice graphics)
+    {
+        Vector3[] faceNormals =
+        [
+            new(0, 0, 1), new(0, 0, -1),
+            new(1, 0, 0), new(-1, 0, 0),
+            new(0, 1, 0), new(0, -1, 0),
+        ];
+
+        var vertices = new List<Vertex3D>(24);
+        var indices = new List<uint>(36);
+
+        foreach (var n in faceNormals)
+        {
+            var t = Vector3.Cross(n, Vector3.UnitY);
+            if (t.LengthSquared() < 0.001f) t = Vector3.Cross(n, Vector3.UnitX);
+            t = Vector3.Normalize(t);
+            var b = Vector3.Cross(n, t);
+
+            int baseIndex = vertices.Count;
+            vertices.Add(new Vertex3D(n - t - b,  n, t, 0xFFFFFFFF, new Vector2(0, 1)));
+            vertices.Add(new Vertex3D(n + t - b,  n, t, 0xFFFFFFFF, new Vector2(1, 1)));
+            vertices.Add(new Vertex3D(n + t + b,  n, t, 0xFFFFFFFF, new Vector2(1, 0)));
+            vertices.Add(new Vertex3D(n - t + b,  n, t, 0xFFFFFFFF, new Vector2(0, 0)));
+
+            // CCW
+            indices.AddRange([
+                (uint)(baseIndex + 0), (uint)(baseIndex + 1), (uint)(baseIndex + 2),
+                (uint)(baseIndex + 0), (uint)(baseIndex + 2), (uint)(baseIndex + 3)
+            ]);
+        }
+
+        return new Mesh("default_cube", graphics, [.. vertices], [.. indices]);
     }
 }
