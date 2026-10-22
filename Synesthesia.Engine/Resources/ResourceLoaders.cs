@@ -18,6 +18,8 @@ public static class ResourceLoaders
 
     public static Texture LoadTexture(Stream stream, string name, bool uploadImmediately = false)
     {
+        StbImage.stbi_set_flip_vertically_on_load(1);
+
         var image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
         var textureData = new TextureData(image.Width, image.Height, image.Data, PixelFormat.Rgba);
         return new Texture(StringUtil.FileName(name), textureData, uploadImmediately);

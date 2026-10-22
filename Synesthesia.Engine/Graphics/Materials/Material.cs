@@ -19,6 +19,8 @@ public abstract class Material : INamedResource
 
     protected abstract string Stringify();
 
+    public bool UniformLocationsCached { get; set; }
+
     public abstract void Bind(GraphicsDevice graphicsDevice);
     public abstract void CacheUniformLocations();
     protected abstract void OnDispose();
@@ -27,6 +29,11 @@ public abstract class Material : INamedResource
     private bool  batchKeyDirty = true;
 
     protected void InvalidateBatchKey() => batchKeyDirty = true;
+
+    public void Initialize()
+    {
+        CacheUniformLocations();
+    }
 
     public int GetBatchKey()
     {

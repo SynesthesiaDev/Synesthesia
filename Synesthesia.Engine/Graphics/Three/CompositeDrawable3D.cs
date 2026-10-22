@@ -123,7 +123,7 @@ public class CompositeDrawable3D : Drawable3D
         base.OnUpdate(frameInfo);
     }
 
-    protected override void OnDraw3D()
+    protected override void Collect(RenderQueue renderQueue)
     {
         Snapshot<Drawable3D> snapshot;
 

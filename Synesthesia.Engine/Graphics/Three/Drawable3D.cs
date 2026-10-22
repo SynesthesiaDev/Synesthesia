@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Platform.Render;
@@ -62,8 +63,8 @@ public abstract class Drawable3D : Drawable
             if (Precision.IsSame(field, value)) return;
             field = value;
             Invalidate(Invalidation.Geometry | Invalidation.Layout | Invalidation.Size);
-            // Parent?.Invalidate(Invalidation.Layout);
-            // invalidateChildrenIfComposite(Invalidation.Size | Invalidation.Geometry);
+            Parent?.Invalidate(Invalidation.Layout);
+            invalidateChildrenIfComposite(Invalidation.Size | Invalidation.Geometry);
         }
     } = 1f;
 
@@ -75,8 +76,8 @@ public abstract class Drawable3D : Drawable
             if (Precision.IsSame(field, value)) return;
             field = value;
             Invalidate(Invalidation.Geometry | Invalidation.Layout | Invalidation.Size);
-            // Parent?.Invalidate(Invalidation.Layout);
-            // invalidateChildrenIfComposite(Invalidation.Size | Invalidation.Geometry);
+            Parent?.Invalidate(Invalidation.Layout);
+            invalidateChildrenIfComposite(Invalidation.Size | Invalidation.Geometry);
         }
     } = 1f;
 
@@ -88,10 +89,10 @@ public abstract class Drawable3D : Drawable
             if (Precision.IsSame(field, value)) return;
             field = value;
             Invalidate(Invalidation.Geometry | Invalidation.Layout | Invalidation.Size);
-            // Parent?.Invalidate(Invalidation.Layout);
-            // invalidateChildrenIfComposite(Invalidation.Size | Invalidation.Geometry);
+            Parent?.Invalidate(Invalidation.Layout);
+            invalidateChildrenIfComposite(Invalidation.Size | Invalidation.Geometry);
         }
-    } = 0f;
+    } = 1f;
 
     public Vector3 Size
     {
@@ -115,9 +116,6 @@ public abstract class Drawable3D : Drawable
         }
     }
 
-    //TODO rotation xyz
-
-
     public Vector3 Scale
     {
         get;
@@ -129,16 +127,16 @@ public abstract class Drawable3D : Drawable
         }
     } = Vector3.One;
 
-    public bool Visible {
+    public bool Visible
+    {
         get;
         set
         {
-            if(field == value) return;
+            if (field == value) return;
             field = value;
 
             Invalidate(Invalidation.Layout | Invalidation.Size | Invalidation.CameraView);
         }
-
     } = true;
 
     public Quaternion RawRotation
@@ -152,7 +150,7 @@ public abstract class Drawable3D : Drawable
         }
     }
 
-    public Vector3 Rotation // or manage in Cube3D
+    public Vector3 Rotation
     {
         get;
         set
@@ -184,19 +182,19 @@ public abstract class Drawable3D : Drawable
         invalidatedFlags |= flags;
         DrawStatistics.Increment(DrawStatistics.Type.Invalidations);
 
-        // if ((flags & Invalidation.Geometry) != Invalidation.None)
-        // {
-        // if (this is CompositeDrawable2D composite)
-        // {
-        // for (int i = 0; i < composite.InternalChildren.Count; i++)
-        // composite.InternalChildren[i].Invalidate(Invalidation.Geometry);
-        // }
-        // }
+        if ((flags & Invalidation.Geometry) != Invalidation.None)
+        {
+            if (this is CompositeDrawable3D composite)
+            {
+                for (int i = 0; i < composite.InternalChildren.Count; i++)
+                    composite.InternalChildren[i].Invalidate(Invalidation.Geometry);
+            }
+        }
 
-        // if ((flags & Invalidation.Size) != Invalidation.None)
-        // {
-        // Parent?.Invalidate(Invalidation.Size);
-        // }
+        if ((flags & Invalidation.Size) != Invalidation.None)
+        {
+            Parent?.Invalidate(Invalidation.Size);
+        }
     }
 
     protected void UpdateLayout()
@@ -220,18 +218,9 @@ public abstract class Drawable3D : Drawable
 
     protected virtual void OnLayout(Invalidation dirty)
     {
-        // if (dirty.HasFlagFast(Invalidation.Size))
-        // {
-            // UpdateRelativeSize();
-        // }
-
-        // if (dirty.HasFlagFast(Invalidation.DrawNode))
-        // {
-            // CachedBorderColor = BorderColor.ToMatrix4();
-        // }
     }
 
-    protected abstract void OnDraw3D();
+    protected abstract void Collect(RenderQueue renderQueue);
 
     protected override void InternalLoadComplete()
     {
@@ -244,8 +233,7 @@ public abstract class Drawable3D : Drawable
         if (!Visible || InheritedAlpha <= 0.001f || !IsLoaded) return;
 
         updateDrawMatrix();
-        Renderer.Matrix = DrawMatrix.Matrix;
-        OnDraw3D();
+        Collect(Renderer.RenderQueue);
     }
 
     private void updateDrawMatrix()
@@ -258,22 +246,21 @@ public abstract class Drawable3D : Drawable
             DrawMatrix.InverseMatrix = Parent.DrawMatrix.InverseMatrix;
         }
 
-        // var anchorPos = Parent != null ? GetAnchorOffset(Parent.Size, Anchor) : Vector2.Zero;
-        // DrawMatrix.Translate(anchorPos.X + Position.X + Margin.X, anchorPos.Y + Position.Y + Margin.Y, 0);
         DrawMatrix.Translate(X, Y, Z);
 
-        DrawMatrix.Scale(Scale.X, Scale.Y, Scale.Z);
+        DrawMatrix.Scale(Width * Scale.X, Height * Scale.Y, Length * Scale.Z);
         DrawMatrix.Rotate(RawRotation);
-        // if (Rotation != 0) DrawMatrix.Rotate(Rotation, 0, 0, 1);
-
-        // var originOffset = GetAnchorOffset(Size, Origin);
-        // DrawMatrix.Translate(-originOffset.X - Margin.X, -originOffset.Y - Margin.Y, 0);
     }
 
     protected void InvalidateIfCamera(Invalidation invalidation)
     {
-        if(this is not Camera) return;
+        if (this is not Camera) return;
         Invalidate(invalidation);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void invalidateChildrenIfComposite(Invalidation invalidation)
+    {
+        if (this is CompositeDrawable3D composite) composite.InvalidateChildren(invalidation);
+    }
 }

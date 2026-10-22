@@ -3,11 +3,10 @@
 
 using System.Numerics;
 using Synesthesia.Engine.Dependency;
-using Synesthesia.Engine.Graphics.Layout;
+using Synesthesia.Engine.Graphics.Commands;
 using Synesthesia.Engine.Graphics.Materials;
 using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Resources;
-using Synesthesia.Utils.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Three;
 
@@ -16,36 +15,12 @@ public class Cube3D : Drawable3D
     [Singleton]
     private IResourceStore<Mesh> meshStore = null!;
 
-    public Color Color
-    {
-        get;
-        set
-        {
-            if (field == value) return;
-            field = value;
-            Invalidate(Invalidation.DrawNode);
-        }
-    } = Color.White;
-
     public Material? Material { get; set; }
 
-    private uint packedColor;
-
-    private static readonly (Vector3 n, Vector3 r, Vector3 u)[] faces =
-    [
-        (new Vector3( 0,  0,  1), new Vector3( 1, 0,  0), new Vector3(0, 1,  0)), // +Z
-        (new Vector3( 0,  0, -1), new Vector3(-1, 0,  0), new Vector3(0, 1,  0)), // -Z
-        (new Vector3( 1,  0,  0), new Vector3( 0, 0, -1), new Vector3(0, 1,  0)), // +X
-        (new Vector3(-1,  0,  0), new Vector3( 0, 0,  1), new Vector3(0, 1,  0)), // -X
-        (new Vector3( 0,  1,  0), new Vector3( 1, 0,  0), new Vector3(0, 0, -1)), // +Y
-        (new Vector3( 0, -1,  0), new Vector3( 1, 0,  0), new Vector3(0, 0,  1)), // -Y
-    ];
-
-    protected override void OnDraw3D()
+    protected override void Collect(RenderQueue renderQueue)
     {
-
-        Renderer.GraphicsDevice.BindMaterial(Material);
-        mesh?.Draw();
+        if(mesh == null) return;
+        renderQueue.Submit(new DrawMeshCommand(mesh, Material ?? Renderer.GraphicsDevice.DefaultMaterial, DrawMatrix.Matrix));
     }
 
     private Mesh? mesh;
@@ -54,16 +29,6 @@ public class Cube3D : Drawable3D
     {
         mesh = meshStore.Get("default_cube");
         base.OnLoading();
-    }
-
-    protected override void OnLayout(Invalidation dirty)
-    {
-        base.OnLayout(dirty);
-
-        if (dirty.HasFlagFast(Invalidation.DrawNode))
-        {
-            packedColor = Color.ToRgba32();
-        }
     }
 
     public static Mesh CreateSharedMesh(GraphicsDevice graphics)

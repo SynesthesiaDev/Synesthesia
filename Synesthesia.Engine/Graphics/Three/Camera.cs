@@ -43,7 +43,7 @@ public class Camera : Drawable3D
         }
     }
 
-    protected override void OnDraw3D()
+    protected override void Collect(RenderQueue renderQueue)
     {
         // no drawie :c
     }

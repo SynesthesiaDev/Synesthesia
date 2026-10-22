@@ -176,7 +176,7 @@ public class GraphicsDevice
     public void BindMaterial(Material? material)
     {
         material ??= DefaultMaterial;
-        material.CacheUniformLocations();
+        if(!material.UniformLocationsCached) material.CacheUniformLocations();
         material.Bind(this);
     }
 

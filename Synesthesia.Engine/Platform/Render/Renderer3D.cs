@@ -5,24 +5,26 @@ using System.Numerics;
 using Silk.NET.OpenGL;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Three;
-using Synesthesia.Engine.Shaders;
-using Synesthesia.Engine.Util;
+using System.Runtime.InteropServices;
+using Shader = Synesthesia.Engine.Graphics.Shader;
 
 namespace Synesthesia.Engine.Platform.Render;
 
 public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D> {
+
     public VertexBatch<Vertex3D> VertexBatch { get; } = new VertexBatch<Vertex3D>(graphicsDevice.OpenGL, is2D: false);
     public GL OpenGL { get; } = graphicsDevice.OpenGL;
 
     public readonly GraphicsDevice GraphicsDevice = graphicsDevice;
 
-    private readonly Stack<Matrix4x4> matrixStack = new();
-
     private Matrix4x4 perspectiveMatrix;
 
     private int modelShaderLocation, viewProjShaderLocation, lightDirShaderLocation, lightColorShaderLocation, ambientShaderLocation;
 
+    private Shader? lastShaderWithUniforms;
     public Camera? Camera { get; set; }
+
+    public readonly RenderQueue RenderQueue = new RenderQueue();
 
     public Vector3 LightDirection
     {
@@ -33,65 +35,12 @@ public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D> {
     public Color LightColor { get; set; } = Color.White;
     public float AmbientLight { get; set; } = 0.2f;
 
-
-    public Matrix4x4 Matrix
-    {
-        get;
-        set
-        {
-            FlushVertexBatch();
-            field = value;
-            UpdateShaderMatrix();
-        }
-    } = Matrix4x4.Identity;
-
-    public void PushMatrix()
-    {
-        GraphicsDevice.EnsureInitialized();
-        matrixStack.Push(Matrix);
-    }
-
-    public void PopMatrix()
-    {
-        GraphicsDevice.EnsureInitialized();
-
-        if (matrixStack.Count == 0) throw new InvalidOperationException("Matrix stack is empty");
-
-        Matrix = matrixStack.Pop();
-    }
-
-    public void Translate(float x, float y, float z)
-    {
-        GraphicsDevice.EnsureInitialized();
-
-        Matrix = Matrix4x4.CreateTranslation(x, y, z) * Matrix;
-    }
-
-    public void Scale(float x, float y, float z)
-    {
-        GraphicsDevice.EnsureInitialized();
-        Matrix = Matrix4x4.CreateScale(x, y, z) * Matrix;
-    }
-
-    public void Rotate(float degrees, float x, float y, float z)
-    {
-        GraphicsDevice.EnsureInitialized();
-
-        var rads = degrees.ToRads();
-        var axis = Vector3.Normalize(new Vector3(x, y, z));
-
-        Matrix = Matrix4x4.CreateFromAxisAngle(axis, rads) * Matrix;
-    }
-
     public void BeginDrawing()
     {
-        //TODO invalidation
-        GraphicsDevice.BindShader(BuiltInShaders.DefaultShader3D);
-
-        updatePerspective();
+        RenderQueue.Clear();
 
         OpenGL.Enable(EnableCap.DepthTest);
-        OpenGL.DepthFunc(DepthFunction.Less); //TODO or equal... figure out which better
+        OpenGL.DepthFunc(DepthFunction.Less);
 
         OpenGL.Clear(ClearBufferMask.DepthBufferBit);
 
@@ -99,13 +48,30 @@ public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D> {
         OpenGL.CullFace(TriangleFace.Back);
         OpenGL.FrontFace(FrontFaceDirection.Ccw);
 
-        uploadGlobalFrameUniforms();
-        LoadIdentity();
+        updatePerspective();
     }
 
     public void EndDrawing()
     {
-        FlushVertexBatch();
+        foreach (var renderBatch in RenderQueue.GetBatches())
+        {
+            GraphicsDevice.BindMaterial(renderBatch.Material);
+
+            if (GraphicsDevice.CurrentShader != lastShaderWithUniforms)
+            {
+                uploadGlobalFrameUniforms();
+                lastShaderWithUniforms = GraphicsDevice.CurrentShader;
+            }
+
+            foreach (ref Matrix4x4 matrix in CollectionsMarshal.AsSpan(renderBatch.Instances))
+            {
+                GraphicsDevice.CurrentShader.SetMatrix4(modelShaderLocation, matrix);
+                renderBatch.Mesh.Draw();
+            }
+        }
+
+        lastShaderWithUniforms = null;
+
         OpenGL.Disable(EnableCap.CullFace);
         OpenGL.Disable(EnableCap.DepthTest);
         GraphicsDevice.UnbindShader();
@@ -113,18 +79,11 @@ public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D> {
 
     public void FlushVertexBatch()
     {
-        VertexBatch.Flush();
     }
 
     public void UpdateShaderMatrix()
     {
-        GraphicsDevice.CurrentShader.SetMatrix4(modelShaderLocation, Matrix);
-    }
-
-    public void LoadIdentity()
-    {
-        GraphicsDevice.EnsureInitialized();
-        Matrix = Matrix4x4.Identity;
+        //noop
     }
 
     public void CacheGlobalUniformLocations()

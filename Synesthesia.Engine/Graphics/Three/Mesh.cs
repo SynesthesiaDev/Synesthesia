@@ -6,6 +6,7 @@ using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Extensions;
 using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Resources;
+using Synesthesia.Engine.Util.Statistics;
 
 namespace Synesthesia.Engine.Graphics.Three;
 
@@ -67,6 +68,7 @@ public class Mesh : INamedResource
                 DrawElementsType.UnsignedInt,
                 indices: null);
         }
+        DrawStatistics.Increment(DrawStatistics.Type.DrawCalls3D);
     }
 
     public void Dispose()
