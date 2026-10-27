@@ -12,28 +12,33 @@ internal static class Demo
     private static void Main(string[] args)
     {
         var game = new GameBuilder().Build();
-        var camera = new Camera
-        {
-            Position = new Vector3(2, 0, 50)
-        };
+        // var camera = new Camera
+        // {
+        //     Position = new Vector3(2, 0, 60)
+        // };
 
         game.OnInitialized.Subscribe(_ =>
         {
             var catto = DefaultMaterial.From(game.TextureResourceStore.Get("Synesthesia.Resources.Textures.cat.png"));
             game.DrawableScene3D.Children =
             [
-                camera
+                new EditorController
+                {
+                    Position = new Vector3(2, 0, 60)
+                }
             ];
 
-            for(int i = 0; i < 100; i++) {
-                game.DrawableScene3D.AddChild(new Cube3D {
-                    Position = new Vector3(Rng.RandomFloat(-20f, 20f), Rng.RandomFloat(-10f, 10f), Rng.RandomFloat(-10f, 10f)),
+            for (int i = 0; i < 100; i++)
+            {
+                game.DrawableScene3D.AddChild(new Cube3D
+                {
+                    Position = new Vector3(Rng.RandomFloat(-30f, 30f), Rng.RandomFloat(-30f, 30f), Rng.RandomFloat(-30f, 30f)),
                     Rotation = new Vector3(Rng.RandomFloat(-20f, 20f), Rng.RandomFloat(-10f, 10f), Rng.RandomFloat(-10f, 10f)),
                     Material = catto
                 });
             }
 
-            game.RenderThread.GraphicsDevice.Renderer3D.Camera = camera;
+            // game.RenderThread.GraphicsDevice.Renderer3D.Camera = camera;
         });
 
         // game.OnInitialized.Subscribe(_ =>

@@ -10,6 +10,7 @@ public class ThreadRunningClock : FramedClock, IDisposable
 {
     private const double spin_threshold = 1.0;
 
+    // Thread.Sleep is not precise at all at rates of 1000 which matters for audio and input polling
     private readonly INativeSleep? nativeSleep = RuntimeInfo.OperatingSystem == RuntimeInfo.Platform.Windows ? new WindowsSleep() : new UnixSleep();
 
     public double MaximumUpdateHz

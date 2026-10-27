@@ -11,6 +11,7 @@ public static class BuiltInShaders
     public static Shader DefaultShader2D = null!;
     public static Shader StencilShader2D = null!;
     public static Shader DefaultShader3D = null!;
+    public static Shader DebugShader3D = null!;
 
     public static void Initialize(GraphicsDevice graphicsDevice)
     {
@@ -19,5 +20,6 @@ public static class BuiltInShaders
         StencilShader2D = new Shader("Stencil 2D", ShaderKind.Two, gl, ShaderSources.Default2dVertex, ShaderSources.Stencil2dFragment);
 
         DefaultShader3D = new Shader("Default 3D", ShaderKind.Three, gl, ShaderSources.Default3dVertex, ShaderSources.Default3dFragment);
+        DebugShader3D = new Shader("Debug 3D", ShaderKind.Three, gl, ShaderSources.Default3dVertex, ShaderSources.Debug3dFragment);
     }
 }

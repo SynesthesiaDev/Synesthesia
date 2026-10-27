@@ -1,45 +1,31 @@
-﻿// Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-
-using System.Numerics;
-using Synesthesia.Engine.Graphics.Layout;
-using Synesthesia.Utils.Extensions;
+﻿using System.Numerics;
 
 namespace Synesthesia.Engine.Graphics.Three;
 
 public class Camera : Drawable3D
 {
-    public Vector3 Target
-    {
-        get;
-        set
-        {
-            if(field == value) return;
-            field = value;
-            Invalidate(Invalidation.CameraView);
-        }
-    } = Vector3.Zero;
-
-    public Vector3 Up
-    {
-        get;
-        set
-        {
-            if(field == value) return;
-            field = value;
-            Invalidate(Invalidation.CameraView);
-        }
-    } = Vector3.UnitY;
+    private const float fov_min = 10;
+    private const float fov_max = 150;
 
     public Matrix4x4 ViewMatrix { get; private set; } = Matrix4x4.Identity;
 
-    protected override void OnLayout(Invalidation dirty)
+    public float Fov
     {
-        base.OnLayout(dirty);
-        if (dirty.HasFlagFast(Invalidation.CameraView))
+        get;
+        set => field = Math.Clamp(value, fov_min, fov_max);
+    } = 70f;
+
+    public float ZNear { get; set; } = 0.1f;
+
+    public float ZFar { get; set; } = 1000f;
+
+    protected internal override void OnDraw()
+    {
+        base.OnDraw();
+
+        if (Matrix4x4.Invert(DrawMatrix.Matrix, out var view))
         {
-            ViewMatrix = Matrix4x4.CreateLookAt(Position, Target, Up);
+            ViewMatrix = view;
         }
     }
 
@@ -47,6 +33,4 @@ public class Camera : Drawable3D
     {
         // no drawie :c
     }
-
-
 }

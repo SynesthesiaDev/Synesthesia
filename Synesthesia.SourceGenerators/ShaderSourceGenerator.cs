@@ -10,7 +10,6 @@ public class ShaderSourceGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // Collect ALL shader files into a single collection
         var shaderFiles = context.AdditionalTextsProvider
             .Where(file =>
                 file.Path.EndsWith(".vert") ||

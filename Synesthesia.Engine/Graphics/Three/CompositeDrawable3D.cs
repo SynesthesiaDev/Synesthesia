@@ -4,8 +4,11 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using Synesthesia.Engine.Graphics.Layout;
+using Synesthesia.Engine.Input.ActionBindings;
+using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util.Pooling;
+using Synesthesia.Utils.Extensions;
 
 namespace Synesthesia.Engine.Graphics.Three;
 
@@ -185,5 +188,97 @@ public class CompositeDrawable3D : Drawable3D
             }
         }
     }
+
+    #region Input
+
+    protected internal void UpdateKeyState(KeyboardInputEvent keyboardInputEvent)
+    {
+        var down = keyboardInputEvent.IsDown;
+        for (int i = InternalChildren.Count - 1; i >= 0; i--)
+        {
+            var child = InternalChildren[i];
+            if (!child.CanHandleInput) continue;
+
+            var handled = down && child.OnKeyDown(keyboardInputEvent);
+            if (!down) child.OnKeyUp(keyboardInputEvent);
+
+            if (handled) break;
+
+            if (child is CompositeDrawable3D composite)
+                composite.UpdateKeyState(keyboardInputEvent);
+        }
+    }
+
+    protected internal void UpdatePlatformActionBindingState(PlatformActionBinding platformActionBinding)
+    {
+        var down = platformActionBinding.IsDown;
+        for (int i = InternalChildren.Count - 1; i >= 0; i--)
+        {
+            var child = InternalChildren[i];
+            if (!child.CanHandleInput) continue;
+
+            var handled = down && child.OnPlatformBindingDown(platformActionBinding);
+            if (!down) child.OnPlatformBindingUp(platformActionBinding);
+
+            if (handled) break;
+
+            if (child is CompositeDrawable3D composite)
+                composite.UpdatePlatformActionBindingState(platformActionBinding);
+        }
+    }
+
+    protected internal bool UpdateCursorInputState(ICursorInputEvent e)
+    {
+        var down = e.IsDown;
+        var handled = false;
+
+        for (int i = InternalChildren.Count - 1; i >= 0; i--)
+        {
+            var child = InternalChildren[i];
+            if (!child.CanHandleInput) continue;
+
+            if (down && child is { IsMouseDown: false })
+            {
+                if (child.OnMouseDown(e))
+                {
+                    child.IsMouseDown = true;
+                    handled = true;
+                    break;
+                }
+            }
+            else if (!down && child.IsMouseDown)
+            {
+                child.IsMouseDown = false;
+                child.OnMouseUp(e);
+                handled = true;
+            }
+
+            if (child is CompositeDrawable3D composite)
+            {
+                handled |= composite.UpdateCursorInputState(e);
+            }
+
+            if (handled) break;
+        }
+
+        return handled;
+    }
+
+    protected internal void UpdateScrollWheelState(MouseScrollInputEvent e)
+    {
+        foreach (var child in InternalChildren.Filter(c => c.CanHandleInput).Reversed())
+        {
+            var handled = child.OnMouseWheel(e.Delta);
+
+            if (handled) continue;
+
+            if (child is CompositeDrawable3D drawable2D)
+            {
+                drawable2D.UpdateScrollWheelState(e);
+            }
+        }
+    }
+
+    #endregion
 
 }

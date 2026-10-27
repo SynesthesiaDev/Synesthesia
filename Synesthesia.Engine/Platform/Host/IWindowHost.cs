@@ -48,6 +48,8 @@ public interface IWindowHost : IDisposable
 
     void Hide();
 
+    void SetMouseCaptured(bool captured);
+
     IClipboard Clipboard { get; }
 
 }

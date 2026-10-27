@@ -38,6 +38,7 @@ public abstract class ThreadRunner : IDisposable
     public double Fps => frameStatistics.FramesPerSecond;
 
     public double FrameTime => frameStatistics.AverageFrameTime;
+    public double FrameTimeDeviance => Math.Abs(frameStatistics.AverageFrameTime - (1000.0 / (IsActive.Value ? ActiveUpdateRate.Value : InactiveUpdateRate.Value)));
 
     protected abstract void ProcessFrame(FrameInfo frameInfo);
 
@@ -84,6 +85,7 @@ public abstract class ThreadRunner : IDisposable
         IsActive.OnValueChange(e =>
         {
             clock.MaximumUpdateHz = e.NewValue ? ActiveUpdateRate.Value : InactiveUpdateRate.Value;
+            frameStatistics.Clear();
         }, triggerOnce: true);
 
         IsActive.BindTo(game.WindowHost.WindowActive);

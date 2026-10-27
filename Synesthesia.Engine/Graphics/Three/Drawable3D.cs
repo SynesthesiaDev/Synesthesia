@@ -5,6 +5,8 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Layout;
+using Synesthesia.Engine.Input.ActionBindings;
+using Synesthesia.Engine.Input.Events;
 using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util;
@@ -156,7 +158,12 @@ public abstract class Drawable3D : Drawable
         set
         {
             field = value;
-            RawRotation = Quaternion.CreateFromYawPitchRoll(value.X, value.Y, value.Z);
+
+            float pitchRad = value.X * (MathF.PI / 180f);
+            float yawRad = value.Y * (MathF.PI / 180f);
+            float rollRad = value.Z * (MathF.PI / 180f);
+
+            RawRotation = Quaternion.CreateFromYawPitchRoll(yawRad, pitchRad, rollRad);
         }
     }
 
@@ -172,8 +179,13 @@ public abstract class Drawable3D : Drawable
 
     public Vector3 InheritedScale => Parent == null ? Scale : Parent.InheritedScale * Scale;
 
+    public bool IsMouseDown { get; set; } = false;
+
     protected float InheritedAlpha => Alpha * (Parent?.InheritedAlpha ?? 1f);
 
+    protected virtual bool AcceptsInput { get; } = true;
+
+    public bool CanHandleInput => IsLoaded && AcceptsInput;
 
     public void Invalidate(Invalidation flags)
     {
@@ -263,4 +275,41 @@ public abstract class Drawable3D : Drawable
     {
         if (this is CompositeDrawable3D composite) composite.InvalidateChildren(invalidation);
     }
+
+    #region Input
+
+    protected internal virtual bool OnMouseDown(ICursorInputEvent e)
+    {
+        return false;
+    }
+
+    protected internal virtual void OnMouseUp(ICursorInputEvent e)
+    {
+    }
+
+    protected internal virtual bool OnKeyDown(KeyboardInputEvent e)
+    {
+        return false;
+    }
+
+    protected internal virtual void OnKeyUp(KeyboardInputEvent e)
+    {
+    }
+
+    protected internal virtual bool OnPlatformBindingDown(PlatformActionBinding e)
+    {
+        return false;
+    }
+
+    protected internal virtual void OnPlatformBindingUp(PlatformActionBinding e)
+    {
+    }
+
+
+    protected internal virtual bool OnMouseWheel(float delta)
+    {
+        return false;
+    }
+
+    #endregion
 }

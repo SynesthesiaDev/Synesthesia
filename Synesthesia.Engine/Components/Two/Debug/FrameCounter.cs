@@ -128,7 +128,7 @@ public class FrameCounter : EngineDebugElement
                                 },
                                 maxFpsText = new Text2D
                                 {
-                                    Text = $" / {maxFps} fps",
+                                    Text = $" / {maxFps}",
                                     Anchor = Anchor.Centre,
                                     Origin = Anchor.CentreLeft,
                                     Color = EngineBranding.TEXT2
@@ -137,7 +137,7 @@ public class FrameCounter : EngineDebugElement
                         },
                         frameTimeText = new Text2D
                         {
-                            Text = "(0.000 ms)",
+                            Text = "(± 0.000 ms)",
                             Anchor = Anchor.CentreRight,
                             Origin = Anchor.CentreRight,
                             Color = EngineBranding.TEXT1
@@ -152,17 +152,17 @@ public class FrameCounter : EngineDebugElement
             activeRateListener = thread.IsActive.OnValueChange(e =>
             {
                 maxFps = e.NewValue ? thread.ActiveUpdateRate.Value : thread.InactiveUpdateRate.Value;
-                maxFpsText.Text = $" / {maxFps} fps";
+                maxFpsText.Text = $"/{maxFps}";
             });
         }
 
 
         protected internal override void OnUpdate(FrameInfo frameInfo)
         {
-            if (throttledUpdater.TryUpdate(frameInfo.Delta))
-            {
+            // if (throttledUpdater.TryUpdate(frameInfo.Delta))
+            // {
                 var currentFps = thread.Fps;
-                var currentFrameTime = thread.FrameTime;
+                var currentFrameTime = thread.FrameTimeDeviance;
 
                 if (!Precision.IsSame(currentFps, lastFps))
                 {
@@ -170,12 +170,12 @@ public class FrameCounter : EngineDebugElement
                     fpsText.Text = $"{currentFps:0}";
                 }
 
-                if (!Precision.IsSame(currentFrameTime, lastFrameTime, 0.001))
+                if (!Precision.IsSame(currentFrameTime, lastFrameTime, 0.009))
                 {
                     lastFrameTime = currentFrameTime;
-                    frameTimeText.Text = $"({currentFrameTime:0.000} ms)";
+                    frameTimeText.Text = $"(± {currentFrameTime:0.000}ms)";
                 }
-            }
+            // }
 
             base.OnUpdate(frameInfo);
         }

@@ -6,10 +6,11 @@ using Silk.NET.OpenGL;
 namespace Synesthesia.Engine.Graphics;
 
 [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
-public class VertexInfoAttribute(int index, int count, VertexAttribPointerType type, bool normalized = false) : Attribute
+public class VertexInfoAttribute(int index, int count, VertexAttribPointerType type, bool normalized = false, int attributeDivisor = -1) : Attribute
 {
     public int Index { get; } = index;
     public int Count { get; } = count;
     public VertexAttribPointerType Type { get; } = type;
     public bool Normalized { get; } = normalized;
+    public int AttributeDivisor { get; } = attributeDivisor;
 }

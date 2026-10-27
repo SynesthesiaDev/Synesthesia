@@ -4,13 +4,23 @@
 using System.Numerics;
 using Synesthesia.Engine.Graphics.Materials;
 using Synesthesia.Engine.Graphics.Three;
+using Synesthesia.Engine.Util.Pooling;
 
 namespace Synesthesia.Engine.Graphics;
 
-public class RenderBatch(Mesh mesh, Material material)
+public class RenderBatch() : IPooledObject
 {
-    public readonly Mesh Mesh = mesh;
-    public readonly Material Material = material;
+    public Mesh Mesh { get; set; } = null!;
+    public Material Material { get; set; } = null!;
 
-    public readonly List<Matrix4x4> Instances = new();
+    public readonly List<Matrix4x4> Instances = [];
+
+    public void Reset()
+    {
+        Instances.Clear();
+    }
+
+    public bool IsPooled { get; set; }
+
+    public Action<IPooledObject>? ReturnAction { get; set; }
 }

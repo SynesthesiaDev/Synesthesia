@@ -18,12 +18,16 @@ internal static class AssetGenerator
         game.OnInitialized.Subscribe(_ =>
         {
             var dependencyContainer = DependencyContainer.Get<IResourceStore<Font>>();
-            var font = dependencyContainer.Get("Synesthesia.Resources.Fonts.Quicksand-Regular.ttf");
             var fonts = Maps.Of(
-                ("Quicksand-Regular", font)
+                ("Quicksand-Regular", dependencyContainer.Get("Synesthesia.Resources.Fonts.Quicksand-Regular.ttf")),
+                ("MapleMono-Regular", dependencyContainer.Get("Synesthesia.Resources.Fonts.MapleMono-Regular.ttf")),
+                ("MapleMono-Light", dependencyContainer.Get("Synesthesia.Resources.Fonts.MapleMono-Light.ttf")),
+                ("MapleMono-ExtraLight", dependencyContainer.Get("Synesthesia.Resources.Fonts.MapleMono-ExtraLight.ttf")),
+                ("MapleMono-Thin", dependencyContainer.Get("Synesthesia.Resources.Fonts.MapleMono-Thin.ttf"))
             );
 
             fontAtlasGenerator.Run(fonts);
+            game.Exit();
         });
 
         game.Run();

@@ -10,21 +10,29 @@ using Shader = Synesthesia.Engine.Graphics.Shader;
 
 namespace Synesthesia.Engine.Platform.Render;
 
-public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D> {
+public class Renderer3D : IRenderer<Vertex3D>
+{
+    public VertexBatch<Vertex3D> VertexBatch { get; }
+    public GL OpenGL { get; }
 
-    public VertexBatch<Vertex3D> VertexBatch { get; } = new VertexBatch<Vertex3D>(graphicsDevice.OpenGL, is2D: false);
-    public GL OpenGL { get; } = graphicsDevice.OpenGL;
+    public readonly GraphicsDevice GraphicsDevice;
 
-    public readonly GraphicsDevice GraphicsDevice = graphicsDevice;
-
-    private Matrix4x4 perspectiveMatrix;
-
-    private int modelShaderLocation, viewProjShaderLocation, lightDirShaderLocation, lightColorShaderLocation, ambientShaderLocation;
+    private int viewProjShaderLocation, lightDirShaderLocation, lightColorShaderLocation, ambientShaderLocation;
 
     private Shader? lastShaderWithUniforms;
     public Camera? Camera { get; set; }
 
+    public readonly InstanceBuffer InstanceBuffer;
+
     public readonly RenderQueue RenderQueue = new RenderQueue();
+
+    public Renderer3D(GraphicsDevice graphicsDevice)
+    {
+        VertexBatch = new VertexBatch<Vertex3D>(graphicsDevice.OpenGL, is2D: false);
+        OpenGL = graphicsDevice.OpenGL;
+        GraphicsDevice = graphicsDevice;
+        InstanceBuffer = new InstanceBuffer(OpenGL);
+    }
 
     public Vector3 LightDirection
     {
@@ -48,7 +56,7 @@ public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D> {
         OpenGL.CullFace(TriangleFace.Back);
         OpenGL.FrontFace(FrontFaceDirection.Ccw);
 
-        updatePerspective();
+        // updatePerspective();
     }
 
     public void EndDrawing()
@@ -63,11 +71,9 @@ public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D> {
                 lastShaderWithUniforms = GraphicsDevice.CurrentShader;
             }
 
-            foreach (ref Matrix4x4 matrix in CollectionsMarshal.AsSpan(renderBatch.Instances))
-            {
-                GraphicsDevice.CurrentShader.SetMatrix4(modelShaderLocation, matrix);
-                renderBatch.Mesh.Draw();
-            }
+            InstanceBuffer.Upload(CollectionsMarshal.AsSpan(renderBatch.Instances));
+            GraphicsDevice.OpenGL.BindVertexArray(renderBatch.Mesh.Vao);
+            renderBatch.Mesh.DrawInstanced(InstanceBuffer.InstanceCount);
         }
 
         lastShaderWithUniforms = null;
@@ -89,7 +95,6 @@ public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D> {
     public void CacheGlobalUniformLocations()
     {
         var shader = GraphicsDevice.CurrentShader;
-        modelShaderLocation = shader.GetUniformLocation("u_model");
         viewProjShaderLocation = shader.GetUniformLocation("u_perspective");
         lightDirShaderLocation = shader.GetUniformLocation("u_lightDirection");
         lightColorShaderLocation = shader.GetUniformLocation("u_lightColor");
@@ -98,18 +103,30 @@ public class Renderer3D(GraphicsDevice graphicsDevice) : IRenderer<Vertex3D> {
 
     private void uploadGlobalFrameUniforms()
     {
-        var view = Camera?.ViewMatrix ?? Matrix4x4.Identity;
-        var viewProjection = view * perspectiveMatrix;
-
         var shader = GraphicsDevice.CurrentShader;
-        shader.SetMatrix4(viewProjShaderLocation, viewProjection);
+
+        if (Camera != null)
+        {
+            var aspectRation = (float)GraphicsDevice.BackBufferWidth / GraphicsDevice.BackBufferHeight;
+            var fovRad = Camera.Fov * (MathF.PI / 180f);
+
+            var projection = Matrix4x4.CreatePerspectiveFieldOfView(fovRad, aspectRation, Camera.ZNear, Camera.ZFar);
+
+            var viewProjection = Camera.ViewMatrix * projection;
+            shader.SetMatrix4(viewProjShaderLocation, viewProjection);
+        }
+        else
+        {
+            shader.SetMatrix4(viewProjShaderLocation, Matrix4x4.Identity);
+        }
+
         shader.SetVector3(lightDirShaderLocation, LightDirection);
         shader.SetColor(lightColorShaderLocation, LightColor);
         shader.SetFloat(ambientShaderLocation, AmbientLight);
     }
 
-    private void updatePerspective()
-    {
-        perspectiveMatrix = Matrix4x4.CreatePerspectiveFieldOfView(MathF.PI / 4f, (float)GraphicsDevice.BackBufferWidth / GraphicsDevice.BackBufferHeight, 0.1f, 1000f);
-    }
+    // private void updatePerspective()
+    // {
+    //     perspectiveMatrix = Matrix4x4.CreatePerspectiveFieldOfView(MathF.PI / 4f, (float)GraphicsDevice.BackBufferWidth / GraphicsDevice.BackBufferHeight, 0.1f, 1000f);
+    // }
 }

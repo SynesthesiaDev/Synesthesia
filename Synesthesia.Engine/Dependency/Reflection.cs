@@ -20,22 +20,19 @@ public static class Reflection
 
     public static void ResolveDependencies(object target)
     {
-        var type = target.GetType(); //get the internal runtime type
+        var type = target.GetType();
         var currentType = type;
 
         while (currentType != null && currentType != typeof(object))
         {
-            // get all the fields of the type (class) that are public, non public, instance or delcared only
             var fields = currentType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
             foreach (var field in fields)
             {
-                // see if the field has [Singleton] Attribute
                 if (field.GetCustomAttribute<SingletonAttribute>() == null)
                     continue;
 
                 var service = DependencyContainer.Get(field.FieldType);
-                // set the value of the field
                 field.SetValue(target, service);
             }
 
@@ -102,6 +99,10 @@ public static class Reflection
                     stride,
                     finalOffset
                 );
+                if (attr.AttributeDivisor != -1)
+                {
+                    gl.VertexAttribDivisor((uint)attr.Index, (uint)attr.AttributeDivisor);
+                }
             }
         }
     }

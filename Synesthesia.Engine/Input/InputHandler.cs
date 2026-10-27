@@ -13,6 +13,8 @@ using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util.Pooling;
+using System.Runtime.InteropServices;
+using Synesthesia.Engine.Graphics.Three;
 using Synesthesia.Engine.Util.Statistics;
 
 namespace Synesthesia.Engine.Input;
@@ -32,15 +34,18 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
     public static readonly EventDispatcher<MouseScrollInputEvent> ON_MOUSE_SCROLL_INPUT = new();
     public static readonly EventDispatcher<TouchInputEvent> ON_TOUCH_INPUT = new();
 
-    private static readonly DenseMap<ulong, TouchInputEvent> active_touches = new();
 
     private static readonly List<Key> held_keys = [];
     private static readonly List<MouseButton> held_mouse_buttons = [];
     private static readonly List<PlatformActionBinding> held_action_bindings = [];
 
     private readonly ConcurrentQueue<IInputEvent> eventQueue = new();
-
     private static readonly List<PlatformActionBinding> platform_action_bindings = [];
+    private static readonly DenseMap<ulong, TouchInputEvent> active_touches = new();
+
+    private static Vector2 accumulatedMouseDelta = Vector2.Zero;
+    private static Vector2 lastMousePosition = Vector2.Zero;
+    private static readonly Lock mouse_delta_lock = new();
 
     public static bool IsKeyDown(Key key) => held_keys.Contains(key);
 
@@ -55,6 +60,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
     public static Vector2 MousePosition = Vector2.Zero;
 
     private readonly InternalGameContainer2D gameContainer = game.GetInternalGameContainer();
+    private readonly DrawableScene3D scene3d = game.DrawableScene3D;
 
     public static IAcceptsFocus? FocusedDrawable
     {
@@ -105,6 +111,11 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
                         handleTextInputEvent(textInputEvent);
                         break;
                     }
+                    case MouseScrollInputEvent scrollInputEvent:
+                    {
+                        handleScrollWheelEvent(scrollInputEvent);
+                        break;
+                    }
                 }
             }
             catch (Exception exception)
@@ -137,12 +148,19 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
         platform_action_bindings.Add(binding);
     }
 
+    private readonly List<IActionBinding> consumedTriggers = [];
+
+    private static readonly Comparison<PlatformActionBinding> complexity_comparer =
+        (a, b) => b.Complexity.CompareTo(a.Complexity);
+
     // man I should really write tests for this, but I don't feel like it
     private void updateActionBindings()
     {
-        var consumedTriggers = new List<IActionBinding>();
+        consumedTriggers.Clear();
 
-        foreach (var action in platform_action_bindings.OrderByDescending(a => a.Complexity))
+        platform_action_bindings.Sort(complexity_comparer);
+
+        foreach (ref PlatformActionBinding action in CollectionsMarshal.AsSpan(platform_action_bindings))
         {
             var activeTrigger = action.AlternativeBindings.FirstOrDefault(b => b.IsDown);
 
@@ -160,6 +178,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
                     {
                         held_action_bindings.Add(action);
                         gameContainer.UpdatePlatformActionBindingState(action);
+                        scene3d.UpdatePlatformActionBindingState(action);
                     }
 
                     continue;
@@ -170,6 +189,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
             if (held_action_bindings.Contains(action))
             {
                 gameContainer.UpdatePlatformActionBindingState(action);
+                scene3d.UpdatePlatformActionBindingState(action);
                 held_action_bindings.Remove(action);
             }
         }
@@ -187,18 +207,70 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
 
     private void handleTextInputEvent(TextInputEvent textInputEvent)
     {
-        if(textInputEvent.Text == string.Empty) return;
+        if (textInputEvent.Text == string.Empty) return;
         FocusedDrawable?.OnTextTyped(textInputEvent.Text);
+    }
+
+    private void handleScrollWheelEvent(MouseScrollInputEvent scrollInputEvent)
+    {
+        gameContainer.UpdateScrollWheelState(scrollInputEvent);
+        scene3d.UpdateScrollWheelState(scrollInputEvent);
+    }
+
+    public static Vector2 ConsumeMouseDelta()
+    {
+        lock (mouse_delta_lock)
+        {
+            var delta = accumulatedMouseDelta;
+            accumulatedMouseDelta = Vector2.Zero;
+            return delta;
+        }
     }
 
     private void handlePositionalInputEvent(IPositionalInputEvent positionalInputEvent)
     {
         if (positionalInputEvent is TabletInputEvent) EngineStatistics.Increment(EngineStatistics.Type.TabletEvents);
-        // var isDelta = positionalInputEvent.PositionDelta != Vector2.Zero;
-        //TODO Mose Delta
+
+        if (positionalInputEvent.PositionDelta != Vector2.Zero)
+        {
+            lock (mouse_delta_lock)
+            {
+                accumulatedMouseDelta += positionalInputEvent.PositionDelta;
+            }
+        }
+        else
+        {
+            // 2. Normal absolute mouse movement (UI hovering)
+            var currentPos = positionalInputEvent.Position;
+            if (lastMousePosition != Vector2.Zero)
+            {
+                float dx = currentPos.X - lastMousePosition.X;
+                float dy = currentPos.Y - lastMousePosition.Y;
+
+                lock (mouse_delta_lock)
+                {
+                    accumulatedMouseDelta += new Vector2(dx, dy);
+                }
+            }
+            lastMousePosition = currentPos;
+        }
+
         MousePosition = positionalInputEvent.Position;
         gameContainer.UpdateHoverState(positionalInputEvent);
         updateActionBindings();
+    }
+
+    public void SetMouseCaptured(bool captured)
+    {
+        game.WindowHost.SetMouseCaptured(captured);
+
+        if (captured)
+        {
+            lock (mouse_delta_lock)
+            {
+                accumulatedMouseDelta = Vector2.Zero;
+            }
+        }
     }
 
     private void handleKeyboardInput(KeyboardInputEvent keyboardInputEvent)
@@ -215,6 +287,8 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
         }
 
         gameContainer.UpdateKeyState(keyboardInputEvent);
+        scene3d.UpdateKeyState(keyboardInputEvent);
+
         ON_KEYBOARD_INPUT.Dispatch(keyboardInputEvent);
         updateActionBindings();
     }
@@ -235,6 +309,7 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
         }
 
         gameContainer.UpdateCursorInputState(mouseButtonInputInputEvent);
+        scene3d.UpdateCursorInputState(mouseButtonInputInputEvent);
         updateActionBindings();
     }
 

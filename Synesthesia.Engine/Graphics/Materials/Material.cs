@@ -30,11 +30,6 @@ public abstract class Material : INamedResource
 
     protected void InvalidateBatchKey() => batchKeyDirty = true;
 
-    public void Initialize()
-    {
-        CacheUniformLocations();
-    }
-
     public int GetBatchKey()
     {
         if (!batchKeyDirty) return batchKey;

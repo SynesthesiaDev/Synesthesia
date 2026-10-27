@@ -258,6 +258,7 @@ public class GraphicsDevice
     public void EndDrawing()
     {
         EnsureInitialized();
+        DrawStatistics.TakeSnapshot();
 
         Surface.SwapBuffers();
         BindTexture(texture: null);

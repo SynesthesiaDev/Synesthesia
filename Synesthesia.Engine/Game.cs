@@ -257,4 +257,6 @@ public class Game
     }
 
     public InternalGameContainer2D GetInternalGameContainer() => internalGameContainer2D;
+
+    public void Exit() => Environment.Exit(0);
 }

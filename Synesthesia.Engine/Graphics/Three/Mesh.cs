@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Numerics;
 using Silk.NET.OpenGL;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Extensions;
@@ -54,6 +55,22 @@ public class Mesh : INamedResource
         Reflection.SetupVertexAttributes<Vertex3D>(gl);
         gl.CheckError("Setup vertex attributes");
 
+        gl.BindBuffer(BufferTargetARB.ArrayBuffer, graphicsDevice.Renderer3D.InstanceBuffer.Vbo);
+        unsafe
+        {
+            int stride = sizeof(Matrix4x4);
+            for (int i = 0; i < 4; i++)
+            {
+                uint location = (uint)(5 + i);
+                gl.EnableVertexAttribArray(location);
+
+                gl.VertexAttribPointer(location, 4, VertexAttribPointerType.Float, false, (uint)stride, (void*)(i * 16));
+
+                gl.VertexAttribDivisor(location, 1);
+
+            }
+        }
+
         gl.BindVertexArray(0);
         gl.CheckError("Unbind vao");
     }
@@ -71,6 +88,20 @@ public class Mesh : INamedResource
         DrawStatistics.Increment(DrawStatistics.Type.DrawCalls3D);
     }
 
+    public void DrawInstanced(int instanceCount)
+    {
+        gl.BindVertexArray(Vao);
+        unsafe
+        {
+            gl.DrawElementsInstanced(PrimitiveType.Triangles,
+                (uint)IndexCount,
+                DrawElementsType.UnsignedInt,
+                indices: null,
+                (uint)instanceCount);
+        }
+        DrawStatistics.Increment(DrawStatistics.Type.DrawCalls3D);
+    }
+
     public void Dispose()
     {
         gl.DeleteBuffer(Vbo);
@@ -79,8 +110,3 @@ public class Mesh : INamedResource
     }
 
 }
-
-//todo
-// Mesh
-// Render Command
-// RenderQueue
