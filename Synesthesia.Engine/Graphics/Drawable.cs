@@ -24,7 +24,7 @@ public abstract class Drawable : IDisposable
 
     public readonly SingleOffEventDispatcher<Drawable> OnLoadComplete = Pooled.DRAWABLE_LOAD_DISPATCHER_POOL.Rent();
 
-    private static readonly StopwatchClock performance_watch = new(true);
+    private static readonly StopwatchClock performance_watch = new(start: true);
 
     public DrawableLoadState LoadState { get; protected set; }
 
@@ -143,7 +143,7 @@ public abstract class Drawable : IDisposable
 
     public void Dispose()
     {
-        lock (LoadLock) Dispose(true);
+        lock (LoadLock) Dispose(isDisposing: true);
 
         GC.SuppressFinalize(this);
     }

@@ -2,26 +2,34 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Faster.Map.Core;
 using Silk.NET.OpenGL;
 using Synesthesia.Engine.Logging;
+using Synesthesia.Engine.Resources;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Util.Exceptions;
 using Synesthesia.Engine.Util.Statistics;
 
+
 namespace Synesthesia.Engine.Graphics;
 
-public class Shader : IDisposable
+public class Shader : IDisposable, INamedResource
 {
     private readonly GL gl;
     public readonly uint Program;
+    public readonly ShaderKind Kind;
 
     private readonly DenseMap<string, int> uniformCache = new();
 
-    public Shader(GL openGl, string? vertexCode, string? fragmentCode)
+    public string ResourceName { get; }
+
+    public Shader(string name, ShaderKind kind, GL openGl, string? vertexCode, string? fragmentCode)
     {
         ThreadSafety.AssertRunningOnRenderThread();
 
+        ResourceName = name;
+        Kind = kind;
         gl = openGl;
 
         if (vertexCode == null && fragmentCode == null) throw new OpenGLException("Cannot have both Vertex and Fragment shaders empty");
@@ -54,6 +62,10 @@ public class Shader : IDisposable
             return cached;
 
         var location = gl.GetUniformLocation(Program, uniform);
+
+        if (location != -1)
+            uniformCache.Insert(uniform, location);
+
         return location != -1 ? location : throw new OpenGLException($"Failed to get shader uniform '{uniform}'");
     }
 
@@ -66,16 +78,17 @@ public class Shader : IDisposable
         gl.GetShader(shader, ShaderParameterName.CompileStatus, out int success);
 
         var shaderId = success == 0 ? throw new OpenGLException($"Shader compilation failed: ({shaderType}): {gl.GetShaderInfoLog(shader)}") : shader;
-        Logger.Verbose($"Compiled {shaderType.ToString().Replace("Shader", string.Empty)} shader with id {shaderId}", Logger.Render);
+        Logger.Verbose($"Compiled {shaderType.ToString().Replace("Shader", string.Empty)} shader '{ResourceName}' with id {shaderId}", Logger.Render);
         return shaderId;
     }
 
     public void SetMatrix4(int location, Matrix4x4 matrix)
     {
+        assertLocationNotInvalid(location);
         ThreadSafety.AssertRunningOnRenderThread();
         unsafe
         {
-            gl.UniformMatrix4(location, 1, false, (float*)&matrix);
+            gl.UniformMatrix4(location, 1, transpose: false, (float*)&matrix);
         }
         DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }
@@ -88,6 +101,7 @@ public class Shader : IDisposable
 
     public void SetFloat(int location, float value)
     {
+        assertLocationNotInvalid(location);
         ThreadSafety.AssertRunningOnRenderThread();
         gl.Uniform1(location, value);
         DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
@@ -101,6 +115,7 @@ public class Shader : IDisposable
 
     public void SetDouble(int location, double value)
     {
+        assertLocationNotInvalid(location);
         ThreadSafety.AssertRunningOnRenderThread();
         gl.Uniform1(location, value);
         DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
@@ -114,6 +129,7 @@ public class Shader : IDisposable
 
     public void SetInt(int location, int value)
     {
+        assertLocationNotInvalid(location);
         ThreadSafety.AssertRunningOnRenderThread();
         gl.Uniform1(location, value);
         DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
@@ -127,6 +143,7 @@ public class Shader : IDisposable
 
     public void SetVector2(int location, Vector2 value)
     {
+        assertLocationNotInvalid(location);
         ThreadSafety.AssertRunningOnRenderThread();
 
         gl.Uniform2(location, value);
@@ -141,6 +158,7 @@ public class Shader : IDisposable
 
     public void SetVector3(int location, Vector3 value)
     {
+        assertLocationNotInvalid(location);
         ThreadSafety.AssertRunningOnRenderThread();
 
         gl.Uniform3(location, value);
@@ -155,11 +173,22 @@ public class Shader : IDisposable
 
     public void SetVector4(int location, Vector4 value)
     {
+        assertLocationNotInvalid(location);
         ThreadSafety.AssertRunningOnRenderThread();
 
         gl.Uniform4(location, value);
         DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }
+
+    public void SetColor(int location, Color value)
+    {
+        assertLocationNotInvalid(location);
+        ThreadSafety.AssertRunningOnRenderThread();
+
+        gl.Uniform4(location, value.ToVector());
+        DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
+    }
+
 
     public void SetVector4(string name, Vector4 value)
     {
@@ -179,8 +208,12 @@ public class Shader : IDisposable
         gl.DeleteProgram(Program);
     }
 
-    public override string ToString()
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void assertLocationNotInvalid(int location)
     {
-        return $"Shader(program={Program},cacheSize={uniformCache.Size})";
+        if(location != -1) return;
+        throw new OpenGLException("Uninitialized or Invalid shader location -1");
     }
+
+    public override string ToString() => $"Shader(Name={ResourceName}, Program={Program}, CacheSize={uniformCache.Size})";
 }

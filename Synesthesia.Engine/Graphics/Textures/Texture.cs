@@ -4,13 +4,14 @@
 using Silk.NET.OpenGL;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform.Render;
+using Synesthesia.Engine.Resources;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Util.Exceptions;
 using Synesthesia.Engine.Util.Statistics;
 
 namespace Synesthesia.Engine.Graphics.Textures;
 
-public class Texture : IDisposable
+public class Texture : IDisposable, INamedResource
 {
     public uint Handle { get; private set; }
 
@@ -28,11 +29,14 @@ public class Texture : IDisposable
 
     private GL? gl;
 
-    public Texture(TextureData textureData, bool uploadImmediately)
+    public string ResourceName { get; }
+
+    public Texture(string name, TextureData textureData, bool uploadImmediately)
     {
         UploadImmediately = uploadImmediately;
         TextureData = textureData;
         IsUploaded = false;
+        ResourceName = name;
 
         if (UploadImmediately) EnqueueUpload();
     }
@@ -107,15 +111,12 @@ public class Texture : IDisposable
         gl.DeleteTexture(Handle);
     }
 
-    public override string ToString()
-    {
-        return $"Texture(Handle={Handle}, TextureData={TextureData}, IsUploaded={IsUploaded}, UploadQueued={UploadQueued})";
-    }
+    public override string ToString() => $"Texture(Name={ResourceName} Handle={Handle}, TextureData={TextureData}, IsUploaded={IsUploaded}, UploadQueued={UploadQueued})";
 
     public static Texture FromExistingHandle(GL gl, uint handle, int width, int height, PixelFormat pixelFormat)
     {
         var data = new TextureData(width, height, [], pixelFormat);
-        var texture = new Texture(data, uploadImmediately: false);
+        var texture = new Texture($"_supersample_{handle}_{width}x{height}", data, uploadImmediately: false);
 
         texture.gl = gl;
         texture.Handle = handle;
@@ -124,4 +125,5 @@ public class Texture : IDisposable
 
         return texture;
     }
+
 }

@@ -20,7 +20,7 @@ public class InternalGameContainer2D : CompositeDrawable2D
             },
             new EngineDebugOverlay
             {
-                RelativeSizeAxes = Axes.Both
+                RelativeSizeAxes = Axes.Both,
             },
         ];
     }

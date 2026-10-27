@@ -1,11 +1,15 @@
 // Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using Synesthesia.Engine.Platform.Render;
+
 namespace Synesthesia.Engine.Resources.Stores;
 
-public class DeferredResourceStore<T>(IResourceStore<T> underlyingStore) : IResourceStore<T>
+public class DeferredResourceStore<T>(IResourceStore<T> underlyingStore) : IResourceStore<T>, IHasUnderlyingStore<T>, IResolvesGraphicsDeferred
 {
     private bool ready;
+
+    public IResourceStore<T> UnderlyingResourceStore => underlyingStore;
 
     public T Get(string name)
     {
@@ -21,6 +25,20 @@ public class DeferredResourceStore<T>(IResourceStore<T> underlyingStore) : IReso
     public IEnumerable<string> List(string prefix = "")
     {
         return underlyingStore.List();
+    }
+
+    public void ResolveGraphicsDeferred(GraphicsDevice graphicsDevice)
+    {
+        if (underlyingStore is IResolvesGraphicsDeferred deferred)
+        {
+            deferred.ResolveGraphicsDeferred(graphicsDevice);
+        }
+    }
+
+    public void UnlockAndResolvedGraphics(GraphicsDevice graphicsDevice)
+    {
+        ResolveGraphicsDeferred(graphicsDevice);
+        Unlock();
     }
 
     public void Unlock()

@@ -3,6 +3,7 @@
 
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Textures;
+using Synesthesia.Engine.Graphics.Three;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Resources;
@@ -28,6 +29,9 @@ public class RenderThread(GraphicsDevice graphicsDevice) : ThreadRunner
     private IResourceStore<Font> fontResourceStore = null!;
 
     [Singleton]
+    private IResourceStore<Mesh> meshResourceStore = null!;
+
+    [Singleton]
     private Game game = null!;
 
     private bool isFirstSwap = true;
@@ -38,15 +42,18 @@ public class RenderThread(GraphicsDevice graphicsDevice) : ThreadRunner
         Logger.Verbose("Transferred renderer context ownership to Render Thread", Logger.Platform);
         hasContextOwnership = true;
 
-        (textureResourceStore as DeferredResourceStore<Texture>)?.Unlock();
-        (fontResourceStore as DeferredResourceStore<Font>)?.Unlock();
-
         GraphicsDevice.CompileDefaultShaders();
+
+        (textureResourceStore as DeferredResourceStore<Texture>)?.UnlockAndResolvedGraphics(GraphicsDevice);
+        (fontResourceStore as DeferredResourceStore<Font>)?.UnlockAndResolvedGraphics(GraphicsDevice);
+        (meshResourceStore as DeferredResourceStore<Mesh>)?.UnlockAndResolvedGraphics(GraphicsDevice);
+
         fontResourceStore.Get("Synesthesia.Resources.Fonts.Quicksand-Regular.fna"); // cache
 
         game.UpdateThread.Schedule(() =>
         {
             game.GetInternalGameContainer().Load();
+            game.DrawableScene3D.Load();
             LoadFuture.Complete(this);
         });
     }
@@ -57,6 +64,11 @@ public class RenderThread(GraphicsDevice graphicsDevice) : ThreadRunner
         var gameContainer = game.GetInternalGameContainer();
 
         GraphicsDevice.BeginDrawing();
+
+        GraphicsDevice.Renderer3D.BeginDrawing();
+        game.DrawableScene3D.OnDraw();
+        GraphicsDevice.Renderer3D.EndDrawing();
+
         GraphicsDevice.Renderer2D.BeginDrawing();
 
         gameContainer.OnDraw();

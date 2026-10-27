@@ -4,6 +4,7 @@
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Events;
 using Synesthesia.Engine.Graphics.Textures;
+using Synesthesia.Engine.Graphics.Three;
 using Synesthesia.Engine.Graphics.Two.Container;
 using Synesthesia.Engine.Input;
 using Synesthesia.Engine.Logging;
@@ -78,7 +79,6 @@ public class Game
 
     public readonly IResourceStore<TextureAtlas> TextureAtlasResourceStore;
 
-
     private readonly InternalGameContainer2D internalGameContainer2D = new InternalGameContainer2D();
 
     /// <summary>
@@ -95,6 +95,9 @@ public class Game
     /// ];
     /// </code>
     public DrawableScene2D DrawableScene2D => internalGameContainer2D.DrawableScene2D;
+    public DrawableScene3D DrawableScene3D { get; } = new DrawableScene3D();
+
+    public readonly IResourceStore<Mesh> MeshResourceStore;
 
     /// <summary>
     /// Primary game class
@@ -107,6 +110,7 @@ public class Game
     public Game(
         IWindowHost gameWindowHost,
         Action<FallbackStoreBuilder<Texture>>? textureResourceStoreInitializer,
+        Action<FallbackStoreBuilder<Mesh>>? meshResourceStoreInitializer,
         Action<FallbackStoreBuilder<TextureAtlas>>? textureAtlasResourceStoreInitializer,
         Action<FallbackStoreBuilder<Font>>? fontResourceStoreInitializer,
         string windowName
@@ -130,12 +134,29 @@ public class Game
             .MakeDeferred()
             .Build();
 
+        MeshResourceStore = new ResourceStoreBuilder<Mesh>()
+            .AddLoaders(new Dictionary<string, Func<Stream, string, Mesh>>(StringComparer.Ordinal))
+            .AddFallback(fallback =>
+            {
+                fallback.AddBuiltIn(builder =>
+                {
+                    builder.AddGraphicsDeferred("default_cube", Cube3D.CreateSharedMesh);
+                });
+                fallback.AddFileSystemStore("Assets/Meshes/");
+                fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);
+                meshResourceStoreInitializer?.Invoke(fallback);
+            })
+            .MakeCached()
+            .MakeAsync()
+            .MakeDeferred()
+            .Build();
+
         TextureResourceStore = new ResourceStoreBuilder<Texture>()
             .AddLoaders(new Dictionary<string, Func<Stream, string, Texture>>(StringComparer.Ordinal)
             {
-                { "png", (stream, _) => ResourceLoaders.LoadTexture(stream) },
-                { "bmp", (stream, _) => ResourceLoaders.LoadTexture(stream) },
-                { "jpg", (stream, _) => ResourceLoaders.LoadTexture(stream) },
+                { "png", (stream, name) => ResourceLoaders.LoadTexture(stream, name) },
+                { "bmp", (stream, name) => ResourceLoaders.LoadTexture(stream, name) },
+                { "jpg", (stream, name) => ResourceLoaders.LoadTexture(stream, name) },
             })
             .AddFallback(fallback =>
             {
@@ -170,6 +191,7 @@ public class Game
         DependencyContainer.AddSingleton(this);
         DependencyContainer.AddSingleton(FontResourceStore);
         DependencyContainer.AddSingleton(TextureResourceStore);
+        DependencyContainer.AddSingleton(MeshResourceStore);
         DependencyContainer.AddSingleton(InputHandler);
         DependencyContainer.AddSingleton(InputThread);
         DependencyContainer.AddSingleton(WindowHost);
@@ -196,6 +218,7 @@ public class Game
 
             DependencyContainer.AddSingleton(renderThread.GraphicsDevice);
             DependencyContainer.AddSingleton(renderThread.GraphicsDevice.Renderer2D);
+            DependencyContainer.AddSingleton(renderThread.GraphicsDevice.Renderer3D);
             DependencyContainer.AddSingleton(renderThread);
 
             WindowHost.Surface.ReleaseOwnership();
@@ -234,4 +257,6 @@ public class Game
     }
 
     public InternalGameContainer2D GetInternalGameContainer() => internalGameContainer2D;
+
+    public void Exit() => Environment.Exit(0);
 }

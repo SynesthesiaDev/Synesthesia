@@ -200,7 +200,7 @@ public class Box2D : Drawable2D
             renderer.ClearCurrentTarget();
 
             renderer.DrawQuad(
-                drawMatrix: DrawMatrix.IDENTITY, position: Vector2.Zero, size: targetSize,
+                drawMatrix: DrawMatrix.Identity, position: Vector2.Zero, size: targetSize,
                 packedColor: packedColor, alpha: 1f,
                 borderThickness: 0, borderHasSingleColor: true, borderColor: Matrix4x4.Identity,
                 cornerRadius: 0, texture: Texture, textureCoord: uvCoords,

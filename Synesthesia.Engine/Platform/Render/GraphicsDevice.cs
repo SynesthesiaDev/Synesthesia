@@ -6,9 +6,11 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using SDL3;
 using Silk.NET.OpenGL;
-using Synesthesia.Engine.Graphics.Shaders;
+using Synesthesia.Engine.Graphics;
+using Synesthesia.Engine.Graphics.Materials;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Logging;
+using Synesthesia.Engine.Shaders;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Util.Exceptions;
 using Synesthesia.Engine.Util.Statistics;
@@ -34,14 +36,12 @@ public class GraphicsDevice
     private int stencilDepthStack;
 
     public Shader CurrentShader { get; private set; } = null!;
-    public Shader DefaultShader = null!;
-    public Shader StencilShader = null!;
 
     public int TextureShaderLocation;
     public int UseTextureShaderLocation;
 
     public Renderer2D Renderer2D = null!;
-    //Renderer3D
+    public Renderer3D Renderer3D = null!;
 
     public Texture? CurrentTexture { get; private set; }
     public TextureFilterMode CurrentTextureFilterMode { get; private set; } = TextureFilterMode.Linear;
@@ -66,6 +66,7 @@ public class GraphicsDevice
 
         openGlInitialized = true;
         Renderer2D = new Renderer2D(this);
+        Renderer3D = new Renderer3D(this);
 
         PushViewport();
 
@@ -93,6 +94,8 @@ public class GraphicsDevice
         private set;
     } = null!;
 
+    public DefaultMaterial DefaultMaterial = null!;
+
     public bool CanDraw => BackBufferWidth > 0 && BackBufferHeight > 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -103,14 +106,19 @@ public class GraphicsDevice
 
     public void CompileDefaultShaders()
     {
-        DefaultShader = new Shader(OpenGL, ShaderSources.DefaultVertex, ShaderSources.DefaultFragment);
-        StencilShader = new Shader(OpenGL, ShaderSources.DefaultVertex, ShaderSources.StencilFragment);
-        BindShader(DefaultShader);
+        BuiltInShaders.Initialize(this);
+        DefaultMaterial = DefaultMaterial.From("Default Material", Color.White);
+        DefaultMaterial.CacheUniformLocations();
+
+        BindShader(BuiltInShaders.DefaultShader2D);
     }
 
     public void FlushAllVertexBuffers()
     {
-        Renderer2D.FlushVertexBatch();
+        if (CurrentShader.Kind == ShaderKind.Two)
+            Renderer2D.FlushVertexBatch();
+        else
+            Renderer3D.FlushVertexBatch();
     }
 
     public void BindShader(Shader shader)
@@ -119,17 +127,20 @@ public class GraphicsDevice
 
         if (CurrentShader == shader) return;
 
+        CurrentShader ??= shader;
+
         // Flush any pending vertices BEFORE swapping shaders
-        if (openGlInitialized)
-        {
-            Renderer2D.VertexBatch.Flush();
-        }
+        if (openGlInitialized) FlushAllVertexBuffers();
 
         CurrentShader = shader;
         shader.Use();
 
         cacheShaderUniformLocations();
-        Renderer2D.UpdateShaderMatrix();
+
+        if (CurrentShader.Kind == ShaderKind.Two)
+            Renderer2D.UpdateShaderMatrix();
+        else
+            Renderer3D.UpdateShaderMatrix();
 
         if (CurrentTexture != null)
         {
@@ -145,7 +156,7 @@ public class GraphicsDevice
     public void UnbindShader()
     {
         ThreadSafety.AssertRunningOnRenderThread();
-        BindShader(DefaultShader);
+        BindShader(BuiltInShaders.DefaultShader2D);
 
         Renderer2D.UpdateShaderMatrix();
     }
@@ -155,7 +166,18 @@ public class GraphicsDevice
         TextureShaderLocation = CurrentShader.GetUniformLocation(shader_uniform_texture);
         UseTextureShaderLocation = CurrentShader.GetUniformLocation(shader_uniform_use_texture);
 
-        Renderer2D.CacheUniformLocations();
+
+        if (CurrentShader.Kind == ShaderKind.Two)
+            Renderer2D.CacheGlobalUniformLocations();
+        else
+            Renderer3D.CacheGlobalUniformLocations();
+    }
+
+    public void BindMaterial(Material? material)
+    {
+        material ??= DefaultMaterial;
+        if(!material.UniformLocationsCached) material.CacheUniformLocations();
+        material.Bind(this);
     }
 
     public void BindTexture(Texture? texture, TextureFilterMode mode = TextureFilterMode.Linear)
@@ -175,9 +197,9 @@ public class GraphicsDevice
             {
                 var (min, mag) = mode switch
                 {
-                    TextureFilterMode.Nearest      => ((int)TextureMinFilter.Nearest, (int)TextureMagFilter.Nearest),
+                    TextureFilterMode.Nearest => ((int)TextureMinFilter.Nearest, (int)TextureMagFilter.Nearest),
                     TextureFilterMode.Trilinear => ((int)TextureMinFilter.LinearMipmapLinear, (int)TextureMagFilter.Linear),
-                    _                               => ((int)TextureMinFilter.Linear, (int)TextureMagFilter.Linear)
+                    _ => ((int)TextureMinFilter.Linear, (int)TextureMagFilter.Linear)
                 };
                 OpenGL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, min);
                 OpenGL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, mag);
@@ -236,9 +258,10 @@ public class GraphicsDevice
     public void EndDrawing()
     {
         EnsureInitialized();
+        DrawStatistics.TakeSnapshot();
 
         Surface.SwapBuffers();
-        BindTexture(null);
+        BindTexture(texture: null);
         ClearFlags = DEFAULT_CLEAR_FLAGS;
     }
 
@@ -262,8 +285,9 @@ public class GraphicsDevice
         unsafe
         {
             OpenGL.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba,
-                (uint)size.X, (uint)size.Y, 0, format, PixelType.UnsignedByte, null);
+                (uint)size.X, (uint)size.Y, 0, format, PixelType.UnsignedByte, pixels: null);
         }
+
         OpenGL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
         OpenGL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
         OpenGL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0,
@@ -292,17 +316,17 @@ public class GraphicsDevice
     public void BeginStencilMask()
     {
         OpenGL.Enable(EnableCap.Multisample);
-        OpenGL.ColorMask(false, false, false, false);
+        OpenGL.ColorMask(red: false, green: false, blue: false, alpha: false);
 
         OpenGL.StencilFunc(StencilFunction.Equal, stencilDepthStack - 1, 0xFF);
         OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr);
 
-        BindShader(StencilShader);
+        BindShader(BuiltInShaders.StencilShader2D);
     }
 
     public void EndStencilMask()
     {
-        OpenGL.ColorMask(true, true, true, true);
+        OpenGL.ColorMask(red: true, green: true, blue: true, alpha: true);
 
         OpenGL.StencilFunc(StencilFunction.Equal, stencilDepthStack, 0xFF);
         OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
@@ -324,18 +348,18 @@ public class GraphicsDevice
             OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
         }
 
-        OpenGL.ColorMask(true, true, true, true);
+        OpenGL.ColorMask(red: true, green: true, blue: true, alpha: true);
         UnbindShader();
     }
 
     public void BeginStencilRestore()
     {
         OpenGL.Enable(EnableCap.Multisample);
-        OpenGL.ColorMask(false, false, false, false);
+        OpenGL.ColorMask(red: false, green: false, blue: false, alpha: false);
 
         OpenGL.StencilFunc(StencilFunction.Equal, stencilDepthStack, 0xFF);
         OpenGL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Decr);
 
-        BindShader(StencilShader);
+        BindShader(BuiltInShaders.StencilShader2D);
     }
 }

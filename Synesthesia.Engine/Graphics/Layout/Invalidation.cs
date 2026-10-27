@@ -36,5 +36,10 @@ public enum Invalidation
     /// </summary>
     DrawNode = 1 << 3,
 
-    All = Geometry | Layout | Size | DrawNode,
+    /// <summary>
+    /// Affects only 3D: Camera view matrix state
+    /// </summary>
+    CameraView = 1 << 4,
+
+    All = Geometry | Layout | Size | DrawNode | CameraView,
 }

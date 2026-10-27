@@ -10,7 +10,7 @@ namespace Synesthesia.Engine.Graphics;
 
 public class DrawMatrix : IPooledObject, IEquatable<DrawMatrix>
 {
-    public static readonly DrawMatrix IDENTITY = new DrawMatrix();
+    public static DrawMatrix Identity => new DrawMatrix();
 
     public Matrix4x4 Matrix { get; set; } = Matrix4x4.Identity;
 
@@ -44,6 +44,15 @@ public class DrawMatrix : IPooledObject, IEquatable<DrawMatrix>
 
         Matrix = Matrix4x4.CreateFromAxisAngle(axis, rads) * Matrix;
         InverseMatrix *= Matrix4x4.CreateFromAxisAngle(axis, -rads);
+    }
+
+    public void Rotate(Quaternion quaternion)
+    {
+        var rotationMatrix = Matrix4x4.CreateFromQuaternion(quaternion);
+        Matrix = rotationMatrix * Matrix; // Change to left-multiplication
+
+        var inverse = Matrix4x4.CreateFromQuaternion(Quaternion.Inverse(quaternion));
+        InverseMatrix = inverse * InverseMatrix;
     }
 
     public void RotateAround(Vector2 pivot, float degrees)

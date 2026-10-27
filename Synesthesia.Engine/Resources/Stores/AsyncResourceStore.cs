@@ -1,14 +1,16 @@
 // Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Util.Future;
 
 namespace Synesthesia.Engine.Resources.Stores;
 
-public class AsyncResourceStore<T>(IResourceStore<T> underlyingStore) : IAsyncResourceStore<T>
+public class AsyncResourceStore<T>(IResourceStore<T> underlyingStore) : IAsyncResourceStore<T>, IHasUnderlyingStore<T>, IResolvesGraphicsDeferred
 {
-
     private readonly Dictionary<string, CompletableFuture<T>> inflight = new(StringComparer.Ordinal);
+
+    public IResourceStore<T> UnderlyingResourceStore => underlyingStore;
 
     public CompletableFuture<T> GetAsync(string name)
     {
@@ -61,4 +63,11 @@ public class AsyncResourceStore<T>(IResourceStore<T> underlyingStore) : IAsyncRe
         inflight.Clear();
     }
 
+    public void ResolveGraphicsDeferred(GraphicsDevice graphicsDevice)
+    {
+        if (underlyingStore is IResolvesGraphicsDeferred deferred)
+        {
+            deferred.ResolveGraphicsDeferred(graphicsDevice);
+        }
+    }
 }

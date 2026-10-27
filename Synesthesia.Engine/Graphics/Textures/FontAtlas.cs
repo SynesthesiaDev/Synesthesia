@@ -15,7 +15,7 @@ public class FontAtlas : IDisposable
         "ěščřžýáíéůúťďňĚŠČŘŽÝÁÍÉŮÚŤĎŇ" +
         "äöüßÄÖÜñçàèìòùÀÈÌÒÙ" +
         "€$£¥©®™°±«»„“”“‘’…–—" +
-        "¿¡†‡§●⬤";
+        "¿¡†‡§●⬤±";
 
     public const int RENDER_SIZE = 64;
 
@@ -46,9 +46,9 @@ public class FontAtlas : IDisposable
 
     public FontAtlas() => EngineStatistics.Increment(EngineStatistics.Type.FontAtlases);
 
-    public static FontAtlas Generate(FreeTypeFaceFacade face, string charset = default_charset)
+    public static FontAtlas Generate(string name, FreeTypeFaceFacade face, string charset = default_charset)
     {
-        var builder = new TextureAtlasBuilder();
+        var builder = new TextureAtlasBuilder(name);
         var glyphMeta = new Dictionary<char, (Vector2 bearing, int advance)>();
         builder.SetPadding(8);
 

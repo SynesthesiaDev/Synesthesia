@@ -22,13 +22,13 @@ public class WindowsSleep : INativeSleep
         try
         {
             // Attempt to use CREATE_WAITABLE_TIMER_HIGH_RESOLUTION, only available since Windows 10, version 1803.
-            waitableTimer = CreateWaitableTimerEx(IntPtr.Zero, null,
+            waitableTimer = CreateWaitableTimerEx(IntPtr.Zero, lpTimerName: null,
                 CreateWaitableTimerFlags.CreateWaitableTimerManualReset | CreateWaitableTimerFlags.CreateWaitableTimerHighResolution, TIMER_ALL_ACCESS);
 
             if (waitableTimer == IntPtr.Zero)
             {
                 // Fall back to a more supported version. This is still far more accurate than Thread.Sleep.
-                waitableTimer = CreateWaitableTimerEx(IntPtr.Zero, null, CreateWaitableTimerFlags.CreateWaitableTimerManualReset, TIMER_ALL_ACCESS);
+                waitableTimer = CreateWaitableTimerEx(IntPtr.Zero, lpTimerName: null, CreateWaitableTimerFlags.CreateWaitableTimerManualReset, TIMER_ALL_ACCESS);
             }
         }
         catch

@@ -16,6 +16,7 @@ namespace Synesthesia.Engine.Graphics.Two.Text;
 public class Text2D : Drawable2D
 {
     private const float spread = 8f;
+    private const string default_font_atlas = "Synesthesia.Resources.Fonts.MapleMono-ExtraLight.fna";
 
     [Singleton]
     private Renderer2D renderer = null!;
@@ -57,7 +58,7 @@ public class Text2D : Drawable2D
 
     protected override void OnLoading()
     {
-        defaultFont = fontResourceStore.Get("Synesthesia.Resources.Fonts.Quicksand-Regular.fna");
+        defaultFont = fontResourceStore.Get(default_font_atlas);
         Font = defaultFont;
         base.OnLoading();
     }

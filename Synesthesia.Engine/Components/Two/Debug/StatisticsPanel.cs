@@ -31,7 +31,8 @@ public class StatisticsPanel : EngineDebugElement
         new DrawStatisticLine(DrawStatistics.Type.Invalidations),
         new Spacer(),
         new DrawStatisticLine(DrawStatistics.Type.DrawCalls2D),
-        new DrawStatisticLine(DrawStatistics.Type.SupersamplingDraws),
+        new DrawStatisticLine(DrawStatistics.Type.DrawCalls3D),
+        //new DrawStatisticLine(DrawStatistics.Type.SupersamplingDraws),
         new DrawStatisticLine(DrawStatistics.Type.TextureBinds),
         new DrawStatisticLine(DrawStatistics.Type.ShaderBinds),
         new DrawStatisticLine(DrawStatistics.Type.TextureUploadQueue),
@@ -50,9 +51,9 @@ public class StatisticsPanel : EngineDebugElement
         new EngineStatisticLine(EngineStatistics.Type.Animations),
         new Spacer(),
         new EngineStatisticLine(EngineStatistics.Type.TextureAtlases),
-        new EngineStatisticLine(EngineStatistics.Type.FontAtlases),
+        //new EngineStatisticLine(EngineStatistics.Type.FontAtlases),
         new EngineStatisticLine(EngineStatistics.Type.CachedResourceStoreSize),
-        new EngineStatisticLine(EngineStatistics.Type.ColorCacheSize),
+        //new EngineStatisticLine(EngineStatistics.Type.ColorCacheSize),
         new EngineStatisticLine(EngineStatistics.Type.DependenciesResolved)
     );
 
@@ -111,7 +112,7 @@ public class StatisticsPanel : EngineDebugElement
 
     private class EngineStatisticLine(EngineStatistics.Type type) : StatisticLine(type.ToString(), () => EngineStatistics.Get(type));
 
-    private class DrawStatisticLine(DrawStatistics.Type type) : StatisticLine(type.ToString(), () => DrawStatistics.Get(type));
+    private class DrawStatisticLine(DrawStatistics.Type type) : StatisticLine(type.ToString(), () => DrawStatistics.LATEST_SNAPSHOT.Get(type));
 
     private class Spacer : Line
     {
@@ -150,7 +151,7 @@ public class StatisticsPanel : EngineDebugElement
             ];
         }
 
-        private ThrottledUpdater statUpdater = new(100);
+        private ThrottledUpdater statUpdater = new(32);
 
         protected internal override void OnUpdate(FrameInfo frameInfo)
         {

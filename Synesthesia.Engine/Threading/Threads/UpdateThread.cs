@@ -27,6 +27,7 @@ public class UpdateThread : ThreadRunner
         var gameContainer = game.GetInternalGameContainer();
 
         gameContainer.Size = windowSize;
+        game.DrawableScene3D.OnUpdate(frameInfo);
         gameContainer.OnUpdate(frameInfo);
     }
 

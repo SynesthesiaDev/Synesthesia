@@ -13,6 +13,8 @@ public class FrameStatistics
 
     public double AverageFrameTime { get; private set; }
 
+    public void Clear() => frameTimes.Clear();
+
     public void Add(double frameTime)
     {
         frameTimes.Enqueue(frameTime);

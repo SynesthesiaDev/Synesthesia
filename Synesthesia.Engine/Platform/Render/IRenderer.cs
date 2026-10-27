@@ -5,14 +5,14 @@ using Synesthesia.Engine.Graphics;
 
 namespace Synesthesia.Engine.Platform.Render;
 
-public interface IRenderer<T> where T : unmanaged
+public interface IRenderer<T> where T : unmanaged, IVertex
 {
     void BeginDrawing();
     void EndDrawing();
     void FlushVertexBatch();
 
     void UpdateShaderMatrix();
-    void CacheUniformLocations();
+    void CacheGlobalUniformLocations();
 
     VertexBatch<T> VertexBatch { get; }
 }

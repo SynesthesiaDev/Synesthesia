@@ -10,4 +10,5 @@ public interface IResourceStore<T> : IDisposable
     T? GetOrNull(string name);
 
     IEnumerable<string> List(string prefix = "");
+
 }

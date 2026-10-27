@@ -257,4 +257,6 @@ public readonly struct Color : IEquatable<Color>
     {
         return $"Color({R}, {G}, {B}, {A})";
     }
+
+    public string ToStringRaw() => string.Create(CultureInfo.InvariantCulture, $"{R}, {G}, {B}, {A}");
 }

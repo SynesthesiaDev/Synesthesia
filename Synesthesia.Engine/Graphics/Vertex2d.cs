@@ -21,7 +21,7 @@ public readonly struct Vertex2D(
     float borderThickness,
     bool hasSingleColor,
     Matrix4x4 borderColor
-)
+): IVertex
 {
     [VertexInfo(0, 2, VertexAttribPointerType.Float)]
     public readonly Vector2 Position = position;

@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Numerics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using OpenTabletDriver.Plugin.Tablet;
 using Synesthesia.Engine.Dependency;
@@ -52,11 +53,11 @@ public class SDL3WindowHost : IWindowHost
 
     public EventDispatcher<Vector4> OnSafeAreaChanged { get; } = new EventDispatcher<Vector4>();
 
-    public Bindable<bool> CursorInWindow { get; } = new Bindable<bool>(false);
+    public Bindable<bool> CursorInWindow { get; } = new Bindable<bool>(defaultInternalValue: false);
 
     public Bindable<WindowState> WindowState { get; } = new Bindable<WindowState>(Platform.WindowState.Normal);
 
-    public Bindable<bool> WindowActive { get; } = new Bindable<bool>(false);
+    public Bindable<bool> WindowActive { get; } = new Bindable<bool>(defaultInternalValue: false);
 
     #endregion
 
@@ -83,6 +84,19 @@ public class SDL3WindowHost : IWindowHost
     private volatile uint pressedMouseButtons;
 
     private PointF previousMousePolledPoint = PointF.Empty;
+
+    public void SetMouseCaptured(bool captured)
+    {
+        Schedule(() =>
+        {
+            SetWindowRelativeMouseMode(Surface.WindowHandle, captured);
+            if (captured)
+                HideCursor();
+            else
+                ShowCursor();
+
+        });
+    }
 
     public IClipboard Clipboard { get; } = new SDL3Clipboard();
 
@@ -126,6 +140,7 @@ public class SDL3WindowHost : IWindowHost
     /// Schedule an action to be run on the next SDL frame
     /// </summary>
     /// <param name="action">Action to be run</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Schedule(Action action)
     {
         commandQueue.Enqueue(action);
@@ -187,8 +202,9 @@ public class SDL3WindowHost : IWindowHost
             SetLogOutputFunction(Logger.SDLLog, IntPtr.Zero);
 
             SetHint(Hints.WindowsCloseOnAltF4, "0").LogErrorIfFailed();
-            SetHint(Hints.MouseRelativeModeCenter, "0").LogErrorIfFailed();
+            SetHint(Hints.MouseRelativeModeCenter, "1").LogErrorIfFailed();
             SetHint(Hints.IMEImplementedUI, "composition").LogErrorIfFailed();
+            SetHint(Hints.MouseRelativeCursorVisible, "0").LogErrorIfFailed();
 
             GLSetAttribute(GLAttr.ContextMajorVersion, 3).LogErrorIfFailed();
             GLSetAttribute(GLAttr.ContextMinorVersion, 3).LogErrorIfFailed();
@@ -328,11 +344,11 @@ public class SDL3WindowHost : IWindowHost
             Interlocked.And(ref pressedMouseButtons, (uint)~buttonsToRelease);
             var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Left)) handleMouseButton(MouseButton.Left, false, timestamp);
-            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Middle)) handleMouseButton(MouseButton.Middle, false, timestamp);
-            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Right)) handleMouseButton(MouseButton.Right, false, timestamp);
-            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.X1)) handleMouseButton(MouseButton.Button1, false, timestamp);
-            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.X2)) handleMouseButton(MouseButton.Button2, false, timestamp);
+            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Left)) handleMouseButton(MouseButton.Left, down: false, timestamp);
+            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Middle)) handleMouseButton(MouseButton.Middle, down: false, timestamp);
+            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.Right)) handleMouseButton(MouseButton.Right, down: false, timestamp);
+            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.X1)) handleMouseButton(MouseButton.Button1, down: false, timestamp);
+            if (buttonsToRelease.HasFlagFast(MouseButtonFlags.X2)) handleMouseButton(MouseButton.Button2, down: false, timestamp);
         }
     }
 
@@ -410,7 +426,7 @@ public class SDL3WindowHost : IWindowHost
                 MinimizeWindow(handle).LogErrorIfFailed();
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(windowState), windowState, null);
+                throw new ArgumentOutOfRangeException(nameof(windowState), windowState, message: null);
         }
     }
 
@@ -425,7 +441,7 @@ public class SDL3WindowHost : IWindowHost
         {
             case EventType.Quit:
             {
-                ExitRequested.Dispatch(true);
+                ExitRequested.Dispatch(value: true);
                 WindowExists = false;
                 break;
             }
@@ -513,7 +529,18 @@ public class SDL3WindowHost : IWindowHost
             case EventType.WindowFocusGained:
                 WindowActive.Value = true;
                 break;
+
+            case EventType.MouseWheel:
+                handleMouseWheelEvent(sdlEvent.Wheel);
+                break;
         }
+    }
+
+    private void handleMouseWheelEvent(MouseWheelEvent mouseWheelEvent)
+    {
+        var eVent = InputHandler.MOUSE_SCROLL_INPUT_EVENT_POOL.Rent();
+        eVent.Delta = mouseWheelEvent.Y;
+        inputHandler.Enqueue(eVent);
     }
 
     private void handleInternalMouseButtonEvent(MouseButtonEvent mouseButtonEvent)
@@ -563,7 +590,8 @@ public class SDL3WindowHost : IWindowHost
         {
             var mouseEvent = MouseMoveInputEvent.Rent();
             mouseEvent.Timestamp = timestamp;
-            mouseEvent.PositionDelta = new Vector2(mouseMotionEvent.X, mouseMotionEvent.Y);
+            // mouseEvent.PositionDelta = new Vector2(mouseMotionEvent.X, mouseMotionEvent.Y);
+            mouseEvent.PositionDelta = new Vector2(mouseMotionEvent.XRel, mouseMotionEvent.YRel);
 
             inputHandler.Enqueue(mouseEvent);
         }

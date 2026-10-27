@@ -40,18 +40,6 @@ public abstract class Drawable2D : Drawable
         }
     } = 0;
 
-    public bool Visible {
-        get;
-        set
-        {
-            if(field == value) return;
-            field = value;
-
-            Invalidate(Invalidation.Size | Invalidation.Layout | Invalidation.Size);
-        }
-
-    } = true;
-
     public float Width
     {
         get;
@@ -64,6 +52,18 @@ public abstract class Drawable2D : Drawable
             invalidateChildrenIfComposite(Invalidation.Size | Invalidation.Geometry);
         }
     } = 0f;
+
+    public bool Visible {
+        get;
+        set
+        {
+            if(field == value) return;
+            field = value;
+
+            Invalidate(Invalidation.Size | Invalidation.Layout | Invalidation.Size);
+        }
+
+    } = true;
 
     public float Height
     {
