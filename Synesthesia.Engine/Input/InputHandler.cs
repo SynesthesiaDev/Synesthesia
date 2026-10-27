@@ -262,15 +262,13 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
 
     public void SetMouseCaptured(bool captured)
     {
-        game.WindowHost.SetMouseCaptured(captured);
-
-        if (captured)
+        lock (mouse_delta_lock)
         {
-            lock (mouse_delta_lock)
-            {
-                accumulatedMouseDelta = Vector2.Zero;
-            }
+            Logger.Verbose("reset mouse delta");
+            accumulatedMouseDelta = Vector2.Zero;
+            lastMousePosition = Vector2.Zero;
         }
+        game.WindowHost.SetMouseCaptured(captured);
     }
 
     private void handleKeyboardInput(KeyboardInputEvent keyboardInputEvent)
