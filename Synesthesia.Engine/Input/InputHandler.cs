@@ -264,7 +264,6 @@ public sealed class InputHandler(Game game) : IFrameProcessor, IDisposable
     {
         lock (mouse_delta_lock)
         {
-            Logger.Verbose("reset mouse delta");
             accumulatedMouseDelta = Vector2.Zero;
             lastMousePosition = Vector2.Zero;
         }

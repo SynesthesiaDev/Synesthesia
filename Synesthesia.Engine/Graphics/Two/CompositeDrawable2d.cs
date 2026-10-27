@@ -273,19 +273,34 @@ public class CompositeDrawable2D : Drawable2D
 
             float minX = float.MaxValue, minY = float.MaxValue;
             float maxX = float.MinValue, maxY = float.MinValue;
+            bool anyX = false, anyY = false;
 
             for (int i = 0; i < InternalChildren.Count; i++)
             {
                 var child = InternalChildren[i];
                 var scaledSize = child.Size * child.Scale;
 
-                minX = Math.Min(minX, child.Position.X);
-                minY = Math.Min(minY, child.Position.Y);
-                maxX = Math.Max(maxX, child.Position.X + scaledSize.X);
-                maxY = Math.Max(maxY, child.Position.Y + scaledSize.Y);
+                // Don't let a child that fills us on an axis drive our size on that axis.
+                var useX = !(child.RelativeSizeAxes.HasFlagFast(Axes.X) && AutoSizeAxes.HasFlagFast(Axes.X));
+                var useY = !(child.RelativeSizeAxes.HasFlagFast(Axes.Y) && AutoSizeAxes.HasFlagFast(Axes.Y));
+
+                if (useX)
+                {
+                    minX = Math.Min(minX, child.Position.X);
+                    maxX = Math.Max(maxX, child.Position.X + scaledSize.X);
+                    anyX = true;
+                }
+                if (useY)
+                {
+                    minY = Math.Min(minY, child.Position.Y);
+                    maxY = Math.Max(maxY, child.Position.Y + scaledSize.Y);
+                    anyY = true;
+                }
             }
 
-            return new Vector2(maxX - minX, maxY - minY);
+            return new Vector2(
+                anyX ? maxX - minX : 0f,
+                anyY ? maxY - minY : 0f);
         }
     }
 

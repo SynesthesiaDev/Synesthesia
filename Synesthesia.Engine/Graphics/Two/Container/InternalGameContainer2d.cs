@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using Synesthesia.Engine.Components.Two.Debug;
+using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Layout;
 
 namespace Synesthesia.Engine.Graphics.Two.Container;
@@ -9,6 +10,7 @@ namespace Synesthesia.Engine.Graphics.Two.Container;
 public class InternalGameContainer2D : CompositeDrawable2D
 {
     public DrawableScene2D DrawableScene2D { get; private set; } = null!;
+    private EngineDebugOverlay debugOverlay = null!;
 
     protected override void OnLoading()
     {
@@ -18,10 +20,12 @@ public class InternalGameContainer2D : CompositeDrawable2D
             {
                 RelativeSizeAxes = Axes.Both
             },
-            new EngineDebugOverlay
+            debugOverlay = new EngineDebugOverlay
             {
                 RelativeSizeAxes = Axes.Both,
             },
         ];
+
+        DependencyContainer.AddSingleton(debugOverlay);
     }
 }

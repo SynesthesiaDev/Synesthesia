@@ -19,7 +19,8 @@ internal static class Demo
 
         game.OnInitialized.Subscribe(_ =>
         {
-            var catto = DefaultMaterial.From(game.TextureResourceStore.Get("Synesthesia.Resources.Textures.cat.png"));
+            // var catto = DefaultMaterial.From(game.TextureResourceStore.Get("Synesthesia.Resources.Textures.cat.png"));
+            var prototype = new PrototypeMaterial();
             game.DrawableScene3D.Children =
             [
                 new EditorController
@@ -34,7 +35,7 @@ internal static class Demo
                 {
                     Position = new Vector3(Rng.RandomFloat(-30f, 30f), Rng.RandomFloat(-30f, 30f), Rng.RandomFloat(-30f, 30f)),
                     Rotation = new Vector3(Rng.RandomFloat(-20f, 20f), Rng.RandomFloat(-10f, 10f), Rng.RandomFloat(-10f, 10f)),
-                    Material = catto
+                    Material = prototype
                 });
             }
 
