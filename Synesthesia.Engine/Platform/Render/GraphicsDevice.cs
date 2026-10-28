@@ -124,6 +124,7 @@ public class GraphicsDevice
     public void BindShader(Shader shader)
     {
         ThreadSafety.AssertRunningOnRenderThread();
+        if(!shader.IsUploaded) shader.Upload(this);
 
         if (CurrentShader == shader) return;
 

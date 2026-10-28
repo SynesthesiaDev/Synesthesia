@@ -51,10 +51,11 @@ public class Cube3D : Drawable3D
             var b = Vector3.Cross(n, t);
 
             int baseIndex = vertices.Count;
-            vertices.Add(new Vertex3D(n - t - b,  n, t, 0xFFFFFFFF, new Vector2(0, 1)));
-            vertices.Add(new Vertex3D(n + t - b,  n, t, 0xFFFFFFFF, new Vector2(1, 1)));
-            vertices.Add(new Vertex3D(n + t + b,  n, t, 0xFFFFFFFF, new Vector2(1, 0)));
-            vertices.Add(new Vertex3D(n - t + b,  n, t, 0xFFFFFFFF, new Vector2(0, 0)));
+
+            vertices.Add(new Vertex3D((n - t - b) * 0.5f,  n, t, 0xFFFFFFFF, new Vector2(0, 1)));
+            vertices.Add(new Vertex3D((n + t - b) * 0.5f,  n, t, 0xFFFFFFFF, new Vector2(1, 1)));
+            vertices.Add(new Vertex3D((n + t + b) * 0.5f,  n, t, 0xFFFFFFFF, new Vector2(1, 0)));
+            vertices.Add(new Vertex3D((n - t + b) * 0.5f,  n, t, 0xFFFFFFFF, new Vector2(0, 0)));
 
             // CCW
             indices.AddRange([

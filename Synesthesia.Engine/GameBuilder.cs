@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Reflection;
+using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Graphics.Three;
 using Synesthesia.Engine.Platform.Host;
@@ -16,11 +17,24 @@ public class GameBuilder
     private Action<FallbackStoreBuilder<TextureAtlas>>? textureAtlasResourceStoreInitializer;
     private Action<FallbackStoreBuilder<Font>>? fontResourceStoreInitializer;
     private Action<FallbackStoreBuilder<Mesh>>? meshResourceStoreInitializer;
+    private Action<FallbackStoreBuilder<Shader>>? shaderResourceStoreInitializer;
     private IWindowHost windowHost = new SDL3WindowHost();
 
     public GameBuilder AddTextureSources(Action<FallbackStoreBuilder<Texture>> action)
     {
         textureResourceStoreInitializer = action;
+        return this;
+    }
+
+    public GameBuilder AddShaderSources(Action<FallbackStoreBuilder<Shader>> action)
+    {
+        shaderResourceStoreInitializer = action;
+        return this;
+    }
+
+    public GameBuilder AddMeshSources(Action<FallbackStoreBuilder<Mesh>> action)
+    {
+        meshResourceStoreInitializer = action;
         return this;
     }
 
@@ -50,6 +64,14 @@ public class GameBuilder
 
     public Game Build()
     {
-        return new Game(windowHost, textureResourceStoreInitializer, meshResourceStoreInitializer, textureAtlasResourceStoreInitializer, fontResourceStoreInitializer, windowName);
+        return new Game(
+            windowHost,
+            textureResourceStoreInitializer,
+            meshResourceStoreInitializer,
+            textureAtlasResourceStoreInitializer,
+            fontResourceStoreInitializer,
+            shaderResourceStoreInitializer,
+            windowName
+        );
     }
 }

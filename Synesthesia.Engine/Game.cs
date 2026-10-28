@@ -3,6 +3,7 @@
 
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Events;
+using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Graphics.Three;
 using Synesthesia.Engine.Graphics.Two.Container;
@@ -55,6 +56,7 @@ public class Game
     /// </example>
     public readonly IResourceStore<Texture> TextureResourceStore;
 
+    public readonly IResourceStore<Shader> ShaderResourceStore;
 
     /// <summary>
     /// Resource store which contains Fonts. Is <see cref="CachedResourceStore{Font}"/>, <see cref="AsyncResourceStore{Font}"/>, and <see cref="DeferredResourceStore{Font}"/>.
@@ -113,6 +115,7 @@ public class Game
         Action<FallbackStoreBuilder<Mesh>>? meshResourceStoreInitializer,
         Action<FallbackStoreBuilder<TextureAtlas>>? textureAtlasResourceStoreInitializer,
         Action<FallbackStoreBuilder<Font>>? fontResourceStoreInitializer,
+        Action<FallbackStoreBuilder<Shader>>? shaderResourceStoreInitializer,
         string windowName
     )
     {
@@ -182,6 +185,21 @@ public class Game
             })
             .Build();
 
+        ShaderResourceStore = new ResourceStoreBuilder<Shader>()
+            .AddLoaders(new Dictionary<string, Func<Stream, string, Shader>>(StringComparer.Ordinal)
+            {
+                { "glsl", ResourceLoaders.LoadShader },
+            })
+            .AddFallback(fallback =>
+            {
+                fallback.AddFileSystemStore("Assets/Shaders/");
+                fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);
+                shaderResourceStoreInitializer?.Invoke(fallback);
+            })
+            .MakeCached()
+            .MakeDeferred()
+            .Build();
+
         WindowHost = gameWindowHost;
         InputHandler = new InputHandler(this);
         InputThread = new InputThread();
@@ -192,6 +210,7 @@ public class Game
         DependencyContainer.AddSingleton(FontResourceStore);
         DependencyContainer.AddSingleton(TextureResourceStore);
         DependencyContainer.AddSingleton(MeshResourceStore);
+        DependencyContainer.AddSingleton(ShaderResourceStore);
         DependencyContainer.AddSingleton(InputHandler);
         DependencyContainer.AddSingleton(InputThread);
         DependencyContainer.AddSingleton(WindowHost);

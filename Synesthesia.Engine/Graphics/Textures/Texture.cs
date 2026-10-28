@@ -59,8 +59,12 @@ public class Texture : IDisposable, INamedResource
         opengl.BindTexture(TextureTarget.Texture2D, Handle);
 
         gl.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
-        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 
         unsafe
         {
@@ -69,6 +73,13 @@ public class Texture : IDisposable, INamedResource
                 gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, (uint)Width, (uint)Height, 0, TextureData.PixelFormat, PixelType.UnsignedByte, ptr);
             }
         }
+
+        float maxAnisotropy = gl.GetFloat((GetPName)0x84FF);
+        if (maxAnisotropy > 1.0f)
+        {
+            gl.TexParameter(TextureTarget.Texture2D, (TextureParameterName)0x84FE, MathF.Min(maxAnisotropy, 16.0f));
+        }
+        gl.GenerateMipmap(TextureTarget.Texture2D);
 
         IsUploaded = true;
         UploadQueued = false;

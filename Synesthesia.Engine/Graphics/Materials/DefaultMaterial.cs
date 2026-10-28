@@ -33,7 +33,7 @@ public sealed class DefaultMaterial(string name) : Material
     public override void Bind(GraphicsDevice graphicsDevice)
     {
         graphicsDevice.BindShader(Shader);
-        if (Texture != null) graphicsDevice.BindTexture(Texture);
+        if (Texture != null) graphicsDevice.BindTexture(Texture, TextureFilterMode);
         Shader.SetVector4(tintUniformLocation, cachedTintVector);
     }
 
