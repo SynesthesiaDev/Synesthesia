@@ -73,7 +73,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Synesthesia.Resources\Synesthesia.Resources.csproj" />
     <ProjectReference Include="..\Synesthesia.NativeLibs\Synesthesia.NativeLibs.csproj" />
-    <ProjectReference Include="..\Synesthesia.SourceGenerators\Synesthesia.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

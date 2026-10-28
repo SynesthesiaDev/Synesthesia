@@ -37,6 +37,7 @@ public class EngineDebugOverlay : CompositeDrawable2D
 
     private FrameCounter frameCounter = null!;
     private StatisticsPanel statisticsPanel = null!;
+    private DebugPopup debugPopup = null!;
 
     protected override void OnLoading()
     {
@@ -74,10 +75,19 @@ public class EngineDebugOverlay : CompositeDrawable2D
                     },
                 ]
             },
+            debugPopup = new DebugPopup
+            {
+                Anchor = Anchor.BottomCentre,
+                Origin = Anchor.BottomCentre,
+                Y = -60,
+                Visible = false,
+            }
         ];
 
         base.OnLoading();
     }
+
+    public void PushPopup(string title, string text) => debugPopup.Push(title, text);
 
     protected override void LoadComplete()
     {

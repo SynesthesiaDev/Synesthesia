@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using Synesthesia.Engine.Dependency;
+using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Graphics.Three;
 using Synesthesia.Engine.Logging;
@@ -32,6 +33,9 @@ public class RenderThread(GraphicsDevice graphicsDevice) : ThreadRunner
     private IResourceStore<Mesh> meshResourceStore = null!;
 
     [Singleton]
+    private IResourceStore<Shader> shaderResourceStore = null!;
+
+    [Singleton]
     private Game game = null!;
 
     private bool isFirstSwap = true;
@@ -42,11 +46,13 @@ public class RenderThread(GraphicsDevice graphicsDevice) : ThreadRunner
         Logger.Verbose("Transferred renderer context ownership to Render Thread", Logger.Platform);
         hasContextOwnership = true;
 
-        GraphicsDevice.CompileDefaultShaders();
 
         (textureResourceStore as DeferredResourceStore<Texture>)?.UnlockAndResolvedGraphics(GraphicsDevice);
         (fontResourceStore as DeferredResourceStore<Font>)?.UnlockAndResolvedGraphics(GraphicsDevice);
         (meshResourceStore as DeferredResourceStore<Mesh>)?.UnlockAndResolvedGraphics(GraphicsDevice);
+        (shaderResourceStore as DeferredResourceStore<Shader>)?.UnlockAndResolvedGraphics(GraphicsDevice);
+
+        GraphicsDevice.CompileDefaultShaders();
 
         fontResourceStore.Get("Synesthesia.Resources.Fonts.Quicksand-Regular.fna"); // cache
 

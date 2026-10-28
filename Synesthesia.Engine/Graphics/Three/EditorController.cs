@@ -1,7 +1,9 @@
 ﻿// Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Globalization;
 using System.Numerics;
+using Synesthesia.Engine.Components.Two.Debug;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Extensions;
 using Synesthesia.Engine.Input;
@@ -14,6 +16,9 @@ public class EditorController : CompositeDrawable3D
 {
     [Singleton]
     private InputHandler inputHandler = null!;
+
+    [Singleton]
+    private EngineDebugOverlay debugOverlay = null!;
 
     public Camera Camera { get; set; } = null!;
 
@@ -108,6 +113,8 @@ public class EditorController : CompositeDrawable3D
                 Camera.Fov--;
             else
                 Camera.Fov++;
+
+            debugOverlay.PushPopup("Field of View", Camera.Fov.ToString(CultureInfo.InvariantCulture));
         }
         else
         {
@@ -117,9 +124,8 @@ public class EditorController : CompositeDrawable3D
                 Speed--;
 
             Speed = Math.Clamp(Speed, 1f, 100f);
+            debugOverlay.PushPopup("Camera Speed", Speed.ToString(CultureInfo.InvariantCulture));
         }
-
-
 
         return true;
     }

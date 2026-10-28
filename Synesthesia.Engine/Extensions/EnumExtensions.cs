@@ -18,4 +18,11 @@ public static class EnumExtensions
 
         return false;
     }
+
+    public static T Parse<T>(string value)
+    {
+        return (T) Enum.Parse(typeof(T), value, true);
+    }
+
+
 }

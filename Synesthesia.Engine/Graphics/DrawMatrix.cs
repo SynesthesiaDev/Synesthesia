@@ -49,7 +49,7 @@ public class DrawMatrix : IPooledObject, IEquatable<DrawMatrix>
     public void Rotate(Quaternion quaternion)
     {
         var rotationMatrix = Matrix4x4.CreateFromQuaternion(quaternion);
-        Matrix = rotationMatrix * Matrix; // Change to left-multiplication
+        Matrix = rotationMatrix * Matrix;
 
         var inverse = Matrix4x4.CreateFromQuaternion(Quaternion.Inverse(quaternion));
         InverseMatrix = inverse * InverseMatrix;

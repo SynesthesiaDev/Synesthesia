@@ -6,57 +6,66 @@ using System.Runtime.CompilerServices;
 using Faster.Map.Core;
 using Silk.NET.OpenGL;
 using Synesthesia.Engine.Logging;
+using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Resources;
 using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Util.Exceptions;
 using Synesthesia.Engine.Util.Statistics;
 
-
 namespace Synesthesia.Engine.Graphics;
 
-public class Shader : IDisposable, INamedResource
+public class Shader : INamedResource
 {
-    private readonly GL gl;
-    public readonly uint Program;
+    private GL gl = null!;
+    public uint Program;
     public readonly ShaderKind Kind;
+
+    private readonly string vertexCode;
+    private readonly string fragmentCode;
 
     private readonly DenseMap<string, int> uniformCache = new();
 
     public string ResourceName { get; }
+    public bool IsUploaded { get; private set; }
 
-    public Shader(string name, ShaderKind kind, GL openGl, string? vertexCode, string? fragmentCode)
+    public Shader(string name, ShaderKind kind, string? vertexCode, string? fragmentCode)
     {
-        ThreadSafety.AssertRunningOnRenderThread();
-
         ResourceName = name;
         Kind = kind;
-        gl = openGl;
 
-        if (vertexCode == null && fragmentCode == null) throw new OpenGLException("Cannot have both Vertex and Fragment shaders empty");
+        if (vertexCode == null || fragmentCode == null) throw new OpenGLException("Cannot have Vertex or Fragment shaders empty");
+        this.vertexCode = vertexCode;
+        this.fragmentCode = fragmentCode;
+    }
 
-        uint? vertexShader = null;
-        uint? fragmentShader = null;
+    public void Upload(GraphicsDevice graphics)
+    {
+        if(IsUploaded) return;
+        gl = graphics.OpenGL;
 
-        if (vertexCode != null) vertexShader = compileShader(ShaderType.VertexShader, vertexCode);
-        if (fragmentCode != null) fragmentShader = compileShader(ShaderType.FragmentShader, fragmentCode);
+        uint? vertexShader = compileShader(ShaderType.VertexShader, vertexCode);
+        uint? fragmentShader = compileShader(ShaderType.FragmentShader, fragmentCode);
 
         Program = gl.CreateProgram();
 
-        if (vertexShader != null) gl.AttachShader(Program, vertexShader.Value);
-        if (fragmentShader != null) gl.AttachShader(Program, fragmentShader.Value);
+        gl.AttachShader(Program, vertexShader.Value);
+        gl.AttachShader(Program, fragmentShader.Value);
         gl.LinkProgram(Program);
 
         gl.GetProgram(Program, ProgramPropertyARB.LinkStatus, out int success);
 
         if (success == 0) throw new OpenGLException($"Shader linking failed: {gl.GetProgramInfoLog(Program)}");
 
-        if (vertexShader != null) gl.DeleteShader(vertexShader.Value);
-        if (fragmentShader != null) gl.DeleteShader(fragmentShader.Value);
+        gl.DeleteShader(vertexShader.Value);
+        gl.DeleteShader(fragmentShader.Value);
+
+        IsUploaded = true;
+        Logger.Verbose($"Compiled {this}", Logger.Render);
     }
 
     public int GetUniformLocation(string uniform)
     {
-        ThreadSafety.AssertRunningOnRenderThread();
+        assertUploadedAndRenderThread();
 
         if (uniformCache.Get(uniform, out int cached))
             return cached;
@@ -78,14 +87,14 @@ public class Shader : IDisposable, INamedResource
         gl.GetShader(shader, ShaderParameterName.CompileStatus, out int success);
 
         var shaderId = success == 0 ? throw new OpenGLException($"Shader compilation failed: ({shaderType}): {gl.GetShaderInfoLog(shader)}") : shader;
-        Logger.Verbose($"Compiled {shaderType.ToString().Replace("Shader", string.Empty)} shader '{ResourceName}' with id {shaderId}", Logger.Render);
         return shaderId;
     }
 
     public void SetMatrix4(int location, Matrix4x4 matrix)
     {
         assertLocationNotInvalid(location);
-        ThreadSafety.AssertRunningOnRenderThread();
+        assertUploadedAndRenderThread();
+
         unsafe
         {
             gl.UniformMatrix4(location, 1, transpose: false, (float*)&matrix);
@@ -102,7 +111,8 @@ public class Shader : IDisposable, INamedResource
     public void SetFloat(int location, float value)
     {
         assertLocationNotInvalid(location);
-        ThreadSafety.AssertRunningOnRenderThread();
+        assertUploadedAndRenderThread();
+
         gl.Uniform1(location, value);
         DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }
@@ -116,7 +126,8 @@ public class Shader : IDisposable, INamedResource
     public void SetDouble(int location, double value)
     {
         assertLocationNotInvalid(location);
-        ThreadSafety.AssertRunningOnRenderThread();
+        assertUploadedAndRenderThread();
+
         gl.Uniform1(location, value);
         DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }
@@ -130,7 +141,8 @@ public class Shader : IDisposable, INamedResource
     public void SetInt(int location, int value)
     {
         assertLocationNotInvalid(location);
-        ThreadSafety.AssertRunningOnRenderThread();
+        assertUploadedAndRenderThread();
+
         gl.Uniform1(location, value);
         DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
     }
@@ -144,7 +156,7 @@ public class Shader : IDisposable, INamedResource
     public void SetVector2(int location, Vector2 value)
     {
         assertLocationNotInvalid(location);
-        ThreadSafety.AssertRunningOnRenderThread();
+        assertUploadedAndRenderThread();
 
         gl.Uniform2(location, value);
         DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
@@ -158,8 +170,8 @@ public class Shader : IDisposable, INamedResource
 
     public void SetVector3(int location, Vector3 value)
     {
+        assertUploadedAndRenderThread();
         assertLocationNotInvalid(location);
-        ThreadSafety.AssertRunningOnRenderThread();
 
         gl.Uniform3(location, value);
         DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
@@ -173,8 +185,8 @@ public class Shader : IDisposable, INamedResource
 
     public void SetVector4(int location, Vector4 value)
     {
+        assertUploadedAndRenderThread();
         assertLocationNotInvalid(location);
-        ThreadSafety.AssertRunningOnRenderThread();
 
         gl.Uniform4(location, value);
         DrawStatistics.Increment(DrawStatistics.Type.UniformUploads);
@@ -198,14 +210,17 @@ public class Shader : IDisposable, INamedResource
 
     public void Use()
     {
-        ThreadSafety.AssertRunningOnRenderThread();
+        assertUploadedAndRenderThread();
         gl.UseProgram(Program);
         DrawStatistics.Increment(DrawStatistics.Type.ShaderBinds);
     }
 
     public void Dispose()
     {
-        gl.DeleteProgram(Program);
+        if (IsUploaded)
+        {
+            gl.DeleteProgram(Program);
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -215,5 +230,13 @@ public class Shader : IDisposable, INamedResource
         throw new OpenGLException("Uninitialized or Invalid shader location -1");
     }
 
-    public override string ToString() => $"Shader(Name={ResourceName}, Program={Program}, CacheSize={uniformCache.Size})";
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void assertUploadedAndRenderThread()
+    {
+        ThreadSafety.AssertRunningOnRenderThread();
+        if(IsUploaded) return;
+        throw new OpenGLException("Shader has not been uploaded yet");
+    }
+
+    public override string ToString() => $"Shader(Name={ResourceName}, IsUploaded={IsUploaded}, Program={Program}, CacheSize={uniformCache.Size})";
 }

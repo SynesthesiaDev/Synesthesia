@@ -41,7 +41,7 @@ public class Renderer3D : IRenderer<Vertex3D>
     } = Vector3.Normalize(new Vector3(-0.4f, -1f, -0.3f));
 
     public Color LightColor { get; set; } = Color.White;
-    public float AmbientLight { get; set; } = 0.2f;
+    public float AmbientLight { get; set; } = 0.5f;
 
     public void BeginDrawing()
     {

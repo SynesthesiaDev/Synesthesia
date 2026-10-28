@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Resources;
 
@@ -14,6 +15,8 @@ public abstract class Material : INamedResource
     public BlendMode BlendMode { get; init; }
     public DepthTest DepthTest { get; init; }
     public FaceCulling FaceCulling { get; init; }
+
+    public TextureFilterMode TextureFilterMode { get; init; } = TextureFilterMode.Trilinear;
 
     public override string ToString() => Stringify();
 
