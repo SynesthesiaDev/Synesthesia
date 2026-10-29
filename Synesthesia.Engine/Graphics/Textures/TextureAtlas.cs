@@ -3,7 +3,7 @@
 
 using System.Numerics;
 using Codon.Binary;
-using Synesthesia.Engine.Extensions;
+using Synesthesia.Common.Utils;
 using Synesthesia.Engine.Resources;
 using Synesthesia.Engine.Util.Statistics;
 

@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.AssetGenerators
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.Parsers", "Synesthesia.Parsers\Synesthesia.Parsers.csproj", "{EE5A5AF1-29D1-425E-B2FF-B7718A16DA58}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synesthesia.Common", "Synesthesia.Common\Synesthesia.Common.csproj", "{0B888FF3-F888-4AA6-BCEB-420DD118547E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{EE5A5AF1-29D1-425E-B2FF-B7718A16DA58}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE5A5AF1-29D1-425E-B2FF-B7718A16DA58}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE5A5AF1-29D1-425E-B2FF-B7718A16DA58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B888FF3-F888-4AA6-BCEB-420DD118547E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B888FF3-F888-4AA6-BCEB-420DD118547E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B888FF3-F888-4AA6-BCEB-420DD118547E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B888FF3-F888-4AA6-BCEB-420DD118547E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -2,6 +2,9 @@
   <dictionary name="project">
     <words>
       <w>Coord</w>
+      <w>Paimon</w>
+      <w>paimon</w>
+      <w>tobj</w>
     </words>
   </dictionary>
 </component>

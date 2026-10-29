@@ -138,12 +138,16 @@ public class Game
             .Build();
 
         MeshResourceStore = new ResourceStoreBuilder<Mesh>()
-            .AddLoaders(new Dictionary<string, Func<Stream, string, Mesh>>(StringComparer.Ordinal))
+            .AddLoaders(new Dictionary<string, Func<Stream, string, Mesh>>(StringComparer.Ordinal)
+            {
+                { "obj", ResourceLoaders.LoadMesh },
+                { "tobj", ResourceLoaders.LoadMesh },
+            })
             .AddFallback(fallback =>
             {
                 fallback.AddBuiltIn(builder =>
                 {
-                    builder.AddGraphicsDeferred("default_cube", Cube3D.CreateSharedMesh);
+                    builder.AddGraphicsDeferred("default_cube", _ => Cube3D.CreateSharedMesh());
                 });
                 fallback.AddFileSystemStore("Assets/Meshes/");
                 fallback.AddAssemblyStream(AssemblyInfo.ResourceAssembly);

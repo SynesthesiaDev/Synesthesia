@@ -5,7 +5,6 @@ using System.Numerics;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Graphics.Commands;
 using Synesthesia.Engine.Graphics.Materials;
-using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Resources;
 
 namespace Synesthesia.Engine.Graphics.Three;
@@ -31,7 +30,7 @@ public class Cube3D : Drawable3D
         base.OnLoading();
     }
 
-    public static Mesh CreateSharedMesh(GraphicsDevice graphics)
+    public static Mesh CreateSharedMesh()
     {
         Vector3[] faceNormals =
         [
@@ -64,6 +63,6 @@ public class Cube3D : Drawable3D
             ]);
         }
 
-        return new Mesh("default_cube", graphics, [.. vertices], [.. indices]);
+        return new Mesh("default_cube", [.. vertices], [.. indices]);
     }
 }

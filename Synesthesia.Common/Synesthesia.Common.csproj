@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="DotNetty.Buffers" Version="0.7.6" />
+      <PackageReference Include="Faster.Map" Version="9.0.3" />
+      <PackageReference Include="SynesthesiaUtils" Version="2026.925.0" />
+    </ItemGroup>
+
+</Project>

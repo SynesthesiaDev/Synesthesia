@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using Synesthesia.Engine;
+using Synesthesia.Engine.Components.Three;
 using Synesthesia.Engine.Graphics.Materials;
 using Synesthesia.Engine.Graphics.Three;
 
@@ -20,6 +21,10 @@ internal static class Demo
                 new EditorController
                 {
                     Position = new Vector3(2, 0, 2)
+                },
+                new MicrowavablePaimonDrawable
+                {
+                    Position = new Vector3(10, 0, 0)
                 }
             ];
 

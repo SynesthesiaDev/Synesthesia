@@ -2,28 +2,33 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Silk.NET.OpenGL;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Extensions;
+using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Resources;
+using Synesthesia.Engine.Threading;
 using Synesthesia.Engine.Util.Statistics;
 
 namespace Synesthesia.Engine.Graphics.Three;
 
-public class Mesh : INamedResource
+public class Mesh(string name, Vertex3D[] vertices, uint[] indices) : INamedResource
 {
-    public readonly uint Vao, Vbo, Ibo;
-    public readonly int IndexCount;
+    public uint Vao, Vbo, Ibo;
+    public readonly int IndexCount = indices.Length;
 
     public ulong Handle => Vao;
-    private readonly GL gl;
+    private GL gl = null!;
 
-    public string ResourceName { get; }
-    public Mesh(string name, GraphicsDevice graphicsDevice, Vertex3D[] vertices, uint[] indices)
+    public string ResourceName { get; } = name;
+    public bool IsUploaded { get; private set; }
+
+    public void Upload(GraphicsDevice graphicsDevice)
     {
-        ResourceName = name;
-        IndexCount = indices.Length;
+        if(IsUploaded) return;
+        ThreadSafety.AssertRunningOnRenderThread();
 
         gl = graphicsDevice.OpenGL;
 
@@ -67,16 +72,18 @@ public class Mesh : INamedResource
                 gl.VertexAttribPointer(location, 4, VertexAttribPointerType.Float, false, (uint)stride, (void*)(i * 16));
 
                 gl.VertexAttribDivisor(location, 1);
-
             }
         }
 
         gl.BindVertexArray(0);
         gl.CheckError("Unbind vao");
+        IsUploaded = true;
+        Logger.Verbose($"Uploaded {this}", Logger.Render);
     }
 
     public void Draw()
     {
+        assertUploadedAndRenderThread();
         gl.BindVertexArray(Vao);
         unsafe
         {
@@ -85,11 +92,13 @@ public class Mesh : INamedResource
                 DrawElementsType.UnsignedInt,
                 indices: null);
         }
+
         DrawStatistics.Increment(DrawStatistics.Type.DrawCalls3D);
     }
 
     public void DrawInstanced(int instanceCount)
     {
+        assertUploadedAndRenderThread();
         gl.BindVertexArray(Vao);
         unsafe
         {
@@ -99,14 +108,30 @@ public class Mesh : INamedResource
                 indices: null,
                 (uint)instanceCount);
         }
+
         DrawStatistics.Increment(DrawStatistics.Type.DrawCalls3D);
     }
 
     public void Dispose()
     {
-        gl.DeleteBuffer(Vbo);
-        gl.DeleteBuffer(Ibo);
-        gl.DeleteVertexArray(Vao);
+        if (IsUploaded)
+        {
+            gl.DeleteBuffer(Vbo);
+            gl.DeleteBuffer(Ibo);
+            gl.DeleteVertexArray(Vao);
+        }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void assertUploadedAndRenderThread()
+    {
+        ThreadSafety.AssertRunningOnRenderThread();
+        if (IsUploaded) return;
+        throw new InvalidOperationException("Mesh has not been uploaded yet");
+    }
+
+    public override string ToString()
+    {
+        return $"Mesh(Vertices={vertices.Length}, Indices={indices.Length}, Vao={Vao}, Vbo={Vbo}, Ibo={Ibo}, IsUploaded={IsUploaded})";
+    }
 }

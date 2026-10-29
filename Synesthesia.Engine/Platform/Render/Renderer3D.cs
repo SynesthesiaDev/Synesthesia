@@ -31,7 +31,7 @@ public class Renderer3D : IRenderer<Vertex3D>
         VertexBatch = new VertexBatch<Vertex3D>(graphicsDevice.OpenGL, is2D: false);
         OpenGL = graphicsDevice.OpenGL;
         GraphicsDevice = graphicsDevice;
-        InstanceBuffer = new InstanceBuffer(OpenGL);
+        InstanceBuffer = new InstanceBuffer(GraphicsDevice);
     }
 
     public Vector3 LightDirection
@@ -61,8 +61,10 @@ public class Renderer3D : IRenderer<Vertex3D>
 
     public void EndDrawing()
     {
-        foreach (var renderBatch in RenderQueue.GetBatches())
+        foreach (ref RenderBatch renderBatch in CollectionsMarshal.AsSpan(RenderQueue.GetBatches()))
         {
+            if(!renderBatch.Mesh.IsUploaded) renderBatch.Mesh.Upload(GraphicsDevice);
+
             GraphicsDevice.BindMaterial(renderBatch.Material);
 
             if (GraphicsDevice.CurrentShader != lastShaderWithUniforms)

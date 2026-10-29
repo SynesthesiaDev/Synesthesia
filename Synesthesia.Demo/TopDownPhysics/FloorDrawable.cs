@@ -1,7 +1,7 @@
 ﻿// Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using Synesthesia.Engine.Extensions;
+using Synesthesia.Common.Utils;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Two;

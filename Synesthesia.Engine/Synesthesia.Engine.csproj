@@ -52,7 +52,6 @@
     <PackageReference Include="StbImageSharp" Version="2.30.16" />
     <PackageReference Include="StbImageWriteSharp" Version="1.16.7" />
     <PackageReference Include="SynesthesiaDev.Codon.Codon" Version="2026.825.0" />
-    <PackageReference Include="SynesthesiaUtils" Version="2026.804.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -71,6 +70,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Synesthesia.Common\Synesthesia.Common.csproj" />
+    <ProjectReference Include="..\Synesthesia.Parsers\Synesthesia.Parsers.csproj" />
     <ProjectReference Include="..\Synesthesia.Resources\Synesthesia.Resources.csproj" />
     <ProjectReference Include="..\Synesthesia.NativeLibs\Synesthesia.NativeLibs.csproj" />
   </ItemGroup>
