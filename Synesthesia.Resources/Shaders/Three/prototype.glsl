@@ -55,9 +55,9 @@ uniform float u_ambientLight;
 uniform sampler2D u_texture;
 uniform int u_useTexture;
 uniform vec4 u_tint;
-uniform float u_texture_scale;
 
 out vec4 FragColor;
+float u_texture_scale = 1.0;
 
 void main() {
     vec3 normal = normalize(v_normal);
