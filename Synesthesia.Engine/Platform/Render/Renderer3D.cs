@@ -6,6 +6,7 @@ using Silk.NET.OpenGL;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Three;
 using System.Runtime.InteropServices;
+using Synesthesia.Engine.Graphics.Materials;
 using Shader = Synesthesia.Engine.Graphics.Shader;
 
 namespace Synesthesia.Engine.Platform.Render;
@@ -31,7 +32,7 @@ public class Renderer3D : IRenderer<Vertex3D>
         VertexBatch = new VertexBatch<Vertex3D>(graphicsDevice.OpenGL, is2D: false);
         OpenGL = graphicsDevice.OpenGL;
         GraphicsDevice = graphicsDevice;
-        InstanceBuffer = new InstanceBuffer(OpenGL);
+        InstanceBuffer = new InstanceBuffer(GraphicsDevice);
     }
 
     public Vector3 LightDirection
@@ -49,6 +50,7 @@ public class Renderer3D : IRenderer<Vertex3D>
 
         OpenGL.Enable(EnableCap.DepthTest);
         OpenGL.DepthFunc(DepthFunction.Less);
+        OpenGL.DepthMask(true);
 
         OpenGL.Clear(ClearBufferMask.DepthBufferBit);
 
@@ -61,8 +63,10 @@ public class Renderer3D : IRenderer<Vertex3D>
 
     public void EndDrawing()
     {
-        foreach (var renderBatch in RenderQueue.GetBatches())
+        foreach (ref RenderBatch renderBatch in CollectionsMarshal.AsSpan(RenderQueue.GetBatches()))
         {
+            if(!renderBatch.Mesh.IsUploaded) renderBatch.Mesh.Upload(GraphicsDevice);
+
             GraphicsDevice.BindMaterial(renderBatch.Material);
 
             if (GraphicsDevice.CurrentShader != lastShaderWithUniforms)
@@ -74,6 +78,13 @@ public class Renderer3D : IRenderer<Vertex3D>
             InstanceBuffer.Upload(CollectionsMarshal.AsSpan(renderBatch.Instances));
             GraphicsDevice.OpenGL.BindVertexArray(renderBatch.Mesh.Vao);
             renderBatch.Mesh.DrawInstanced(InstanceBuffer.InstanceCount);
+
+            if (renderBatch.Material is SkyboxMaterial)
+            {
+                OpenGL.Enable(EnableCap.CullFace);
+                OpenGL.CullFace(TriangleFace.Back);
+                OpenGL.DepthMask(true);
+            }
         }
 
         lastShaderWithUniforms = null;

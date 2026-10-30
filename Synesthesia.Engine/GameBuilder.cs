@@ -5,8 +5,10 @@ using System.Reflection;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Textures;
 using Synesthesia.Engine.Graphics.Three;
+using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform.Host;
 using Synesthesia.Engine.Resources.Stores;
+using Synesthesia.Parsers.Model;
 
 namespace Synesthesia.Engine;
 
@@ -64,6 +66,8 @@ public class GameBuilder
 
     public Game Build()
     {
+        ObjFileParser.LogFunc = Logger.Verbose;
+
         return new Game(
             windowHost,
             textureResourceStoreInitializer,

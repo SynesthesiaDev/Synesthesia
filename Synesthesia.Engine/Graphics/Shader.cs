@@ -75,7 +75,7 @@ public class Shader : INamedResource
         if (location != -1)
             uniformCache.Insert(uniform, location);
 
-        return location != -1 ? location : throw new OpenGLException($"Failed to get shader uniform '{uniform}'");
+        return location;
     }
 
     private uint compileShader(ShaderType shaderType, string code)
@@ -226,8 +226,6 @@ public class Shader : INamedResource
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void assertLocationNotInvalid(int location)
     {
-        if(location != -1) return;
-        throw new OpenGLException("Uninitialized or Invalid shader location -1");
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

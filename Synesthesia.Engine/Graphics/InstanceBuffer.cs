@@ -3,11 +3,13 @@
 
 using System.Numerics;
 using Silk.NET.OpenGL;
+using Synesthesia.Engine.Platform.Render;
 
 namespace Synesthesia.Engine.Graphics;
 
 public class InstanceBuffer : IDisposable
 {
+    private readonly GraphicsDevice graphics;
     private readonly GL gl;
     private readonly uint vbo;
     private readonly int maxInstances;
@@ -17,9 +19,10 @@ public class InstanceBuffer : IDisposable
 
     public int InstanceCount { get; private set; }
 
-    public InstanceBuffer(GL gl, int maxInstances = 10000)
+    public InstanceBuffer(GraphicsDevice graphics, int maxInstances = 10000)
     {
-        this.gl = gl;
+        this.graphics = graphics;
+        gl = graphics.OpenGL;
         this.maxInstances = maxInstances;
         matrixData = new Matrix4x4[maxInstances];
 

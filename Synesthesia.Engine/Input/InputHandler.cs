@@ -5,7 +5,6 @@ using System.Collections.Concurrent;
 using System.Numerics;
 using Faster.Map.Core;
 using Synesthesia.Engine.Events;
-using Synesthesia.Engine.Extensions;
 using Synesthesia.Engine.Graphics.Two.Container;
 using Synesthesia.Engine.Input.ActionBindings;
 using Synesthesia.Engine.Input.Events;
@@ -14,6 +13,7 @@ using Synesthesia.Engine.Platform;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util.Pooling;
 using System.Runtime.InteropServices;
+using Synesthesia.Common.Utils;
 using Synesthesia.Engine.Graphics.Three;
 using Synesthesia.Engine.Util.Statistics;
 

@@ -3,7 +3,7 @@
 
 using DotNetty.Buffers;
 
-namespace Synesthesia.Engine.Extensions;
+namespace Synesthesia.Common.Utils;
 
 public static class ByteArrayExtensions
 {

@@ -5,9 +5,12 @@ using System.Text;
 using FreeTypeSharp;
 using Silk.NET.OpenGL;
 using StbImageSharp;
+using Synesthesia.Common.Utils;
 using Synesthesia.Engine.Extensions;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Textures;
+using Synesthesia.Engine.Graphics.Three;
+using Synesthesia.Parsers.Model;
 using Shader = Synesthesia.Engine.Graphics.Shader;
 using StringUtil = Synesthesia.Engine.Util.StringUtil;
 using Texture = Synesthesia.Engine.Graphics.Textures.Texture;
@@ -27,6 +30,8 @@ public static class ResourceLoaders
         var textureData = new TextureData(image.Width, image.Height, image.Data, PixelFormat.Rgba);
         return new Texture(StringUtil.FileName(name), textureData, uploadImmediately);
     }
+
+    public static Mesh LoadMesh(Stream stream, string name) => ObjFileParser.Parse(stream).ToMesh(name);
 
     public static Shader LoadShader(Stream stream, string name)
     {

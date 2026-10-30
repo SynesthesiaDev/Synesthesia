@@ -4,7 +4,7 @@
 using System.Runtime.CompilerServices;
 using Synesthesia.Utils.Extensions;
 
-namespace Synesthesia.Engine.Extensions;
+namespace Synesthesia.Common.Utils;
 
 public static class EnumExtensions
 {

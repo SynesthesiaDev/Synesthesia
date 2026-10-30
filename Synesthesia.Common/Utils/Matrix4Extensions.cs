@@ -3,7 +3,7 @@
 
 using System.Numerics;
 
-namespace Synesthesia.Engine.Extensions;
+namespace Synesthesia.Common.Utils;
 
 public static class Matrix4Extensions
 {

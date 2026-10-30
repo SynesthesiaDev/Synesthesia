@@ -244,11 +244,11 @@ public abstract class Drawable3D : Drawable
     {
         if (!Visible || InheritedAlpha <= 0.001f || !IsLoaded) return;
 
-        updateDrawMatrix();
+        UpdateDrawMatrix();
         Collect(Renderer.RenderQueue);
     }
 
-    private void updateDrawMatrix()
+    protected virtual void UpdateDrawMatrix()
     {
         DrawMatrix.Reset();
 

@@ -2,7 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Runtime.CompilerServices;
-using Synesthesia.Engine.Extensions;
+using Synesthesia.Common.Utils;
 using Synesthesia.Engine.Util.Statistics;
 
 namespace Synesthesia.Engine.Util.Pooling;

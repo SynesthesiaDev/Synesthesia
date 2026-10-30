@@ -4,7 +4,7 @@
 using System.Runtime.CompilerServices;
 using Faster.Map.Core;
 
-namespace Synesthesia.Engine.Extensions;
+namespace Synesthesia.Common.Utils;
 
 public static class MapExtensions
 {

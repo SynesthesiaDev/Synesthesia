@@ -4,7 +4,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace Synesthesia.Engine.Extensions;
+namespace Synesthesia.Common.Utils;
 
 public static class SpanExtensions
 {

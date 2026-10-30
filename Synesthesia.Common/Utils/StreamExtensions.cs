@@ -1,9 +1,10 @@
 ﻿// Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Text;
 using DotNetty.Buffers;
 
-namespace Synesthesia.Engine.Extensions;
+namespace Synesthesia.Common.Utils;
 
 public static class StreamExtensions
 {
@@ -26,6 +27,8 @@ public static class StreamExtensions
 
             return data;
         }
+
+        public string ReadString() => Encoding.UTF8.GetString(stream.ToByteArray());
 
         public IByteBuffer ToByteBuffer() => Unpooled.CopiedBuffer(stream.ToByteArray());
     }
