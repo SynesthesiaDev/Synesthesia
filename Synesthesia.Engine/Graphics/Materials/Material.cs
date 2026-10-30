@@ -16,7 +16,7 @@ public abstract class Material : INamedResource
     public DepthTest DepthTest { get; init; }
     public FaceCulling FaceCulling { get; init; }
 
-    public TextureFilterMode TextureFilterMode { get; init; } = TextureFilterMode.Trilinear;
+    public virtual TextureFilterMode TextureFilterMode { get; init; } = TextureFilterMode.Trilinear;
 
     public override string ToString() => Stringify();
 

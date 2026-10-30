@@ -18,6 +18,7 @@ internal static class Demo
             var prototype = PrototypeMaterial.From(game.TextureResourceStore.Get("Synesthesia.Resources.Textures.Prototype.gray.png"));
             game.DrawableScene3D.Children =
             [
+                new Skybox3D(),
                 new EditorController
                 {
                     Position = new Vector3(2, 0, 2)

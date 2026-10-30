@@ -6,6 +6,7 @@ using Silk.NET.OpenGL;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Three;
 using System.Runtime.InteropServices;
+using Synesthesia.Engine.Graphics.Materials;
 using Shader = Synesthesia.Engine.Graphics.Shader;
 
 namespace Synesthesia.Engine.Platform.Render;
@@ -49,6 +50,7 @@ public class Renderer3D : IRenderer<Vertex3D>
 
         OpenGL.Enable(EnableCap.DepthTest);
         OpenGL.DepthFunc(DepthFunction.Less);
+        OpenGL.DepthMask(true);
 
         OpenGL.Clear(ClearBufferMask.DepthBufferBit);
 
@@ -76,6 +78,13 @@ public class Renderer3D : IRenderer<Vertex3D>
             InstanceBuffer.Upload(CollectionsMarshal.AsSpan(renderBatch.Instances));
             GraphicsDevice.OpenGL.BindVertexArray(renderBatch.Mesh.Vao);
             renderBatch.Mesh.DrawInstanced(InstanceBuffer.InstanceCount);
+
+            if (renderBatch.Material is SkyboxMaterial)
+            {
+                OpenGL.Enable(EnableCap.CullFace);
+                OpenGL.CullFace(TriangleFace.Back);
+                OpenGL.DepthMask(true);
+            }
         }
 
         lastShaderWithUniforms = null;

@@ -14,6 +14,7 @@ public static class BuiltInShaders
     public static Shader StencilShader2D = null!;
     public static Shader DefaultShader3D = null!;
     public static Shader PrototypeShader3D = null!;
+    public static Shader SkyboxShader3D = null!;
 
     public static void Initialize(GraphicsDevice graphicsDevice)
     {
@@ -23,10 +24,12 @@ public static class BuiltInShaders
         StencilShader2D = shaderStore.Get("Synesthesia.Resources.Shaders.Two.stencil.glsl");
         DefaultShader3D = shaderStore.Get("Synesthesia.Resources.Shaders.Three.default.glsl");
         PrototypeShader3D = shaderStore.Get("Synesthesia.Resources.Shaders.Three.prototype.glsl");
+        SkyboxShader3D = shaderStore.Get("Synesthesia.Resources.Shaders.Three.skybox.glsl");
 
         DefaultShader2D.Upload(graphicsDevice);
         StencilShader2D.Upload(graphicsDevice);
         DefaultShader3D.Upload(graphicsDevice);
         PrototypeShader3D.Upload(graphicsDevice);
+        SkyboxShader3D.Upload(graphicsDevice);
     }
 }
