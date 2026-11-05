@@ -3,7 +3,7 @@
 
 using System.Numerics;
 using Synesthesia.Engine.Graphics.Two;
-using Synesthesia.Engine.Physics;
+using Synesthesia.Engine.Physics.Two;
 using Synesthesia.Engine.Timing;
 
 namespace Synesthesia.Demo.TopDownPhysics;

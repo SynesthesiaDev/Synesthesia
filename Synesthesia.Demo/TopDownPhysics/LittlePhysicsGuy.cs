@@ -6,7 +6,7 @@ using Synesthesia.Common.Utils;
 using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Two;
-using Synesthesia.Engine.Physics;
+using Synesthesia.Engine.Physics.Two;
 
 namespace Synesthesia.Demo.TopDownPhysics;
 

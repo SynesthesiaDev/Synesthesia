@@ -5,7 +5,7 @@ using System.Numerics;
 using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Timing;
 
-namespace Synesthesia.Engine.Physics;
+namespace Synesthesia.Engine.Physics.Two;
 
 public class NaiveAabbCollisionSolver : ICollisionSolver2D
 {

@@ -43,6 +43,9 @@ public class StatisticsPanel : EngineDebugElement
         new StatisticLine("GC Collections Gen0", () => GC.CollectionCount(0)),
         new StatisticLine("GC Size Gen0", () => gcMemoryInfo.GenerationInfo[0].SizeAfterBytes),
         new Spacer(),
+        new PhysicsStatisticLine(PhysicsStatistics.Type.StepsThisFrame),
+        new PhysicsStatisticLine(PhysicsStatistics.Type.AwakeBodies),
+        new Spacer(),
         new EngineStatisticLine(EngineStatistics.Type.ObjectsInflight),
         new EngineStatisticLine(EngineStatistics.Type.ObjectsRented),
         new EngineStatisticLine(EngineStatistics.Type.ObjectsReturned),
@@ -113,6 +116,8 @@ public class StatisticsPanel : EngineDebugElement
     private class EngineStatisticLine(EngineStatistics.Type type) : StatisticLine(type.ToString(), () => EngineStatistics.Get(type));
 
     private class DrawStatisticLine(DrawStatistics.Type type) : StatisticLine(type.ToString(), () => DrawStatistics.LATEST_SNAPSHOT.Get(type));
+
+    private class PhysicsStatisticLine(PhysicsStatistics.Type type) : StatisticLine(type.ToString(), () => PhysicsStatistics.LATEST_SNAPSHOT.Get(type));
 
     private class Spacer : Line
     {

@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="BepuPhysics" Version="2.4.0" />
     <PackageReference Include="ErrorProne.NET.CoreAnalyzers" Version="0.9.0-beta.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

@@ -5,9 +5,9 @@
 using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Timing;
 
-namespace Synesthesia.Engine.Physics;
+namespace Synesthesia.Engine.Physics.Two;
 
-public interface IPhysicsSolver2D
+public interface ICollisionSolver2D
 {
-    void Step(IHasPhysics2D physicsObject, Drawable2D drawable, FrameInfo frameInfo);
+    void Step(Span<Drawable2D> children, FrameInfo frameInfo);
 }

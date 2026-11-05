@@ -3,7 +3,7 @@
 
 using System.Numerics;
 
-namespace Synesthesia.Engine.Physics;
+namespace Synesthesia.Engine.Physics.Two;
 
 public interface IHasPhysics2D
 {

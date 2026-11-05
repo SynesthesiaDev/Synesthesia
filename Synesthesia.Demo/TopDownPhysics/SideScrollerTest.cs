@@ -9,7 +9,7 @@ using Synesthesia.Engine.Graphics;
 using Synesthesia.Engine.Graphics.Layout;
 using Synesthesia.Engine.Graphics.Two;
 using Synesthesia.Engine.Input;
-using Synesthesia.Engine.Physics;
+using Synesthesia.Engine.Physics.Two;
 using Synesthesia.Engine.Timing;
 
 namespace Synesthesia.Demo.TopDownPhysics;

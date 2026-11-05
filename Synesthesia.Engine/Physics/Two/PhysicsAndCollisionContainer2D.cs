@@ -6,7 +6,7 @@ using Synesthesia.Engine.Graphics.Two.Container;
 using Synesthesia.Engine.Timing;
 using Synesthesia.Engine.Util.Pooling;
 
-namespace Synesthesia.Engine.Physics;
+namespace Synesthesia.Engine.Physics.Two;
 
 public class PhysicsAndCollisionContainer2D : Container2D
 {

@@ -6,6 +6,7 @@ using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Logging;
 using Synesthesia.Engine.Platform.Render;
 using Synesthesia.Engine.Timing;
+using Synesthesia.Engine.Util.Statistics;
 
 namespace Synesthesia.Engine.Threading.Threads;
 
@@ -29,6 +30,7 @@ public class UpdateThread : ThreadRunner
         gameContainer.Size = windowSize;
         game.DrawableScene3D.OnUpdate(frameInfo);
         gameContainer.OnUpdate(frameInfo);
+        PhysicsStatistics.TakeSnapshot();
     }
 
     protected override void OnThreadInit()

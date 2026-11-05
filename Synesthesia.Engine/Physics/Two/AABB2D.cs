@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using Codon.Binary;
 
-namespace Synesthesia.Engine.Physics;
+namespace Synesthesia.Engine.Physics.Two;
 
 [StructLayout(LayoutKind.Auto)]
 public readonly struct AABB2D(Vector2 min, Vector2 max)

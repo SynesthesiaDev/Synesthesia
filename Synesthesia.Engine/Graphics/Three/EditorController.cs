@@ -52,29 +52,30 @@ public class EditorController : CompositeDrawable3D
             currentRot.Y = (currentRot.Y + 360f) % 360f;
 
             Rotation = currentRot;
+
+            var q = RawRotation;
+            var forward = Vector3.Transform(-Vector3.UnitZ, q);
+            var right = Vector3.Transform(Vector3.UnitX, q);
+
+            Vector3 moveDir = Vector3.Zero;
+            if (Key.W.IsDown()) moveDir += forward;
+            if (Key.S.IsDown()) moveDir -= forward;
+            if (Key.D.IsDown()) moveDir += right;
+            if (Key.A.IsDown()) moveDir -= right;
+            if (Key.Space.IsDown()) moveDir += Vector3.UnitY;
+            if (Key.Q.IsDown()) moveDir -= Vector3.UnitY;
+
+            if (moveDir != Vector3.Zero)
+            {
+                var moveSpeed = Key.ShiftLeft.IsDown() ? Speed * 2 : Speed;
+                Position += Vector3.Normalize(moveDir) * moveSpeed * frameInfo.DeltaSeconds;
+            }
         }
         else
         {
             InputHandler.ConsumeMouseDelta();
         }
 
-        var q = RawRotation;
-        var forward = Vector3.Transform(-Vector3.UnitZ, q);
-        var right = Vector3.Transform(Vector3.UnitX, q);
-
-        Vector3 moveDir = Vector3.Zero;
-        if (Key.W.IsDown()) moveDir += forward;
-        if (Key.S.IsDown()) moveDir -= forward;
-        if (Key.D.IsDown()) moveDir += right;
-        if (Key.A.IsDown()) moveDir -= right;
-        if (Key.Space.IsDown()) moveDir += Vector3.UnitY;
-        if (Key.Q.IsDown()) moveDir -= Vector3.UnitY;
-
-        if (moveDir != Vector3.Zero)
-        {
-            var moveSpeed = Key.ShiftLeft.IsDown() ? Speed * 2 : Speed;
-            Position += Vector3.Normalize(moveDir) * moveSpeed * frameInfo.DeltaSeconds;
-        }
 
         base.OnUpdate(frameInfo);
     }
