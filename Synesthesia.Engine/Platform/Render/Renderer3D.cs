@@ -59,13 +59,11 @@ public class Renderer3D : IRenderer<Vertex3D>
         OpenGL.Enable(EnableCap.CullFace);
         OpenGL.CullFace(TriangleFace.Back);
         OpenGL.FrontFace(FrontFaceDirection.Ccw);
-
-        // updatePerspective();
     }
 
     public void EndDrawing()
     {
-        foreach (ref RenderBatch renderBatch in CollectionsMarshal.AsSpan(RenderQueue.GetBatches()))
+        foreach (ref RenderBatch renderBatch in CollectionsMarshal.AsSpan(RenderQueue.GetBatches(Camera?.Position)))
         {
             if(!renderBatch.Mesh.IsUploaded) renderBatch.Mesh.Upload(GraphicsDevice);
 

@@ -9,7 +9,7 @@ namespace Synesthesia.Parsers.Model;
 
 public record MeshTemplate(List<MeshTemplate.Vertex> Vertices, List<uint> Indices) : IResourceTemplate
 {
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Auto)]
     public readonly struct Vertex(
         Vector3 position,
         Vector3 normal,

@@ -20,6 +20,8 @@ public abstract class Material : INamedResource
     public DepthTest DepthTest { get; init; }
     public FaceCulling FaceCulling { get; init; }
 
+    public virtual bool IsTransparent { get; init; } = false;
+
     public virtual TextureFilterMode TextureFilterMode { get; set; } = TextureFilterMode.Trilinear;
 
     public override string ToString() => Stringify();
@@ -33,7 +35,7 @@ public abstract class Material : INamedResource
     protected abstract void OnDispose();
 
     private int batchKey;
-    private bool  batchKeyDirty = true;
+    private bool batchKeyDirty = true;
 
     protected void InvalidateBatchKey() => batchKeyDirty = true;
 
@@ -41,17 +43,16 @@ public abstract class Material : INamedResource
     {
         if (!batchKeyDirty) return batchKey;
 
-        batchKey = ComputeBatchKey(); batchKeyDirty = false;
+        batchKey = ComputeBatchKey();
+        batchKeyDirty = false;
         return batchKey;
     }
 
-    protected virtual int ComputeBatchKey()
-        => HashCode.Combine(Shader.StaticBatchId, BlendMode, DepthTest, FaceCulling);
+    protected virtual int ComputeBatchKey() => HashCode.Combine(Shader.StaticBatchId, IsTransparent, BlendMode, DepthTest, FaceCulling);
 
     public void Dispose()
     {
         OnDispose();
         Shader.Dispose();
     }
-
 }
