@@ -13,7 +13,7 @@ public static class MeshTemplateExtensions
 {
     public static Mesh ToMesh(this MeshTemplate template, string name)
     {
-        List<Vertex3D> vertices = [.. template.Vertices.Select(templateVertex => new Vertex3D(templateVertex.Position, templateVertex.Normal, Vector3.Zero, 0xFFFFFF, templateVertex.TextureCoord))];
+        List<Vertex3D> vertices = [.. template.Vertices.Select(templateVertex => new Vertex3D(templateVertex.Position, templateVertex.Normal, Vector3.Zero, Color.WhitePacked, templateVertex.TextureCoord))];
         return new Mesh(name, [.. vertices], [.. template.Indices]);
     }
 }

@@ -50,6 +50,8 @@ public class Renderer3D : IRenderer<Vertex3D>
 
         OpenGL.Enable(EnableCap.DepthTest);
         OpenGL.DepthFunc(DepthFunction.Less);
+        OpenGL.Enable(EnableCap.Blend);
+        OpenGL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         OpenGL.DepthMask(true);
 
         OpenGL.Clear(ClearBufferMask.DepthBufferBit);

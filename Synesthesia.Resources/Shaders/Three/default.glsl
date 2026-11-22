@@ -65,5 +65,5 @@ void main() {
     vec3 light = vec3(u_ambientLight) + u_lightColor.rgb * diffuse;
 
     vec4 texColor = (u_useTexture == 1) ? texture(u_texture, v_texCoord) : vec4(1.0);
-    FragColor = vec4(light * v_color.rgb * texColor.rgb * u_tint.rgb, v_color.a * texColor.a);
+    FragColor = vec4(light * v_color.rgb * texColor.rgb * u_tint.rgb, texColor.a);
 }
