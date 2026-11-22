@@ -58,7 +58,7 @@ public abstract class ThreadRunner : IDisposable
         }
     }
 
-    [Singleton]
+    [Injected]
     private Game game = null!;
 
     public void Start()

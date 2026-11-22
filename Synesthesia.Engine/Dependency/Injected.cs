@@ -7,6 +7,6 @@ namespace Synesthesia.Engine.Dependency;
 
 [MeansImplicitUse(ImplicitUseKindFlags.Assign)]
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-public class SingletonAttribute : Attribute
+public class Injected : Attribute
 {
 }

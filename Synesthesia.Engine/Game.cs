@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2026 SynesthesiaDev <synesthesiadev@proton.me>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using Synesthesia.Engine.Audio;
 using Synesthesia.Engine.Dependency;
 using Synesthesia.Engine.Events;
 using Synesthesia.Engine.Graphics;
@@ -23,6 +24,7 @@ public class Game
     public IWindowHost WindowHost { get; }
 
     public InputHandler InputHandler { get; }
+    public AudioManager AudioManager { get; }
 
     public InputThread InputThread { get; }
     public UpdateThread UpdateThread { get; }
@@ -119,7 +121,6 @@ public class Game
         string windowName
     )
     {
-
         FontResourceStore = new ResourceStoreBuilder<Font>()
             .AddLoaders(new Dictionary<string, Func<Stream, string, Font>>(StringComparer.Ordinal)
             {
@@ -217,8 +218,12 @@ public class Game
         DependencyContainer.AddSingleton(ShaderResourceStore);
         DependencyContainer.AddSingleton(InputHandler);
         DependencyContainer.AddSingleton(InputThread);
+        DependencyContainer.AddSingleton(AudioThread);
         DependencyContainer.AddSingleton(WindowHost);
         DependencyContainer.AddSingleton(WindowHost.Clipboard);
+
+        AudioManager = new AudioManager();
+        DependencyContainer.AddSingleton(AudioManager);
 
         WindowHost.Title = windowName;
 

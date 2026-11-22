@@ -18,7 +18,7 @@ public abstract class Drawable3D : Drawable
 {
     private Invalidation invalidatedFlags = Invalidation.All;
 
-    [Singleton]
+    [Injected]
     protected Renderer3D Renderer = null!;
 
     public float X
@@ -183,9 +183,9 @@ public abstract class Drawable3D : Drawable
 
     protected float InheritedAlpha => Alpha * (Parent?.InheritedAlpha ?? 1f);
 
-    protected virtual bool AcceptsInput { get; } = true;
+    public virtual bool AcceptsInput { get; set; } = true;
 
-    public bool CanHandleInput => IsLoaded && AcceptsInput;
+    public bool CanHandleInput => IsLoaded && AcceptsInput && (Parent?.CanHandleInput ?? true);
 
     public void Invalidate(Invalidation flags)
     {

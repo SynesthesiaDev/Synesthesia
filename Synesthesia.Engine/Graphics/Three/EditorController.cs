@@ -14,10 +14,10 @@ namespace Synesthesia.Engine.Graphics.Three;
 
 public class EditorController : CompositeDrawable3D
 {
-    [Singleton]
+    [Injected]
     private InputHandler inputHandler = null!;
 
-    [Singleton]
+    [Injected]
     private EngineDebugOverlay debugOverlay = null!;
 
     public Camera Camera { get; set; } = null!;

@@ -33,6 +33,10 @@
     </PackageReference>
     <PackageReference Include="Faster.Map" Version="9.0.3" />
     <PackageReference Include="JetBrains.Annotations" Version="2026.2.0" />
+    <PackageReference Include="ManagedBass" Version="4.0.2" />
+    <PackageReference Include="ManagedBass.Fx" Version="4.0.2" />
+    <PackageReference Include="ManagedBass.Mix" Version="4.0.2" />
+    <PackageReference Include="ManagedBass.Wasapi" Version="4.0.2" />
     <PackageReference Include="Meziantou.Analyzer" Version="3.0.177">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

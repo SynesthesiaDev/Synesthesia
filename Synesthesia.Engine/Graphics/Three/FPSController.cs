@@ -13,7 +13,7 @@ namespace Synesthesia.Engine.Graphics.Three;
 
 public class FpsController : CharacterBody3D
 {
-    private const float camera_lean_amount = 0.2f;
+    private const float camera_lean_amount = 0.3f;
     private const float camera_lean_responsiveness = 100f;
 
     private const float max_speed = 6.0f;
@@ -30,10 +30,10 @@ public class FpsController : CharacterBody3D
     private const float look_sensitivity = 0.12f;
     private const float max_look_pitch = 89f;
 
-    [Singleton]
+    [Injected]
     private InputHandler inputHandler = null!;
 
-    [Singleton]
+    [Injected]
     private Game game = null!;
 
     public Camera Camera { get; set; } = null!;

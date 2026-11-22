@@ -11,7 +11,7 @@ namespace Synesthesia.Engine.Graphics.Two;
 
 public class Circle2D : Drawable2D
 {
-    [Singleton]
+    [Injected]
     private Renderer2D renderer = null!;
 
     public Color Color

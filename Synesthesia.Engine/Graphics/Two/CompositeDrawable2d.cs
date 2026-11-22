@@ -24,10 +24,10 @@ public class CompositeDrawable2D : Drawable2D
     [SuppressMessage("Design", "MA0016:Prefer using collection abstraction instead of implementation")]
     protected internal List<Drawable2D> InternalChildren = [];
 
-    [Singleton]
+    [Injected]
     private GraphicsDevice graphicsDevice = null!;
 
-    [Singleton]
+    [Injected]
     private Renderer2D renderer = null!;
 
     public float CornerRadius

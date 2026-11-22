@@ -68,12 +68,13 @@ public class EngineDebugOverlay : CompositeDrawable2D
                             },
                             statisticsPanel = new StatisticsPanel
                             {
+                                Visible = false,
                                 Anchor = Anchor.TopLeft,
                                 Origin = Anchor.TopLeft,
-                            }
-                        ]
+                            },
+                        ],
                     },
-                ]
+                ],
             },
             debugPopup = new DebugPopup
             {

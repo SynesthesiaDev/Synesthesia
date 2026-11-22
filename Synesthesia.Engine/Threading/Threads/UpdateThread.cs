@@ -16,10 +16,10 @@ public class UpdateThread : ThreadRunner
 
     protected override Logger.LogCategory LoggerCategory => Logger.Runtime;
 
-    [Singleton]
+    [Injected]
     private Game game = null!;
 
-    [Singleton]
+    [Injected]
     private GraphicsDevice renderer = null!;
 
     protected override void ProcessFrame(FrameInfo frameInfo)

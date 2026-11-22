@@ -133,7 +133,7 @@ public class SDL3WindowHost : IWindowHost
 
     public bool HasKeyboard => HasKeyboard();
 
-    [Singleton]
+    [Injected]
     private InputHandler inputHandler = null!;
 
     /// <summary>

@@ -18,7 +18,7 @@ namespace Synesthesia.Engine.Components.Two.Debug;
 
 public class FrameCounter : EngineDebugElement
 {
-    [Singleton]
+    [Injected]
     private Game game = null!;
 
     private Box2D backgroundBox = null!;

@@ -23,19 +23,19 @@ public class RenderThread(GraphicsDevice graphicsDevice) : ThreadRunner
 
     private bool hasContextOwnership;
 
-    [Singleton]
+    [Injected]
     private IResourceStore<Texture> textureResourceStore = null!;
 
-    [Singleton]
+    [Injected]
     private IResourceStore<Font> fontResourceStore = null!;
 
-    [Singleton]
+    [Injected]
     private IResourceStore<Mesh> meshResourceStore = null!;
 
-    [Singleton]
+    [Injected]
     private IResourceStore<Shader> shaderResourceStore = null!;
 
-    [Singleton]
+    [Injected]
     private Game game = null!;
 
     private bool isFirstSwap = true;

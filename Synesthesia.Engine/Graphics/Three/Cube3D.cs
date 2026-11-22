@@ -11,7 +11,7 @@ namespace Synesthesia.Engine.Graphics.Three;
 
 public class Cube3D : Drawable3D
 {
-    [Singleton]
+    [Injected]
     private IResourceStore<Mesh> meshStore = null!;
 
     public Material? Material { get; set; }

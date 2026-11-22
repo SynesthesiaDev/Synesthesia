@@ -24,7 +24,7 @@ namespace Synesthesia.Engine.Components.Two.Barebones;
 
 public class BarebonesTextbox : CompositeDrawable2D, IAcceptsFocus
 {
-    [Singleton]
+    [Injected]
     private IClipboard clipboard = null!;
 
     public Drawable2D OwningDrawable => this;

@@ -19,7 +19,7 @@ public class SideScrollerTest : CompositeDrawable2D
     private LittlePhysicsGuy guy = null!;
     private const float velocity_modifier = 900.0f;
 
-    [Singleton]
+    [Injected]
     private Game game = null!;
 
     protected override void OnLoading()

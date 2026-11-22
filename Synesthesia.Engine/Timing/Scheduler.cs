@@ -20,7 +20,7 @@ public class Scheduler : IDisposable
     private readonly Lock timerLock = new();
     private bool timerRunning;
 
-    [Singleton]
+    [Injected]
     private UpdateThread updateThread = null!;
 
     public Scheduler()

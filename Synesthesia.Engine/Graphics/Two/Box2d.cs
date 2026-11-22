@@ -18,7 +18,7 @@ namespace Synesthesia.Engine.Graphics.Two;
 
 public class Box2D : Drawable2D
 {
-    [Singleton]
+    [Injected]
     private Renderer2D renderer = null!;
 
     private RectangleF uvCoords = new(0, 0, 1, 1);

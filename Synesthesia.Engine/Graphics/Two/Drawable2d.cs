@@ -315,6 +315,11 @@ public abstract class Drawable2D : Drawable
         }
     }
 
+    protected virtual void OnActivate(bool visible)
+    {
+
+    }
+
     protected virtual void UpdateRelativeSize()
     {
         if (Parent == null) return;

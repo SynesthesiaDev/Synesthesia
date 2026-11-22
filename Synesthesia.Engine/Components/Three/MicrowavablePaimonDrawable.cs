@@ -14,10 +14,10 @@ namespace Synesthesia.Engine.Components.Three;
 public class MicrowavablePaimonDrawable : CompositeDrawable3D
 {
 
-    [Singleton]
+    [Injected]
     private IResourceStore<Mesh> meshResourceStore = null!;
 
-    [Singleton]
+    [Injected]
     private IResourceStore<Texture> textureResourceStore = null!;
 
     private MeshDrawable3D meshDrawable = null!;

@@ -18,10 +18,10 @@ public class Text2D : Drawable2D
     private const float spread = 8f;
     private const string default_font_atlas = "Synesthesia.Resources.Fonts.MapleMono-ExtraLight.fna";
 
-    [Singleton]
+    [Injected]
     private Renderer2D renderer = null!;
 
-    [Singleton]
+    [Injected]
     private IResourceStore<Font> fontResourceStore = null!;
 
     private Font defaultFont = null!;
