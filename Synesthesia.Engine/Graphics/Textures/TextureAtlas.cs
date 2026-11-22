@@ -17,6 +17,8 @@ public class TextureAtlas : IDisposable, INamedResource
     public readonly TextureData TextureData;
     public readonly Dictionary<int, TextureRegion> TextureRegions;
 
+    public ulong StaticBatchId { get; private set; }
+
     public override string ToString() => $"TextureAtlas(Texture={Texture.ResourceName}, Width={Width}, Height={Height}, TextureRegions={TextureRegions.Count})";
 
     public Vector2 Size => new Vector2(Width, Height);
@@ -30,6 +32,7 @@ public class TextureAtlas : IDisposable, INamedResource
         Height = height;
         TextureRegions = textureRegions;
         EngineStatistics.Increment(EngineStatistics.Type.TextureAtlases);
+        StaticBatchId = Texture.StaticBatchId;
     }
 
     public TextureAtlas(string name, int width, int height, TextureData textureData, Dictionary<int, TextureRegion> textureRegions)

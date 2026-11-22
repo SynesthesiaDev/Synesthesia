@@ -18,7 +18,7 @@ public class RenderQueue
     {
         foreach (ref DrawMeshCommand command in CollectionsMarshal.AsSpan(commands))
         {
-            var key = (command.Mesh.Handle, command.Material.GetBatchKey());
+            var key = (command.Mesh.StaticBatchId, command.Material.GetBatchKey());
 
             if (!batchCache.TryGetValue(key, out var batch))
             {
@@ -50,5 +50,6 @@ public class RenderQueue
             batch.Instances.Clear();
         }
         activeBatches.Clear();
+        batchCache.Clear();
     }
 }

@@ -42,7 +42,7 @@ public sealed class DefaultMaterial(string name) : Material
         tintUniformLocation = Shader.GetUniformLocation(tint_uniform_name);
     }
 
-    protected override int ComputeBatchKey() => HashCode.Combine(base.ComputeBatchKey(), Texture?.Handle ?? 0, cachedTintVector);
+    protected override int ComputeBatchKey() => HashCode.Combine(base.ComputeBatchKey(), Texture?.StaticBatchId ?? 0, cachedTintVector, TextureFilterMode);
 
     public static DefaultMaterial From(Texture texture) => new DefaultMaterial(texture.ResourceName) { Texture = texture };
     public static DefaultMaterial From(Texture texture, Color tint) => new DefaultMaterial(texture.ResourceName) { Texture = texture, Tint = tint };

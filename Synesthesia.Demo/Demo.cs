@@ -42,10 +42,10 @@ internal static class Demo
             Children =
             [
                 new Skybox3D(),
-                new EditorController
-                {
-                    Position = new Vector3(2, 1, 2)
-                },
+                // new EditorController
+                // {
+                //     Position = new Vector3(2, 1, 2)
+                // },
                 new MicrowavablePaimonDrawable
                 {
                     Position = new Vector3(2, 2, 0),
@@ -59,9 +59,13 @@ internal static class Demo
                         new PhysicsBody3D
                         {
                             Type = PhysicsType.Static,
-                            Size = new Vector3(10, 1, 10),
+                            Size = new Vector3(100, 1, 100),
                             Position = new Vector3(0, -0.5f, 0),
                             Children = [new Cube3D { Material = prototype }]
+                        },
+                        new FpsController
+                        {
+                            Position = new Vector3(0, 10f, 0),
                         }
                     ]
                 }

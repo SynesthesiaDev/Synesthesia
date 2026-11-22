@@ -20,6 +20,10 @@ public class Shader : INamedResource
     public uint Program;
     public readonly ShaderKind Kind;
 
+    private static ulong nextId;
+
+    public ulong StaticBatchId { get; } = Interlocked.Increment(ref nextId);
+
     private readonly string vertexCode;
     private readonly string fragmentCode;
 

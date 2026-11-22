@@ -11,8 +11,12 @@ using Synesthesia.Engine.Util.Statistics;
 
 namespace Synesthesia.Engine.Graphics.Textures;
 
-public class Texture : IDisposable, INamedResource
+public class Texture : INamedResource
 {
+    private static ulong nextId;
+
+    public ulong StaticBatchId { get; } = Interlocked.Increment(ref nextId);
+
     public uint Handle { get; private set; }
 
     public TextureData TextureData { get; private set; }

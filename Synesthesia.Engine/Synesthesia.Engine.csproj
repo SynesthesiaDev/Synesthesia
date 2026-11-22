@@ -52,7 +52,7 @@
     <PackageReference Include="Silk.NET.OpenGL" Version="2.23.0"/>
     <PackageReference Include="StbImageSharp" Version="2.30.16" />
     <PackageReference Include="StbImageWriteSharp" Version="1.16.7" />
-    <PackageReference Include="SynesthesiaDev.Codon.Codon" Version="2026.825.0" />
+    <PackageReference Include="SynesthesiaDev.Codon.Codon" Version="2026.925.0" />
   </ItemGroup>
 
   <ItemGroup>

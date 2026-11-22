@@ -9,6 +9,10 @@ namespace Synesthesia.Engine.Graphics.Materials;
 
 public abstract class Material : INamedResource
 {
+    private static ulong nextId;
+
+    public ulong StaticBatchId { get; } = Interlocked.Increment(ref nextId);
+
     public abstract string ResourceName { get; }
     public abstract Shader Shader { get; init; }
 
@@ -16,7 +20,7 @@ public abstract class Material : INamedResource
     public DepthTest DepthTest { get; init; }
     public FaceCulling FaceCulling { get; init; }
 
-    public virtual TextureFilterMode TextureFilterMode { get; init; } = TextureFilterMode.Trilinear;
+    public virtual TextureFilterMode TextureFilterMode { get; set; } = TextureFilterMode.Trilinear;
 
     public override string ToString() => Stringify();
 
@@ -42,7 +46,7 @@ public abstract class Material : INamedResource
     }
 
     protected virtual int ComputeBatchKey()
-        => HashCode.Combine(Shader.Program, BlendMode, DepthTest, FaceCulling);
+        => HashCode.Combine(Shader.StaticBatchId, BlendMode, DepthTest, FaceCulling);
 
     public void Dispose()
     {

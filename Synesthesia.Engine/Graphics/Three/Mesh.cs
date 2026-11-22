@@ -16,6 +16,10 @@ namespace Synesthesia.Engine.Graphics.Three;
 
 public class Mesh(string name, Vertex3D[] vertices, uint[] indices) : INamedResource
 {
+    private static ulong nextId;
+
+    public ulong StaticBatchId { get; } = Interlocked.Increment(ref nextId);
+
     public uint Vao, Vbo, Ibo;
     public readonly int IndexCount = indices.Length;
 
@@ -132,6 +136,7 @@ public class Mesh(string name, Vertex3D[] vertices, uint[] indices) : INamedReso
 
     public override string ToString()
     {
-        return $"Mesh(Vertices={vertices.Length}, Indices={indices.Length}, Vao={Vao}, Vbo={Vbo}, Ibo={Ibo}, IsUploaded={IsUploaded})";
+        return $"Mesh(Name={ResourceName}, Vertices={vertices.Length}, Indices={indices.Length}, Vao={Vao}, Vbo={Vbo}, Ibo={Ibo}, IsUploaded={IsUploaded})";
     }
+
 }

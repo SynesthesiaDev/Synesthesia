@@ -26,6 +26,7 @@ public static class MathUtil
     }
 
     public static double Lerp(double start, double final, double amount) => start + (final - start) * amount;
+    public static float Lerp(float start, float final, float amount) => start + (final - start) * amount;
 
     public static double Damp(double start, double final, double @base, double exponent)
     {
